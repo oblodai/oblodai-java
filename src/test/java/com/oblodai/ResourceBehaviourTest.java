@@ -117,6 +117,32 @@ class ResourceBehaviourTest {
     }
 
     @Test
+    void documentReportsKeyedByAnObjectSendItAsTheUuidQueryParameter() {
+        // The gateway names the parameter `uuid` whatever the object is — a batch, a link, a wallet
+        // — so the SDK's friendlier argument names must still land there.
+        MockHttpClient http =
+                new MockHttpClient()
+                        .raw(200, "%PDF", "content-type", "application/pdf")
+                        .raw(200, "%PDF", "content-type", "application/pdf")
+                        .raw(200, "csv", "content-type", "text/csv")
+                        .raw(200, "%PDF", "content-type", "application/pdf");
+        Oblodai oblodai = client(http).build();
+
+        oblodai.documents().splitReport("i1", new com.oblodai.resources.DocumentQuery());
+        oblodai.documents().linkReport("l1", new com.oblodai.resources.DocumentQuery());
+        oblodai
+                .documents()
+                .batchReport("b1", new com.oblodai.resources.DocumentQuery().format("csv"));
+        oblodai.documents().jobFile("j1");
+
+        assertTrue(http.calls().get(0).uri().getQuery().contains("uuid=i1"), "split report");
+        assertTrue(http.calls().get(1).uri().getQuery().contains("uuid=l1"), "link report");
+        assertTrue(http.calls().get(2).uri().getQuery().contains("uuid=b1"), "batch report");
+        assertTrue(http.calls().get(2).uri().getQuery().contains("format=csv"), "format");
+        assertTrue(http.calls().get(3).uri().getQuery().contains("job_id=j1"), "job file");
+    }
+
+    @Test
     void anUnconsumedPagerRequestsNothingAndCannotFailTheProcess() {
         MockHttpClient http = new MockHttpClient(); // nothing scripted: any request would fail
         Pager<Payout> pager =

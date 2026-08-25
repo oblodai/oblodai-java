@@ -231,7 +231,7 @@ against the registry.
 ## Development
 
 ```bash
-mvn -q verify                                    # drift gate + compile + 330 tests
+mvn -q verify                                    # drift gate + compile + 322 offline tests
 codegen/run.sh                                   # after refreshing contract/
 OBLODAI_LIVE_URL=http://127.0.0.1:8095 mvn -q verify   # also runs the live journey
 ```
