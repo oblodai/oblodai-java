@@ -3,7 +3,7 @@ package com.oblodai.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oblodai.contract.FeeBearer;
 import com.oblodai.contract.Network;
-import com.oblodai.contract.PayoutStatus;
+import com.oblodai.contract.PayoutLinkStatus;
 
 /**
  * {@code POST /v1/claim/&#123;token&#125;} — the payout minted by a claim.
@@ -24,7 +24,7 @@ import com.oblodai.contract.PayoutStatus;
  */
 public record ClaimResult(
         @JsonProperty("payout_id") String payoutId,
-        @JsonProperty("status") PayoutStatus status,
+        @JsonProperty("status") PayoutLinkStatus status,
         @JsonProperty("address") String address,
         @JsonProperty("amount") String amount,
         @JsonProperty("currency") String currency,
