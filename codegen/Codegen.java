@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,9 +36,6 @@ public final class Codegen {
     private static final String SKIP_PATHS = "^/(healthz|readyz|docs|openapi\\.json|internal).*";
 
     private static final Map<String, String> ENUM_NAMES = new LinkedHashMap<>();
-    private static final Map<String, String> FIELD_ENUMS = new LinkedHashMap<>();
-    private static final Map<String, String> ROUTE_FIELD_VALUES = new LinkedHashMap<>();
-    private static final Map<String, List<String>> REQUIRED_OVERRIDES = new LinkedHashMap<>();
 
     static {
         ENUM_NAMES.put("payment_status", "PaymentStatus");
@@ -53,54 +49,6 @@ public final class Codegen {
         ENUM_NAMES.put("webhook_kind", "WebhookKind");
         ENUM_NAMES.put("error_kind", "ErrorKind");
 
-        // Request fields drawn from a generated vocabulary: the setter takes the enum, and a String
-        // overload keeps a value newer than this snapshot callable.
-        FIELD_ENUMS.put("network", "Network");
-        FIELD_ENUMS.put("pinned_network", "Network");
-        FIELD_ENUMS.put("on_error", "BatchOnError");
-        FIELD_ENUMS.put("fee_bearer", "FeeBearer");
-        FIELD_ENUMS.put("amount_mode", "AmountMode");
-
-        // Vocabularies the core does not export as enums; documented on the field instead.
-        ROUTE_FIELD_VALUES.put("POST /v1/payment/history#status", "PaymentStatus");
-        ROUTE_FIELD_VALUES.put("POST /v1/payout/history#status", "PayoutStatus");
-        ROUTE_FIELD_VALUES.put("POST /v1/payout/history#kind", "\"payout\" | \"refund\"");
-        ROUTE_FIELD_VALUES.put("POST /v1/payment/resolve#action", "\"accept\" | \"refund\"");
-        ROUTE_FIELD_VALUES.put("POST /v1/test-webhook/payment#status", "PaymentStatus");
-        ROUTE_FIELD_VALUES.put("POST /v1/test-webhook/payout#status", "PayoutStatus");
-        ROUTE_FIELD_VALUES.put("POST /v1/test-webhook/wallet#status", "\"paid\"");
-        ROUTE_FIELD_VALUES.put("POST /v1/payment/testing-webhook#status", "PaymentStatus");
-
-        // Fields the handler requires although the shared DTO marks them optional (batch items reuse
-        // the single-create DTO, where the core backfills the key from the Idempotency-Key header).
-        REQUIRED_OVERRIDES.put("POST /v1/payment/batch", List.of("payments.order_id"));
-        REQUIRED_OVERRIDES.put("POST /v1/payout/batch", List.of("payouts.order_id"));
-        REQUIRED_OVERRIDES.put("POST /v1/refund/batch", List.of("refunds.reference"));
-        REQUIRED_OVERRIDES.put(
-                "POST /v1/transfer/batch",
-                List.of("transfers.order_id", "transfers.amount", "transfers.currency"));
-        REQUIRED_OVERRIDES.put("POST /v1/payout/link/batch", List.of("items.reference"));
-        REQUIRED_OVERRIDES.put("POST /v1/transfer/to-user", List.of("amount", "currency"));
-        REQUIRED_OVERRIDES.put("POST /v1/claim/{token}", List.of("address"));
-    }
-
-    /** Request schemas for routes whose core DTO is not declared in the gateway's docs module. */
-    private static Map<String, Object> requestOverride(String key) {
-        if (!key.equals("POST /v1/merchants")) return null;
-        Map<String, Object> email = new LinkedHashMap<>();
-        email.put("type", "string");
-        email.put("example", "owner@shop.example");
-        Map<String, Object> name = new LinkedHashMap<>();
-        name.put("type", "string");
-        name.put("example", "Acme");
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("email", email);
-        props.put("name", name);
-        Map<String, Object> schema = new LinkedHashMap<>();
-        schema.put("type", "object");
-        schema.put("properties", props);
-        schema.put("required", List.of("email"));
-        return schema;
     }
 
     private final Path root;
@@ -143,10 +91,11 @@ public final class Codegen {
         emitEnums();
         emitErrorCodes();
         emitVersion();
-        emitRequests(routes);
+        RequestTypes requests = new RequestTypes(this);
+        requests.emit(routes);
         System.out.printf(
                 "codegen: %d routes, %d error codes, %d request types%n",
-                routes.size(), Json.arr(contract.get("error_codes")).size(), requestCount);
+                routes.size(), Json.arr(contract.get("error_codes")).size(), requests.count());
         if (!missingDescriptions.isEmpty()) {
             System.out.println(
                     "codegen: "
@@ -428,277 +377,14 @@ public final class Codegen {
         files.put(javaFile(PKG, "ContractVersion"), sb);
     }
 
-    // --- request bodies -------------------------------------------------------------------------
-
-    private int requestCount;
-
-    private void emitRequests(List<Map<String, Object>> routes) {
-        for (Map<String, Object> r : routes) {
-            String key = Json.str(r.get("method")) + " " + Json.str(r.get("path"));
-            Object schema = r.get("request_schema");
-            if (schema == null) schema = requestOverride(key);
-            if (schema == null) continue;
-            requestCount++;
-            String name = requestClassName(Json.str(r.get("path")));
-            StringBuilder sb = new StringBuilder(header);
-            sb.append("package ").append(REQ_PKG).append(";\n\n");
-            sb.append("import com.fasterxml.jackson.annotation.JsonInclude;\n");
-            sb.append("import com.fasterxml.jackson.annotation.JsonProperty;\n");
-            sb.append("import com.oblodai.contract.*;\n");
-            sb.append("import java.util.List;\nimport java.util.Map;\n\n");
-            sb.append("/**\n * Body of {@code ").append(key).append("}.\n *\n");
-            sb.append(" * <p>Fluent setters; unset fields are omitted from the JSON, never sent as")
-                    .append(" null.\n */\n");
-            sb.append("@JsonInclude(JsonInclude.Include.NON_NULL)\n");
-            emitBodyClass(sb, "public final class " + name, Json.obj(schema), key, "", 0);
-            files.put(javaFile(REQ_PKG, name), sb.toString());
-        }
-    }
-
-    /** A request DTO (or one nested item type) with fluent setters and getters. */
-    private void emitBodyClass(
-            StringBuilder sb,
-            String declaration,
-            Map<String, Object> schema,
-            String route,
-            String prefix,
-            int depth) {
-        String pad = "    ".repeat(depth);
-        sb.append(pad).append(declaration).append(" {\n\n");
-        Map<String, Object> props =
-                schema.get("properties") == null
-                        ? Map.of()
-                        : new TreeMap<>(Json.obj(schema.get("properties")));
-        Set<String> required = requiredOf(schema, route, prefix);
-        List<String[]> fields = new ArrayList<>(); // {wireName, javaName, javaType, enumType}
-        List<Runnable> nested = new ArrayList<>();
-        for (Map.Entry<String, Object> e : props.entrySet()) {
-            String wire = e.getKey();
-            Map<String, Object> p = Json.obj(e.getValue());
-            String javaName = camel(wire);
-            String type = javaType(p, route, prefix, wire, depth, sb, nested);
-            fields.add(
-                    new String[] {
-                        wire, javaName, type, FIELD_ENUMS.get(wire),
-                    });
-            String doc = doc(route, prefix + wire, p, required.contains(wire));
-            sb.append(pad).append("    ").append(doc.replace("\n", "\n" + pad + "    ")).append('\n');
-            sb.append(pad)
-                    .append("    @JsonProperty(\"")
-                    .append(wire)
-                    .append("\")\n")
-                    .append(pad)
-                    .append("    private ")
-                    .append(type)
-                    .append(' ')
-                    .append(javaName)
-                    .append(";\n\n");
-        }
-        for (String[] f : fields) {
-            String setterDoc = "/** Sets {@code " + f[0] + "}. */";
-            sb.append(pad).append("    ").append(setterDoc).append('\n');
-            sb.append(pad)
-                    .append("    public ")
-                    .append(className(declaration))
-                    .append(' ')
-                    .append(f[1])
-                    .append('(')
-                    .append(f[2])
-                    .append(" value) {\n")
-                    .append(pad)
-                    .append("        this.")
-                    .append(f[1])
-                    .append(" = value;\n")
-                    .append(pad)
-                    .append("        return this;\n")
-                    .append(pad)
-                    .append("    }\n\n");
-            if (f[3] != null && f[2].equals("String")) {
-                sb.append(pad)
-                        .append("    /** Sets {@code ")
-                        .append(f[0])
-                        .append("} from the generated vocabulary. */\n");
-                sb.append(pad)
-                        .append("    public ")
-                        .append(className(declaration))
-                        .append(' ')
-                        .append(f[1])
-                        .append('(')
-                        .append(f[3])
-                        .append(" value) {\n")
-                        .append(pad)
-                        .append("        this.")
-                        .append(f[1])
-                        .append(" = value == null ? null : value.wire();\n")
-                        .append(pad)
-                        .append("        return this;\n")
-                        .append(pad)
-                        .append("    }\n\n");
-            }
-            sb.append(pad).append("    /** Current {@code ").append(f[0]).append("}. */\n");
-            sb.append(pad)
-                    .append("    public ")
-                    .append(f[2])
-                    .append(' ')
-                    .append(f[1])
-                    .append("() {\n")
-                    .append(pad)
-                    .append("        return ")
-                    .append(f[1])
-                    .append(";\n")
-                    .append(pad)
-                    .append("    }\n\n");
-        }
-        for (Runnable r : nested) r.run();
-        sb.append(pad).append("}\n");
-    }
-
-    private String javaType(
-            Map<String, Object> p,
-            String route,
-            String prefix,
-            String wire,
-            int depth,
-            StringBuilder sb,
-            List<Runnable> nested) {
-        String type = p.get("type") == null ? "" : Json.str(p.get("type"));
-        switch (type) {
-            case "string":
-                return "String";
-            case "integer":
-                return "Integer";
-            case "number":
-                return "Double";
-            case "boolean":
-                return "Boolean";
-            case "array":
-                {
-                    Map<String, Object> items =
-                            p.get("items") == null ? Map.of() : Json.obj(p.get("items"));
-                    String itemType;
-                    if ("object".equals(items.get("type")) && items.get("properties") != null) {
-                        String name = itemClassName(wire);
-                        nested.add(
-                                () ->
-                                        emitBodyClass(
-                                                sb,
-                                                "public static final class " + name,
-                                                items,
-                                                route,
-                                                prefix + wire + ".",
-                                                depth + 1));
-                        itemType = name;
-                    } else {
-                        itemType = javaType(items, route, prefix, wire, depth, sb, nested);
-                    }
-                    return "List<" + itemType + ">";
-                }
-            case "object":
-                {
-                    if (p.get("properties") != null) {
-                        String name = itemClassName(wire);
-                        Map<String, Object> obj = p;
-                        nested.add(
-                                () ->
-                                        emitBodyClass(
-                                                sb,
-                                                "public static final class " + name,
-                                                obj,
-                                                route,
-                                                prefix + wire + ".",
-                                                depth + 1));
-                        return name;
-                    }
-                    if (p.get("additionalProperties") != null) {
-                        return "Map<String, "
-                                + javaType(
-                                        Json.obj(p.get("additionalProperties")),
-                                        route,
-                                        prefix,
-                                        wire,
-                                        depth,
-                                        sb,
-                                        nested)
-                                + ">";
-                    }
-                    return "Map<String, Object>";
-                }
-            default:
-                return "Object";
-        }
-    }
-
-    private Set<String> requiredOf(Map<String, Object> schema, String route, String prefix) {
-        Set<String> out = new LinkedHashSet<>();
-        if (schema.get("required") != null) out.addAll(strings(schema.get("required")));
-        for (String f : REQUIRED_OVERRIDES.getOrDefault(route, List.of())) {
-            if (f.startsWith(prefix) && !f.substring(prefix.length()).contains(".")) {
-                out.add(f.substring(prefix.length()));
-            }
-        }
-        return out;
-    }
-
-    private String doc(String route, String path, Map<String, Object> p, boolean required) {
-        String desc = null;
-        Object byRoute = Json.obj(descriptions.get("request")).get(route);
-        if (byRoute != null) desc = (String) Json.obj(byRoute).get(path);
-        if (desc == null && p.get("description") != null) missingDescriptions.add(route + "#" + path);
-        StringBuilder sb = new StringBuilder("/**");
-        if (desc != null) sb.append(' ').append(escapeDoc(desc));
-        if (required) sb.append(desc != null ? " " : " ").append("Required.");
-        if (p.get("example") != null) {
-            // The gateway's snapshot carries some examples in Russian; the SDK's documentation is
-            // English only, so a non-ASCII sample value is dropped rather than translated.
-            String example = String.valueOf(p.get("example"));
-            if (example.chars().allMatch(c -> c >= 0x20 && c < 0x7f)) {
-                sb.append(" Example: {@code ").append(example).append("}.");
-            }
-        }
-        String enumType = ROUTE_FIELD_VALUES.get(route + "#" + path);
-        if (enumType != null) sb.append(" One of ").append(escapeDoc(enumType)).append('.');
-        sb.append(" */");
-        String text = sb.toString();
-        return text.equals("/** */") ? "/** {@code " + path + "}. */" : text;
-    }
-
-    private static String escapeDoc(String text) {
-        return text.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("@", "&#64;")
-                .replace("*/", "*&#47;");
-    }
-
     // --- names ----------------------------------------------------------------------------------
 
-    private static String className(String declaration) {
-        String[] words = declaration.split("\\s+");
-        return words[words.length - 1];
-    }
-
-    /** {@code /v1/payout/link/batch → PayoutLinkBatchRequest}; {@code {id}} contributes its name. */
-    static String requestClassName(String path) {
-        StringBuilder sb = new StringBuilder();
-        for (String segment : path.replaceAll("[{}]", "").split("/")) {
-            if (segment.isEmpty() || segment.equals("v1")) continue;
-            sb.append(pascal(segment));
-        }
-        return sb + "Request";
-    }
-
-    /** Nested item type for an array/object field: {@code payouts → Payout}, {@code items → Item}. */
-    private static String itemClassName(String field) {
-        String base = field.endsWith("s") ? field.substring(0, field.length() - 1) : field;
-        return pascal(base);
-    }
-
-    private static String pascal(String text) {
+    static String pascal(String text) {
         String camel = camel(text);
         return Character.toUpperCase(camel.charAt(0)) + camel.substring(1);
     }
 
-    private static String camel(String wire) {
+    static String camel(String wire) {
         String[] parts = wire.split("[^A-Za-z0-9]+");
         StringBuilder sb = new StringBuilder(parts[0]);
         for (int i = 1; i < parts.length; i++) {
@@ -708,7 +394,27 @@ public final class Codegen {
         return sb.toString();
     }
 
-    private Path javaFile(String pkg, String name) {
+    /** The generated-file banner every emitted source starts with. */
+    String header() {
+        return header;
+    }
+
+    /** The English field documentation, by route. */
+    Map<String, Object> descriptions() {
+        return descriptions;
+    }
+
+    /** Records a file to write (or to compare against, under --check). */
+    void putFile(java.nio.file.Path path, String content) {
+        files.put(path, content);
+    }
+
+    /** Records a documented field with no English description, for the run's summary. */
+    void noteMissingDescription(String field) {
+        missingDescriptions.add(field);
+    }
+
+    Path javaFile(String pkg, String name) {
         return root.resolve(srcDir(pkg)).resolve(name + ".java");
     }
 
@@ -716,7 +422,7 @@ public final class Codegen {
         return "src/main/java/" + pkg.replace('.', '/');
     }
 
-    private static List<String> strings(Object array) {
+    static List<String> strings(Object array) {
         List<String> out = new ArrayList<>();
         for (Object o : Json.arr(array)) out.add(Json.str(o));
         return out;
