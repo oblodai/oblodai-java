@@ -1,5 +1,6 @@
 package com.oblodai;
 
+import com.oblodai.errors.ConfigException;
 import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
@@ -16,10 +17,19 @@ import java.util.regex.Pattern;
  * Money.compare("25", "25.000000");   // 0
  * Money.isZero("0.000000");           // true
  * }</pre>
+ *
+ * <p>Every helper takes the amount exactly as the API writes it: digits, at most one dot with digits
+ * on both sides of it, an optional leading minus, at most {@value #MAX_LENGTH} characters. Anything
+ * else — a float, an empty string, {@code "1e9"}, {@code "  25"}, a thousand digits — is a {@code
+ * sdk.bad_amount} {@link ConfigException}, never a language-level failure a caller cannot catch
+ * alongside the SDK's own errors.
  */
 public final class Money {
 
-    private static final Pattern DECIMAL = Pattern.compile("^-?\\d+(\\.\\d+)?$");
+    /** Longest amount any asset the gateway settles can need, with room to spare. */
+    public static final int MAX_LENGTH = 64;
+
+    private static final Pattern DECIMAL = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
 
     private Money() {}
 
@@ -86,13 +96,32 @@ public final class Money {
      *
      * @param amount a decimal string as the API renders it
      * @return the same value, exactly
-     * @throws IllegalArgumentException when the text is not a plain decimal
+     * @throws ConfigException ({@code sdk.bad_amount}) when the text is not a plain decimal
      */
     public static BigDecimal toBigDecimal(String amount) {
-        if (amount == null || !DECIMAL.matcher(amount).matches()) {
-            throw new IllegalArgumentException("not a decimal amount: \"" + amount + "\"");
+        // Length first: the check must cost the same for a hostile input as for a real one.
+        if (amount == null || amount.isEmpty() || amount.length() > MAX_LENGTH) {
+            throw notAnAmount(amount);
         }
+        if (!DECIMAL.matcher(amount).matches()) throw notAnAmount(amount);
         return new BigDecimal(amount);
+    }
+
+    private static ConfigException notAnAmount(String amount) {
+        String shown =
+                amount == null
+                        ? "null"
+                        : '"'
+                                + (amount.length() > MAX_LENGTH
+                                        ? amount.substring(0, MAX_LENGTH) + "…"
+                                        : amount)
+                                + '"';
+        return new ConfigException(
+                ConfigException.BAD_AMOUNT,
+                "not a decimal amount: "
+                        + shown
+                        + " — amounts are digits with at most one dot, as the API writes them",
+                "amount");
     }
 
     /**

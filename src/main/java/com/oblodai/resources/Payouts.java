@@ -2,30 +2,19 @@ package com.oblodai.resources;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.oblodai.RequestOptions;
-import com.oblodai.contract.RouteSpec;
 import com.oblodai.contract.Routes;
 import com.oblodai.contract.requests.PayoutApproveRequest;
 import com.oblodai.contract.requests.PayoutBatchRequest;
-import com.oblodai.contract.requests.PayoutCalculateRequest;
 import com.oblodai.contract.requests.PayoutCancelRequest;
-import com.oblodai.contract.requests.PayoutFeeConfigSetRequest;
 import com.oblodai.contract.requests.PayoutHistoryRequest;
 import com.oblodai.contract.requests.PayoutInfoRequest;
 import com.oblodai.contract.requests.PayoutMassRequest;
-import com.oblodai.contract.requests.PayoutRefundFeeConfigSetRequest;
 import com.oblodai.contract.requests.PayoutRequest;
-import com.oblodai.contract.requests.PayoutServicesRequest;
-import com.oblodai.contract.requests.PayoutValidateRequest;
 import com.oblodai.core.Pager;
 import com.oblodai.core.Transport;
 import com.oblodai.models.BatchElement;
 import com.oblodai.models.BatchSubmitted;
 import com.oblodai.models.Payout;
-import com.oblodai.models.PayoutCalculation;
-import com.oblodai.models.PayoutFeeConfig;
-import com.oblodai.models.PayoutValidation;
-import com.oblodai.models.RefundFeeConfig;
-import com.oblodai.models.ServiceMethod;
 import java.util.List;
 
 /**
@@ -39,7 +28,7 @@ import java.util.List;
  * <p>Lookups take the payout's {@code uuid} or your {@code order_id}: pass the uuid as a string, or
  * a request object carrying whichever you have. Refunds are payouts too, marked {@code is_refund}.
  */
-public final class Payouts extends Resource {
+public final class Payouts extends PayoutsPreflightRoutes {
 
     /**
      * @param transport the engine to call through
@@ -59,6 +48,15 @@ public final class Payouts extends Resource {
     }
 
     /**
+     * {@code POST /v1/payout} — creates and, for API keys, auto-approves a payout.
+     *
+     * <p>Errors worth branching on: {@code payout.insufficient_funds} — the balance is short, so
+     * retry after a top-up; {@code payout.funds_maturing} — the funds have not matured yet;
+     * {@code payout.bad_address} — the destination address is malformed;
+     * {@code payout.address_network_mismatch} — the address does not belong to the chosen network;
+     * {@code payout.memo_required} — the network needs a memo or tag and none was given;
+     * {@code payout.amount_below_fee} — the amount does not cover the network fee.
+     *
      * @param request the payout to send
      * @param options per-call options
      * @return the payout
@@ -68,52 +66,24 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * {@code POST /v1/payout/validate} — dry run: every check {@link #create} makes, with nothing
-     * reserved and nothing sent. Fails with the same errors as {@code create}.
-     *
-     * @param request the payout to check
-     * @return the verdict, and what would have happened
-     */
-    public PayoutValidation validate(PayoutValidateRequest request) {
-        return validate(request, RequestOptions.none());
-    }
-
-    /**
-     * @param request the payout to check
-     * @param options per-call options
-     * @return the verdict
-     */
-    public PayoutValidation validate(PayoutValidateRequest request, RequestOptions options) {
-        return call(Routes.POST_V1_PAYOUT_VALIDATE, request, options, PayoutValidation.class);
-    }
-
-    /**
-     * {@code POST /v1/payout/calculate} — commission and net amount, without creating anything.
-     *
-     * @param request the amount, asset and network to price
-     * @return what the payout would cost and what would arrive
-     */
-    public PayoutCalculation calculate(PayoutCalculateRequest request) {
-        return calculate(request, RequestOptions.none());
-    }
-
-    /**
-     * @param request the amount, asset and network to price
-     * @param options per-call options
-     * @return the calculation
-     */
-    public PayoutCalculation calculate(PayoutCalculateRequest request, RequestOptions options) {
-        return call(Routes.POST_V1_PAYOUT_CALCULATE, request, options, PayoutCalculation.class);
-    }
-
-    /**
      * {@code POST /v1/payout/info} — the payout, by its uuid.
      *
      * @param uuid the payout's uuid
      * @return the payout
      */
     public Payout info(String uuid) {
-        return info(new PayoutInfoRequest().uuid(uuid), RequestOptions.none());
+        return info(uuid, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/info}.
+     *
+     * @param uuid the payout's uuid
+     * @param options per-call options
+     * @return the payout
+     */
+    public Payout info(String uuid, RequestOptions options) {
+        return info(new PayoutInfoRequest().uuid(uuid), options);
     }
 
     /**
@@ -140,7 +110,18 @@ public final class Payouts extends Resource {
      * @return the payout
      */
     public Payout get(String uuid) {
-        return info(uuid);
+        return get(uuid, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/info} — alias of {@link #info(String, RequestOptions)}.
+     *
+     * @param uuid the payout's uuid
+     * @param options per-call options
+     * @return the payout
+     */
+    public Payout get(String uuid, RequestOptions options) {
+        return info(uuid, options);
     }
 
     /**
@@ -150,7 +131,18 @@ public final class Payouts extends Resource {
      * @return the payout
      */
     public Payout get(PayoutInfoRequest lookup) {
-        return info(lookup);
+        return get(lookup, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/info} — alias of {@link #info(PayoutInfoRequest, RequestOptions)}.
+     *
+     * @param lookup which payout to read
+     * @param options per-call options
+     * @return the payout
+     */
+    public Payout get(PayoutInfoRequest lookup, RequestOptions options) {
+        return info(lookup, options);
     }
 
     /**
@@ -161,7 +153,18 @@ public final class Payouts extends Resource {
      * @return the cancelled payout
      */
     public Payout cancel(String uuid) {
-        return cancel(new PayoutCancelRequest().uuid(uuid), RequestOptions.none());
+        return cancel(uuid, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/cancel}.
+     *
+     * @param uuid the payout's uuid
+     * @param options per-call options
+     * @return the cancelled payout
+     */
+    public Payout cancel(String uuid, RequestOptions options) {
+        return cancel(new PayoutCancelRequest().uuid(uuid), options);
     }
 
     /**
@@ -188,7 +191,18 @@ public final class Payouts extends Resource {
      * @return the approved payout
      */
     public Payout approve(String uuid) {
-        return approve(new PayoutApproveRequest().uuid(uuid), RequestOptions.none());
+        return approve(uuid, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/approve}.
+     *
+     * @param uuid the payout's uuid
+     * @param options per-call options
+     * @return the approved payout
+     */
+    public Payout approve(String uuid, RequestOptions options) {
+        return approve(new PayoutApproveRequest().uuid(uuid), options);
     }
 
     /**
@@ -214,7 +228,17 @@ public final class Payouts extends Resource {
      * @return a lazy pager over the merchant's payouts
      */
     public Pager<Payout> history() {
-        return history(new PayoutHistoryRequest(), RequestOptions.none());
+        return history(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/history}.
+     *
+     * @param options per-call options
+     * @return a lazy pager over the merchant's payouts
+     */
+    public Pager<Payout> history(RequestOptions options) {
+        return history(new PayoutHistoryRequest(), options);
     }
 
     /**
@@ -240,7 +264,17 @@ public final class Payouts extends Resource {
      * @return a lazy pager over the merchant's payouts
      */
     public Pager<Payout> list() {
-        return history();
+        return list(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/history} — alias of {@link #history(RequestOptions)}.
+     *
+     * @param options per-call options
+     * @return a lazy pager over the merchant's payouts
+     */
+    public Pager<Payout> list(RequestOptions options) {
+        return history(options);
     }
 
     /**
@@ -250,7 +284,19 @@ public final class Payouts extends Resource {
      * @return a lazy pager over the matching payouts
      */
     public Pager<Payout> list(PayoutHistoryRequest params) {
-        return history(params);
+        return list(params, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/history} — alias of
+     * {@link #history(PayoutHistoryRequest, RequestOptions)}.
+     *
+     * @param params filters and page bounds
+     * @param options per-call options
+     * @return a lazy pager over the matching payouts
+     */
+    public Pager<Payout> list(PayoutHistoryRequest params, RequestOptions options) {
+        return history(params, options);
     }
 
     /**
@@ -265,6 +311,14 @@ public final class Payouts extends Resource {
     }
 
     /**
+     * {@code POST /v1/payout/mass} — synchronous batch of at most 100.
+     *
+     * <p>Errors worth branching on: {@code payout.empty_batch} — nothing to send;
+     * {@code payout.batch_too_large} — over the 100-item cap; {@code payout.insufficient_funds} —
+     * the balance cannot cover the batch; {@code payout.reference_collision} — an item reuses a
+     * reference already spent; {@code payout.frozen} — payouts are frozen for this merchant. A
+     * single item failing does not raise: it reports on its own element.
+     *
      * @param request the payouts to send
      * @param options per-call options
      * @return one element per submitted payout
@@ -286,112 +340,18 @@ public final class Payouts extends Resource {
     }
 
     /**
+     * {@code POST /v1/payout/batch} — asynchronous batch of at most 5000.
+     *
+     * <p>Errors worth branching on: {@code batch.empty} — nothing to submit;
+     * {@code batch.too_large} — over the 5000-item cap; {@code batch.order_id_required} — an item
+     * carries no {@code order_id}; {@code batch.duplicate_order_id} — two items share one
+     * {@code order_id}; {@code batch.disabled} — batches are switched off for this merchant.
+     *
      * @param request the payouts to submit
      * @param options per-call options
      * @return the batch ticket
      */
     public BatchSubmitted batch(PayoutBatchRequest request, RequestOptions options) {
         return call(Routes.POST_V1_PAYOUT_BATCH, request, options, BatchSubmitted.class);
-    }
-
-    /**
-     * {@code POST /v1/payout/services} — the currencies and networks payouts can be sent on.
-     *
-     * @return a lazy pager over the available methods
-     */
-    public Pager<ServiceMethod> services() {
-        return services(new PayoutServicesRequest(), RequestOptions.none());
-    }
-
-    /**
-     * @param params page bounds
-     * @return a lazy pager over the available methods
-     */
-    public Pager<ServiceMethod> services(PayoutServicesRequest params) {
-        return services(params, RequestOptions.none());
-    }
-
-    /**
-     * @param params page bounds
-     * @param options per-call options
-     * @return a lazy pager over the available methods
-     */
-    public Pager<ServiceMethod> services(PayoutServicesRequest params, RequestOptions options) {
-        return pager(Routes.POST_V1_PAYOUT_SERVICES, params, options, ServiceMethod.class);
-    }
-
-    /**
-     * {@code POST /v1/payout/fee-config/get} — who bears the network fee on payouts today.
-     *
-     * @return the current payout fee configuration
-     */
-    public PayoutFeeConfig getFeeConfig() {
-        return getFeeConfig(RequestOptions.none());
-    }
-
-    /**
-     * @param options per-call options
-     * @return the current payout fee configuration
-     */
-    public PayoutFeeConfig getFeeConfig(RequestOptions options) {
-        return call(Routes.POST_V1_PAYOUT_FEE_CONFIG_GET, null, options, PayoutFeeConfig.class);
-    }
-
-    /**
-     * {@code POST /v1/payout/fee-config/set} — who bears the network fee by default.
-     *
-     * @param request the configuration to store
-     * @return the stored configuration
-     */
-    public PayoutFeeConfig setFeeConfig(PayoutFeeConfigSetRequest request) {
-        return setFeeConfig(request, RequestOptions.none());
-    }
-
-    /**
-     * @param request the configuration to store
-     * @param options per-call options
-     * @return the stored configuration
-     */
-    public PayoutFeeConfig setFeeConfig(PayoutFeeConfigSetRequest request, RequestOptions options) {
-        return call(Routes.POST_V1_PAYOUT_FEE_CONFIG_SET, request, options, PayoutFeeConfig.class);
-    }
-
-    /**
-     * {@code POST /v1/payout/refund-fee-config/get} — who bears the fee on refunds today.
-     *
-     * @return the current refund fee configuration
-     */
-    public RefundFeeConfig getRefundFeeConfig() {
-        return getRefundFeeConfig(RequestOptions.none());
-    }
-
-    /**
-     * @param options per-call options
-     * @return the current refund fee configuration
-     */
-    public RefundFeeConfig getRefundFeeConfig(RequestOptions options) {
-        return call(
-                Routes.POST_V1_PAYOUT_REFUND_FEE_CONFIG_GET, null, options, RefundFeeConfig.class);
-    }
-
-    /**
-     * {@code POST /v1/payout/refund-fee-config/set} — who bears the fee on refunds.
-     *
-     * @param request the configuration to store
-     * @return the stored configuration
-     */
-    public RefundFeeConfig setRefundFeeConfig(PayoutRefundFeeConfigSetRequest request) {
-        return setRefundFeeConfig(request, RequestOptions.none());
-    }
-
-    /**
-     * @param request the configuration to store
-     * @param options per-call options
-     * @return the stored configuration
-     */
-    public RefundFeeConfig setRefundFeeConfig(
-            PayoutRefundFeeConfigSetRequest request, RequestOptions options) {
-        RouteSpec route = Routes.POST_V1_PAYOUT_REFUND_FEE_CONFIG_SET;
-        return call(route, request, options, RefundFeeConfig.class);
     }
 }

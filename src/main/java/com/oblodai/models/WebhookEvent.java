@@ -9,18 +9,22 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * {@code wallet} for {@code wallet.paid}.
  *
  * <p>The accessors declared here are the fields every delivered event carries, whatever its type.
+ * A {@code type} outside this snapshot's vocabulary decodes to {@link UnknownEvent}, which keeps the
+ * raw discriminator — a gateway that grows a new event kind cannot break a deployed receiver.
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
-        visible = true)
+        visible = true,
+        defaultImpl = UnknownEvent.class)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = PaymentEvent.class, name = "payment"),
     @JsonSubTypes.Type(value = PayoutEvent.class, name = "payout"),
     @JsonSubTypes.Type(value = WalletEvent.class, name = "wallet")
 })
-public sealed interface WebhookEvent permits PaymentEvent, PayoutEvent, WalletEvent {
+public sealed interface WebhookEvent
+        permits PaymentEvent, PayoutEvent, WalletEvent, UnknownEvent {
 
     /** The discriminator: {@code payment}, {@code payout} or {@code wallet}. */
     String type();

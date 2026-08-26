@@ -4,6 +4,7 @@ import com.oblodai.Oblodai
 import com.oblodai.contract.Network
 import com.oblodai.errors.NotFoundException
 import com.oblodai.support.MockHttpClient
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -78,6 +79,45 @@ class KotlinExtensionsTest {
             listOf("a", "b"),
             client(blocking).payments().history().asSequence().map { it.uuid() }.toList(),
         )
+    }
+
+    @Test
+    fun `a flow delivers every item of a large result set, not a bufferful`() = runBlocking {
+        // Five pages of two hundred. The previous callbackFlow implementation handed items to a
+        // 64-slot channel with trySend and dropped everything that did not fit.
+        val http = MockHttpClient()
+        var uuid = 0
+        repeat(5) { pageIndex ->
+            val items = (1..200).joinToString(",") { """{"uuid":"u${uuid++}"}""" }
+            http.ok(
+                """{"items":[$items],"paginate":{"total":1000,"per_page":200,""" +
+                    """"offset":${pageIndex * 200},"has_pages":${pageIndex < 4}}}"""
+            )
+        }
+
+        val collected = client(http).async().payments().history().asFlow().toList()
+
+        assertEquals(1000, collected.size)
+        assertEquals("u0", collected.first().uuid())
+        assertEquals("u999", collected.last().uuid())
+        assertEquals(5, http.calls().size, "one request per page, pulled by the collector")
+    }
+
+    @Test
+    fun `a flow stops walking when the collector stops collecting`() = runBlocking {
+        val http = MockHttpClient()
+        repeat(2) { pageIndex ->
+            val items = (1..10).joinToString(",") { """{"uuid":"u$it"}""" }
+            http.ok(
+                """{"items":[$items],"paginate":{"total":100,"per_page":10,""" +
+                    """"offset":${pageIndex * 10},"has_pages":true}}"""
+            )
+        }
+
+        val firstThree = client(http).async().payments().history().asFlow().take(3).toList()
+
+        assertEquals(3, firstThree.size)
+        assertEquals(1, http.calls().size, "a cancelled collection asks for no further page")
     }
 
     @Test

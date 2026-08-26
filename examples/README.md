@@ -9,6 +9,7 @@ away from the SDK.
 | `java/com/oblodai/examples/SendPayout.java`               | dry-run a payout, then send it under your own idempotency key |
 | `java/com/oblodai/examples/WebhookReceiver.java`          | verify a delivery over the raw bytes, deduplicate, act        |
 | `kotlin/com/oblodai/examples/AcceptPaymentKotlin.kt`      | the same journey with coroutines and the request DSL          |
+| `java/com/oblodai/examples/DocSnippets.java`              | every snippet in the README and MIGRATION-1.3, compiled       |
 
 Get a sandbox key from the dashboard (or, on a self-hosted gateway, with
 `merchants().create(...)` followed by `merchants().createSandbox(...)`), then:

@@ -1,6 +1,9 @@
 package com.oblodai;
 
+import com.oblodai.core.RequestBuilder;
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Per-call options, accepted as the last argument of every resource method.
@@ -10,22 +13,32 @@ import java.time.Duration;
  * <pre>{@code
  * oblodai.payouts().create(request, RequestOptions.of().idempotencyKey(orderId).timeout(Duration.ofSeconds(10)));
  * }</pre>
+ *
+ * <p>The options are {@code idempotencyKey}, {@code timeout}, {@code deadline}, {@code header} and
+ * {@code preferPayoutKey}.
  */
 public final class RequestOptions {
 
-    private static final RequestOptions NONE = new RequestOptions(null, null, null, false);
+    private static final RequestOptions NONE =
+            new RequestOptions(null, null, null, false, Map.of());
 
     private final String idempotencyKey;
     private final Long timeoutMs;
     private final Long deadlineMs;
     private final boolean preferPayoutKey;
+    private final Map<String, String> headers;
 
     private RequestOptions(
-            String idempotencyKey, Long timeoutMs, Long deadlineMs, boolean preferPayoutKey) {
+            String idempotencyKey,
+            Long timeoutMs,
+            Long deadlineMs,
+            boolean preferPayoutKey,
+            Map<String, String> headers) {
         this.idempotencyKey = idempotencyKey;
         this.timeoutMs = timeoutMs;
         this.deadlineMs = deadlineMs;
         this.preferPayoutKey = preferPayoutKey;
+        this.headers = headers;
     }
 
     /** Defaults: an automatic idempotency key where the route deduplicates, client-level timeouts. */
@@ -47,7 +60,7 @@ public final class RequestOptions {
      * @return a copy carrying the key
      */
     public RequestOptions idempotencyKey(String key) {
-        return new RequestOptions(key, timeoutMs, deadlineMs, preferPayoutKey);
+        return new RequestOptions(key, timeoutMs, deadlineMs, preferPayoutKey, headers);
     }
 
     /**
@@ -57,7 +70,8 @@ public final class RequestOptions {
      * @return a copy carrying the timeout
      */
     public RequestOptions timeout(Duration timeout) {
-        return new RequestOptions(idempotencyKey, timeout.toMillis(), deadlineMs, preferPayoutKey);
+        return new RequestOptions(
+                idempotencyKey, timeout.toMillis(), deadlineMs, preferPayoutKey, headers);
     }
 
     /**
@@ -67,7 +81,8 @@ public final class RequestOptions {
      * @return a copy carrying the deadline
      */
     public RequestOptions deadline(Duration deadline) {
-        return new RequestOptions(idempotencyKey, timeoutMs, deadline.toMillis(), preferPayoutKey);
+        return new RequestOptions(
+                idempotencyKey, timeoutMs, deadline.toMillis(), preferPayoutKey, headers);
     }
 
     /**
@@ -78,7 +93,26 @@ public final class RequestOptions {
      * @return a copy carrying the preference
      */
     public RequestOptions preferPayoutKey(boolean prefer) {
-        return new RequestOptions(idempotencyKey, timeoutMs, deadlineMs, prefer);
+        return new RequestOptions(idempotencyKey, timeoutMs, deadlineMs, prefer, headers);
+    }
+
+    /**
+     * One extra header on this call only, on top of the client-wide ones. A name the SDK owns
+     * (Accept, Content-Type, User-Agent, the signing headers, Idempotency-Key, X-Admin-Token) is
+     * refused, as is a value HTTP could not carry: the signature covers what is sent, so a header
+     * that changes on the way out would break it.
+     *
+     * @param name header name
+     * @param value header value
+     * @return a copy carrying the header
+     * @throws com.oblodai.errors.ConfigException ({@code sdk.bad_header}) when it cannot be sent
+     */
+    public RequestOptions header(String name, String value) {
+        RequestBuilder.assertCallerHeader(name, value);
+        Map<String, String> merged = new LinkedHashMap<>(headers);
+        merged.put(name, value);
+        return new RequestOptions(
+                idempotencyKey, timeoutMs, deadlineMs, preferPayoutKey, Map.copyOf(merged));
     }
 
     /** The caller's idempotency key, or null. */
@@ -94,6 +128,11 @@ public final class RequestOptions {
     /** Overall budget in milliseconds, or null for the client default. */
     public Long deadlineMs() {
         return deadlineMs;
+    }
+
+    /** Extra headers for this call, never null. */
+    public Map<String, String> headers() {
+        return headers;
     }
 
     /** Whether to prefer the payout key pair on an {@code any}-gated route. */

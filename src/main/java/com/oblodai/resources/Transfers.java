@@ -39,6 +39,10 @@ public final class Transfers extends Resource {
     /**
      * {@code POST /v1/transfer/to-personal} — business balance to the owner's personal wallet.
      *
+     * <p>Errors worth branching on: {@code transfer.bad_amount} — the amount is not valid;
+     * {@code merchant.no_owner} — the merchant has no owner to pay;
+     * {@code merchant.no_personal_wallet} — the owner has no personal wallet yet.
+     *
      * @param request how much to move, and in which asset
      * @param options per-call options
      * @return the completed transfer
@@ -63,6 +67,12 @@ public final class Transfers extends Resource {
     /**
      * {@code POST /v1/transfer/to-user} — business balance to another platform user.
      *
+     * <p>Errors worth branching on: {@code transfer.no_recipient} — no recipient was given;
+     * {@code transfer.bad_recipient} — the recipient identifier is malformed;
+     * {@code transfer.recipient_not_found} — no platform user answers to it;
+     * {@code transfer.bad_amount} — the amount is not valid;
+     * {@code sandbox.transfer_not_available} — a test key cannot fund a transfer to a real user.
+     *
      * @param request the recipient, the amount and the asset
      * @param options per-call options
      * @return the completed transfer
@@ -84,6 +94,12 @@ public final class Transfers extends Resource {
 
     /**
      * {@code POST /v1/transfer/batch} — asynchronous batch of {@code toUser} transfers.
+     *
+     * <p>Errors worth branching on: {@code batch.empty} — nothing to submit;
+     * {@code batch.too_large} — over the 5000-item cap; {@code batch.order_id_required} — an item
+     * carries no {@code order_id}; {@code batch.duplicate_order_id} — two items share one
+     * {@code order_id}; {@code batch.bad_recipient} — an item names a recipient the gateway cannot
+     * resolve.
      *
      * @param request the transfers to submit
      * @param options per-call options

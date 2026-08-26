@@ -4,12 +4,10 @@ import com.oblodai.core.AsyncPager
 import com.oblodai.core.Page
 import com.oblodai.core.Pager
 import com.oblodai.errors.OblodaiException
-import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -56,19 +54,23 @@ private fun Throwable.unwrapped(): Throwable {
 public suspend fun <T> AsyncPager<T>.firstPageAwait(): Page<T> = firstPage().await()
 
 /**
- * Every item of a list route as a cold [Flow], one page fetched at a time. Collecting it walks the
- * pages; cancelling the collection stops after the page in flight.
+ * Every item of a list route as a cold [Flow], one page fetched at a time.
+ *
+ * The walk is pull-based: a page is requested only once the collector has consumed the previous one,
+ * and `emit` suspends until the collector takes each item. Nothing is buffered, so a slow collector
+ * slows the walk down instead of losing items to a full channel. Cancelling the collection stops
+ * after the page in flight.
  */
-public fun <T : Any> AsyncPager<T>.asFlow(): Flow<T> = callbackFlow {
-    val walk =
-        forEach { item ->
-            // trySend is non-suspending: the pager hands items over as each page decodes.
-            trySend(item)
-        }
-    walk.whenComplete { _, failure ->
-        if (failure == null) close() else close(failure.unwrapped())
+public fun <T : Any> AsyncPager<T>.asFlow(): Flow<T> = flow {
+    var at = offset()
+    while (true) {
+        val page = page(limit(), at).await()
+        val items = page.items()
+        for (item in items) emit(item)
+        val paginate = page.paginate()
+        if (items.isEmpty() || paginate == null || paginate.hasPages() != true) break
+        at += items.size
     }
-    awaitClose { walk.cancel(true) }
 }
 
 /** Every item of a blocking pager as a Kotlin [Sequence], one page at a time. */

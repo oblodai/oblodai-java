@@ -18,4 +18,15 @@ public record Page<T>(
     public List<T> items() {
         return items == null ? List.of() : items;
     }
+
+    /**
+     * Whether the gateway actually answered with a list envelope. A body missing {@code items} or
+     * {@code paginate} decodes into an empty page, which reads exactly like "no results" — so the
+     * resources check this and raise a contract failure instead of handing back a silent nothing.
+     *
+     * @return true when both blocks were present
+     */
+    public boolean isListEnvelope() {
+        return items != null && paginate != null;
+    }
 }

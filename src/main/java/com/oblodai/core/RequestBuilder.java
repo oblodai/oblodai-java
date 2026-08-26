@@ -7,7 +7,6 @@ import com.oblodai.errors.ConfigException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -21,13 +20,22 @@ import java.util.regex.Pattern;
  */
 public final class RequestBuilder {
 
-    /** Headers the SDK owns, plus the ones the JDK client refuses to let a caller set. */
+    /**
+     * Headers the SDK owns, plus the ones the JDK client refuses to let a caller set. A caller
+     * header whose name matches one of these — case-insensitively — is dropped: the SDK's value
+     * wins, and the request never goes out with two of anything the signature or the gateway reads.
+     * {@code X-Admin-Token} is on the list because it is a credential the transport attaches to
+     * onboarding routes only; a client-wide copy of it must not ride along on every call.
+     */
     private static final Set<String> RESERVED_HEADERS =
             Set.of(
                     Signing.HEADER_PUBLIC_ID.toLowerCase(Locale.ROOT),
                     Signing.HEADER_SIGNATURE.toLowerCase(Locale.ROOT),
                     Signing.HEADER_TIMESTAMP.toLowerCase(Locale.ROOT),
                     Signing.HEADER_IDEMPOTENCY_KEY.toLowerCase(Locale.ROOT),
+                    Signing.HEADER_ADMIN_TOKEN.toLowerCase(Locale.ROOT),
+                    "accept",
+                    "user-agent",
                     "content-type",
                     "content-length",
                     "host",
@@ -35,6 +43,11 @@ public final class RequestBuilder {
                     "expect",
                     "upgrade",
                     "transfer-encoding");
+
+    /** Header names a caller may not set, exposed for tests and for the client's own validation. */
+    public static Set<String> reservedHeaders() {
+        return RESERVED_HEADERS;
+    }
 
     private static final Pattern PATH_PARAM = Pattern.compile("\\{([a-zA-Z_]+)}");
 
@@ -45,7 +58,7 @@ public final class RequestBuilder {
      *
      * @param uri absolute URL of the request
      * @param method HTTP method
-     * @param headers headers to set, in insertion order
+     * @param headers headers to set, keyed case-insensitively
      * @param body body bytes, empty for GET
      * @param requestUri path plus query — the string the signature covers
      */
@@ -64,7 +77,8 @@ public final class RequestBuilder {
      * @param idempotencyKey the {@code Idempotency-Key} to send, or null
      * @param ts unix seconds to sign with
      * @param userAgent the SDK's user agent
-     * @param extraHeaders caller headers; ones colliding with signed headers are dropped
+     * @param extraHeaders caller headers; ones colliding with an SDK-owned header are dropped
+     * @param adminToken admin token to attach, on the onboarding routes that take one; null otherwise
      * @return the request to send
      */
     public static BuiltRequest build(
@@ -77,21 +91,25 @@ public final class RequestBuilder {
             String idempotencyKey,
             long ts,
             String userAgent,
-            Map<String, String> extraHeaders) {
+            Map<String, String> extraHeaders,
+            String adminToken) {
 
         String path = joinPath(baseUrl, fillPath(route.path(), pathParams));
         String queryString = queryString(query);
         String requestUri = queryString.isEmpty() ? path : path + "?" + queryString;
         URI uri = URI.create(origin(baseUrl) + requestUri);
 
-        Map<String, String> headers = new LinkedHashMap<>();
+        // Case-insensitive so a caller's "accept" cannot sit next to the SDK's "Accept".
+        Map<String, String> headers = new java.util.TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (extraHeaders != null) {
             for (Map.Entry<String, String> e : extraHeaders.entrySet()) {
                 if (e.getValue() == null) continue;
                 if (RESERVED_HEADERS.contains(e.getKey().toLowerCase(Locale.ROOT))) continue;
+                assertHeader(e.getKey(), e.getValue());
                 headers.put(e.getKey(), e.getValue());
             }
         }
+        if (adminToken != null) headers.put(Signing.HEADER_ADMIN_TOKEN, adminToken);
         headers.put("Accept", "application/json");
         headers.put("User-Agent", userAgent);
         boolean hasBody = !route.method().equals("GET");
@@ -127,6 +145,75 @@ public final class RequestBuilder {
         }
 
         return new BuiltRequest(uri, route.method(), headers, hasBody ? body : new byte[0], requestUri);
+    }
+
+    /**
+     * Refuses a caller header outright: one the HTTP layer could not carry verbatim, and one whose
+     * name the SDK owns. Used by both the client builder and the per-call options, so "set a header"
+     * means the same thing wherever a caller says it.
+     *
+     * @param name header name
+     * @param value header value
+     * @throws ConfigException ({@code sdk.bad_header}) when the header cannot be sent as written or
+     *     would override one the SDK sets itself
+     */
+    public static void assertCallerHeader(String name, String value) {
+        assertHeader(name, value);
+        if (RESERVED_HEADERS.contains(name.toLowerCase(Locale.ROOT))) {
+            throw new ConfigException(
+                    ConfigException.BAD_HEADER,
+                    "header \""
+                            + name
+                            + "\" is set by the SDK itself and cannot be overridden"
+                            + (name.equalsIgnoreCase(Signing.HEADER_ADMIN_TOKEN)
+                                    ? "; use adminToken(...), which sends it on onboarding routes only"
+                                    : ""),
+                    name);
+        }
+    }
+
+    /**
+     * Refuses a caller header the HTTP layer could not carry verbatim. A CR or LF would split the
+     * request; a byte above ASCII has no agreed encoding in a header value and different servers
+     * read it differently.
+     *
+     * @param name header name
+     * @param value header value
+     * @throws ConfigException ({@code sdk.bad_header}) when either cannot be sent as written
+     */
+    public static void assertHeader(String name, String value) {
+        if (name == null || name.isEmpty()) {
+            throw new ConfigException(ConfigException.BAD_HEADER, "header name must not be empty", null);
+        }
+        if (value == null) {
+            throw new ConfigException(
+                    ConfigException.BAD_HEADER, "header \"" + name + "\" has a null value", name);
+        }
+        if (!name.matches("[!#$%&'*+\\-.^_`|~0-9A-Za-z]+")) {
+            throw new ConfigException(
+                    ConfigException.BAD_HEADER,
+                    "header name \"" + name + "\" is not a valid HTTP token",
+                    name);
+        }
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c == '\r' || c == '\n') {
+                throw new ConfigException(
+                        ConfigException.BAD_HEADER,
+                        "header \"" + name + "\" contains a line break",
+                        name);
+            }
+            if (c > 0x7e || (c < 0x20 && c != '\t')) {
+                throw new ConfigException(
+                        ConfigException.BAD_HEADER,
+                        "header \""
+                                + name
+                                + "\" contains a character HTTP headers cannot carry (U+"
+                                + String.format("%04X", (int) c)
+                                + "); send it in the body or percent-encode it",
+                        name);
+            }
+        }
     }
 
     /** Serializes a request body once: GET sends nothing, a missing POST body becomes {@code {}}. */
@@ -188,7 +275,7 @@ public final class RequestBuilder {
         return out.toString();
     }
 
-    /** Query string in the caller's order; null and empty values are dropped. */
+    /** Query string in the caller's order; null values are dropped, empty strings are sent. */
     static String queryString(Map<String, Object> query) {
         if (query == null || query.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();

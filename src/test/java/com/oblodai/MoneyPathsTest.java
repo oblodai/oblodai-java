@@ -99,18 +99,31 @@ class MoneyPathsTest {
     }
 
     @Test
-    void doesNotForwardACallerKeyToListPages() {
-        MockHttpClient http =
-                new MockHttpClient()
-                        .ok("{\"items\":[],\"paginate\":{\"total\":0,\"per_page\":50,\"offset\":0,\"has_pages\":false}}");
-        client(http)
-                .build()
-                .payouts()
-                .history(
-                        new com.oblodai.contract.requests.PayoutHistoryRequest(),
-                        RequestOptions.of().idempotencyKey("k"))
-                .firstPage();
-        assertNull(http.onlyCall().header("idempotency-key"));
+    void refusesACallerKeyOnAListRouteRatherThanDroppingIt() {
+        // Dropping it silently would leave the caller believing the pages were deduplicated.
+        MockHttpClient http = new MockHttpClient();
+        ConfigException refused =
+                assertThrows(
+                        ConfigException.class,
+                        () ->
+                                client(http)
+                                        .build()
+                                        .payouts()
+                                        .history(
+                                                new com.oblodai.contract.requests.PayoutHistoryRequest(),
+                                                RequestOptions.of().idempotencyKey("k")));
+        assertEquals(ConfigException.IDEMPOTENCY_UNSUPPORTED, refused.code());
+        assertEquals(0, http.calls().size(), "nothing was sent");
+
+        assertThrows(
+                ConfigException.class,
+                () ->
+                        client(http)
+                                .buildAsync()
+                                .payouts()
+                                .history(
+                                        new com.oblodai.contract.requests.PayoutHistoryRequest(),
+                                        RequestOptions.of().idempotencyKey("k")));
     }
 
     @Test
@@ -160,10 +173,11 @@ class MoneyPathsTest {
     }
 
     @Test
-    void dropsCallerHeadersThatCollideWithSignedHeaders() {
+    void refusesCallerHeadersThatCollideWithSdkOwnedOnesAndSendsTheRest() {
         MockHttpClient http = new MockHttpClient().ok("{\"balance\":{\"merchant\":[]}}");
-        client(http).header("x-signature", "zz").header("X-Trace", "t1").build().account().balance();
+        assertThrows(ConfigException.class, () -> client(http).header("x-signature", "zz"));
 
+        client(http).header("X-Trace", "t1").build().account().balance();
         assertTrue(http.onlyCall().header("x-signature").matches("^[0-9a-f]{64}$"));
         assertEquals("t1", http.onlyCall().header("x-trace"));
     }

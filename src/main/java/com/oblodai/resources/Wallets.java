@@ -42,6 +42,12 @@ public final class Wallets extends Resource {
     /**
      * {@code POST /v1/wallet} — idempotent by {@code order_id}.
      *
+     * <p>Errors worth branching on: {@code wallet.no_network} — no network was given;
+     * {@code wallet.unsupported_network} — that network has no static wallets;
+     * {@code wallet.static_disabled} — static wallets are switched off for this merchant;
+     * {@code wallet.sandbox_unsupported} — a test key cannot mint static wallets, so simulate a
+     * deposit on an invoice instead; {@code wallet.no_address} — no address could be derived.
+     *
      * @param request the wallet to create
      * @param options per-call options
      * @return the wallet, with its permanent deposit address

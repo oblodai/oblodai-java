@@ -472,10 +472,13 @@ class ModelsTest {
                         });
     }
 
-    private static void assertNotEqualsUnknown(Enum<?> value, JsonNode context) {
+    private static void assertNotEqualsUnknown(Vocabulary value, JsonNode context) {
         assertTrue(
-                value != null && !value.name().equals("UNKNOWN"),
-                "the wire carries a value outside the SDK's vocabulary: " + context);
+                value != null && value.isKnown(),
+                "the wire carries a value outside the SDK's vocabulary ("
+                        + (value == null ? "null" : value.wire())
+                        + "): "
+                        + context);
     }
 
     private static Set<String> fieldNames(JsonNode node) {

@@ -3,6 +3,7 @@ package com.oblodai.core;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 
 /**
@@ -10,6 +11,11 @@ import java.util.function.LongSupplier;
  * a host with a drifting clock would get {@code merchant.bad_signature} on every call. The transport
  * learns the server's time from the {@code Date} header of a signature-failure response, re-signs
  * once, and keeps the offset only if that re-signed attempt got past authentication.
+ *
+ * <p>The offset is shared by every call the client makes, so it is held in an {@link AtomicLong} and
+ * a call that wants to undo its own correction does so with {@link #revert(long, long)} — a
+ * compare-and-set, never a plain write. Two calls racing on a skewed host must not have the loser
+ * roll back the winner's correction.
  */
 public final class SkewCorrectingClock {
 
@@ -17,7 +23,7 @@ public final class SkewCorrectingClock {
     public static final long MAX_PLAUSIBLE_OFFSET_SECONDS = 24 * 3600L;
 
     private final LongSupplier base;
-    private volatile long offsetSeconds;
+    private final AtomicLong offsetSeconds = new AtomicLong();
 
     /** A clock reading the system time. */
     public SkewCorrectingClock() {
@@ -35,22 +41,45 @@ public final class SkewCorrectingClock {
 
     /** Current unix time in seconds, including any learned offset. */
     public long now() {
-        return base.getAsLong() + offsetSeconds;
+        return now(offsetSeconds.get());
+    }
+
+    /**
+     * Current unix time in seconds with a specific offset applied, so a caller can record exactly
+     * which offset a request was signed with.
+     *
+     * @param offset the offset to apply, in seconds
+     * @return local time plus that offset
+     */
+    public long now(long offset) {
+        return base.getAsLong() + offset;
     }
 
     /** Server-minus-local offset currently applied, in seconds. */
     public long offset() {
-        return offsetSeconds;
+        return offsetSeconds.get();
     }
 
     /** Applies an offset measured from a server response. */
     public void correct(long offsetSeconds) {
-        this.offsetSeconds = offsetSeconds;
+        this.offsetSeconds.set(offsetSeconds);
+    }
+
+    /**
+     * Undoes a correction this caller installed, and only that one.
+     *
+     * @param installed the offset this caller set
+     * @param previous the offset that was in force before it did
+     * @return true when the offset was still {@code installed} and has been rolled back; false when
+     *     another call has since corrected the clock, whose verdict is newer and is kept
+     */
+    public boolean revert(long installed, long previous) {
+        return offsetSeconds.compareAndSet(installed, previous);
     }
 
     /** Drops the learned offset. */
     public void reset() {
-        this.offsetSeconds = 0;
+        this.offsetSeconds.set(0);
     }
 
     /**
