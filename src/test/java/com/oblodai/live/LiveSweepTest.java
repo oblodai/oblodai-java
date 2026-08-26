@@ -141,7 +141,7 @@ class LiveSweepTest {
                                         .payments(
                                                 List.of(
                                                         new PaymentBatchRequest.Payment()
-                                                                .amount("3")
+                                                                .amount("5")
                                                                 .currency("USDT")
                                                                 .network(Network.TRON)
                                                                 .orderId(reference("sw-b")))));
@@ -155,7 +155,7 @@ class LiveSweepTest {
                         .payments()
                         .create(
                                 new PaymentRequest()
-                                        .amount("1")
+                                        .amount("5")
                                         .currency("USDT")
                                         .network(Network.TRON)
                                         .orderId(reference("sw-c")));
@@ -208,7 +208,7 @@ class LiveSweepTest {
                                                                 new RefundBatchRequest.Refund()
                                                                         .uuid(invoice.uuid())
                                                                         .address(ADDRESS)
-                                                                        .amount("1")
+                                                                        .amount("5")
                                                                         .reference(reference("sw-rb"))))));
     }
 
@@ -257,7 +257,7 @@ class LiveSweepTest {
                                         .payouts(
                                                 List.of(
                                                         new PayoutMassRequest.Payout()
-                                                                .amount("1")
+                                                                .amount("5")
                                                                 .currency("USDT")
                                                                 .network(Network.TRON)
                                                                 .address(ADDRESS)
@@ -272,7 +272,7 @@ class LiveSweepTest {
                                         .payouts(
                                                 List.of(
                                                         new PayoutBatchRequest.Payout()
-                                                                .amount("1")
+                                                                .amount("5")
                                                                 .currency("USDT")
                                                                 .network(Network.TRON)
                                                                 .address(ADDRESS)
@@ -322,7 +322,7 @@ class LiveSweepTest {
                         .payoutLinks()
                         .create(
                                 new PayoutLinkRequest()
-                                        .amount("1")
+                                        .amount("5")
                                         .currency("USDT")
                                         .network(Network.TRON)
                                         .reference(reference("sw-pl2")));
@@ -337,7 +337,7 @@ class LiveSweepTest {
                                         .items(
                                                 List.of(
                                                         new PayoutLinkBatchRequest.Item()
-                                                                .amount("1")
+                                                                .amount("5")
                                                                 .currency("USDT")
                                                                 .network(Network.TRON)
                                                                 .reference(reference("sw-plb")))));
@@ -510,7 +510,7 @@ class LiveSweepTest {
                 () ->
                         oblodai
                                 .transfers()
-                                .toPersonal(new TransferToPersonalRequest().amount("1").currency("USDT")));
+                                .toPersonal(new TransferToPersonalRequest().amount("5").currency("USDT")));
     }
 
     @Test
