@@ -47,11 +47,12 @@ import com.oblodai.resources.async.Webhooks;
  *
  * <p>Immutable and safe to share across threads.
  */
-public final class OblodaiAsync {
+public final class OblodaiAsync implements AutoCloseable {
 
     private final Transport transport;
     private final Payments payments;
     private final Refunds refunds;
+    private final boolean ownsHttpClient;
     private final Payouts payouts;
     private final PayoutLinks payoutLinks;
     private final PaymentLinks paymentLinks;
@@ -68,7 +69,12 @@ public final class OblodaiAsync {
     private final Merchants merchants;
 
     OblodaiAsync(Transport transport) {
+        this(transport, false);
+    }
+
+    OblodaiAsync(Transport transport, boolean ownsHttpClient) {
         this.transport = transport;
+        this.ownsHttpClient = ownsHttpClient;
         this.payments = new Payments(transport);
         this.refunds = new Refunds(transport);
         this.payouts = new Payouts(transport);
@@ -170,6 +176,15 @@ public final class OblodaiAsync {
     /** The same API blocking, over this client's engine, connections and clock. */
     public Oblodai blocking() {
         return new Oblodai(transport);
+    }
+
+    /**
+     * Releases the HTTP client this client built for itself; one supplied through
+     * {@code httpClient(...)} is left alone. Calls in flight are not cancelled.
+     */
+    @Override
+    public void close() {
+        if (ownsHttpClient) ClientSettings.closeHttpClient(transport.httpClient());
     }
 
     /** The transport, for advanced use: custom routes, tests, reading the learned clock skew. */

@@ -1,14 +1,10 @@
 package com.oblodai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oblodai.contract.ContractVersion;
-import com.oblodai.core.Credentials;
-import com.oblodai.core.Json;
 import com.oblodai.core.Logger;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.core.SkewCorrectingClock;
 import com.oblodai.core.Transport;
-import com.oblodai.errors.ConfigException;
 import com.oblodai.resources.Account;
 import com.oblodai.resources.Batches;
 import com.oblodai.resources.Catalog;
@@ -25,11 +21,8 @@ import com.oblodai.resources.Splits;
 import com.oblodai.resources.Transfers;
 import com.oblodai.resources.Wallets;
 import com.oblodai.resources.Webhooks;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -52,8 +45,12 @@ import java.util.Map;
  * <p>Every method's optional last argument is a {@link RequestOptions}. Calls block; {@link #async()}
  * gives the same surface returning {@link java.util.concurrent.CompletableFuture} over the same
  * engine, connections and clock.
+ *
+ * <p>The client is {@link AutoCloseable}: closing it releases the HTTP client it created for itself.
+ * A long-lived application does not need to — one client per key pair, kept for the life of the
+ * process, is the intended shape — but a short-lived tool can use try-with-resources.
  */
-public final class Oblodai {
+public final class Oblodai implements AutoCloseable {
 
     /** Version of this SDK. */
     public static final String VERSION = "1.3.0";
@@ -62,6 +59,7 @@ public final class Oblodai {
     public static final String DEFAULT_BASE_URL = "https://api.oblodai.com";
 
     private final Transport transport;
+    private final boolean ownsHttpClient;
     private final Payments payments;
     private final Refunds refunds;
     private final Payouts payouts;
@@ -80,7 +78,12 @@ public final class Oblodai {
     private final Merchants merchants;
 
     Oblodai(Transport transport) {
+        this(transport, false);
+    }
+
+    Oblodai(Transport transport, boolean ownsHttpClient) {
         this.transport = transport;
+        this.ownsHttpClient = ownsHttpClient;
         this.payments = new Payments(transport);
         this.refunds = new Refunds(transport);
         this.payouts = new Payouts(transport);
@@ -195,6 +198,16 @@ public final class Oblodai {
     }
 
     /**
+     * Releases the HTTP client this client built for itself; one supplied through
+     * {@link Builder#httpClient(HttpClient)} is left alone, being the caller's to manage. Calls in
+     * flight are not cancelled.
+     */
+    @Override
+    public void close() {
+        if (ownsHttpClient) ClientSettings.closeHttpClient(transport.httpClient());
+    }
+
+    /**
      * Builds a client. Options that are not set fall back to the environment, then to a default.
      *
      * <table border="1">
@@ -209,22 +222,7 @@ public final class Oblodai {
      */
     public static final class Builder {
 
-        private String publicId;
-        private String secret;
-        private String payoutPublicId;
-        private String payoutSecret;
-        private String adminToken;
-        private String baseUrl;
-        private HttpClient httpClient;
-        private RetryOptions retry = RetryOptions.DEFAULT;
-        private Logger logger;
-        private ObjectMapper mapper;
-        private SkewCorrectingClock clock;
-        private long timeoutMs = 30_000;
-        private long deadlineMs = 90_000;
-        private Boolean allowInsecureBaseUrl;
-        private final Map<String, String> headers = new LinkedHashMap<>();
-        private Map<String, String> environment = System.getenv();
+        private final ClientSettings settings = new ClientSettings();
 
         Builder() {}
 
@@ -233,7 +231,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder publicId(String publicId) {
-            this.publicId = publicId;
+            settings.publicId = publicId;
             return this;
         }
 
@@ -242,7 +240,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder secret(String secret) {
-            this.secret = secret;
+            settings.secret = secret;
             return this;
         }
 
@@ -258,8 +256,8 @@ public final class Oblodai {
          * @return this
          */
         public Builder payoutKey(String publicId, String secret) {
-            this.payoutPublicId = publicId;
-            this.payoutSecret = secret;
+            settings.payoutPublicId = publicId;
+            settings.payoutSecret = secret;
             return this;
         }
 
@@ -268,7 +266,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder adminToken(String adminToken) {
-            this.adminToken = adminToken;
+            settings.adminToken = adminToken;
             return this;
         }
 
@@ -277,17 +275,18 @@ public final class Oblodai {
          * @return this
          */
         public Builder baseUrl(String baseUrl) {
-            this.baseUrl = baseUrl;
+            settings.baseUrl = baseUrl;
             return this;
         }
 
         /**
          * @param httpClient the JDK client to send with; supply one to control proxies, TLS or
-         *     connection pooling. Defaults to a client that never follows redirects.
+         *     connection pooling. Defaults to a client that never follows redirects. A client you
+         *     supply is yours to shut down: {@link Oblodai#close()} only closes the default one
          * @return this
          */
         public Builder httpClient(HttpClient httpClient) {
-            this.httpClient = httpClient;
+            settings.httpClient = httpClient;
             return this;
         }
 
@@ -296,16 +295,17 @@ public final class Oblodai {
          * @return this
          */
         public Builder retry(RetryOptions retry) {
-            this.retry = retry;
+            settings.retry = retry;
             return this;
         }
 
         /**
-         * @param logger structured logger; values under sensitive keys are redacted for it
+         * @param logger structured logger; the transport redacts sensitive values before this logger
+         *     ever sees them
          * @return this
          */
         public Builder logger(Logger logger) {
-            this.logger = logger;
+            settings.logger = logger;
             return this;
         }
 
@@ -314,7 +314,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder objectMapper(ObjectMapper mapper) {
-            this.mapper = mapper;
+            settings.mapper = mapper;
             return this;
         }
 
@@ -323,7 +323,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder timeout(Duration timeout) {
-            this.timeoutMs = timeout.toMillis();
+            settings.timeoutMs = timeout.toMillis();
             return this;
         }
 
@@ -332,17 +332,21 @@ public final class Oblodai {
          * @return this
          */
         public Builder deadline(Duration deadline) {
-            this.deadlineMs = deadline.toMillis();
+            settings.deadlineMs = deadline.toMillis();
             return this;
         }
 
         /**
-         * @param name header name
-         * @param value header value; a name that collides with a signed header is dropped
+         * A header to send on every request.
+         *
+         * @param name header name; one the SDK owns (Accept, Content-Type, User-Agent, the signing
+         *     headers, Idempotency-Key, X-Admin-Token) is refused rather than silently dropped
+         * @param value header value; must be non-null, ASCII and free of line breaks
          * @return this
+         * @throws com.oblodai.errors.ConfigException when the name or the value could not be sent
          */
         public Builder header(String name, String value) {
-            this.headers.put(name, value);
+            settings.header(name, value);
             return this;
         }
 
@@ -354,7 +358,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder allowInsecureBaseUrl(boolean allow) {
-            this.allowInsecureBaseUrl = allow;
+            settings.allowInsecureBaseUrl = allow;
             return this;
         }
 
@@ -365,7 +369,7 @@ public final class Oblodai {
          * @return this
          */
         public Builder clock(SkewCorrectingClock clock) {
-            this.clock = clock;
+            settings.clock = clock;
             return this;
         }
 
@@ -376,135 +380,20 @@ public final class Oblodai {
          * @return this
          */
         public Builder environment(Map<String, String> environment) {
-            this.environment = environment == null ? Map.of() : environment;
+            settings.environment = environment == null ? Map.of() : environment;
             return this;
         }
 
         /** Builds the blocking client. */
         public Oblodai build() {
-            return new Oblodai(buildTransport());
+            Transport transport = settings.buildTransport();
+            return new Oblodai(transport, settings.ownsHttpClient);
         }
 
         /** Builds the {@link java.util.concurrent.CompletableFuture} client. */
         public OblodaiAsync buildAsync() {
-            return new OblodaiAsync(buildTransport());
-        }
-
-        private Transport buildTransport() {
-            String resolvedBaseUrl = firstSet(baseUrl, env("OBLODAI_BASE_URL"), DEFAULT_BASE_URL);
-            while (resolvedBaseUrl.endsWith("/")) {
-                resolvedBaseUrl = resolvedBaseUrl.substring(0, resolvedBaseUrl.length() - 1);
-            }
-            boolean allowInsecure =
-                    allowInsecureBaseUrl != null
-                            ? allowInsecureBaseUrl
-                            : "1".equals(env("OBLODAI_ALLOW_INSECURE"));
-            assertBaseUrl(resolvedBaseUrl, allowInsecure);
-
-            String id = firstSet(publicId, env("OBLODAI_PUBLIC_ID"), null);
-            String key = firstSet(secret, env("OBLODAI_SECRET"), null);
-            if ((id == null) != (key == null)) {
-                throw new ConfigException(
-                        ConfigException.BAD_CONFIG,
-                        "publicId and secret must be provided together (or set both OBLODAI_PUBLIC_ID"
-                                + " and OBLODAI_SECRET)",
-                        null);
-            }
-            String payoutId = firstSet(payoutPublicId, env("OBLODAI_PAYOUT_PUBLIC_ID"), null);
-            String payoutKey = firstSet(payoutSecret, env("OBLODAI_PAYOUT_SECRET"), null);
-            if ((payoutId == null) != (payoutKey == null)) {
-                throw new ConfigException(
-                        ConfigException.BAD_CONFIG,
-                        "the payout key's publicId and secret must be provided together",
-                        null);
-            }
-
-            Logger resolvedLogger = logger != null ? logger : loggerFromEnvironment();
-            ObjectMapper resolvedMapper = mapper != null ? mapper : Json.mapper();
-            HttpClient client =
-                    httpClient != null
-                            ? httpClient
-                            : HttpClient.newBuilder()
-                                    .followRedirects(HttpClient.Redirect.NEVER)
-                                    .connectTimeout(Duration.ofSeconds(10))
-                                    .build();
-
-            return new Transport(
-                    new Transport.Config(
-                            resolvedBaseUrl,
-                            id == null ? null : new Credentials(id, key),
-                            payoutId == null ? null : new Credentials(payoutId, payoutKey),
-                            client,
-                            retry,
-                            clock != null ? clock : new SkewCorrectingClock(),
-                            resolvedLogger,
-                            timeoutMs,
-                            deadlineMs,
-                            Map.copyOf(headers),
-                            firstSet(adminToken, env("OBLODAI_ADMIN_TOKEN"), null),
-                            userAgent(),
-                            resolvedMapper));
-        }
-
-        private Logger loggerFromEnvironment() {
-            String level = env("OBLODAI_LOG");
-            if (level == null) return Logger.noop();
-            try {
-                return Logger.console(Logger.Level.valueOf(level.trim().toUpperCase(Locale.ROOT)));
-            } catch (IllegalArgumentException e) {
-                return Logger.noop();
-            }
-        }
-
-        private String env(String name) {
-            String value = environment == null ? null : environment.get(name);
-            return value == null || value.isEmpty() ? null : value;
-        }
-
-        private static String firstSet(String a, String b, String fallback) {
-            if (a != null && !a.isEmpty()) return a;
-            if (b != null && !b.isEmpty()) return b;
-            return fallback;
-        }
-
-        private static String userAgent() {
-            return "oblodai-java/"
-                    + VERSION
-                    + " (contract "
-                    + ContractVersion.HASH.substring(0, 12)
-                    + "; jdk "
-                    + System.getProperty("java.version", "?")
-                    + ")";
-        }
-
-        private static void assertBaseUrl(String baseUrl, boolean allowInsecure) {
-            URI parsed;
-            try {
-                parsed = new URI(baseUrl);
-            } catch (Exception e) {
-                throw new ConfigException(
-                        ConfigException.BAD_CONFIG, "baseUrl is not a valid URL: " + baseUrl, "baseUrl");
-            }
-            if (parsed.getScheme() == null || parsed.getHost() == null) {
-                throw new ConfigException(
-                        ConfigException.BAD_CONFIG, "baseUrl is not a valid URL: " + baseUrl, "baseUrl");
-            }
-            if (parsed.getScheme().equals("https")) return;
-            String host = parsed.getHost();
-            boolean loopback =
-                    host.equals("localhost")
-                            || host.equals("127.0.0.1")
-                            || host.equals("[::1]")
-                            || host.equals("::1");
-            if (parsed.getScheme().equals("http") && (allowInsecure || loopback)) return;
-            throw new ConfigException(
-                    ConfigException.BAD_CONFIG,
-                    "baseUrl must use https (got "
-                            + parsed.getScheme()
-                            + "://"
-                            + host
-                            + "); set allowInsecureBaseUrl(true) for a local gateway",
-                    "baseUrl");
+            Transport transport = settings.buildTransport();
+            return new OblodaiAsync(transport, settings.ownsHttpClient);
         }
     }
 }

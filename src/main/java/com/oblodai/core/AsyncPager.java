@@ -44,6 +44,29 @@ public final class AsyncPager<T> {
         return fetcher.fetch(limit, offset);
     }
 
+    /**
+     * One page at an explicit offset. This is what a pull-based consumer (a Kotlin {@code Flow}, a
+     * reactive publisher) walks with: it asks for the next page only once it has consumed the last,
+     * so nothing is ever fetched into a buffer the consumer never drains.
+     *
+     * @param limit page size
+     * @param offset offset into the result set
+     * @return a future of that page
+     */
+    public CompletableFuture<Page<T>> page(int limit, int offset) {
+        return fetcher.fetch(limit, offset);
+    }
+
+    /** The page size this pager walks with. */
+    public int limit() {
+        return limit;
+    }
+
+    /** The offset this pager starts at. */
+    public int offset() {
+        return offset;
+    }
+
     /** Every item, collected. Use {@link #all(int)} when the result set may be large. */
     public CompletableFuture<List<T>> all() {
         return all(Integer.MAX_VALUE);

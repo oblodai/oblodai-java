@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -25,31 +24,8 @@ public final class Codegen {
     private static final String PKG = "com.oblodai.contract";
     private static final String REQ_PKG = PKG + ".requests";
 
-    /** Read-only routes: a transport failure may be retried without risking a duplicate side effect. */
-    private static final String SAFE_SUFFIX =
-            ".*/(info|history|list|calculate|validate|services|get|balance|qr|deliveries)$";
-
-    /** Paths that look read-only but whose body can mutate state. */
-    private static final Set<String> NOT_SAFE = Set.of("POST /v1/vrcs");
-
     /** Routes the gateway serves but the merchant SDK does not model (health, docs, internals). */
     private static final String SKIP_PATHS = "^/(healthz|readyz|docs|openapi\\.json|internal).*";
-
-    private static final Map<String, String> ENUM_NAMES = new LinkedHashMap<>();
-
-    static {
-        ENUM_NAMES.put("payment_status", "PaymentStatus");
-        ENUM_NAMES.put("payout_status", "PayoutStatus");
-        ENUM_NAMES.put("payout_link_status", "PayoutLinkStatus");
-        ENUM_NAMES.put("delivery_status", "DeliveryStatus");
-        ENUM_NAMES.put("network", "Network");
-        ENUM_NAMES.put("fee_bearer", "FeeBearer");
-        ENUM_NAMES.put("fee_bearer_result", "FeeBearerResult");
-        ENUM_NAMES.put("batch_on_error", "BatchOnError");
-        ENUM_NAMES.put("webhook_kind", "WebhookKind");
-        ENUM_NAMES.put("error_kind", "ErrorKind");
-
-    }
 
     private final Path root;
     private final Map<String, Object> contract;
@@ -88,7 +64,7 @@ public final class Codegen {
     private void generate() throws IOException {
         List<Map<String, Object>> routes = routes();
         emitRoutes(routes);
-        emitEnums();
+        new Enums(this).emit(Json.obj(contract.get("enums")), strings(contract.get("event_types")));
         emitErrorCodes();
         emitVersion();
         RequestTypes requests = new RequestTypes(this);
@@ -173,10 +149,23 @@ public final class Codegen {
         return out;
     }
 
+    /**
+     * Whether a transport failure may be re-sent without an idempotency key. This is the core's own
+     * hand-classified verdict, carried in the contract as {@code safe}; the SDK never guesses it from
+     * the path, because a guess that says "safe" about a route that moves money is a double spend.
+     */
     private static boolean isSafe(Map<String, Object> r) {
-        String key = Json.str(r.get("method")) + " " + Json.str(r.get("path"));
-        if (NOT_SAFE.contains(key)) return false;
-        return Json.str(r.get("method")).equals("GET") || Json.str(r.get("path")).matches(SAFE_SUFFIX);
+        Object safe = r.get("safe");
+        if (!(safe instanceof Boolean flag)) {
+            throw new IllegalStateException(
+                    "route "
+                            + Json.str(r.get("method"))
+                            + " "
+                            + Json.str(r.get("path"))
+                            + " has no boolean \"safe\" field — re-export contract/contract.json from a"
+                            + " core that declares it");
+        }
+        return flag;
     }
 
     private static String constantName(Map<String, Object> r) {
@@ -234,83 +223,6 @@ public final class Codegen {
                 + " + key);\n");
         sb.append("        return spec;\n    }\n}\n");
         files.put(javaFile(PKG, "Routes"), sb.toString());
-    }
-
-    // --- enums ----------------------------------------------------------------------------------
-
-    private void emitEnums() {
-        Map<String, Object> enums = Json.obj(contract.get("enums"));
-        for (Map.Entry<String, String> e : ENUM_NAMES.entrySet()) {
-            Object values = enums.get(e.getKey());
-            if (values == null) throw new IllegalStateException("enum " + e.getKey() + " missing");
-            emitEnum(e.getValue(), strings(values), enumDoc(e.getValue()));
-        }
-        emitEnum(
-                "AmountMode",
-                List.of("fixed", "open", "range"),
-                "How a payment link prices a checkout. Not exported by the gateway as an enum;"
-                        + " pinned here from its handlers.");
-        emitEnum(
-                "EventType",
-                strings(contract.get("event_types")),
-                "Webhook event types: {@code invoice.<status>}, {@code payout.<status>}, {@code"
-                        + " wallet.paid}.");
-    }
-
-    private static String enumDoc(String name) {
-        return switch (name) {
-            case "PaymentStatus" -> "Invoice lifecycle: {@code select → created → confirm_check →"
-                    + " paid | paid_over | wrong_amount | expired | cancelled}.";
-            case "PayoutStatus" -> "Payout lifecycle: {@code pending → approved → awaiting_cosign →"
-                    + " broadcasting → sent → confirmed | failed | cancelled}.";
-            case "PayoutLinkStatus" -> "Lifecycle of a payout link (cheque).";
-            case "DeliveryStatus" -> "State of one webhook delivery.";
-            case "Network" -> "Blockchain networks the gateway settles on.";
-            case "FeeBearer" -> "Who pays the network fee of a payout.";
-            case "FeeBearerResult" -> "Who paid the network fee, as reported on a priced result.";
-            case "BatchOnError" -> "What an asynchronous batch does after a failing element.";
-            case "WebhookKind" -> "Kinds of rehearsal webhook the gateway can deliver.";
-            case "ErrorKind" -> "Error families behind the HTTP statuses the gateway returns.";
-            default -> name + " vocabulary.";
-        };
-    }
-
-    private void emitEnum(String name, List<String> values, String doc) {
-        StringBuilder sb = new StringBuilder(header);
-        sb.append("package ").append(PKG).append(";\n\n");
-        sb.append("import com.fasterxml.jackson.annotation.JsonCreator;\n");
-        sb.append("import com.fasterxml.jackson.annotation.JsonValue;\n\n");
-        sb.append("/**\n * ").append(doc).append("\n *\n");
-        sb.append(" * <p>A value this snapshot does not know decodes to {@link #UNKNOWN} rather than")
-                .append(" failing, so a\n * gateway that grows its vocabulary cannot break a")
-                .append(" deployed client.\n */\n");
-        sb.append("public enum ").append(name).append(" {\n\n");
-        for (String v : values) {
-            sb.append("    /** {@code ").append(v).append("} */\n");
-            sb.append("    ").append(enumConstant(v)).append("(\"").append(v).append("\"),\n\n");
-        }
-        sb.append("    /** A value outside this snapshot's vocabulary. Serializes as an empty")
-                .append(" string. */\n    UNKNOWN(\"\");\n\n");
-        sb.append("    private final String wire;\n\n");
-        sb.append("    ").append(name).append("(String wire) {\n        this.wire = wire;\n    }\n\n");
-        sb.append("    /** The exact string the API uses. */\n");
-        sb.append("    @JsonValue\n    public String wire() {\n        return wire;\n    }\n\n");
-        sb.append("    /** Decodes a wire value; anything unknown becomes {@link #UNKNOWN}. */\n");
-        sb.append("    @JsonCreator\n    public static ")
-                .append(name)
-                .append(" from(String wire) {\n")
-                .append("        if (wire == null) return null;\n")
-                .append("        for (")
-                .append(name)
-                .append(" value : values()) {\n")
-                .append("            if (value.wire.equals(wire)) return value;\n        }\n")
-                .append("        return UNKNOWN;\n    }\n\n");
-        sb.append("    @Override\n    public String toString() {\n        return wire;\n    }\n}\n");
-        files.put(javaFile(PKG, name), sb.toString());
-    }
-
-    private static String enumConstant(String wire) {
-        return wire.replaceAll("[^A-Za-z0-9]+", "_").toUpperCase();
     }
 
     // --- error codes ----------------------------------------------------------------------------

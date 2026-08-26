@@ -23,6 +23,12 @@ public class ConfigException extends OblodaiException {
     /** A path parameter would have rewritten the URL. */
     public static final String BAD_PATH_PARAM = "sdk.bad_path_param";
 
+    /** A money helper was handed something that is not a decimal amount. */
+    public static final String BAD_AMOUNT = "sdk.bad_amount";
+
+    /** A caller header the HTTP layer could not carry, or one the SDK owns. */
+    public static final String BAD_HEADER = "sdk.bad_header";
+
     /**
      * @param code one of the {@code sdk.*} constants on this class
      * @param message what is wrong and how to fix it

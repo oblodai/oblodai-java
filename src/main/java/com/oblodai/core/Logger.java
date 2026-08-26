@@ -7,8 +7,13 @@ import java.util.regex.Pattern;
 
 /**
  * Minimal structured logging contract. Anything with debug/info/warn/error(message, fields) fits
- * (SLF4J adapters, a console, a test recorder). Values under sensitive-looking keys are redacted
- * before they reach the logger, so a debug log never leaks a key, a signature or a cheque passcode.
+ * (SLF4J adapters, a console, a test recorder).
+ *
+ * <p>Values under sensitive-looking keys are redacted by the transport <b>before</b> the fields are
+ * handed to the logger, so an injected logger never sees a key, a signature or a cheque passcode —
+ * redaction is not something the logger implementation has to remember to do. {@link #console(Level)}
+ * redacts again on its own path, which costs nothing and keeps the guarantee if the transport is
+ * bypassed.
  */
 public interface Logger {
 
@@ -92,6 +97,18 @@ public interface Logger {
 
     /** Pattern of field names whose values are replaced before logging. */
     Pattern SENSITIVE = Pattern.compile("secret|signature|passcode|token|authorization|password", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * The transport's redaction hook: a copy of the fields with sensitive values replaced.
+     *
+     * @param fields the fields about to be logged, or null
+     * @return a redacted copy, never null
+     */
+    @SuppressWarnings("unchecked")
+    static Map<String, Object> redactFields(Map<String, Object> fields) {
+        if (fields == null || fields.isEmpty()) return Map.of();
+        return (Map<String, Object>) redact(fields);
+    }
 
     /** Replaces values of sensitive-looking keys, recursively, without touching the original. */
     static Object redact(Object value) {

@@ -53,6 +53,13 @@ public final class PayoutLinks extends Resource {
     /**
      * {@code POST /v1/payout/link} — reserve funds and mint a claim token.
      *
+     * <p>Errors worth branching on: {@code payoutlink.insufficient_funds} — the balance cannot
+     * cover the reservation; {@code payoutlink.funds_maturing} — the funds have not matured yet;
+     * {@code payoutlink.reference_required} — no {@code reference} was given;
+     * {@code payoutlink.duplicate_reference} — that reference already minted a link;
+     * {@code payoutlink.bad_amount} — the amount is not valid;
+     * {@code payoutlink.unsupported_network} — the network cannot carry a payout link.
+     *
      * @param request the link to create
      * @param options per-call options
      * @return a future of the link, with its claim token
@@ -68,7 +75,18 @@ public final class PayoutLinks extends Resource {
      * @return a future of the link
      */
     public CompletableFuture<PayoutLink> info(String linkId) {
-        return info(new PayoutLinkInfoRequest().linkId(linkId), RequestOptions.none());
+        return info(linkId, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/link/info}.
+     *
+     * @param linkId the link's id
+     * @param options per-call options
+     * @return a future of the link
+     */
+    public CompletableFuture<PayoutLink> info(String linkId, RequestOptions options) {
+        return info(new PayoutLinkInfoRequest().linkId(linkId), options);
     }
 
     /**
@@ -100,7 +118,18 @@ public final class PayoutLinks extends Resource {
      * @return a future of the link
      */
     public CompletableFuture<PayoutLink> get(String linkId) {
-        return info(linkId);
+        return get(linkId, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/link/info} — alias of {@link #info(String, RequestOptions)}.
+     *
+     * @param linkId the link's id
+     * @param options per-call options
+     * @return a future of the link
+     */
+    public CompletableFuture<PayoutLink> get(String linkId, RequestOptions options) {
+        return info(linkId, options);
     }
 
     /**
@@ -110,7 +139,20 @@ public final class PayoutLinks extends Resource {
      * @return a future of the link
      */
     public CompletableFuture<PayoutLink> get(PayoutLinkInfoRequest request) {
-        return info(request);
+        return get(request, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/link/info} — alias of
+     * {@link #info(PayoutLinkInfoRequest, RequestOptions)}.
+     *
+     * @param request which link to read
+     * @param options per-call options
+     * @return a future of the link
+     */
+    public CompletableFuture<PayoutLink> get(
+            PayoutLinkInfoRequest request, RequestOptions options) {
+        return info(request, options);
     }
 
     /**
@@ -119,7 +161,17 @@ public final class PayoutLinks extends Resource {
      * @return a lazy non-blocking pager over the merchant's payout links
      */
     public AsyncPager<PayoutLink> list() {
-        return list(new PayoutLinkListRequest(), RequestOptions.none());
+        return list(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/link/list}.
+     *
+     * @param options per-call options
+     * @return a lazy non-blocking pager over the merchant's payout links
+     */
+    public AsyncPager<PayoutLink> list(RequestOptions options) {
+        return list(new PayoutLinkListRequest(), options);
     }
 
     /**
@@ -151,7 +203,18 @@ public final class PayoutLinks extends Resource {
      * @return a future of the cancelled link
      */
     public CompletableFuture<PayoutLink> cancel(String linkId) {
-        return cancel(new PayoutLinkCancelRequest().linkId(linkId), RequestOptions.none());
+        return cancel(linkId, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payout/link/cancel}.
+     *
+     * @param linkId the link's id
+     * @param options per-call options
+     * @return a future of the cancelled link
+     */
+    public CompletableFuture<PayoutLink> cancel(String linkId, RequestOptions options) {
+        return cancel(new PayoutLinkCancelRequest().linkId(linkId), options);
     }
 
     /**
@@ -189,6 +252,12 @@ public final class PayoutLinks extends Resource {
 
     /**
      * {@code POST /v1/payout/link/batch} — synchronous batch of payout links.
+     *
+     * <p>Errors worth branching on: {@code payoutlink.empty_batch} — nothing to create;
+     * {@code payoutlink.batch_too_large} — over the batch cap;
+     * {@code payoutlink.reference_required} — an item carries no {@code reference};
+     * {@code payoutlink.duplicate_reference} — two items share one reference;
+     * {@code payoutlink.insufficient_funds} — the balance cannot cover the batch.
      *
      * @param request the links to create
      * @param options per-call options
@@ -266,6 +335,13 @@ public final class PayoutLinks extends Resource {
 
     /**
      * {@code POST /v1/claim/{token}}.
+     *
+     * <p>Errors worth branching on: {@code payoutlink.already_claimed} — the link has been claimed
+     * already; {@code payoutlink.cancelled} — the link was cancelled and its funds released;
+     * {@code payoutlink.expired} — the claim window has closed;
+     * {@code payoutlink.passcode_required} — the link has a passcode and none was sent;
+     * {@code payoutlink.passcode_wrong} — the passcode does not match;
+     * {@code payoutlink.passcode_locked} — too many wrong tries, so the link is locked.
      *
      * @param token the claim token
      * @param request the destination address, and the passcode when one is set

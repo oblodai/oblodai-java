@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oblodai.core.Signing;
+import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.models.PaymentEvent;
 import com.oblodai.models.WebhookEvent;
@@ -238,10 +239,16 @@ class WebhookVerifierTest {
         assertFalse(WebhookVerifier.isStale(event, 6L));
         assertFalse(WebhookVerifier.isStale(event, null));
 
-        SignatureException alien =
-                assertThrows(
-                        SignatureException.class,
-                        () -> WebhookVerifier.parse("{\"type\":\"alien\",\"uuid\":\"x\"}"));
-        assertTrue(alien.getMessage().contains("unknown event type"));
+        // A kind this snapshot has not heard of is delivered, not thrown: a gateway that grows a
+        // new event type must not break a deployed receiver.
+        WebhookEvent alien = WebhookVerifier.parse("{\"type\":\"alien\",\"uuid\":\"x\"}");
+        assertEquals("alien", alien.type());
+        assertEquals("x", alien.uuid());
+        assertFalse(WebhookVerifier.isStale(alien, 7L));
+
+        // A body that is not an event at all is a contract failure, not a signature failure.
+        assertEquals(
+                "webhook.bad_payload",
+                assertThrows(ContractException.class, () -> WebhookVerifier.parse("[1,2,3]")).code());
     }
 }

@@ -3,11 +3,8 @@ package com.oblodai.resources;
 import com.oblodai.RequestOptions;
 import com.oblodai.contract.RouteSpec;
 import com.oblodai.contract.Routes;
-import com.oblodai.contract.requests.DocumentsJobsInfoRequest;
-import com.oblodai.contract.requests.DocumentsJobsRequest;
 import com.oblodai.core.FileResult;
 import com.oblodai.core.Transport;
-import com.oblodai.models.DocumentJob;
 
 /**
  * Generated PDF and CSV documents. Every report method answers with the bytes themselves
@@ -16,7 +13,7 @@ import com.oblodai.models.DocumentJob;
  *
  * <p>What each document accepts — language, format, period — is carried by {@link DocumentQuery}.
  */
-public final class Documents extends Resource {
+public final class Documents extends DocumentsJobRoutes {
 
     /**
      * @param transport the engine to call through
@@ -26,80 +23,22 @@ public final class Documents extends Resource {
     }
 
     /**
-     * {@code POST /v1/documents/jobs} — queues a large report; poll {@code jobInfo}, then fetch
-     * {@code jobFile}.
-     *
-     * @param request which report, in which language, format and period
-     * @return the queued job
-     */
-    public DocumentJob createJob(DocumentsJobsRequest request) {
-        return createJob(request, RequestOptions.none());
-    }
-
-    /**
-     * {@code POST /v1/documents/jobs}.
-     *
-     * @param request which report, in which language, format and period
-     * @param options per-call options
-     * @return the queued job
-     */
-    public DocumentJob createJob(DocumentsJobsRequest request, RequestOptions options) {
-        return call(Routes.POST_V1_DOCUMENTS_JOBS, request, options, DocumentJob.class);
-    }
-
-    /**
-     * {@code POST /v1/documents/jobs/info} — where a queued report has got to.
-     *
-     * @param jobId the job's id
-     * @return the job and its status
-     */
-    public DocumentJob jobInfo(String jobId) {
-        return jobInfo(jobId, RequestOptions.none());
-    }
-
-    /**
-     * {@code POST /v1/documents/jobs/info}.
-     *
-     * @param jobId the job's id
-     * @param options per-call options
-     * @return the job and its status
-     */
-    public DocumentJob jobInfo(String jobId, RequestOptions options) {
-        return call(
-                Routes.POST_V1_DOCUMENTS_JOBS_INFO,
-                new DocumentsJobsInfoRequest().jobId(jobId),
-                options,
-                DocumentJob.class);
-    }
-
-    /**
-     * {@code GET /v1/documents/jobs/file} — the finished job's bytes.
-     *
-     * @param jobId the job's id
-     * @return the rendered document
-     */
-    public FileResult jobFile(String jobId) {
-        return jobFile(jobId, RequestOptions.none());
-    }
-
-    /**
-     * {@code GET /v1/documents/jobs/file}.
-     *
-     * @param jobId the job's id
-     * @param options per-call options
-     * @return the rendered document
-     */
-    public FileResult jobFile(String jobId, RequestOptions options) {
-        return file(Routes.GET_V1_DOCUMENTS_JOBS_FILE, options(options).query("job_id", jobId));
-    }
-
-    /**
      * {@code GET /v1/documents/statement} — account statement for a period (PDF or CSV).
      *
      * @return the rendered document
      */
     public FileResult statement() {
-        return statement(new DocumentQuery());
+        return statement(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/statement}.
+     *
+     * @param options per-call options
+     * @return the rendered document
+     */
+    public FileResult statement(RequestOptions options) {
+        return statement(new DocumentQuery(), options);
     }
 
     /**
@@ -129,7 +68,17 @@ public final class Documents extends Resource {
      * @return the rendered document
      */
     public FileResult balanceCertificate() {
-        return balanceCertificate(new DocumentQuery());
+        return balanceCertificate(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/balance}.
+     *
+     * @param options per-call options
+     * @return the rendered document
+     */
+    public FileResult balanceCertificate(RequestOptions options) {
+        return balanceCertificate(new DocumentQuery(), options);
     }
 
     /**
@@ -159,7 +108,17 @@ public final class Documents extends Resource {
      * @return the rendered document
      */
     public FileResult feeSchedule() {
-        return feeSchedule(new DocumentQuery());
+        return feeSchedule(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/fees}.
+     *
+     * @param options per-call options
+     * @return the rendered document
+     */
+    public FileResult feeSchedule(RequestOptions options) {
+        return feeSchedule(new DocumentQuery(), options);
     }
 
     /**
@@ -189,7 +148,17 @@ public final class Documents extends Resource {
      * @return the rendered document
      */
     public FileResult ledger() {
-        return ledger(new DocumentQuery());
+        return ledger(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/ledger}.
+     *
+     * @param options per-call options
+     * @return the rendered document
+     */
+    public FileResult ledger(RequestOptions options) {
+        return ledger(new DocumentQuery(), options);
     }
 
     /**
@@ -219,7 +188,17 @@ public final class Documents extends Resource {
      * @return the rendered document
      */
     public FileResult referralsReport() {
-        return referralsReport(new DocumentQuery());
+        return referralsReport(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/referrals}.
+     *
+     * @param options per-call options
+     * @return the rendered document
+     */
+    public FileResult referralsReport(RequestOptions options) {
+        return referralsReport(new DocumentQuery(), options);
     }
 
     /**

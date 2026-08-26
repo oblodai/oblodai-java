@@ -45,7 +45,17 @@ public final class Catalog extends Resource {
      * @return a lazy pager over the rates
      */
     public Pager<ExchangeRate> exchangeRates() {
-        return exchangeRates(new ExchangeRateListRequest(), RequestOptions.none());
+        return exchangeRates(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/exchange-rate/list}.
+     *
+     * @param options per-call options
+     * @return a lazy pager over the rates
+     */
+    public Pager<ExchangeRate> exchangeRates(RequestOptions options) {
+        return exchangeRates(new ExchangeRateListRequest(), options);
     }
 
     /**

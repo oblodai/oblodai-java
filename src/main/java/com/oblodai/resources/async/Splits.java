@@ -61,7 +61,17 @@ public final class Splits extends Resource {
      * @return a lazy non-blocking pager over the rules
      */
     public AsyncPager<SplitRule> listRules() {
-        return listRules(new SplitRuleListRequest(), RequestOptions.none());
+        return listRules(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/split/rule/list}.
+     *
+     * @param options per-call options
+     * @return a lazy non-blocking pager over the rules
+     */
+    public AsyncPager<SplitRule> listRules(RequestOptions options) {
+        return listRules(new SplitRuleListRequest(), options);
     }
 
     /**

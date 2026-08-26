@@ -1,15 +1,15 @@
 package com.oblodai.webhooks;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oblodai.core.Json;
-import com.oblodai.core.Signing;
+import com.oblodai.errors.ConfigException;
+import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
+import com.oblodai.errors.WebhookPayloadException;
+import com.oblodai.models.UnknownEvent;
 import com.oblodai.models.WebhookEvent;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.LongSupplier;
 
 /**
@@ -29,6 +29,13 @@ import java.util.function.LongSupplier;
  *
  * <p>Always verify over the <b>raw request bytes</b>. A re-serialized parse will not match: JSON
  * round-trips are not byte-stable, and the signature covers bytes.
+ *
+ * <p>The order of the checks is deliberate: headers, then the MAC, then freshness, then the body.
+ * The freshness window is only consulted once the MAC has proved the delivery is ours, so an
+ * unauthenticated caller cannot use the timestamp check to learn anything. A body that verified but
+ * cannot be read is a contract failure ({@code webhook.bad_payload}), not a signature failure — a
+ * receiver that answers 401 to {@code webhook.*} signature errors must not reject an authentic
+ * delivery it merely failed to decode.
  *
  * <pre>{@code
  * WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
@@ -64,6 +71,9 @@ public final class WebhookVerifier {
     /** Default freshness window, in seconds, on either side of the delivery timestamp. */
     public static final long DEFAULT_TOLERANCE_SECONDS = 300;
 
+    /** A delivery that verified but whose body could not be read as an event. */
+    public static final String BAD_PAYLOAD = ContractException.WEBHOOK_BAD_PAYLOAD;
+
     private static final ObjectMapper MAPPER = Json.newMapper();
 
     private WebhookVerifier() {}
@@ -72,13 +82,13 @@ public final class WebhookVerifier {
     public static final class Options {
         private final String secret;
         private final String previousSecret;
-        private final long toleranceSeconds;
+        private final long toleranceMillis;
         private final LongSupplier clock;
 
-        private Options(String secret, String previousSecret, long toleranceSeconds, LongSupplier clock) {
+        private Options(String secret, String previousSecret, long toleranceMillis, LongSupplier clock) {
             this.secret = secret;
             this.previousSecret = previousSecret;
-            this.toleranceSeconds = toleranceSeconds;
+            this.toleranceMillis = toleranceMillis;
             this.clock = clock;
         }
 
@@ -87,22 +97,44 @@ public final class WebhookVerifier {
          * stay signed with it for their whole retry life (about 26 hours), so keep it at least that
          * long after rotating.
          *
-         * @param previousSecret the secret being retired
+         * @param previousSecret the secret being retired; must not be empty when supplied
          * @return a copy carrying it
+         * @throws ConfigException when the value is present but empty
          */
         public Options previousSecret(String previousSecret) {
-            return new Options(secret, previousSecret, toleranceSeconds, clock);
+            if (previousSecret != null && previousSecret.isEmpty()) {
+                throw new ConfigException(
+                        ConfigException.BAD_CONFIG,
+                        "previousSecret was supplied but is empty; pass null when there is no rotation"
+                                + " in progress",
+                        "previousSecret");
+            }
+            return new Options(secret, previousSecret, toleranceMillis, clock);
         }
 
         /**
          * How far the delivery timestamp may be from now. {@link Duration#ZERO} disables the check —
-         * only sensible when replaying a recorded delivery in a test.
+         * only sensible when replaying a recorded delivery in a test. Sub-second windows are kept as
+         * written; a negative one is refused rather than silently disabling the check.
          *
          * @param tolerance the window
          * @return a copy carrying it
+         * @throws ConfigException when the duration is null or negative
          */
         public Options tolerance(Duration tolerance) {
-            return new Options(secret, previousSecret, tolerance.toSeconds(), clock);
+            if (tolerance == null) {
+                throw new ConfigException(
+                        ConfigException.BAD_CONFIG, "tolerance must not be null", "tolerance");
+            }
+            if (tolerance.isNegative()) {
+                throw new ConfigException(
+                        ConfigException.BAD_CONFIG,
+                        "tolerance must not be negative (got "
+                                + tolerance
+                                + "); pass Duration.ZERO to disable the freshness check deliberately",
+                        "tolerance");
+            }
+            return new Options(secret, previousSecret, tolerance.toMillis(), clock);
         }
 
         /**
@@ -112,7 +144,15 @@ public final class WebhookVerifier {
          * @return a copy carrying it
          */
         public Options clock(LongSupplier clock) {
-            return new Options(secret, previousSecret, toleranceSeconds, clock);
+            if (clock == null) {
+                throw new ConfigException(ConfigException.BAD_CONFIG, "clock must not be null", "clock");
+            }
+            return new Options(secret, previousSecret, toleranceMillis, clock);
+        }
+
+        /** The freshness window in milliseconds; 0 means the check is disabled. */
+        public long toleranceMillis() {
+            return toleranceMillis;
         }
     }
 
@@ -122,10 +162,22 @@ public final class WebhookVerifier {
      * @param secret the endpoint secret from {@code webhooks().register(...)} or {@code
      *     rotateSecret()}
      * @return the settings, with a ±300 s freshness window
+     * @throws ConfigException when the secret is null or blank — an empty key would "verify"
+     *     whatever a stranger signed with an empty key
      */
     public static Options options(String secret) {
+        if (secret == null || secret.isBlank()) {
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG,
+                    "a webhook secret is required: pass the value webhooks().register(...) or"
+                            + " rotateSecret() returned",
+                    "secret");
+        }
         return new Options(
-                secret, null, DEFAULT_TOLERANCE_SECONDS, () -> System.currentTimeMillis() / 1000L);
+                secret,
+                null,
+                DEFAULT_TOLERANCE_SECONDS * 1000L,
+                () -> System.currentTimeMillis() / 1000L);
     }
 
     /**
@@ -162,9 +214,22 @@ public final class WebhookVerifier {
      * @param options the endpoint secret and freshness window
      * @return the event, the delivery id, the event type and the times
      * @throws SignatureException when the signature, the timestamp or the headers do not hold up
+     * @throws WebhookPayloadException when the delivery is authentic but its body is not an event
      */
     public static WebhookDeliveryInfo verifyDelivery(
             byte[] rawBody, WebhookHeaders headers, Options options) {
+        if (options == null) {
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG,
+                    "verification options are required: WebhookVerifier.options(secret)",
+                    "options");
+        }
+        if (headers == null) {
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG, "the delivery headers are required", "headers");
+        }
+        byte[] body = rawBody == null ? new byte[0] : rawBody;
+
         String timestampHeader = headers.first(HEADER_TIMESTAMP);
         String signature = headers.first(HEADER_SIGNATURE);
         if (timestampHeader == null || signature == null) {
@@ -180,53 +245,37 @@ public final class WebhookVerifier {
                     SignatureException.BAD_SIGNATURE, "timestamp header is not an integer");
         }
 
-        if (options.toleranceSeconds > 0) {
-            long now = options.clock.getAsLong();
-            if (Math.abs(now - timestamp) > options.toleranceSeconds) {
+        // 1. The MAC, before anything the timestamp says: the freshness window must never be an
+        //    oracle an unauthenticated caller can probe.
+        String previousSignature = headers.first(HEADER_SIGNATURE_PREV);
+        if (!WebhookPayloads.matches(
+                body, timestamp, signature, options.secret, options.previousSecret, previousSignature)) {
+            throw new SignatureException(
+                    SignatureException.BAD_SIGNATURE, "signature does not match the body");
+        }
+
+        // 2. Freshness, now that the delivery is known to be ours.
+        if (options.toleranceMillis > 0) {
+            long nowMillis = options.clock.getAsLong() * 1000L;
+            if (Math.abs(nowMillis - timestamp * 1000L) > options.toleranceMillis) {
                 throw new SignatureException(
                         SignatureException.STALE_TIMESTAMP,
                         "delivery timestamp "
                                 + timestamp
                                 + " is outside the ±"
-                                + options.toleranceSeconds
-                                + "s window");
+                                + options.toleranceMillis
+                                + "ms window");
             }
         }
 
-        String previousSignature = headers.first(HEADER_SIGNATURE_PREV);
-        // A merchant who has not swapped the stored secret yet verifies the Prev header with it; one
-        // who already swapped but kept the old copy verifies the main header with the new secret.
-        // Both hold during the overlap, so both are accepted.
-        List<String[]> candidates = new ArrayList<>();
-        candidates.add(new String[] {signature, options.secret});
-        if (previousSignature != null) candidates.add(new String[] {previousSignature, options.secret});
-        if (options.previousSecret != null) {
-            candidates.add(new String[] {signature, options.previousSecret});
-            if (previousSignature != null) {
-                candidates.add(new String[] {previousSignature, options.previousSecret});
-            }
-        }
-        boolean matched = false;
-        for (String[] candidate : candidates) {
-            String expected = Signing.signWebhook(candidate[1], timestamp, rawBody);
-            if (Signing.constantTimeEquals(
-                    candidate[0].toLowerCase(java.util.Locale.ROOT), expected)) {
-                matched = true;
-                break;
-            }
-        }
-        if (!matched) {
-            throw new SignatureException(
-                    SignatureException.BAD_SIGNATURE, "signature does not match the body");
-        }
-
+        // 3. The body itself.
+        WebhookEvent event = parse(body);
         String eventTimeHeader = headers.first(HEADER_EVENT_TIME);
         Long eventTime = null;
         if (eventTimeHeader != null && eventTimeHeader.trim().matches("\\d+")) {
             eventTime = Long.valueOf(eventTimeHeader.trim());
         }
-        WebhookEvent event = parse(rawBody);
-        boolean isTest = "true".equals(headers.first(HEADER_TEST)) || isTestEvent(event);
+        boolean isTest = isTrue(headers.first(HEADER_TEST)) || isTestEvent(event);
         return new WebhookDeliveryInfo(
                 event,
                 headers.first(HEADER_ID),
@@ -236,37 +285,22 @@ public final class WebhookVerifier {
                 isTest);
     }
 
+    private static boolean isTrue(String header) {
+        return header != null && header.trim().equalsIgnoreCase("true");
+    }
+
     /**
      * Parses a delivery body into a typed event. Only call this on bytes you have verified — it
      * checks the shape, not the origin.
      *
      * @param rawBody the delivery body
-     * @return the event, one of the three concrete kinds
-     * @throws SignatureException when the body is not a webhook event
+     * @return the event; a {@code type} this snapshot does not know decodes to
+     *     {@link com.oblodai.models.UnknownEvent} rather than failing
+     * @throws WebhookPayloadException ({@code webhook.bad_payload}) when the body is not an event
+     *     object
      */
     public static WebhookEvent parse(byte[] rawBody) {
-        JsonNode body;
-        try {
-            body = MAPPER.readTree(rawBody);
-        } catch (Exception e) {
-            throw new SignatureException(SignatureException.BAD_SIGNATURE, "body is not JSON");
-        }
-        if (body == null || !body.isObject() || !body.path("type").isTextual() || !body.path("uuid").isTextual()) {
-            throw new SignatureException(
-                    SignatureException.BAD_SIGNATURE,
-                    "body lacks the type/uuid fields every event carries");
-        }
-        String type = body.get("type").asText();
-        if (!type.equals("payment") && !type.equals("payout") && !type.equals("wallet")) {
-            throw new SignatureException(
-                    SignatureException.BAD_SIGNATURE, "unknown event type \"" + type + "\"");
-        }
-        try {
-            return MAPPER.treeToValue(body, WebhookEvent.class);
-        } catch (Exception e) {
-            throw new SignatureException(
-                    SignatureException.BAD_SIGNATURE, "event body could not be decoded: " + e.getMessage());
-        }
+        return WebhookPayloads.parse(rawBody);
     }
 
     /**
@@ -276,14 +310,26 @@ public final class WebhookVerifier {
      * @return the event
      */
     public static WebhookEvent parse(String rawBody) {
-        return parse(rawBody.getBytes(StandardCharsets.UTF_8));
+        return parse(rawBody == null ? new byte[0] : rawBody.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Whether the event is one of the kinds this SDK snapshot models. A {@code false} means the
+     * gateway has grown a new event type: the delivery is still verified and readable through
+     * {@link UnknownEvent}, and a receiver should ignore it rather than fail.
+     *
+     * @param event the event just verified, or null
+     * @return true for a payment, payout or wallet event
+     */
+    public static boolean isKnownEvent(WebhookEvent event) {
+        return event != null && !(event instanceof UnknownEvent);
     }
 
     /**
      * Rehearsal deliveries ({@code webhooks().test(...)}, sandbox) are signed exactly like live ones
      * and carry {@code test: true}. Never act on one as if money moved.
      *
-     * @param event the event just verified
+     * @param event the event just verified, or null
      * @return true when the event is a rehearsal, not a real state change
      */
     public static boolean isTestEvent(WebhookEvent event) {
@@ -294,12 +340,13 @@ public final class WebhookVerifier {
      * Deliveries can arrive out of order (a retried {@code paid} after a {@code refund}). Keep the
      * last {@code sequence} you processed per object and skip anything not newer.
      *
-     * @param event the event just verified
+     * @param event the event just verified, or null
      * @param lastProcessedSequence the highest sequence you have already applied, or null
-     * @return true when this event is not newer than what you have already applied
+     * @return true when this event is not newer than what you have already applied; false when
+     *     either side is unknown — never throws
      */
     public static boolean isStale(WebhookEvent event, Long lastProcessedSequence) {
-        if (lastProcessedSequence == null || event.sequence() == null) return false;
+        if (event == null || lastProcessedSequence == null || event.sequence() == null) return false;
         return event.sequence() <= lastProcessedSequence;
     }
 }

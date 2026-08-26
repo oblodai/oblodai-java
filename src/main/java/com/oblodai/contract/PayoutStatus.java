@@ -1,67 +1,112 @@
-// GENERATED FILE — do not edit. Source: contract/contract.json (core bfca971cce71).
+// GENERATED FILE — do not edit. Source: contract/contract.json (core 7ec04293c426).
 // Regenerate with: codegen/run.sh
 package com.oblodai.contract;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Payout lifecycle: {@code pending → approved → awaiting_cosign → broadcasting → sent → confirmed | failed | cancelled}.
  *
- * <p>A value this snapshot does not know decodes to {@link #UNKNOWN} rather than failing, so a
- * gateway that grows its vocabulary cannot break a deployed client.
+ * <p>An open vocabulary. The values below are the ones this contract snapshot knows, and they are
+ * interned: {@code status == PayoutStatus.PENDING} works. A value the
+ * gateway starts sending that is not among them decodes to an instance carrying that exact
+ * string — {@link #wire()} tells you what it was, {@link #isKnown()} that it is new — so a
+ * gateway that grows its vocabulary neither breaks a deployed client nor hides what it said.
  */
-public enum PayoutStatus {
+public final class PayoutStatus implements Vocabulary {
 
     /** {@code pending} */
-    PENDING("pending"),
+    public static final PayoutStatus PENDING = new PayoutStatus("pending");
 
     /** {@code approved} */
-    APPROVED("approved"),
+    public static final PayoutStatus APPROVED = new PayoutStatus("approved");
 
     /** {@code awaiting_cosign} */
-    AWAITING_COSIGN("awaiting_cosign"),
+    public static final PayoutStatus AWAITING_COSIGN = new PayoutStatus("awaiting_cosign");
 
     /** {@code broadcasting} */
-    BROADCASTING("broadcasting"),
+    public static final PayoutStatus BROADCASTING = new PayoutStatus("broadcasting");
 
     /** {@code sent} */
-    SENT("sent"),
+    public static final PayoutStatus SENT = new PayoutStatus("sent");
 
     /** {@code confirmed} */
-    CONFIRMED("confirmed"),
+    public static final PayoutStatus CONFIRMED = new PayoutStatus("confirmed");
 
     /** {@code failed} */
-    FAILED("failed"),
+    public static final PayoutStatus FAILED = new PayoutStatus("failed");
 
     /** {@code cancelled} */
-    CANCELLED("cancelled"),
+    public static final PayoutStatus CANCELLED = new PayoutStatus("cancelled");
 
-    /** A value outside this snapshot's vocabulary. Serializes as an empty string. */
-    UNKNOWN("");
+    private static final Map<String, PayoutStatus> KNOWN = new LinkedHashMap<>();
+
+    /** Every value this snapshot knows, in the gateway's own order. */
+    public static final List<PayoutStatus> VALUES = List.of(PENDING, APPROVED, AWAITING_COSIGN, BROADCASTING,
+            SENT, CONFIRMED, FAILED, CANCELLED);
+
+    static {
+        for (PayoutStatus value : VALUES) KNOWN.put(value.wire, value);
+    }
 
     private final String wire;
 
-    PayoutStatus(String wire) {
+    private PayoutStatus(String wire) {
         this.wire = wire;
     }
 
     /** The exact string the API uses. */
     @JsonValue
+    @Override
     public String wire() {
         return wire;
     }
 
-    /** Decodes a wire value; anything unknown becomes {@link #UNKNOWN}. */
-    @JsonCreator
-    public static PayoutStatus from(String wire) {
-        if (wire == null) return null;
-        for (PayoutStatus value : values()) {
-            if (value.wire.equals(wire)) return value;
-        }
-        return UNKNOWN;
+    /** Whether this is one of the values this contract snapshot declares. */
+    @Override
+    public boolean isKnown() {
+        return KNOWN.get(wire) == this;
     }
 
+    /**
+     * Decodes a wire value. A value outside this snapshot's vocabulary is kept as it arrived,
+     * readable through {@link #wire()}.
+     *
+     * @param wire the string the API sent
+     * @return the interned constant, or a new instance carrying the raw value; null for null
+     */
+    @JsonCreator
+    public static PayoutStatus of(String wire) {
+        if (wire == null) return null;
+        PayoutStatus known = KNOWN.get(wire);
+        return known != null ? known : new PayoutStatus(wire);
+    }
+
+    /**
+     * Alias of {@link #of(String)}.
+     *
+     * @param wire the string the API sent
+     * @return the value
+     */
+    public static PayoutStatus from(String wire) {
+        return of(wire);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof PayoutStatus value && value.wire.equals(wire);
+    }
+
+    @Override
+    public int hashCode() {
+        return wire.hashCode();
+    }
+
+    /** The observed wire value — including one this snapshot does not know. */
     @Override
     public String toString() {
         return wire;

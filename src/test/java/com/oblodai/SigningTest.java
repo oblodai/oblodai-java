@@ -82,7 +82,7 @@ class SigningTest {
 
     @Test
     void signsTheBodyBytesSoTextAndBytesAgree() {
-        String body = "{\"additional_data\":\"тест\"}";
+        String body = "{\"additional_data\":\"café 日本語 🚀\"}";
         assertEquals(
                 Signing.signRequest("s", 5, "POST", "/v1/payment", null, body),
                 Signing.signRequest(
