@@ -48,4 +48,11 @@ public sealed interface WebhookEvent permits PaymentEvent, PayoutEvent, WalletEv
 
     /** The on-chain transaction id, empty when there is none yet. */
     String txid();
+
+    /**
+     * Present and true ONLY on rehearsal deliveries ({@code webhooks().test(...)}, sandbox); null on
+     * a live one. The body is signed exactly like a live delivery, so a handler must check this flag
+     * (or the {@code X-Webhook-Test} header) and never act on a test event as if money moved.
+     */
+    Boolean test();
 }

@@ -6,7 +6,7 @@ signs requests with the gateway's five-field recipe and is generated from its co
 ## 1.3.0 — 2026-08-25
 
 First release of the Java SDK, generated from and verified against contract snapshot
-`e09b495accae` (gateway commit `7b8eb828b9ec`).
+`e0271464937d` (gateway commit `bfca971cce71`).
 
 ### The API
 

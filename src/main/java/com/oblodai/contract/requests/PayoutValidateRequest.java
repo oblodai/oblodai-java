@@ -1,4 +1,4 @@
-// GENERATED FILE — do not edit. Source: contract/contract.json (core 7b8eb828b9ec).
+// GENERATED FILE — do not edit. Source: contract/contract.json (core bfca971cce71).
 // Regenerate with: codegen/run.sh
 package com.oblodai.contract.requests;
 

@@ -74,6 +74,15 @@ class WebhookVerifierTest {
                                 assertTrue(
                                         delivery.eventType().matches("^(invoice|payout|wallet)\\..+"),
                                         "event type vocabulary");
+                                // Rehearsals are signed like live deliveries and must be recognisable.
+                                assertEquals(
+                                        sample.path("body").path("test").asBoolean(false),
+                                        delivery.isTest(),
+                                        "rehearsal flag");
+                                assertEquals(
+                                        delivery.isTest(),
+                                        WebhookVerifier.isTestEvent(delivery.event()),
+                                        "the body alone says the same");
 
                                 // The same bytes under any other secret must not verify.
                                 assertThrows(
@@ -183,6 +192,42 @@ class WebhookVerifierTest {
                                 rotated,
                                 WebhookVerifier.options("unrelated").previousSecret("old").clock(() -> TS))
                         .uuid());
+    }
+
+    @Test
+    void flagsRehearsalDeliveriesFromEitherTheHeaderOrTheBody() {
+        WebhookHeaders live = headers(Signing.signWebhook("whsec", TS, BODY), null);
+        assertFalse(
+                WebhookVerifier.verifyDelivery(
+                                BODY.getBytes(StandardCharsets.UTF_8),
+                                live,
+                                WebhookVerifier.options("whsec").clock(() -> TS))
+                        .isTest(),
+                "a live delivery is not a rehearsal");
+
+        // The body carries it: recognised with or without the advisory header.
+        String testBody = BODY.replace("\"sequence\":7", "\"sequence\":7,\"test\":true");
+        WebhookDeliveryInfo fromBody =
+                WebhookVerifier.verifyDelivery(
+                        testBody.getBytes(StandardCharsets.UTF_8),
+                        headers(Signing.signWebhook("whsec", TS, testBody), null),
+                        WebhookVerifier.options("whsec").clock(() -> TS));
+        assertTrue(fromBody.isTest());
+        assertTrue(WebhookVerifier.isTestEvent(fromBody.event()));
+        assertEquals(Boolean.TRUE, fromBody.event().test());
+
+        // Only the header carries it: still a rehearsal, though the body alone cannot tell.
+        Map<String, String> withHeader = new LinkedHashMap<>();
+        withHeader.put("x-webhook-timestamp", String.valueOf(TS));
+        withHeader.put("x-webhook-signature", Signing.signWebhook("whsec", TS, BODY));
+        withHeader.put("X-Webhook-Test", "true");
+        WebhookDeliveryInfo fromHeader =
+                WebhookVerifier.verifyDelivery(
+                        BODY.getBytes(StandardCharsets.UTF_8),
+                        WebhookHeaders.of(withHeader),
+                        WebhookVerifier.options("whsec").clock(() -> TS));
+        assertTrue(fromHeader.isTest());
+        assertFalse(WebhookVerifier.isTestEvent(fromHeader.event()));
     }
 
     @Test

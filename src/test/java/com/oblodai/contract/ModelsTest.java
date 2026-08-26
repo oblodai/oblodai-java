@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.oblodai.core.Json;
 import com.oblodai.models.*;
 import com.oblodai.support.Contract;
+import com.oblodai.webhooks.WebhookVerifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -419,9 +420,16 @@ class ModelsTest {
                     };
             Set<String> onWire = fieldNames(body);
             Set<String> onModel = properties(model);
+            // `test` rides only on rehearsal deliveries, so it is required of neither side.
+            onWire.remove("test");
+            onModel.remove("test");
             assertEquals(onModel, onWire, "event body of " + body.path("type").asText());
-            assertNotNull(
-                    MAPPER.convertValue(body, WebhookEvent.class), "the union decodes by its type field");
+            WebhookEvent event = MAPPER.convertValue(body, WebhookEvent.class);
+            assertNotNull(event, "the union decodes by its type field");
+            assertEquals(
+                    body.path("test").asBoolean(false),
+                    WebhookVerifier.isTestEvent(event),
+                    "a rehearsal delivery is recognised as one");
         }
     }
 
