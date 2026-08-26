@@ -12,6 +12,7 @@ import com.oblodai.contract.requests.WebhooksDeliveriesRequest;
 import com.oblodai.contract.requests.WebhooksRequest;
 import com.oblodai.core.AsyncPager;
 import com.oblodai.core.Transport;
+import com.oblodai.errors.ConfigException;
 import com.oblodai.models.WebhookDelivery;
 import com.oblodai.models.WebhookEndpoint;
 import com.oblodai.models.WebhookSecretRotated;
@@ -88,7 +89,17 @@ public final class Webhooks extends Resource {
      * @return a lazy non-blocking pager over the deliveries
      */
     public AsyncPager<WebhookDelivery> deliveries() {
-        return deliveries(new WebhooksDeliveriesRequest(), RequestOptions.none());
+        return deliveries(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/webhooks/deliveries}.
+     *
+     * @param options per-call options
+     * @return a lazy non-blocking pager over the deliveries
+     */
+    public AsyncPager<WebhookDelivery> deliveries(RequestOptions options) {
+        return deliveries(new WebhooksDeliveriesRequest(), options);
     }
 
     /**
@@ -242,14 +253,17 @@ public final class Webhooks extends Resource {
     }
 
     private static RouteSpec routeFor(WebhookKind kind) {
-        if (kind == null) throw new IllegalArgumentException("webhook kind is required");
-        return switch (kind) {
-            case PAYMENT -> Routes.POST_V1_TEST_WEBHOOK_PAYMENT;
-            case PAYOUT -> Routes.POST_V1_TEST_WEBHOOK_PAYOUT;
-            case WALLET -> Routes.POST_V1_TEST_WEBHOOK_WALLET;
-            case UNKNOWN ->
-                    throw new IllegalArgumentException(
-                            "unknown webhook kind: no test route for it");
-        };
+        if (kind == null) {
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG, "a webhook kind is required", "kind");
+        }
+        if (WebhookKind.PAYMENT.equals(kind)) return Routes.POST_V1_TEST_WEBHOOK_PAYMENT;
+        if (WebhookKind.PAYOUT.equals(kind)) return Routes.POST_V1_TEST_WEBHOOK_PAYOUT;
+        if (WebhookKind.WALLET.equals(kind)) return Routes.POST_V1_TEST_WEBHOOK_WALLET;
+        // A kind the gateway grew after this snapshot: it has no rehearsal route here yet.
+        throw new ConfigException(
+                ConfigException.BAD_CONFIG,
+                "no rehearsal route for webhook kind \"" + kind.wire() + "\"",
+                "kind");
     }
 }

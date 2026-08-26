@@ -39,6 +39,13 @@ public final class Refunds extends Resource {
     /**
      * {@code POST /v1/payment/refund} — refund a paid invoice, fully or partially.
      *
+     * <p>Errors worth branching on: {@code refund.nothing_to_refund} — nothing arrived that could
+     * go back; {@code refund.exceeds_refundable} — the amount is more than what is still
+     * refundable; {@code refund.no_address} — there is no address to send it to;
+     * {@code refund.paid_internally} — the invoice was paid from inside the platform, so nothing
+     * goes back on-chain; {@code refund.dust} — the amount is under the network's dust floor;
+     * {@code payout.insufficient_funds} — a refund is a payout, and the balance is short.
+     *
      * @param request which invoice to refund, and how much
      * @param options per-call options
      * @return the refund, as the payout it is

@@ -3,6 +3,8 @@ package com.oblodai;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.oblodai.contract.PaymentStatus;
@@ -91,7 +93,25 @@ class ConfigTest {
         assertTrue(Money.isZero("0.000000"));
         assertFalse(Money.isPositive("0"));
         assertEquals("1.5", Money.of(Money.toBigDecimal("1.5")));
-        assertThrows(IllegalArgumentException.class, () -> Money.add("1e3", "1"));
+    }
+
+    @Test
+    void moneyHelpersRefuseAnythingThatIsNotAPlainDecimalAsAnSdkError() {
+        // Not an IllegalArgumentException: a caller catching OblodaiException must catch this too.
+        for (String notAnAmount :
+                new String[] {
+                    "1e3", "", " 25", "25 ", "25.", ".5", "--1", "1.2.3", "0x10", "25,00", "NaN", null
+                }) {
+            ConfigException failure =
+                    assertThrows(
+                            ConfigException.class,
+                            () -> Money.add(notAnAmount, "1"),
+                            "accepted " + notAnAmount);
+            assertEquals(ConfigException.BAD_AMOUNT, failure.code());
+        }
+        assertThrows(ConfigException.class, () -> Money.compare("1", "one"));
+        assertThrows(ConfigException.class, () -> Money.isZero("0".repeat(Money.MAX_LENGTH + 1)));
+        assertEquals(0, Money.compare("0".repeat(Money.MAX_LENGTH), "0"), "64 digits is still fine");
     }
 
     @Test
@@ -107,9 +127,42 @@ class ConfigTest {
     }
 
     @Test
-    void unknownVocabularyDecodesToUnknownInsteadOfFailing() {
-        assertEquals(PaymentStatus.PAID, PaymentStatus.from("paid"));
-        assertEquals(PaymentStatus.UNKNOWN, PaymentStatus.from("teleported"));
+    void anUnknownVocabularyValueIsKeptExactlyAsItArrived() {
+        assertEquals(PaymentStatus.PAID, PaymentStatus.of("paid"));
+        assertSame(PaymentStatus.PAID, PaymentStatus.of("paid"), "known values are interned");
+        assertTrue(PaymentStatus.PAID.isKnown());
         assertEquals("paid", PaymentStatus.PAID.wire());
+
+        // The value the gateway actually sent must survive: a client that cannot log or report it
+        // has nothing to take to support.
+        PaymentStatus grown = PaymentStatus.of("teleported");
+        assertFalse(grown.isKnown());
+        assertEquals("teleported", grown.wire());
+        assertEquals("teleported", grown.toString());
+        assertEquals(grown, PaymentStatus.of("teleported"), "equal by value");
+        assertFalse(PaymentStatus.PAID.equals(grown));
+        assertTrue(PaymentStatus.VALUES.contains(PaymentStatus.PAID));
+        assertFalse(PaymentStatus.VALUES.contains(grown));
+        assertNull(PaymentStatus.of(null));
+    }
+
+    @Test
+    void aStatusTheGatewayGrewSurvivesTheWholeDecode() {
+        MockHttpClient http =
+                new MockHttpClient().ok("{\"uuid\":\"u1\",\"status\":\"teleported\"}");
+        PaymentStatus status =
+                Oblodai.builder()
+                        .publicId("pk")
+                        .secret("s")
+                        .baseUrl("https://api.test")
+                        .httpClient(http)
+                        .environment(Map.of())
+                        .build()
+                        .payments()
+                        .info("u1")
+                        .status();
+
+        assertFalse(status.isKnown());
+        assertEquals("teleported", status.wire(), "the model keeps what the gateway said");
     }
 }

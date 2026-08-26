@@ -14,7 +14,6 @@ import java.net.http.HttpTimeoutException;
 import java.net.http.WebSocket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -51,14 +50,20 @@ public final class MockHttpClient extends HttpClient {
         final Map<String, String> headers = new LinkedHashMap<>();
         Throwable throwable;
         long delayMs;
+        URI finalUri;
 
         Scripted() {
             headers.put("content-type", "application/json");
         }
     }
 
-    private final Deque<Scripted> script = new ArrayDeque<>();
-    private final List<Recorded> calls = new ArrayList<>();
+    // Concurrent by design: the skew tests drive several calls through one client at once.
+    private final Deque<Scripted> script = new java.util.concurrent.ConcurrentLinkedDeque<>();
+    private final List<Recorded> calls = java.util.Collections.synchronizedList(new ArrayList<>());
+    private final List<CompletableFuture<?>> hanging =
+            java.util.Collections.synchronizedList(new ArrayList<>());
+    private volatile Long serverEpochSeconds;
+    private volatile boolean hangs;
 
     /** Every request the SDK made, in order. */
     public List<Recorded> calls() {
@@ -119,6 +124,46 @@ public final class MockHttpClient extends HttpClient {
     }
 
     /**
+     * Queues a success envelope that arrives from a different URL than the one requested — what an
+     * injected HTTP client that follows redirects produces.
+     *
+     * @param finalUri the URL the answer actually came from
+     * @param resultJson the {@code result} payload, as JSON text
+     * @return this
+     */
+    public MockHttpClient okFrom(String finalUri, String resultJson) {
+        Scripted next = new Scripted();
+        next.body = "{\"state\":0,\"result\":" + resultJson + "}";
+        next.finalUri = URI.create(finalUri);
+        script.add(next);
+        return this;
+    }
+
+    /**
+     * Answers every request the way a gateway whose clock reads {@code serverEpochSeconds} would:
+     * 401 {@code merchant.bad_signature} with a {@code Date} header while the request timestamp is
+     * outside the ±300 s window, and the scripted success once it is inside.
+     *
+     * @param serverEpochSeconds the gateway's idea of now
+     * @return this
+     */
+    public MockHttpClient withServerClock(long serverEpochSeconds) {
+        this.serverEpochSeconds = serverEpochSeconds;
+        return this;
+    }
+
+    /** Answers nothing at all, so a test can cancel the call. */
+    public MockHttpClient hangs() {
+        this.hangs = true;
+        return this;
+    }
+
+    /** Every exchange this client left pending, so a test can assert it was aborted. */
+    public List<CompletableFuture<?>> hanging() {
+        return hanging;
+    }
+
+    /**
      * Queues a transport failure.
      *
      * @param failure what the client throws instead of answering
@@ -158,6 +203,35 @@ public final class MockHttpClient extends HttpClient {
         request.headers().map().forEach((k, v) -> headers.put(k.toLowerCase(Locale.ROOT), v.get(0)));
         calls.add(new Recorded(request.uri(), request.method(), headers, bodyOf(request)));
 
+        if (hangs) {
+            CompletableFuture<HttpResponse<T>> pending = new CompletableFuture<>();
+            hanging.add(pending);
+            return pending;
+        }
+
+        Long serverNow = serverEpochSeconds;
+        if (serverNow != null) {
+            String stamp = headers.get("x-timestamp");
+            long signedAt = stamp == null ? 0 : Long.parseLong(stamp);
+            if (Math.abs(serverNow - signedAt) > 300) {
+                Map<String, String> answer = new LinkedHashMap<>();
+                answer.put("content-type", "application/json");
+                answer.put(
+                        "date",
+                        java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(
+                                java.time.Instant.ofEpochSecond(serverNow)
+                                        .atZone(java.time.ZoneOffset.UTC)));
+                return CompletableFuture.completedFuture(
+                        (HttpResponse<T>)
+                                new StubResponse(
+                                        request,
+                                        401,
+                                        "{\"error\":{\"code\":\"merchant.bad_signature\",\"retryable\":false}}",
+                                        answer,
+                                        null));
+            }
+        }
+
         Scripted next = script.poll();
         if (next == null) {
             return CompletableFuture.failedFuture(
@@ -167,7 +241,8 @@ public final class MockHttpClient extends HttpClient {
 
         CompletableFuture<HttpResponse<T>> answer =
                 CompletableFuture.completedFuture(
-                        (HttpResponse<T>) new Stub(request, next.status, next.body, next.headers));
+                        (HttpResponse<T>)
+                                new StubResponse(request, next.status, next.body, next.headers, next.finalUri));
         if (next.delayMs > 0) {
             // The real client fails the future with HttpTimeoutException; a delayed answer that
             // outlives the request timeout must do the same.
@@ -235,64 +310,6 @@ public final class MockHttpClient extends HttpClient {
                             return sb.toString();
                         })
                 .orElse(null);
-    }
-
-    /** A minimal {@link HttpResponse} over the scripted body. */
-    private static final class Stub implements HttpResponse<byte[]> {
-
-        private final HttpRequest request;
-        private final int status;
-        private final String text;
-        private final Map<String, String> headerMap;
-
-        Stub(HttpRequest request, int status, String text, Map<String, String> headerMap) {
-            this.request = request;
-            this.status = status;
-            this.text = text;
-            this.headerMap = headerMap;
-        }
-
-        @Override
-        public int statusCode() {
-            return status;
-        }
-
-        @Override
-        public HttpRequest request() {
-            return request;
-        }
-
-        @Override
-        public Optional<HttpResponse<byte[]>> previousResponse() {
-            return Optional.empty();
-        }
-
-        @Override
-        public HttpHeaders headers() {
-            Map<String, List<String>> multi = new LinkedHashMap<>();
-            headerMap.forEach((k, v) -> multi.put(k, List.of(v)));
-            return HttpHeaders.of(multi, (a, b) -> true);
-        }
-
-        @Override
-        public byte[] body() {
-            return text.getBytes(StandardCharsets.UTF_8);
-        }
-
-        @Override
-        public Optional<javax.net.ssl.SSLSession> sslSession() {
-            return Optional.empty();
-        }
-
-        @Override
-        public URI uri() {
-            return request.uri();
-        }
-
-        @Override
-        public HttpClient.Version version() {
-            return HttpClient.Version.HTTP_1_1;
-        }
     }
 
     // --- the rest of the HttpClient surface, unused by the SDK ----------------------------------

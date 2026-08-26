@@ -52,7 +52,17 @@ public final class Catalog extends Resource {
      * @return a lazy non-blocking pager over the rates
      */
     public AsyncPager<ExchangeRate> exchangeRates() {
-        return exchangeRates(new ExchangeRateListRequest(), RequestOptions.none());
+        return exchangeRates(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/exchange-rate/list}.
+     *
+     * @param options per-call options
+     * @return a lazy non-blocking pager over the rates
+     */
+    public AsyncPager<ExchangeRate> exchangeRates(RequestOptions options) {
+        return exchangeRates(new ExchangeRateListRequest(), options);
     }
 
     /**

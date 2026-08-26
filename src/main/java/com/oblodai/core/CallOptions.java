@@ -15,6 +15,7 @@ public final class CallOptions {
     private Map<String, Object> query;
     private Map<String, String> pathParams;
     private String idempotencyKey;
+    private Map<String, String> headers = Map.of();
     private boolean preferPayoutKey;
     private Long timeoutMs;
     private Long deadlineMs;
@@ -32,6 +33,7 @@ public final class CallOptions {
         CallOptions out = new CallOptions();
         if (options != null) {
             out.idempotencyKey = options.idempotencyKey();
+            out.headers = options.headers();
             out.preferPayoutKey = options.isPreferPayoutKey();
             out.timeoutMs = options.timeoutMs();
             out.deadlineMs = options.deadlineMs();
@@ -99,6 +101,11 @@ public final class CallOptions {
     /** Path parameters, or null. */
     public Map<String, String> pathParams() {
         return pathParams;
+    }
+
+    /** Extra headers for this call, never null. */
+    public Map<String, String> headers() {
+        return headers;
     }
 
     /** The caller's idempotency key, or null. */

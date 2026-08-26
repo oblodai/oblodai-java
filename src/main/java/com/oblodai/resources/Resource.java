@@ -11,6 +11,8 @@ import com.oblodai.core.Page;
 import com.oblodai.core.Pager;
 import com.oblodai.core.RawResponse;
 import com.oblodai.core.Transport;
+import com.oblodai.errors.ConfigException;
+import com.oblodai.errors.ContractException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +39,39 @@ public abstract class Resource {
     }
 
     /** A plain {@code {items}} answer — a list the gateway caps rather than paginates. */
-    private record PlainList<T>(@JsonProperty("items") List<T> items) {}
+    private record PlainList<T>(@JsonProperty("items") List<T> items) {
+
+        /** Whether {@code items} was there at all, as opposed to an empty array. */
+        boolean present() {
+            return items != null;
+        }
+    }
+
+    /**
+     * A list route must answer with the list envelope. Without this check a body that lost its
+     * {@code items} — a proxy's error page with a 200, a route that changed shape — decodes into an
+     * empty page, and "nothing happened yet" is indistinguishable from "the answer was unreadable".
+     */
+    private static <T> Page<T> assertListEnvelope(RouteSpec route, Page<T> page) {
+        if (page == null || !page.isListEnvelope()) {
+            throw new ContractException(
+                    route.method()
+                            + " "
+                            + route.path()
+                            + ": expected a {items, paginate} list envelope",
+                    200,
+                    null);
+        }
+        return page;
+    }
+
+    private static <T> List<T> assertItems(RouteSpec route, PlainList<T> list) {
+        if (list == null || !list.present()) {
+            throw new ContractException(
+                    route.method() + " " + route.path() + ": expected an {items} list envelope", 200, null);
+        }
+        return list.items();
+    }
 
     // --- blocking -------------------------------------------------------------------------------
 
@@ -79,7 +113,7 @@ public abstract class Resource {
                         route,
                         CallOptions.from(options).body(body),
                         parametric(PlainList.class, item));
-        return list.items() == null ? List.of() : list.items();
+        return assertItems(route, list);
     }
 
     /**
@@ -94,12 +128,16 @@ public abstract class Resource {
      */
     protected <T> Pager<T> pager(
             RouteSpec route, Object params, RequestOptions options, Class<T> item) {
+        assertNoIdempotencyKey(route, options);
         Map<String, Object> base = toMap(params);
         Integer limit = intOf(base.remove("limit"));
         Integer offset = intOf(base.remove("offset"));
         JavaType pageType = parametric(Page.class, item);
         return new Pager<>(
-                (l, o) -> transport.call(route, pageOptions(route, base, options, l, o), pageType),
+                (l, o) ->
+                        assertListEnvelope(
+                                route,
+                                transport.call(route, pageOptions(route, base, options, l, o), pageType)),
                 limit,
                 offset);
     }
@@ -155,7 +193,7 @@ public abstract class Resource {
                         route,
                         CallOptions.from(options).body(body),
                         parametric(PlainList.class, item));
-        return future.thenApply(list -> list.items() == null ? List.of() : list.items());
+        return future.thenApply(list -> assertItems(route, list));
     }
 
     /**
@@ -168,12 +206,16 @@ public abstract class Resource {
      */
     protected <T> AsyncPager<T> pagerAsync(
             RouteSpec route, Object params, RequestOptions options, Class<T> item) {
+        assertNoIdempotencyKey(route, options);
         Map<String, Object> base = toMap(params);
         Integer limit = intOf(base.remove("limit"));
         Integer offset = intOf(base.remove("offset"));
         JavaType pageType = parametric(Page.class, item);
         return new AsyncPager<>(
-                (l, o) -> transport.callAsync(route, pageOptions(route, base, options, l, o), pageType),
+                (l, o) ->
+                        transport
+                                .<Page<T>>callAsync(route, pageOptions(route, base, options, l, o), pageType)
+                                .thenApply(page -> assertListEnvelope(route, page)),
                 limit,
                 offset);
     }
@@ -202,7 +244,7 @@ public abstract class Resource {
                         route,
                         CallOptions.from(options).body(body),
                         transport.mapper().getTypeFactory().constructParametricType(PlainList.class, item));
-        return list.items() == null ? List.of() : list.items();
+        return assertItems(route, list);
     }
 
     /**
@@ -220,7 +262,7 @@ public abstract class Resource {
                         route,
                         CallOptions.from(options).body(body),
                         transport.mapper().getTypeFactory().constructParametricType(PlainList.class, item));
-        return future.thenApply(list -> list.items() == null ? List.of() : list.items());
+        return future.thenApply(list -> assertItems(route, list));
     }
 
     /**
@@ -271,9 +313,36 @@ public abstract class Resource {
             map.forEach((k, v) -> out.put(String.valueOf(k), v));
             return out;
         }
-        @SuppressWarnings("unchecked")
-        Map<String, Object> converted = transport.mapper().convertValue(request, Map.class);
-        return new LinkedHashMap<>(converted);
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> converted = transport.mapper().convertValue(request, Map.class);
+            return new LinkedHashMap<>(converted);
+        } catch (IllegalArgumentException notSerializable) {
+            // The caller handed a request object the mapper cannot write. Nothing was sent, so this
+            // is a configuration failure, not an API one.
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG,
+                    "request parameters cannot be serialized: " + notSerializable.getMessage(),
+                    null);
+        }
+    }
+
+    /**
+     * A caller key on a list route is refused, not quietly dropped. The gateway does not deduplicate
+     * these routes, so the header would be ignored — and a caller who passed one would go on
+     * believing a re-send was deduplicated when it was not. Refusing at the point the pager is built
+     * says so before any page is fetched.
+     */
+    private static void assertNoIdempotencyKey(RouteSpec route, RequestOptions options) {
+        if (options == null || options.idempotencyKey() == null) return;
+        throw new ConfigException(
+                ConfigException.IDEMPOTENCY_UNSUPPORTED,
+                route.method()
+                        + " "
+                        + route.path()
+                        + " does not deduplicate by Idempotency-Key; remove idempotencyKey from this"
+                        + " call",
+                "idempotencyKey");
     }
 
     private CallOptions pageOptions(

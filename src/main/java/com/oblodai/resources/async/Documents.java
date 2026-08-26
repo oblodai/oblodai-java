@@ -3,13 +3,9 @@ package com.oblodai.resources.async;
 import com.oblodai.RequestOptions;
 import com.oblodai.contract.RouteSpec;
 import com.oblodai.contract.Routes;
-import com.oblodai.contract.requests.DocumentsJobsInfoRequest;
-import com.oblodai.contract.requests.DocumentsJobsRequest;
 import com.oblodai.core.FileResult;
 import com.oblodai.core.Transport;
-import com.oblodai.models.DocumentJob;
 import com.oblodai.resources.DocumentQuery;
-import com.oblodai.resources.Resource;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -22,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * <p>This is the non-blocking form of {@link com.oblodai.resources.Documents}: the same methods,
  * returning {@link CompletableFuture}.
  */
-public final class Documents extends Resource {
+public final class Documents extends DocumentsJobRoutes {
 
     /**
      * @param transport the engine to call through
@@ -32,82 +28,22 @@ public final class Documents extends Resource {
     }
 
     /**
-     * {@code POST /v1/documents/jobs} — queues a large report; poll {@code jobInfo}, then fetch
-     * {@code jobFile}.
-     *
-     * @param request which report, in which language, format and period
-     * @return a future of the queued job
-     */
-    public CompletableFuture<DocumentJob> createJob(DocumentsJobsRequest request) {
-        return createJob(request, RequestOptions.none());
-    }
-
-    /**
-     * {@code POST /v1/documents/jobs}.
-     *
-     * @param request which report, in which language, format and period
-     * @param options per-call options
-     * @return a future of the queued job
-     */
-    public CompletableFuture<DocumentJob> createJob(
-            DocumentsJobsRequest request, RequestOptions options) {
-        return callAsync(Routes.POST_V1_DOCUMENTS_JOBS, request, options, DocumentJob.class);
-    }
-
-    /**
-     * {@code POST /v1/documents/jobs/info} — where a queued report has got to.
-     *
-     * @param jobId the job's id
-     * @return a future of the job and its status
-     */
-    public CompletableFuture<DocumentJob> jobInfo(String jobId) {
-        return jobInfo(jobId, RequestOptions.none());
-    }
-
-    /**
-     * {@code POST /v1/documents/jobs/info}.
-     *
-     * @param jobId the job's id
-     * @param options per-call options
-     * @return a future of the job and its status
-     */
-    public CompletableFuture<DocumentJob> jobInfo(String jobId, RequestOptions options) {
-        return callAsync(
-                Routes.POST_V1_DOCUMENTS_JOBS_INFO,
-                new DocumentsJobsInfoRequest().jobId(jobId),
-                options,
-                DocumentJob.class);
-    }
-
-    /**
-     * {@code GET /v1/documents/jobs/file} — the finished job's bytes.
-     *
-     * @param jobId the job's id
-     * @return a future of the rendered document
-     */
-    public CompletableFuture<FileResult> jobFile(String jobId) {
-        return jobFile(jobId, RequestOptions.none());
-    }
-
-    /**
-     * {@code GET /v1/documents/jobs/file}.
-     *
-     * @param jobId the job's id
-     * @param options per-call options
-     * @return a future of the rendered document
-     */
-    public CompletableFuture<FileResult> jobFile(String jobId, RequestOptions options) {
-        return fileAsync(
-                Routes.GET_V1_DOCUMENTS_JOBS_FILE, options(options).query("job_id", jobId));
-    }
-
-    /**
      * {@code GET /v1/documents/statement} — account statement for a period (PDF or CSV).
      *
      * @return a future of the rendered document
      */
     public CompletableFuture<FileResult> statement() {
-        return statement(new DocumentQuery());
+        return statement(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/statement}.
+     *
+     * @param options per-call options
+     * @return a future of the rendered document
+     */
+    public CompletableFuture<FileResult> statement(RequestOptions options) {
+        return statement(new DocumentQuery(), options);
     }
 
     /**
@@ -137,7 +73,17 @@ public final class Documents extends Resource {
      * @return a future of the rendered document
      */
     public CompletableFuture<FileResult> balanceCertificate() {
-        return balanceCertificate(new DocumentQuery());
+        return balanceCertificate(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/balance}.
+     *
+     * @param options per-call options
+     * @return a future of the rendered document
+     */
+    public CompletableFuture<FileResult> balanceCertificate(RequestOptions options) {
+        return balanceCertificate(new DocumentQuery(), options);
     }
 
     /**
@@ -168,7 +114,17 @@ public final class Documents extends Resource {
      * @return a future of the rendered document
      */
     public CompletableFuture<FileResult> feeSchedule() {
-        return feeSchedule(new DocumentQuery());
+        return feeSchedule(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/fees}.
+     *
+     * @param options per-call options
+     * @return a future of the rendered document
+     */
+    public CompletableFuture<FileResult> feeSchedule(RequestOptions options) {
+        return feeSchedule(new DocumentQuery(), options);
     }
 
     /**
@@ -198,7 +154,17 @@ public final class Documents extends Resource {
      * @return a future of the rendered document
      */
     public CompletableFuture<FileResult> ledger() {
-        return ledger(new DocumentQuery());
+        return ledger(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/ledger}.
+     *
+     * @param options per-call options
+     * @return a future of the rendered document
+     */
+    public CompletableFuture<FileResult> ledger(RequestOptions options) {
+        return ledger(new DocumentQuery(), options);
     }
 
     /**
@@ -228,7 +194,17 @@ public final class Documents extends Resource {
      * @return a future of the rendered document
      */
     public CompletableFuture<FileResult> referralsReport() {
-        return referralsReport(new DocumentQuery());
+        return referralsReport(RequestOptions.none());
+    }
+
+    /**
+     * {@code GET /v1/documents/referrals}.
+     *
+     * @param options per-call options
+     * @return a future of the rendered document
+     */
+    public CompletableFuture<FileResult> referralsReport(RequestOptions options) {
+        return referralsReport(new DocumentQuery(), options);
     }
 
     /**

@@ -43,6 +43,12 @@ public final class PaymentLinks extends Resource {
     /**
      * {@code POST /v1/payment/link}.
      *
+     * <p>Errors worth branching on: {@code paylink.bad_mode} — the mode is not one the gateway
+     * knows; {@code paylink.bad_amount} — the fixed amount is not a valid price;
+     * {@code paylink.bad_range} — the minimum and maximum do not make a range;
+     * {@code paylink.order_id_too_long} — the {@code order_id} is over the length cap;
+     * {@code paylink.expires_in_too_large} — the lifetime is beyond the cap.
+     *
      * @param request the link to create
      * @param options per-call options
      * @return the link, with the URL to hand to payers
@@ -59,7 +65,18 @@ public final class PaymentLinks extends Resource {
      * @return the link and its first page of invoices
      */
     public PaymentLink info(String linkId) {
-        return info(new PaymentLinkInfoRequest().linkId(linkId), RequestOptions.none());
+        return info(linkId, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payment/link/info}.
+     *
+     * @param linkId the link's id
+     * @param options per-call options
+     * @return the link and its first page of invoices
+     */
+    public PaymentLink info(String linkId, RequestOptions options) {
+        return info(new PaymentLinkInfoRequest().linkId(linkId), options);
     }
 
     /**
@@ -91,7 +108,18 @@ public final class PaymentLinks extends Resource {
      * @return the link and its first page of invoices
      */
     public PaymentLink get(String linkId) {
-        return info(linkId);
+        return get(linkId, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payment/link/info} — alias of {@link #info(String, RequestOptions)}.
+     *
+     * @param linkId the link's id
+     * @param options per-call options
+     * @return the link and its first page of invoices
+     */
+    public PaymentLink get(String linkId, RequestOptions options) {
+        return info(linkId, options);
     }
 
     /**
@@ -101,7 +129,19 @@ public final class PaymentLinks extends Resource {
      * @return the link and the requested page of invoices
      */
     public PaymentLink get(PaymentLinkInfoRequest request) {
-        return info(request);
+        return get(request, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payment/link/info} — alias of
+     * {@link #info(PaymentLinkInfoRequest, RequestOptions)}.
+     *
+     * @param request which link to read, and which page of its invoices
+     * @param options per-call options
+     * @return the link and the requested page of invoices
+     */
+    public PaymentLink get(PaymentLinkInfoRequest request, RequestOptions options) {
+        return info(request, options);
     }
 
     /**
@@ -110,7 +150,17 @@ public final class PaymentLinks extends Resource {
      * @return a lazy pager over the merchant's links
      */
     public Pager<PaymentLink> list() {
-        return list(new PaymentLinkListRequest(), RequestOptions.none());
+        return list(RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payment/link/list}.
+     *
+     * @param options per-call options
+     * @return a lazy pager over the merchant's links
+     */
+    public Pager<PaymentLink> list(RequestOptions options) {
+        return list(new PaymentLinkListRequest(), options);
     }
 
     /**
@@ -143,9 +193,19 @@ public final class PaymentLinks extends Resource {
      * @return the link's new state
      */
     public PaymentLinkToggled toggle(String linkId, boolean active) {
-        return toggle(
-                new PaymentLinkToggleRequest().linkId(linkId).active(active),
-                RequestOptions.none());
+        return toggle(linkId, active, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/payment/link/toggle}.
+     *
+     * @param linkId the link's id
+     * @param active true to enable the link, false to disable it
+     * @param options per-call options
+     * @return the link's new state
+     */
+    public PaymentLinkToggled toggle(String linkId, boolean active, RequestOptions options) {
+        return toggle(new PaymentLinkToggleRequest().linkId(linkId).active(active), options);
     }
 
     /**
@@ -204,7 +264,18 @@ public final class PaymentLinks extends Resource {
      * @return the invoice, as the payer sees it
      */
     public PublicPayment checkout(String linkId) {
-        return checkout(linkId, new LinkIdCheckoutRequest(), RequestOptions.none());
+        return checkout(linkId, RequestOptions.none());
+    }
+
+    /**
+     * {@code POST /v1/link/{id}/checkout}.
+     *
+     * @param linkId the link's id
+     * @param options per-call options
+     * @return the invoice, as the payer sees it
+     */
+    public PublicPayment checkout(String linkId, RequestOptions options) {
+        return checkout(linkId, new LinkIdCheckoutRequest(), options);
     }
 
     /**
