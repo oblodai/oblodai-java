@@ -112,17 +112,17 @@ public final class Oblodai implements AutoCloseable {
         return payments;
     }
 
-    /** Refunds and the resolution of underpaid invoices. Payout key. */
+    /** Refunds and the resolution of underpaid invoices. */
     public Refunds refunds() {
         return refunds;
     }
 
-    /** Outgoing transfers to external addresses. Payout key. */
+    /** Outgoing transfers to external addresses. */
     public Payouts payouts() {
         return payouts;
     }
 
-    /** Payout links (cheques): funds reserved now, claimed later. Payout key. */
+    /** Payout links (cheques): funds reserved now, claimed later. */
     public PayoutLinks payoutLinks() {
         return payoutLinks;
     }
@@ -137,7 +137,7 @@ public final class Oblodai implements AutoCloseable {
         return batches;
     }
 
-    /** Internal, instant, fee-free moves between platform balances. Payout key. */
+    /** Internal, instant, fee-free moves between platform balances. */
     public Transfers transfers() {
         return transfers;
     }
@@ -157,7 +157,7 @@ public final class Oblodai implements AutoCloseable {
         return documents;
     }
 
-    /** Revenue splits: a share of every payment forwarded to a partner. Payout key. */
+    /** Revenue splits: a share of every payment forwarded to a partner. */
     public Splits splits() {
         return splits;
     }
@@ -212,8 +212,7 @@ public final class Oblodai implements AutoCloseable {
      *
      * <table border="1">
      *   <caption>Environment fallbacks</caption>
-     *   <tr><td>{@code OBLODAI_PUBLIC_ID} / {@code OBLODAI_SECRET}</td><td>payment key pair</td></tr>
-     *   <tr><td>{@code OBLODAI_PAYOUT_PUBLIC_ID} / {@code OBLODAI_PAYOUT_SECRET}</td><td>payout key pair</td></tr>
+     *   <tr><td>{@code OBLODAI_PUBLIC_ID} / {@code OBLODAI_SECRET}</td><td>the API key pair</td></tr>
      *   <tr><td>{@code OBLODAI_BASE_URL}</td><td>API origin</td></tr>
      *   <tr><td>{@code OBLODAI_ADMIN_TOKEN}</td><td>admin token of a self-hosted gateway</td></tr>
      *   <tr><td>{@code OBLODAI_ALLOW_INSECURE=1}</td><td>permit a plain-http base URL</td></tr>
@@ -227,7 +226,7 @@ public final class Oblodai implements AutoCloseable {
         Builder() {}
 
         /**
-         * @param publicId public id of the payment key ({@code X-Public-Id})
+         * @param publicId public id of the merchant's API key ({@code X-Public-Id})
          * @return this
          */
         public Builder publicId(String publicId) {
@@ -236,28 +235,11 @@ public final class Oblodai implements AutoCloseable {
         }
 
         /**
-         * @param secret secret of the payment key; used to sign, never sent
+         * @param secret secret of the merchant's API key; used to sign, never sent
          * @return this
          */
         public Builder secret(String secret) {
             settings.secret = secret;
-            return this;
-        }
-
-        /**
-         * The dedicated payout key. Live merchants get two key kinds, and money-out routes
-         * ({@code payouts}, {@code refunds}, {@code payoutLinks}, {@code transfers}, {@code splits},
-         * auto-withdraw, the IP allow-list, {@code webhooks().rotateSecret()}, sandbox faucet and
-         * reset) need this one; a call with the wrong kind is a 403 {@code merchant.wrong_key_kind}.
-         * Sandbox keys are both kinds at once, so a sandbox integration can leave this unset.
-         *
-         * @param publicId public id of the payout key
-         * @param secret secret of the payout key
-         * @return this
-         */
-        public Builder payoutKey(String publicId, String secret) {
-            settings.payoutPublicId = publicId;
-            settings.payoutSecret = secret;
             return this;
         }
 

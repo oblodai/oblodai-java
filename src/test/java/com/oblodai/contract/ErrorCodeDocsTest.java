@@ -40,6 +40,17 @@ class ErrorCodeDocsTest {
     /** Codes the SDK raises itself; they are not in the gateway's catalogue by design. */
     private static final Pattern SDK_OWN = Pattern.compile("^(sdk|transport|webhook)\\.");
 
+    /**
+     * Codes the current gateway cannot emit but a merchant may still meet, and which the
+     * documentation therefore names on purpose. {@code merchant.wrong_key_kind} is the one: a
+     * merchant still holding a legacy split pair ({@code oblodai_pk_…} / {@code oblodai_wk_…}) sees
+     * it, and the documentation says so — once, as history, not as something to build against.
+     */
+    private static final Set<String> LEGACY = Set.of("merchant.wrong_key_kind");
+
+    /** How far around a legacy mention the test looks for the word that frames it as history. */
+    private static final int LEGACY_CONTEXT = 600;
+
     /** Every source file whose documentation a caller reads. */
     private static List<Path> sources() {
         try (Stream<Path> files = Files.walk(Path.of("src/main/java"))) {
@@ -98,6 +109,7 @@ class ErrorCodeDocsTest {
                 String token = matcher.group(1);
                 if (SDK_OWN.matcher(token).find()) continue;
                 if (events.contains(token)) continue;
+                if (LEGACY.contains(token)) continue;
                 if (!families.contains(token.substring(0, token.indexOf('.')))) continue;
                 if (!ErrorCodes.isKnown(token)) {
                     unknown.add(source.getFileName() + ": " + token);
@@ -106,6 +118,42 @@ class ErrorCodeDocsTest {
         }
 
         assertEquals(List.of(), unknown, "these documented codes are not in the contract catalogue");
+    }
+
+    @Test
+    void theLegacyCodeIsNamedOncePerDocumentAndAlwaysAsHistory() {
+        // The split-key error left the catalogue with the split keys. Where the documentation still
+        // names it, it names it once and says plainly that it belongs to the old pair — a reader
+        // must never come away thinking it is a case to write a branch for.
+        for (String code : LEGACY) {
+            assertFalse(ErrorCodes.isKnown(code), code + " is back in the catalogue; drop the exemption");
+        }
+        List<String> wrong = new ArrayList<>();
+        List<Path> documents = new ArrayList<>(sources());
+        documents.addAll(markdown());
+        for (Path document : documents) {
+            String text = read(document);
+            for (String code : LEGACY) {
+                List<Integer> at = new ArrayList<>();
+                for (int from = text.indexOf(code); from >= 0; from = text.indexOf(code, from + 1)) {
+                    at.add(from);
+                }
+                if (at.isEmpty()) continue;
+                if (at.size() > 1) {
+                    wrong.add(document.getFileName() + ": " + code + " named " + at.size() + " times");
+                    continue;
+                }
+                String around =
+                        text.substring(
+                                        Math.max(0, at.get(0) - LEGACY_CONTEXT),
+                                        Math.min(text.length(), at.get(0) + LEGACY_CONTEXT))
+                                .toLowerCase(java.util.Locale.ROOT);
+                if (!around.contains("legacy") && !around.contains("устаревш")) {
+                    wrong.add(document.getFileName() + ": " + code + " is not marked as legacy");
+                }
+            }
+        }
+        assertEquals(List.of(), wrong, "the legacy split-key error is mishandled in these documents");
     }
 
     @Test

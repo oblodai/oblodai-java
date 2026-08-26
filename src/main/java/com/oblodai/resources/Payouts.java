@@ -18,7 +18,7 @@ import com.oblodai.models.Payout;
 import java.util.List;
 
 /**
- * Outgoing transfers to external addresses. Every route here needs the payout key.
+ * Outgoing transfers to external addresses.
  *
  * <p>Creating a payout is idempotent by {@code order_id} and by {@code Idempotency-Key}, which the
  * SDK generates when you do not. The errors worth handling by name are

@@ -168,6 +168,29 @@ public final class Codegen {
         return flag;
     }
 
+    /**
+     * The route's gate, as the {@link com.oblodai.contract.RouteAuth} constant it maps to. The
+     * gateway declares exactly three: {@code public} (unsigned), {@code key} (signed with the
+     * merchant's API key) and {@code onboard} (admin token). Anything else is a contract the SDK
+     * does not know how to authenticate, and generating a plausible-looking constant for it would
+     * mean signing a money route with the wrong credential — so it stops the run instead.
+     */
+    private static String authConstant(Map<String, Object> r) {
+        String auth = Json.str(r.get("auth"));
+        if (!List.of("public", "key", "onboard").contains(auth)) {
+            throw new IllegalStateException(
+                    "route "
+                            + Json.str(r.get("method"))
+                            + " "
+                            + Json.str(r.get("path"))
+                            + " declares auth \""
+                            + auth
+                            + "\"; this SDK knows only public, key and onboard — re-export"
+                            + " contract/contract.json from a core that uses that vocabulary");
+        }
+        return auth.toUpperCase();
+    }
+
     private static String constantName(Map<String, Object> r) {
         String path = Json.str(r.get("path")).replaceAll("[{}]", "").replaceAll("[^A-Za-z0-9]+", "_");
         return (Json.str(r.get("method")) + path).toUpperCase().replaceAll("_+", "_");
@@ -191,7 +214,7 @@ public final class Codegen {
                     .append("\", \"")
                     .append(Json.str(r.get("path")))
                     .append("\", RouteAuth.")
-                    .append(Json.str(r.get("auth")).toUpperCase())
+                    .append(authConstant(r))
                     .append(", ")
                     .append(r.get("idempotent"))
                     .append(", ")

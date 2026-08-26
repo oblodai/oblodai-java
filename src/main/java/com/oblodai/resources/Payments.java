@@ -15,7 +15,7 @@ import com.oblodai.models.Payment;
 import com.oblodai.models.ServiceMethod;
 
 /**
- * Invoices: create, look up, cancel, list, and the payer-facing checkout endpoints. Payment key.
+ * Invoices: create, look up, cancel, list, and the payer-facing checkout endpoints.
  *
  * <p>Lookups take either the invoice's {@code uuid} or your {@code order_id}: pass the uuid as a
  * string, or a request object carrying whichever you have.

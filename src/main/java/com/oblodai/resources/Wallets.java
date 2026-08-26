@@ -105,7 +105,7 @@ public final class Wallets extends Resource {
 
     /**
      * {@code POST /v1/wallet/blocked-address-refund} — send funds that landed on a blocked address
-     * back where they came from. Requires the payout key.
+     * back where they came from.
      *
      * @param request which deposit to send back, and to which address
      * @return the refund, as the payout it is

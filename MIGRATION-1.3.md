@@ -12,6 +12,33 @@ for code you already have.
 </dependency>
 ```
 
+## One API key
+
+A merchant has one API key, and it signs every signed route — invoices and payouts, settings and
+documents alike. A 1.2 client that configured two pairs configures one now:
+
+```java
+Oblodai oblodai = Oblodai.builder()
+        .publicId(System.getenv("OBLODAI_PUBLIC_ID"))
+        .secret(System.getenv("OBLODAI_SECRET"))
+        .build();
+```
+
+Gone with the split: `payoutKey(publicId, secret)` on the builder, `RequestOptions.preferPayoutKey(…)`
+per call, the `OBLODAI_PAYOUT_PUBLIC_ID` / `OBLODAI_PAYOUT_SECRET` environment variables, and the
+retry-under-the-other-key fallback `batches().info(...)` used to make. The environment is exactly six
+names: `OBLODAI_PUBLIC_ID`, `OBLODAI_SECRET`, `OBLODAI_ADMIN_TOKEN`, `OBLODAI_BASE_URL`,
+`OBLODAI_LOG`, `OBLODAI_ALLOW_INSECURE`.
+
+Onboarding answers with `api_key` only, so `MerchantOnboarded` and `SandboxStore` carry one
+`ApiKeyPair` (and `ApiKeyPair` has no `kind`). The route registry's `auth` is `public`, `key` or
+`onboard`.
+
+`merchant.wrong_key_kind` has left the gateway's catalogue with the split keys. You can still meet it
+if — and only if — you are a merchant onboarded before this change who kept a legacy `oblodai_pk_…` /
+`oblodai_wk_…` pair; replace it with an API key in the dashboard, because this SDK carries one pair
+and does not switch between kinds.
+
 ## The signature is five fields
 
 Requests are signed over

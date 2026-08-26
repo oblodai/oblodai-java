@@ -14,7 +14,7 @@ import com.oblodai.models.PayoutValidation;
  * response can never become a second payout.
  *
  * <pre>
- * OBLODAI_PUBLIC_ID=… OBLODAI_SECRET=… OBLODAI_PAYOUT_PUBLIC_ID=… OBLODAI_PAYOUT_SECRET=… \
+ * OBLODAI_PUBLIC_ID=… OBLODAI_SECRET=… \
  *   mvn -q exec:java -Dexec.classpathScope=test \
  *       -Dexec.mainClass=com.oblodai.examples.SendPayout
  * </pre>
@@ -79,8 +79,8 @@ public final class SendPayout {
                                 "not enough funds yet; retry in "
                                         + (e.retryAfter() == null ? 60 : e.retryAfter())
                                         + "s");
-                case "merchant.wrong_key_kind" ->
-                        System.err.println("this route needs the payout key pair, not the payment one");
+                case "payout.bad_address" ->
+                        System.err.println("that address is not valid on this network");
                 default -> System.err.println("refused: " + e.code() + " (" + e.getMessage() + ")");
             }
         }

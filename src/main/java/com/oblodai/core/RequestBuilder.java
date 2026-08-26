@@ -73,7 +73,7 @@ public final class RequestBuilder {
      * @param pathParams values for the {@code {name}} segments of the route path
      * @param query query parameters; null and empty values are dropped
      * @param body already-serialized body bytes
-     * @param credentials the key pair to sign with, or null on public/onboard routes
+     * @param credentials the merchant's API key pair, or null on public/onboard routes
      * @param idempotencyKey the {@code Idempotency-Key} to send, or null
      * @param ts unix seconds to sign with
      * @param userAgent the SDK's user agent
@@ -116,19 +116,15 @@ public final class RequestBuilder {
         if (hasBody) headers.put("Content-Type", "application/json");
         if (idempotencyKey != null) headers.put(Signing.HEADER_IDEMPOTENCY_KEY, idempotencyKey);
 
-        if (route.auth() != RouteAuth.PUBLIC && route.auth() != RouteAuth.ONBOARD) {
+        if (route.auth() == RouteAuth.KEY) {
             if (credentials == null) {
                 throw new ConfigException(
                         ConfigException.MISSING_CREDENTIALS,
                         route.method()
                                 + " "
                                 + route.path()
-                                + " needs a "
-                                + (route.auth() == RouteAuth.ANY
-                                        ? "merchant"
-                                        : route.auth().name().toLowerCase(Locale.ROOT))
-                                + " API key: pass publicId/secret to Oblodai.builder() or set"
-                                + " OBLODAI_PUBLIC_ID and OBLODAI_SECRET",
+                                + " needs the merchant's API key: pass publicId/secret to"
+                                + " Oblodai.builder() or set OBLODAI_PUBLIC_ID and OBLODAI_SECRET",
                         null);
             }
             headers.put(Signing.HEADER_PUBLIC_ID, credentials.publicId());

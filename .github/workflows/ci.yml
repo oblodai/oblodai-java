@@ -1,5 +1,5 @@
 # The same gates a developer runs locally: the contract drift check, then `mvn verify`
-# (compile → 514 offline tests → jar, sources jar, javadoc jar).
+# (compile → 521 offline tests → jar, sources jar, javadoc jar).
 name: CI
 on:
   push:

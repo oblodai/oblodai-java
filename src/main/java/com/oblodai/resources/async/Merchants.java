@@ -27,8 +27,8 @@ public final class Merchants extends Resource {
     }
 
     /**
-     * {@code POST /v1/merchants} — creates a merchant and mints its payment and payout keys. The
-     * keys are shown once and never again.
+     * {@code POST /v1/merchants} — creates a merchant and mints its API key. The secret is shown
+     * once and never again.
      *
      * @param request the merchant to create
      * @return a future of the merchant, with its freshly minted keys

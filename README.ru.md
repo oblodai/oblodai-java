@@ -55,27 +55,23 @@ Java 17 и новее. Jackson — единственная runtime-зависи
 
 ## Где взять ключи
 
-Ключи выдаются в [личном кабинете](https://my.oblodai.com) в разделе **API keys**. Шлюз выдаёт два
-вида ключей, и вызов не тем ключом — это 403 `merchant.wrong_key_kind`:
+Один API-ключ, и он подписывает всё. Возьмите его в [личном кабинете](https://my.oblodai.com) в
+разделе **API keys**: public id `oblodai_<hex>` и секрет `oblodai_live_<hex>`, показанный один раз.
+Эта пара подписывает каждый подписываемый маршрут — и деньги внутрь, и деньги наружу, инвойсы и
+выплаты, настройки и документы.
 
-- **платёжный ключ** — деньги внутрь: инвойсы, платёжные ссылки, кошельки, документы, балансы,
-  справочники;
-- **выплатной ключ** — деньги наружу и всё, что может двинуть или разблокировать деньги:
-  `payouts()`, `refunds()`, `payoutLinks()`, `transfers()`, `splits()`,
-  `wallets().refundBlockedDeposit(...)`, правила авто-вывода и IP-allow-list в `settings()`,
-  `webhooks().rotateSecret()`, `webhooks().testPayout(...)`, `sandbox().faucet(...)` и
-  `sandbox().reset()`.
+Пара песочницы приходит из онбординга песочницы (`merchants().createSandbox(...)` или кабинет): public
+id `test_oblodai_<hex>` и секрет `oblodai_test_<hex>`. Ведёт себя ровно так же, как боевая пара, но
+на данных песочницы.
 
-Боевая пара — это public id `oblodai_<hex>` (единый API-ключ; устаревшие виды пишутся как
-`oblodai_pk_<hex>` для платёжного и `oblodai_wk_<hex>` для выплатного) и секрет `oblodai_live_<hex>`.
-Пара песочницы — это `test_oblodai_<hex>` и секрет `oblodai_test_<hex>`, причём в песочнице одна пара
-работает сразу как оба вида ключа, поэтому интеграции с песочницей выплатной ключ можно не задавать.
-Боевые ключи — это две отдельные пары: передайте клиенту обе, и он подпишет каждый вызов тем видом
-ключа, который объявляет маршрут.
-
-Есть и третий реквизит — только для платформ, которые сами заводят мерчантов на self-hosted шлюзе:
+Второй реквизит существует только для платформ, которые сами заводят мерчантов на self-hosted шлюзе:
 **админ-токен**, задаётся через `adminToken(...)` (или `OBLODAI_ADMIN_TOKEN`). Он уходит заголовком
 `X-Admin-Token` на неподписанных маршрутах `merchants()` и больше нигде.
+
+> **Устаревшие раздельные ключи.** Мерчанты, заведённые до перехода на один ключ, могут всё ещё
+> держать раздельную пару — `oblodai_pk_<hex>` для денег внутрь и `oblodai_wk_<hex>` для денег
+> наружу, — и только они могут увидеть 403 `merchant.wrong_key_kind`. Если это ваш случай, замените
+> пару на API-ключ в кабинете: этот SDK несёт одну пару и не переключается между видами.
 
 ## Быстрый старт
 
@@ -98,8 +94,8 @@ System.out.println(invoice.url() + " " + invoice.address() + " " + invoice.statu
 Чтобы выставить цену в фиате, используйте `.amount("25").currency("USD").toCurrency("USDT")` —
 `currency` это то, в чём вы выставляете счёт, а `to_currency` — актив, который отправит плательщик.
 
-Для денег наружу нужен выплатной ключ. Сначала прогоните проверку, затем создайте выплату со своим
-ключом идемпотентности — так потерянный ответ никогда не превратится во вторую выплату:
+Деньги наружу подписываются тем же ключом. Сначала прогоните проверку, затем создайте выплату со
+своим ключом идемпотентности — так потерянный ответ никогда не превратится во вторую выплату:
 
 ```java
 PayoutValidation check = oblodai.payouts().validate(new PayoutValidateRequest()
@@ -187,8 +183,7 @@ sandbox.sandbox().reset();                                  // cancels open invo
 заголовках запроса, поэтому `delivery.isTest()` для них истинно: никогда не реагируйте на такую
 доставку так, будто деньги действительно двинулись.
 
-`faucet(...)` и `reset()` требуют выплатного ключа на боевой паре ключей; ключ песочницы сразу обоих
-видов, поэтому вызвать их может и он.
+`faucet(...)` и `reset()` подписываются как любой другой маршрут — ключ песочницы вызывает их сам.
 
 ## Обзор методов
 
@@ -313,7 +308,7 @@ if (!WebhookVerifier.isKnownEvent(event)) return 200;   // newer than this SDK: 
 | ------------------------------------------------- | ----------- | ------------------------------------------------------------ |
 | `ValidationException`                             | 400         | запрос некорректен или поле отвергнуто                        |
 | `AuthenticationException`                         | 401         | неверная подпись, неверная метка времени, неизвестный public id |
-| `PermissionException`                             | 403         | не тот вид ключа, IP не в allow-list                          |
+| `PermissionException`                             | 403         | IP не в allow-list, функция отключена                         |
 | `NotFoundException`                               | 404         | объекта нет                                                   |
 | `ConflictException` / `IdempotencyConflictException` | 409       | конфликт состояния; ключ переиспользован с другим телом        |
 | `RateLimitException`                              | 429         | сработал лимит — соблюдайте `retryAfter()`                     |
@@ -325,7 +320,7 @@ if (!WebhookVerifier.isKnownEvent(event)) return 200;   // newer than this SDK: 
 | `WebhookPayloadException`                         | —           | `webhook.bad_payload`: доставка подлинная, но это не событие   |
 | `SignatureException`                              | —           | не прошла проверка подписи или свежести вебхука                |
 
-Код имеет вид `family.reason`, и снимок контракта несёт все 471 из них — `ErrorCodes.ALL`, а для
+Код имеет вид `family.reason`, и снимок контракта несёт все 469 из них — `ErrorCodes.ALL`, а для
 одного `ErrorCodes.isKnown(code)`. Ветвитесь по коду, а не по сообщению:
 
 ```java
@@ -342,7 +337,7 @@ try {
 
 Коды, которые стоит обрабатывать по имени: `payout.insufficient_funds` и `payout.funds_maturing`
 (оба retryable), `idempotency.key_reused`, `invoice.not_payable`, `payment.not_found`,
-`merchant.wrong_key_kind`, `merchant.bad_signature`, `request.rate_limited`.
+`merchant.bad_signature`, `request.rate_limited`.
 
 `toString()` и `details()` никогда не включают сырое тело ответа, поэтому лог не может пролить
 содержимое инвойса или пароль чека; `raw()` есть для осознанного разбора.
@@ -368,8 +363,7 @@ oblodai.payouts().create(request, RequestOptions.of()
         .idempotencyKey(orderId)                  // your own key; generated for you when omitted
         .timeout(Duration.ofSeconds(10))          // per attempt
         .deadline(Duration.ofSeconds(45))         // whole call, retries and pauses included
-        .header("X-Tenant", "acme")               // one call only, on top of the client-wide headers
-        .preferPayoutKey(true));                  // sign with the payout key on an either-kind route
+        .header("X-Tenant", "acme"));             // one call only, on top of the client-wide headers
 ```
 
 - Получив 401, означающий неверную подпись или метку времени, SDK читает заголовок `Date` сервера,
@@ -386,7 +380,6 @@ oblodai.payouts().create(request, RequestOptions.of()
 ```java
 Oblodai oblodai = Oblodai.builder()
         .publicId(id).secret(secret)
-        .payoutKey(payoutId, payoutSecret)
         .baseUrl("https://api.oblodai.com")
         .timeout(Duration.ofSeconds(30))
         .deadline(Duration.ofSeconds(90))
@@ -398,8 +391,7 @@ Oblodai oblodai = Oblodai.builder()
 
 | Опция билдера                        | По умолчанию                                | Что делает                                                       |
 | ------------------------------------ | ------------------------------------------- | ---------------------------------------------------------------- |
-| `publicId(…)` / `secret(…)`          | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET`      | платёжная пара ключей; секрет подписывает и никогда не отправляется |
-| `payoutKey(publicId, secret)`        | `OBLODAI_PAYOUT_PUBLIC_ID` / `…_SECRET`     | выплатная пара ключей, выбирается автоматически по маршруту       |
+| `publicId(…)` / `secret(…)`          | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET`      | API-ключ мерчанта; секрет подписывает и никогда не отправляется   |
 | `adminToken(…)`                      | `OBLODAI_ADMIN_TOKEN`                       | `X-Admin-Token`, уходит только на маршруты онбординга мерчантов   |
 | `baseUrl(…)`                         | `OBLODAI_BASE_URL`, иначе `https://api.oblodai.com` | адрес API; префикс пути сохраняется                       |
 | `allowInsecureBaseUrl(boolean)`      | `OBLODAI_ALLOW_INSECURE=1`, иначе `false`   | разрешает http-адрес вне loopback                                 |
@@ -415,10 +407,8 @@ Oblodai oblodai = Oblodai.builder()
 
 | Переменная окружения         | Действие                                                       |
 | ---------------------------- | -------------------------------------------------------------- |
-| `OBLODAI_PUBLIC_ID`          | public id платёжного ключа                                      |
-| `OBLODAI_SECRET`             | секрет платёжного ключа                                         |
-| `OBLODAI_PAYOUT_PUBLIC_ID`   | public id выплатного ключа                                      |
-| `OBLODAI_PAYOUT_SECRET`      | секрет выплатного ключа                                         |
+| `OBLODAI_PUBLIC_ID`          | public id API-ключа                                             |
+| `OBLODAI_SECRET`             | секрет API-ключа                                                |
 | `OBLODAI_ADMIN_TOKEN`        | админ-токен self-hosted шлюза                                   |
 | `OBLODAI_BASE_URL`           | адрес API                                                       |
 | `OBLODAI_LOG`                | `debug` \| `info` \| `warn` \| `error` — лог в stderr           |
@@ -452,14 +442,15 @@ JDK 17 это no-op, там у `HttpClient` нет операции закрыт
 
 ## Контрактный снимок
 
-`contract/` выгружается собственным набором тестов шлюза из коммита ядра `7ec04293c426`: реестр
-маршрутов (107 мерчантских маршрутов, у каждого метод, путь, вид ключа, `idempotent`, `safe`, `bare`
-и форма списка), схемы DTO запросов с английскими описаниями полей, энумы, все 471 код ошибок,
+`contract/` выгружается собственным набором тестов шлюза из коммита ядра `2cc44c16f516`: реестр
+маршрутов (107 мерчантских маршрутов, у каждого метод, путь, гейт — `public`, `key` или `onboard`, —
+`idempotent`, `safe`, `bare` и форма списка), схемы DTO запросов с английскими описаниями полей,
+энумы, все 469 кодов ошибок,
 векторы подписи, эталонные тела ответов, записанные с живого шлюза, и настоящие подписанные доставки
 вебхуков.
 
 `src/main/java/com/oblodai/contract/` генерируется из него скриптом `codegen/run.sh` — 92 файла, 107
-маршрутов, 471 код ошибок, 76 типов запросов. `codegen/run.sh --check` — это дрейф-гейт: он валит
+маршрутов, 469 кодов ошибок, 76 типов запросов. `codegen/run.sh --check` — это дрейф-гейт: он валит
 сборку, когда закоммиченные исходники и снимок расходятся, и `mvn verify` запускает его первым.
 Дальше контрактные тесты сверяют каждую модель с эталонными телами, а каждый маршрут — с реестром.
 
@@ -470,7 +461,7 @@ JDK 17 это no-op, там у `HttpClient` нет операции закрыт
 
 ```bash
 git clone https://github.com/oblodai/oblodai-java && cd oblodai-java
-mvn -o verify                                          # drift gate + compile + 518 offline tests + jars
+mvn -o verify                                          # drift gate + compile + 521 offline tests + jars
 mvn -o test                                            # tests only
 codegen/run.sh                                         # regenerate after refreshing contract/
 codegen/run.sh --check                                 # what the drift gate runs

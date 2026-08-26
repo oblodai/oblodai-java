@@ -201,7 +201,7 @@ final class Dispatcher {
                         exchange.options.pathParams(),
                         exchange.options.query(),
                         exchange.body,
-                        credentialsFor(exchange.route, exchange.options.preferPayoutKey()),
+                        config.credentials(),
                         exchange.idempotencyKey,
                         config.clock().now(exchange.signedOffset),
                         config.userAgent(),
@@ -224,14 +224,6 @@ final class Dispatcher {
             builder.method(built.method(), HttpRequest.BodyPublishers.ofByteArray(built.body()));
         }
         return builder.build();
-    }
-
-    /** Which key pair signs a route. {@code any} routes take the payment key unless told otherwise. */
-    private Credentials credentialsFor(RouteSpec route, boolean preferPayout) {
-        if (route.auth() == RouteAuth.PAYOUT || (route.auth() == RouteAuth.ANY && preferPayout)) {
-            return config.payoutCredentials() != null ? config.payoutCredentials() : config.credentials();
-        }
-        return config.credentials();
     }
 
     private String resolveIdempotencyKey(RouteSpec route, CallOptions options) {

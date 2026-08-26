@@ -17,8 +17,8 @@ import org.junit.jupiter.api.TestFactory;
 
 /**
  * Every route, called through both clients, must produce the same request: the declared method and
- * path, the right key kind, a signature where one is due, an idempotency key exactly where the
- * gateway deduplicates. The async tree is a hand-written mirror of the blocking one, and this is
+ * path, the merchant's API key where the route is signed, the admin token only where the gateway
+ * asks for it, an idempotency key exactly where the gateway deduplicates. The async tree is a hand-written mirror of the blocking one, and this is
  * what holds the mirror honest — neither tree has a route wired to the wrong place for long.
  */
 class RouteWiringTest {
@@ -42,7 +42,6 @@ class RouteWiringTest {
         return Oblodai.builder()
                 .publicId("pk")
                 .secret("s")
-                .payoutKey("wk", "s2")
                 .adminToken("adm")
                 .baseUrl("https://api.test")
                 .httpClient(http)
@@ -58,17 +57,21 @@ class RouteWiringTest {
                 shape + ": path " + recorded.uri().getPath() + " matches " + spec.path());
 
         switch (spec.auth()) {
-            case PUBLIC -> assertNull(recorded.header("x-signature"), shape + ": public routes are unsigned");
+            case PUBLIC -> {
+                assertNull(recorded.header("x-signature"), shape + ": public routes are unsigned");
+                assertNull(recorded.header("x-public-id"), shape + ": and carry no key");
+            }
             case ONBOARD -> {
                 assertNull(recorded.header("x-signature"), shape + ": onboarding routes are unsigned");
                 assertEquals("adm", recorded.header("x-admin-token"), shape);
             }
-            case PAYOUT -> assertEquals("wk", recorded.header("x-public-id"), shape + ": payout key");
-            default -> assertEquals("pk", recorded.header("x-public-id"), shape + ": payment key");
-        }
-        if (spec.auth() != RouteAuth.PUBLIC && spec.auth() != RouteAuth.ONBOARD) {
-            assertTrue(recorded.header("x-signature").matches("^[0-9a-f]{64}$"), shape + ": hex signature");
-            assertNotNull(recorded.header("x-timestamp"), shape);
+            // One API key signs every signed route; there is no second pair to pick between.
+            case KEY -> {
+                assertEquals("pk", recorded.header("x-public-id"), shape + ": the merchant's API key");
+                assertTrue(
+                        recorded.header("x-signature").matches("^[0-9a-f]{64}$"), shape + ": hex signature");
+                assertNotNull(recorded.header("x-timestamp"), shape);
+            }
         }
         if (spec.auth() != RouteAuth.ONBOARD) {
             assertNull(

@@ -41,8 +41,7 @@ public final class Transport {
      * Transport configuration.
      *
      * @param baseUrl API origin, optionally with a path prefix
-     * @param credentials payment key pair, used for {@code payment}/{@code any} routes
-     * @param payoutCredentials payout key pair; {@code payout} routes fall back to the payment pair
+     * @param credentials the merchant's API key pair; every signed route uses it
      * @param httpClient the JDK HTTP client to send with
      * @param retry retry policy
      * @param clock the signing clock, which learns the gateway's time on a skew failure
@@ -57,7 +56,6 @@ public final class Transport {
     public record Config(
             String baseUrl,
             Credentials credentials,
-            Credentials payoutCredentials,
             HttpClient httpClient,
             RetryOptions retry,
             SkewCorrectingClock clock,

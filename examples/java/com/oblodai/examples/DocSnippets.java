@@ -210,18 +210,16 @@ public final class DocSnippets {
                 .idempotencyKey(orderId)                  // your own key; generated for you when omitted
                 .timeout(Duration.ofSeconds(10))          // per attempt
                 .deadline(Duration.ofSeconds(45))         // whole call, retries and pauses included
-                .header("X-Tenant", "acme")               // one call only, on top of the client-wide headers
-                .preferPayoutKey(true));                  // sign with the payout key on an either-kind route
+                .header("X-Tenant", "acme"));             // one call only, on top of the client-wide headers
 
         oblodai.payments().info("d1b0…");
         oblodai.payments().info(new PaymentInfoRequest().orderId("order-1001"));
     }
 
     /** README — "Configuration", the builder. */
-    static void configuration(String id, String secret, String payoutId, String payoutSecret) {
+    static void configuration(String id, String secret) {
         Oblodai oblodai = Oblodai.builder()
                 .publicId(id).secret(secret)
-                .payoutKey(payoutId, payoutSecret)
                 .baseUrl("https://api.oblodai.com")
                 .timeout(Duration.ofSeconds(30))
                 .deadline(Duration.ofSeconds(90))
