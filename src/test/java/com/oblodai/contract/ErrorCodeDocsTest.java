@@ -51,7 +51,7 @@ class ErrorCodeDocsTest {
 
     /** The prose documentation, which names codes in backticks rather than {@code {@code …}}. */
     private static List<Path> markdown() {
-        return Stream.of("README.md", "AGENTS.md", "CHANGELOG.md", "MIGRATION-1.3.md")
+        return Stream.of("README.md", "README.ru.md", "AGENTS.md", "CHANGELOG.md", "MIGRATION-1.3.md")
                 .map(Path::of)
                 .filter(Files::exists)
                 .toList();
