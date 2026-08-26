@@ -96,7 +96,7 @@ error samples, signed webhook samples).
 ## Building
 
 ```bash
-mvn -o verify          # drift gate → compile (Kotlin then Java) → 514 offline tests → jar, sources, javadoc
+mvn -o verify          # drift gate → compile (Kotlin then Java) → 518 offline tests → jar, sources, javadoc
 mvn -o test            # tests only
 codegen/run.sh         # regenerate src/main/java/com/oblodai/contract from contract/contract.json
 codegen/run.sh --check  # what the drift gate runs

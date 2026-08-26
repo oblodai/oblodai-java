@@ -1,0 +1,25 @@
+# The same gates a developer runs locally: the contract drift check, then `mvn verify`
+# (compile → 514 offline tests → jar, sources jar, javadoc jar).
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17', '21']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+          cache: maven
+      - name: contract drift
+        run: bash codegen/run.sh --check
+      - name: build and test
+        run: mvn -B verify
