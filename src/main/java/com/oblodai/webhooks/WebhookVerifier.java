@@ -24,6 +24,7 @@ import java.util.function.LongSupplier;
  *   X-Webhook-Event:          invoice.&lt;status&gt; | payout.&lt;status&gt; | wallet.paid
  *   X-Webhook-Id:             stable per delivery, identical across retries — deduplicate on it
  *   X-Webhook-Event-Time:     unix seconds when the state change committed
+ *   X-Webhook-Test:           true on a rehearsal delivery — no money moved
  * </pre>
  *
  * <p>Always verify over the <b>raw request bytes</b>. A re-serialized parse will not match: JSON
@@ -56,6 +57,9 @@ public final class WebhookVerifier {
 
     /** Unix seconds the state change committed at. */
     public static final String HEADER_EVENT_TIME = "X-Webhook-Event-Time";
+
+    /** {@code true} on a rehearsal delivery; the body then carries {@code test: true} as well. */
+    public static final String HEADER_TEST = "X-Webhook-Test";
 
     /** Default freshness window, in seconds, on either side of the delivery timestamp. */
     public static final long DEFAULT_TOLERANCE_SECONDS = 300;
@@ -221,8 +225,15 @@ public final class WebhookVerifier {
         if (eventTimeHeader != null && eventTimeHeader.trim().matches("\\d+")) {
             eventTime = Long.valueOf(eventTimeHeader.trim());
         }
+        WebhookEvent event = parse(rawBody);
+        boolean isTest = "true".equals(headers.first(HEADER_TEST)) || isTestEvent(event);
         return new WebhookDeliveryInfo(
-                parse(rawBody), headers.first(HEADER_ID), headers.first(HEADER_EVENT), eventTime, timestamp);
+                event,
+                headers.first(HEADER_ID),
+                headers.first(HEADER_EVENT),
+                eventTime,
+                timestamp,
+                isTest);
     }
 
     /**
@@ -266,6 +277,17 @@ public final class WebhookVerifier {
      */
     public static WebhookEvent parse(String rawBody) {
         return parse(rawBody.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Rehearsal deliveries ({@code webhooks().test(...)}, sandbox) are signed exactly like live ones
+     * and carry {@code test: true}. Never act on one as if money moved.
+     *
+     * @param event the event just verified
+     * @return true when the event is a rehearsal, not a real state change
+     */
+    public static boolean isTestEvent(WebhookEvent event) {
+        return event != null && Boolean.TRUE.equals(event.test());
     }
 
     /**

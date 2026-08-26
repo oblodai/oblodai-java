@@ -85,6 +85,12 @@ public final class WebhookReceiver {
             System.out.println("duplicate delivery " + delivery.id() + ", already applied");
             return;
         }
+        if (delivery.isTest()) {
+            // A rehearsal from webhooks().test(...) or the sandbox: signed like a live delivery, but
+            // no money moved. Log it, answer 2xx, and never touch the order.
+            System.out.println("test delivery " + delivery.eventType() + ", not applied");
+            return;
+        }
         WebhookEvent event = delivery.event();
         Long last = LAST_SEQUENCE.get(event.uuid());
         if (WebhookVerifier.isStale(event, last)) {

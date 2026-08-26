@@ -19,6 +19,8 @@ import com.oblodai.contract.Network;
  * @param txid the on-chain transaction id of the deposit
  * @param eventAt when the state change was committed, RFC 3339 UTC
  * @param sequence global, increasing sequence number of the event
+ * @param test true ONLY on a rehearsal delivery ({@code webhooks().test(...)}, sandbox): the body is
+ *     signed like a live one, so never act on it as if money moved; null on a live delivery
  */
 public record WalletEvent(
         @JsonProperty("type") String type,
@@ -33,5 +35,6 @@ public record WalletEvent(
         @JsonProperty("payment_amount") String paymentAmount,
         @JsonProperty("txid") String txid,
         @JsonProperty("event_at") String eventAt,
-        @JsonProperty("sequence") Long sequence)
+        @JsonProperty("sequence") Long sequence,
+        @JsonProperty("test") Boolean test)
         implements WebhookEvent {}

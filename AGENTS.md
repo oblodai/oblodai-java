@@ -63,9 +63,11 @@ WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
         rawBody, WebhookHeaders.of(headers), WebhookVerifier.options(secret));
 ```
 
-Verify over the **raw** bytes. Deduplicate on `delivery.id()` (`X-Webhook-Id`); drop out-of-order
-events with `WebhookVerifier.isStale(event, lastSequence)`. During a rotation pass
-`.previousSecret(old)` for at least 26 h.
+Verify over the **raw** bytes. `delivery.isTest()` (and `WebhookVerifier.isTestEvent(event)`) is true
+for rehearsal deliveries — `test: true` in the signed body, `X-Webhook-Test: true` on the request —
+never treat one as money. Deduplicate on `delivery.id()` (`X-Webhook-Id`); drop out-of-order events
+with `WebhookVerifier.isStale(event, lastSequence)`. During a rotation pass `.previousSecret(old)`
+for at least 26 h.
 
 ## Machine-readable surface
 
