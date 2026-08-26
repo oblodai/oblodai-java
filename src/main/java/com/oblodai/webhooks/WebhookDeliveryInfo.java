@@ -12,6 +12,13 @@ import com.oblodai.models.WebhookEvent;
  *     payout.&lt;status&gt;} or {@code wallet.paid}
  * @param eventTime {@code X-Webhook-Event-Time} — unix seconds when the state change committed
  * @param sentAt {@code X-Webhook-Timestamp} — unix seconds when this attempt was sent
+ * @param isTest a rehearsal delivery ({@code X-Webhook-Test: true}, or {@code test: true} in the
+ *     signed body): signed exactly like a live one, but no money moved — never act on it
  */
 public record WebhookDeliveryInfo(
-        WebhookEvent event, String id, String eventType, Long eventTime, long sentAt) {}
+        WebhookEvent event,
+        String id,
+        String eventType,
+        Long eventTime,
+        long sentAt,
+        boolean isTest) {}

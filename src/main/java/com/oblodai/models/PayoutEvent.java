@@ -33,6 +33,8 @@ import com.oblodai.contract.PayoutStatus;
  * @param updatedAt when the payout last changed, RFC 3339 UTC
  * @param eventAt when the state change was committed, RFC 3339 UTC
  * @param sequence global, increasing sequence number of the event
+ * @param test true ONLY on a rehearsal delivery ({@code webhooks().test(...)}, sandbox): the body is
+ *     signed like a live one, so never act on it as if money moved; null on a live delivery
  */
 public record PayoutEvent(
         @JsonProperty("type") String type,
@@ -58,5 +60,6 @@ public record PayoutEvent(
         @JsonProperty("created_at") String createdAt,
         @JsonProperty("updated_at") String updatedAt,
         @JsonProperty("event_at") String eventAt,
-        @JsonProperty("sequence") Long sequence)
+        @JsonProperty("sequence") Long sequence,
+        @JsonProperty("test") Boolean test)
         implements WebhookEvent {}

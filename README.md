@@ -173,7 +173,10 @@ if (delivery.event() instanceof PaymentEvent payment && payment.status() == Paym
 }
 ```
 
-`delivery.id()` (`X-Webhook-Id`) is stable across retries — deduplicate on it;
+Rehearsal deliveries (`webhooks().test(...)`, sandbox) are signed exactly like live ones and carry
+`test: true` in the body (and `X-Webhook-Test: true`): check `delivery.isTest()` — or
+`WebhookVerifier.isTestEvent(event)` on a body you already have — and never act on one as if money
+moved. `delivery.id()` (`X-Webhook-Id`) is stable across retries — deduplicate on it;
 `WebhookVerifier.isStale(event, lastSequence)` drops out-of-order deliveries. After
 `webhooks().rotateSecret()` keep the previous secret for at least 26 hours. Verification is a
 standalone class: no client, no key, no network.
