@@ -16,7 +16,7 @@ import com.oblodai.models.PublicPayment;
 import com.oblodai.models.PublicPaymentLink;
 
 /**
- * Reusable payment links (tip jars, price tags): each checkout spawns an invoice. Payment key.
+ * Reusable payment links (tip jars, price tags): each checkout spawns an invoice.
  *
  * <p>A link is not an invoice: it is a template that stays open, and every payer who checks out
  * gets their own invoice from it.

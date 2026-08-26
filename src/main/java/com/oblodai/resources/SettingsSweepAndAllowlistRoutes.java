@@ -13,25 +13,26 @@ import com.oblodai.models.AutoWithdrawRule;
 import java.util.List;
 
 /**
- * The payout-key routes of {@link Settings}: {@code POST /v1/auto-withdraw/list}, {@code /set}
- * and {@code /delete} — the sweep rules — together with {@code POST /v1/api-allowlist/list},
- * {@code /add}, {@code /remove} and {@code /enable} — the source IPs the keys may be used from.
+ * The sweep and allow-list routes of {@link Settings}: {@code POST /v1/auto-withdraw/list},
+ * {@code /set} and {@code /delete} — the sweep rules — together with
+ * {@code POST /v1/api-allowlist/list}, {@code /add}, {@code /remove} and {@code /enable} — the
+ * source IPs the key may be used from.
  *
  * <p>It holds no state of its own and adds nothing to the API: it is a base class of
  * {@link Settings} and exists only to keep source files small. Reach every method here through
  * {@code settings()}.
  */
-public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Settings {
+public abstract sealed class SettingsSweepAndAllowlistRoutes extends Resource permits Settings {
 
     /**
      * @param transport the engine to call through
      */
-    protected SettingsPayoutKeyRoutes(Transport transport) {
+    protected SettingsSweepAndAllowlistRoutes(Transport transport) {
         super(transport);
     }
 
     /**
-     * {@code POST /v1/auto-withdraw/list} — the sweep rules in force. Payout key.
+     * {@code POST /v1/auto-withdraw/list} — the sweep rules in force.
      *
      * @return every rule, as a plain list the gateway caps rather than paginates
      */
@@ -60,7 +61,7 @@ public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Se
     }
 
     /**
-     * {@code POST /v1/auto-withdraw/set}. Payout key.
+     * {@code POST /v1/auto-withdraw/set}.
      *
      * @param request the currency, the destination and the threshold
      * @param options per-call options
@@ -73,7 +74,7 @@ public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Se
     }
 
     /**
-     * {@code POST /v1/auto-withdraw/delete} — stops sweeping that currency. Payout key.
+     * {@code POST /v1/auto-withdraw/delete} — stops sweeping that currency.
      *
      * @param currency the currency whose rule to drop
      * @return every rule that remains
@@ -96,7 +97,7 @@ public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Se
     }
 
     /**
-     * {@code POST /v1/api-allowlist/list} — source IPs allowed to use the keys. Payout key.
+     * {@code POST /v1/api-allowlist/list} — source IPs allowed to use the keys.
      *
      * @return the allowlist, and whether it is being enforced
      */
@@ -115,7 +116,7 @@ public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Se
     }
 
     /**
-     * {@code POST /v1/api-allowlist/add}. Payout key.
+     * {@code POST /v1/api-allowlist/add}.
      *
      * @param cidr the range to allow
      * @return the allowlist after the change
@@ -137,7 +138,7 @@ public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Se
     }
 
     /**
-     * {@code POST /v1/api-allowlist/remove}. Payout key.
+     * {@code POST /v1/api-allowlist/remove}.
      *
      * @param cidr the range to drop
      * @return the allowlist after the change
@@ -169,7 +170,7 @@ public abstract sealed class SettingsPayoutKeyRoutes extends Resource permits Se
     }
 
     /**
-     * {@code POST /v1/api-allowlist/enable}. Payout key.
+     * {@code POST /v1/api-allowlist/enable}.
      *
      * @param enabled true to enforce the list
      * @param options per-call options

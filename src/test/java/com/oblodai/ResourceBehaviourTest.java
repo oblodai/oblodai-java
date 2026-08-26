@@ -26,7 +26,6 @@ class ResourceBehaviourTest {
         return Oblodai.builder()
                 .publicId("pk")
                 .secret("s")
-                .payoutKey("wk", "s2")
                 .baseUrl("https://api.test")
                 .httpClient(http)
                 .environment(Map.of())
@@ -34,41 +33,37 @@ class ResourceBehaviourTest {
     }
 
     @Test
-    void batchInfoRetriesOnceWithThePayoutKeyWhenTheGatewayWantsTheOtherKind() {
-        // The gateway requires the key kind that created the batch, and a caller cannot know which
-        // that was; the SDK asks again with the payout key rather than making them guess.
+    void batchInfoIsOneCallWithTheMerchantsOneKey() {
+        // There is no second key pair to fall back to any more: whichever route created the batch,
+        // the merchant's API key reads it, and one call is all the SDK makes.
         MockHttpClient http =
                 new MockHttpClient()
-                        .apiError(403, "{\"code\":\"merchant.wrong_key_kind\",\"retryable\":false}")
                         .ok("{\"batch_id\":\"b1\",\"kind\":\"payout\",\"status\":\"completed\"}");
 
         BatchInfo info = client(http).build().batches().info(new BatchInfoRequest().batchId("b1"));
 
         assertEquals("b1", info.batchId());
-        assertEquals(2, http.calls().size());
-        assertEquals("pk", http.calls().get(0).header("x-public-id"), "the payment key first");
-        assertEquals("wk", http.calls().get(1).header("x-public-id"), "then the payout key");
+        assertEquals(1, http.calls().size(), "no second attempt under another key");
+        assertEquals("pk", http.onlyCall().header("x-public-id"));
     }
 
     @Test
-    void batchInfoDoesNotLoopWhenThePayoutKeyIsRefusedToo() {
+    void batchInfoSurfacesA403AsItCameWithoutRetrying() {
         MockHttpClient http =
                 new MockHttpClient()
-                        .apiError(403, "{\"code\":\"merchant.wrong_key_kind\",\"retryable\":false}")
-                        .apiError(403, "{\"code\":\"merchant.wrong_key_kind\",\"retryable\":false}");
+                        .apiError(403, "{\"code\":\"auth.ip_not_allowed\",\"retryable\":false}");
 
-        assertThrows(
-                PermissionException.class,
-                () -> client(http).build().batches().info(new BatchInfoRequest().batchId("b1")));
-        assertEquals(2, http.calls().size(), "one fallback, not a loop");
+        PermissionException refused =
+                assertThrows(
+                        PermissionException.class,
+                        () -> client(http).build().batches().info(new BatchInfoRequest().batchId("b1")));
+        assertEquals("auth.ip_not_allowed", refused.code());
+        assertEquals(1, http.calls().size(), "a 403 is the caller's answer, not a cue to re-sign");
     }
 
     @Test
-    void theAsyncBatchInfoFallsBackTheSameWayWithoutBlocking() {
-        MockHttpClient http =
-                new MockHttpClient()
-                        .apiError(403, "{\"code\":\"merchant.wrong_key_kind\",\"retryable\":false}")
-                        .ok("{\"batch_id\":\"b1\"}");
+    void theAsyncBatchInfoBehavesTheSameWithoutBlocking() {
+        MockHttpClient http = new MockHttpClient().ok("{\"batch_id\":\"b1\"}");
 
         assertEquals(
                 "b1",
@@ -78,7 +73,8 @@ class ResourceBehaviourTest {
                         .info(new BatchInfoRequest().batchId("b1"))
                         .join()
                         .batchId());
-        assertEquals("wk", http.calls().get(1).header("x-public-id"));
+        assertEquals(1, http.calls().size());
+        assertEquals("pk", http.onlyCall().header("x-public-id"));
     }
 
     @Test

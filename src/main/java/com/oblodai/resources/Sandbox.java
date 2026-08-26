@@ -29,7 +29,7 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * {@code POST /v1/sandbox/faucet} — credits test funds to the sandbox balance. Payout key.
+     * {@code POST /v1/sandbox/faucet} — credits test funds to the sandbox balance.
      *
      * @param request which asset, and how much
      * @return what was credited
@@ -146,7 +146,7 @@ public final class Sandbox extends Resource {
 
     /**
      * {@code POST /v1/sandbox/reset} — cancels the open invoices and zeroes the balances, leaving
-     * a clean store behind. Payout key.
+     * a clean store behind.
      *
      * @return what was cleared
      */

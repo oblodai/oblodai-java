@@ -205,15 +205,16 @@ class TransportTest {
     }
 
     @Test
-    void usesThePayoutCredentialsForPayoutRoutes() {
+    void signsMoneyOutAndMoneyInWithTheOneApiKey() {
+        // A merchant has one key; a payout and an invoice go out under the same public id.
         MockHttpClient http = new MockHttpClient().ok("{\"uuid\":\"p\"}").ok("{\"uuid\":\"i\"}");
-        Oblodai oblodai = client(http).payoutKey("wk_test_1", "s2").build();
+        Oblodai oblodai = client(http).build();
         oblodai
                 .payouts()
                 .create(new PayoutRequest().amount("1").currency("USDT").address("T").orderId("o"));
         oblodai.payments().create(new PaymentRequest().amount("1").currency("USDT"));
 
-        assertEquals("wk_test_1", http.calls().get(0).header("x-public-id"));
+        assertEquals("pk_test_1", http.calls().get(0).header("x-public-id"));
         assertEquals("pk_test_1", http.calls().get(1).header("x-public-id"));
     }
 

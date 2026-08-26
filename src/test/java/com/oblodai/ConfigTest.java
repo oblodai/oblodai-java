@@ -11,7 +11,18 @@ import com.oblodai.contract.PaymentStatus;
 import com.oblodai.contract.PayoutStatus;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.support.MockHttpClient;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /** Client options, their environment fallbacks, and the two helper families. */
@@ -71,16 +82,67 @@ class ConfigTest {
                                                 .build())
                         .getMessage()
                         .contains("together"));
-        assertThrows(
-                ConfigException.class,
-                () ->
-                        Oblodai.builder()
-                                .publicId("pk")
-                                .secret("s")
-                                .payoutKey("wk", null)
-                                .baseUrl("https://api.test")
-                                .environment(Map.of())
-                                .build());
+        assertTrue(
+                assertThrows(
+                                ConfigException.class,
+                                () ->
+                                        Oblodai.builder()
+                                                .secret("s")
+                                                .baseUrl("https://api.test")
+                                                .environment(Map.of())
+                                                .build())
+                        .getMessage()
+                        .contains("together"));
+    }
+
+    @Test
+    void theCredentialsAreOnePairAndTheAdminTokenIsTheOnlyOtherOne() {
+        // The whole environment surface: six names, and no second key pair among them.
+        assertEquals(
+                List.of(
+                        "OBLODAI_ADMIN_TOKEN",
+                        "OBLODAI_ALLOW_INSECURE",
+                        "OBLODAI_BASE_URL",
+                        "OBLODAI_LOG",
+                        "OBLODAI_PUBLIC_ID",
+                        "OBLODAI_SECRET"),
+                environmentVariablesTheSdkReads());
+
+        // And the whole credential surface of the builder: one pair plus the admin token.
+        List<String> credentialSetters =
+                Stream.of(Oblodai.Builder.class.getDeclaredMethods())
+                        .map(Method::getName)
+                        .filter(
+                                name -> {
+                                    String lower = name.toLowerCase(Locale.ROOT);
+                                    return lower.contains("key")
+                                            || lower.contains("secret")
+                                            || lower.contains("token")
+                                            || lower.contains("publicid");
+                                })
+                        .distinct()
+                        .sorted()
+                        .toList();
+        assertEquals(List.of("adminToken", "publicId", "secret"), credentialSetters);
+    }
+
+    /** Every {@code OBLODAI_*} name the client's own settings read, sorted. */
+    private static List<String> environmentVariablesTheSdkReads() {
+        String source = read(Path.of("src/main/java/com/oblodai/ClientSettings.java"));
+        Matcher matcher = Pattern.compile("env\\(\"(OBLODAI_[A-Z_]+)\"\\)").matcher(source);
+        List<String> names = new ArrayList<>();
+        while (matcher.find()) {
+            if (!names.contains(matcher.group(1))) names.add(matcher.group(1));
+        }
+        return names.stream().sorted().toList();
+    }
+
+    private static String read(Path path) {
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Test

@@ -8,13 +8,12 @@ contract snapshot in `contract/contract.json`.
 - Amounts are decimal **strings**: `.amount("25")`, never `25` or a `double`. Use `Money.add`,
   `Money.compare`, `Money.subtract`; `Money.toBigDecimal` only when you deliberately want one.
 - Every method's optional last argument is a `RequestOptions`
-  (`idempotencyKey`, `timeout`, `deadline`, `header`, `preferPayoutKey`). Every method: the aliases
-  and the no-argument list forms have the overload too.
-- Two key kinds. The **payout key** is required for `payouts()`, `refunds()`, `payoutLinks()`,
-  `transfers()`, `splits()`, `wallets().refundBlockedDeposit`, `settings()` auto-withdraw and
-  API allow-list, `webhooks().rotateSecret()`, `webhooks().testPayout(...)`, `sandbox().faucet(...)`
-  and `sandbox().reset()`. Configure it with `.payoutKey(publicId, secret)` (or `OBLODAI_PAYOUT_*`);
-  the wrong kind is a 403 `merchant.wrong_key_kind`.
+  (`idempotencyKey`, `timeout`, `deadline`, `header`). Every method: the aliases and the no-argument
+  list forms have the overload too.
+- **One API key.** `.publicId(…)` + `.secret(…)` (or `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET`) sign
+  every signed route — money in and money out alike. The only other credential is `.adminToken(…)`
+  (`OBLODAI_ADMIN_TOKEN`), sent on the `merchants()` provisioning routes and nowhere else. The route
+  registry's `auth` is `public` (unsigned), `key` (the API key) or `onboard` (the admin token).
 - List methods return `Pager<T>`: `firstPage()` for one page, iteration or `stream()` for every item,
   `all(max)` to collect. Nothing is requested until consumed.
 - Idempotency keys are generated automatically on create routes and reused across retries. Passing
@@ -53,8 +52,8 @@ authentic delivery whose body is not an event; answer 400, never 401), `Signatur
 (webhooks).
 
 Codes worth handling: `payout.insufficient_funds` (retryable), `payout.funds_maturing` (retryable),
-`idempotency.key_reused`, `invoice.not_payable`, `payment.not_found`, `merchant.wrong_key_kind`,
-`merchant.bad_signature`, `request.rate_limited`. Full list: `ErrorCodes.ALL`.
+`idempotency.key_reused`, `invoice.not_payable`, `payment.not_found`, `merchant.bad_signature`,
+`request.rate_limited`. Full list: `ErrorCodes.ALL`.
 
 ## Statuses
 
@@ -89,14 +88,14 @@ for at least 26 h.
 
 `Routes.ALL` (107 routes: path, auth, idempotent, safe, bare, list — each field equal to
 `contract/contract.json`, checked route by route in `RoutesTest`), the generated request types in
-`com.oblodai.contract.requests`, `ErrorCodes.ALL` (471 codes), the vocabulary enums (`Network`, `PaymentStatus`,
+`com.oblodai.contract.requests`, `ErrorCodes.ALL` (469 codes), the vocabulary enums (`Network`, `PaymentStatus`,
 `PayoutStatus`, `EventType`, …), and `contract/` itself (schemas, golden response bodies per route,
 error samples, signed webhook samples).
 
 ## Building
 
 ```bash
-mvn -o verify          # drift gate → compile (Kotlin then Java) → 518 offline tests → jar, sources, javadoc
+mvn -o verify          # drift gate → compile (Kotlin then Java) → 521 offline tests → jar, sources, javadoc
 mvn -o test            # tests only
 codegen/run.sh         # regenerate src/main/java/com/oblodai/contract from contract/contract.json
 codegen/run.sh --check  # what the drift gate runs
@@ -105,6 +104,6 @@ mvn -Prelease deploy   # Maven Central; inert without -Prelease, see RELEASING.m
 ```
 
 Source files stay ≤ 400 lines; a namespace that outgrows it is split into a package-private base
-class in the same package (`PaymentsCheckoutRoutes`, `SettingsPayoutKeyRoutes`, …), never into a
+class in the same package (`PaymentsCheckoutRoutes`, `SettingsSweepAndAllowlistRoutes`, …), never into a
 second public type. The blocking and async trees are method-for-method identical — `AsyncParityTest`
 enforces it, and `RouteWiringTest` drives every route through both clients.

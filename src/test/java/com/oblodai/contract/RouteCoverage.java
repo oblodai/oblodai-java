@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 /**
  * One call per gateway route on the blocking client. {@link RouteCoverageAsync} is the same table
  * against the asynchronous client, and the same test drives both: the async tree is a mirror of this
- * one, method for method, so a route wired to the wrong path, key kind or idempotency behaviour on
+ * one, method for method, so a route wired to the wrong path, gate or idempotency behaviour on
  * one side and not the other fails the build.
  *
  * <p>Both tables must have key sets equal to {@link Routes#ALL}.

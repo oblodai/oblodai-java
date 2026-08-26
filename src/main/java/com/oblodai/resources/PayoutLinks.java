@@ -19,7 +19,7 @@ import com.oblodai.models.PayoutLink;
 import java.util.List;
 
 /**
- * Payout links (cheques): funds reserved now, claimed later by whoever holds the token. Payout key.
+ * Payout links (cheques): funds reserved now, claimed later by whoever holds the token.
  *
  * <p>The money leaves the balance when the link is created, not when it is claimed, so an unclaimed
  * link keeps holding it until you cancel.

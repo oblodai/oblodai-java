@@ -47,7 +47,7 @@ class SecretsTest {
         assertFalse(json(rotated).contains("whsec_new"));
         assertTrue(rotated.toString().contains("2026-02-01T00:00:00Z"), "the overlap window still shows");
 
-        ApiKeyPair pair = new ApiKeyPair("pk_live_1", "sk_live_zzz", "api");
+        ApiKeyPair pair = new ApiKeyPair("pk_live_1", "sk_live_zzz");
         assertEquals("sk_live_zzz", pair.secret());
         assertFalse(pair.toString().contains("sk_live_zzz"));
         assertFalse(json(pair).contains("sk_live_zzz"));

@@ -13,8 +13,8 @@ import com.oblodai.models.Resolution;
 /**
  * Refunds are payouts in the invoice's own asset; underpayments are resolved (accept or refund).
  *
- * <p>Because a refund leaves the platform, this namespace is gated by the payout key, not the
- * payment key that created the invoice.
+ * <p>A refund leaves the platform, so it is a money-out route: it is signed with the merchant's
+ * API key, exactly like the invoice it refunds.
  */
 public final class Refunds extends Resource {
 
@@ -26,8 +26,7 @@ public final class Refunds extends Resource {
     }
 
     /**
-     * {@code POST /v1/payment/refund} — refund a paid invoice, fully or partially. Requires the
-     * payout key.
+     * {@code POST /v1/payment/refund} — refund a paid invoice, fully or partially.
      *
      * @param request which invoice to refund, and how much
      * @return the refund, as the payout it is

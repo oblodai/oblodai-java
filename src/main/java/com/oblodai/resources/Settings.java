@@ -19,7 +19,7 @@ import com.oblodai.models.OkResult;
 import com.oblodai.models.PaymentFeeConfig;
 
 /** Merchant-level configuration exposed over the API. */
-public final class Settings extends SettingsPayoutKeyRoutes {
+public final class Settings extends SettingsSweepAndAllowlistRoutes {
 
     /**
      * @param transport the engine to call through

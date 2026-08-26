@@ -1,6 +1,6 @@
 package com.oblodai.errors;
 
-/** 403 — the key is valid but not allowed to do this (wrong key kind, feature disabled). */
+/** 403 — the key is valid but not allowed to do this (IP not allowed, feature disabled). */
 public class PermissionException extends ApiException {
 
     private static final long serialVersionUID = 1L;

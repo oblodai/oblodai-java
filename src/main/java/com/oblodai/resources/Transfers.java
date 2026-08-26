@@ -11,7 +11,7 @@ import com.oblodai.models.TransferToPersonal;
 import com.oblodai.models.TransferToUser;
 
 /**
- * Internal, instant, fee-free moves between platform balances. Payout key.
+ * Internal, instant, fee-free moves between platform balances.
  *
  * <p>Nothing here touches a blockchain: the funds never leave the platform, so there is no network
  * fee and no confirmation to wait for.

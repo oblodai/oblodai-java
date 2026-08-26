@@ -17,7 +17,7 @@ import com.oblodai.resources.Resource;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Revenue splits: a percentage of every payment forwarded to a partner. Payout key.
+ * Revenue splits: a percentage of every payment forwarded to a partner.
  *
  * <p>This is the non-blocking form of {@link com.oblodai.resources.Splits}: the same methods,
  * returning {@link CompletableFuture} and {@link com.oblodai.core.AsyncPager}.

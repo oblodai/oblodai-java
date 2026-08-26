@@ -26,8 +26,6 @@ final class ClientSettings {
 
     String publicId;
     String secret;
-    String payoutPublicId;
-    String payoutSecret;
     String adminToken;
     String baseUrl;
     HttpClient httpClient;
@@ -65,14 +63,6 @@ final class ClientSettings {
                             + " and OBLODAI_SECRET)",
                     null);
         }
-        String payoutId = firstSet(payoutPublicId, env("OBLODAI_PAYOUT_PUBLIC_ID"), null);
-        String payoutKey = firstSet(payoutSecret, env("OBLODAI_PAYOUT_SECRET"), null);
-        if ((payoutId == null) != (payoutKey == null)) {
-            throw new ConfigException(
-                    ConfigException.BAD_CONFIG,
-                    "the payout key's publicId and secret must be provided together",
-                    null);
-        }
 
         HttpClient client = httpClient;
         if (client == null) {
@@ -88,7 +78,6 @@ final class ClientSettings {
                 new Transport.Config(
                         resolvedBaseUrl,
                         id == null ? null : new Credentials(id, key),
-                        payoutId == null ? null : new Credentials(payoutId, payoutKey),
                         client,
                         retry,
                         clock != null ? clock : new SkewCorrectingClock(),

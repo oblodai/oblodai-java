@@ -11,15 +11,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @param merchantId the merchant the dev store belongs to
  * @param projectId the dev store's project identifier
- * @param apiKey the unified sandbox key
- * @param paymentKey the sandbox key scoped to payment acceptance
- * @param payoutKey the sandbox key scoped to payouts
+ * @param apiKey the dev store's API key
  * @param created false when the dev store already existed (the call is idempotent)
  */
 public record SandboxStore(
         @JsonProperty("merchant_id") String merchantId,
         @JsonProperty("project_id") String projectId,
         @JsonProperty("api_key") ApiKeyPair apiKey,
-        @JsonProperty("payment_key") ApiKeyPair paymentKey,
-        @JsonProperty("payout_key") ApiKeyPair payoutKey,
         @JsonProperty("created") Boolean created) {}
