@@ -16,7 +16,6 @@ public final class CallOptions {
     private Map<String, String> pathParams;
     private String idempotencyKey;
     private Map<String, String> headers = Map.of();
-    private boolean preferPayoutKey;
     private Long timeoutMs;
     private Long deadlineMs;
 
@@ -34,7 +33,6 @@ public final class CallOptions {
         if (options != null) {
             out.idempotencyKey = options.idempotencyKey();
             out.headers = options.headers();
-            out.preferPayoutKey = options.isPreferPayoutKey();
             out.timeoutMs = options.timeoutMs();
             out.deadlineMs = options.deadlineMs();
         }
@@ -111,11 +109,6 @@ public final class CallOptions {
     /** The caller's idempotency key, or null. */
     public String idempotencyKey() {
         return idempotencyKey;
-    }
-
-    /** Whether the payout key pair is preferred on an {@code any}-gated route. */
-    public boolean preferPayoutKey() {
-        return preferPayoutKey;
     }
 
     /** Per-attempt timeout override, or null. */

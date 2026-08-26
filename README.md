@@ -55,25 +55,23 @@ that half.
 
 ## Where to get keys
 
-Keys live in the [dashboard](https://my.oblodai.com) under **API keys**. The gateway issues two
-kinds, and a call made with the wrong one is a 403 `merchant.wrong_key_kind`:
+One API key, and it signs everything. Take it from the [dashboard](https://my.oblodai.com) under
+**API keys**: a public id `oblodai_<hex>` and a secret `oblodai_live_<hex>`, shown once. That pair
+signs every signed route — money in and money out alike, invoices and payouts, settings and
+documents.
 
-- a **payment key** — money in: invoices, payment links, wallets, documents, balances, catalogue;
-- a **payout key** — money out and anything that can move or unlock money: `payouts()`, `refunds()`,
-  `payoutLinks()`, `transfers()`, `splits()`, `wallets().refundBlockedDeposit(...)`, the
-  auto-withdraw rules and the IP allow-list in `settings()`, `webhooks().rotateSecret()`,
-  `webhooks().testPayout(...)`, `sandbox().faucet(...)` and `sandbox().reset()`.
+The sandbox pair comes from sandbox onboarding (`merchants().createSandbox(...)`, or the dashboard):
+a public id `test_oblodai_<hex>` with the secret `oblodai_test_<hex>`. It behaves exactly like the
+live pair against sandbox data.
 
-A live pair is a public id `oblodai_<hex>` — the unified API key; the legacy kinds are spelled
-`oblodai_pk_<hex>` for payment and `oblodai_wk_<hex>` for payout — with the secret
-`oblodai_live_<hex>`. A sandbox pair is `test_oblodai_<hex>` with the secret `oblodai_test_<hex>`,
-and in the sandbox one pair serves both key kinds, so a sandbox integration can leave the payout key
-unset. Live keys are separate pairs: give the client both and it signs each call with the kind that
-route declares.
-
-A third credential exists only for platforms that onboard merchants on a self-hosted gateway: an
+A second credential exists only for platforms that onboard merchants on a self-hosted gateway: an
 **admin token**, set with `adminToken(...)` (or `OBLODAI_ADMIN_TOKEN`). It is sent as `X-Admin-Token`
 on the unsigned `merchants()` provisioning routes and on nothing else.
+
+> **Legacy split keys.** Merchants onboarded before the single-key change may still hold a split
+> pair — `oblodai_pk_<hex>` for money in, `oblodai_wk_<hex>` for money out — and only they can see a
+> 403 `merchant.wrong_key_kind`. If you do, replace the pair with an API key in the dashboard; this
+> SDK carries one pair and does not switch between kinds.
 
 ## Quick start
 
@@ -96,7 +94,7 @@ System.out.println(invoice.url() + " " + invoice.address() + " " + invoice.statu
 Price in fiat with `.amount("25").currency("USD").toCurrency("USDT")` — `currency` is what you
 charge, `to_currency` the asset the payer sends.
 
-Money out needs the payout key. Dry-run it first, then create it under your own idempotency key so a
+Money out uses the same key. Dry-run it first, then create it under your own idempotency key so a
 lost response can never become a second payout:
 
 ```java
@@ -183,8 +181,7 @@ sandbox.sandbox().reset();                                  // cancels open invo
 live ones and carry `test: true` in the signed body and `X-Webhook-Test: true` on the request, so
 `delivery.isTest()` is true for them: never act on one as if money moved.
 
-`faucet(...)` and `reset()` need the payout key on a live-shaped key pair; a sandbox key is both
-kinds at once, so it can call them itself.
+`faucet(...)` and `reset()` are signed like every other route — the sandbox key calls them itself.
 
 ## Method overview
 
@@ -306,7 +303,7 @@ Every failure is an `OblodaiException` carrying the API's error envelope: `code(
 | ------------------------------------------------- | ----------- | ----------------------------------------------------------- |
 | `ValidationException`                             | 400         | the request is malformed or a field is rejected              |
 | `AuthenticationException`                         | 401         | bad signature, bad timestamp, unknown public id              |
-| `PermissionException`                             | 403         | wrong key kind, IP not on the allow-list                     |
+| `PermissionException`                             | 403         | IP not on the allow-list, feature disabled                   |
 | `NotFoundException`                               | 404         | no such object                                               |
 | `ConflictException` / `IdempotencyConflictException` | 409       | state conflict; the key was reused with a different body     |
 | `RateLimitException`                              | 429         | rate limited — honour `retryAfter()`                         |
@@ -318,7 +315,7 @@ Every failure is an `OblodaiException` carrying the API's error envelope: `code(
 | `WebhookPayloadException`                         | —           | `webhook.bad_payload`: authentic delivery, not an event      |
 | `SignatureException`                              | —           | webhook signature or freshness check failed                  |
 
-A code is `family.reason`, and the contract snapshot carries all 471 of them — `ErrorCodes.ALL`, and
+A code is `family.reason`, and the contract snapshot carries all 469 of them — `ErrorCodes.ALL`, and
 `ErrorCodes.isKnown(code)` for one. Branch on the code, not on the message:
 
 ```java
@@ -335,7 +332,7 @@ try {
 
 Codes worth handling by name: `payout.insufficient_funds` and `payout.funds_maturing` (both
 retryable), `idempotency.key_reused`, `invoice.not_payable`, `payment.not_found`,
-`merchant.wrong_key_kind`, `merchant.bad_signature`, `request.rate_limited`.
+`merchant.bad_signature`, `request.rate_limited`.
 
 `toString()` and `details()` never include the raw response body, so a log cannot spill an invoice
 payload or a cheque passcode; `raw()` is there for deliberate inspection.
@@ -360,8 +357,7 @@ oblodai.payouts().create(request, RequestOptions.of()
         .idempotencyKey(orderId)                  // your own key; generated for you when omitted
         .timeout(Duration.ofSeconds(10))          // per attempt
         .deadline(Duration.ofSeconds(45))         // whole call, retries and pauses included
-        .header("X-Tenant", "acme")               // one call only, on top of the client-wide headers
-        .preferPayoutKey(true));                  // sign with the payout key on an either-kind route
+        .header("X-Tenant", "acme"));             // one call only, on top of the client-wide headers
 ```
 
 - On a 401 that means a bad signature or timestamp, the SDK reads the server's `Date`, re-signs once,
@@ -378,7 +374,6 @@ oblodai.payouts().create(request, RequestOptions.of()
 ```java
 Oblodai oblodai = Oblodai.builder()
         .publicId(id).secret(secret)
-        .payoutKey(payoutId, payoutSecret)
         .baseUrl("https://api.oblodai.com")
         .timeout(Duration.ofSeconds(30))
         .deadline(Duration.ofSeconds(90))
@@ -390,8 +385,7 @@ Oblodai oblodai = Oblodai.builder()
 
 | Builder option                       | Default                                     | What it does                                                     |
 | ------------------------------------ | ------------------------------------------- | ---------------------------------------------------------------- |
-| `publicId(…)` / `secret(…)`          | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET`      | the payment key pair; the secret signs and is never sent          |
-| `payoutKey(publicId, secret)`        | `OBLODAI_PAYOUT_PUBLIC_ID` / `…_SECRET`     | the payout key pair, picked automatically per route               |
+| `publicId(…)` / `secret(…)`          | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET`      | the merchant's API key; the secret signs and is never sent        |
 | `adminToken(…)`                      | `OBLODAI_ADMIN_TOKEN`                       | `X-Admin-Token`, sent on merchant provisioning routes only        |
 | `baseUrl(…)`                         | `OBLODAI_BASE_URL`, else `https://api.oblodai.com` | API origin; a path prefix is kept                          |
 | `allowInsecureBaseUrl(boolean)`      | `OBLODAI_ALLOW_INSECURE=1`, else `false`    | permits a plain-http base URL away from loopback                  |
@@ -407,10 +401,8 @@ Oblodai oblodai = Oblodai.builder()
 
 | Environment variable         | Effect                                                        |
 | ---------------------------- | ------------------------------------------------------------- |
-| `OBLODAI_PUBLIC_ID`          | public id of the payment key                                   |
-| `OBLODAI_SECRET`             | secret of the payment key                                      |
-| `OBLODAI_PAYOUT_PUBLIC_ID`   | public id of the payout key                                    |
-| `OBLODAI_PAYOUT_SECRET`      | secret of the payout key                                       |
+| `OBLODAI_PUBLIC_ID`          | public id of the API key                                       |
+| `OBLODAI_SECRET`             | secret of the API key                                          |
 | `OBLODAI_ADMIN_TOKEN`        | admin token of a self-hosted gateway                           |
 | `OBLODAI_BASE_URL`           | API origin                                                     |
 | `OBLODAI_LOG`                | `debug` \| `info` \| `warn` \| `error` — log to stderr         |
@@ -444,13 +436,14 @@ process, is the intended shape.
 
 ## The contract snapshot
 
-`contract/` is exported by the gateway's own test suite from core commit `7ec04293c426`: the route
-registry (107 merchant routes, each with its method, path, key kind, `idempotent`, `safe`, `bare` and
-list shape), request DTO schemas with English field docs, enums, all 471 error codes, signing
-vectors, golden response bodies recorded from a live gateway and real signed webhook deliveries.
+`contract/` is exported by the gateway's own test suite from core commit `2cc44c16f516`: the route
+registry (107 merchant routes, each with its method, path, gate — `public`, `key` or `onboard` —
+`idempotent`, `safe`, `bare` and list shape), request DTO schemas with English field docs, enums, all
+469 error codes, signing vectors, golden response bodies recorded from a live gateway and real signed
+webhook deliveries.
 
 `src/main/java/com/oblodai/contract/` is generated from it by `codegen/run.sh` — 92 files, 107 routes,
-471 error codes, 76 request types. `codegen/run.sh --check` is the drift gate: it fails the build when
+469 error codes, 76 request types. `codegen/run.sh --check` is the drift gate: it fails the build when
 the committed sources and the snapshot disagree, and `mvn verify` runs it first. The contract tests
 then check every model against the golden bodies and every route against the registry.
 
@@ -461,7 +454,7 @@ quoted here and in [AGENTS.md](AGENTS.md).
 
 ```bash
 git clone https://github.com/oblodai/oblodai-java && cd oblodai-java
-mvn -o verify                                          # drift gate + compile + 518 offline tests + jars
+mvn -o verify                                          # drift gate + compile + 521 offline tests + jars
 mvn -o test                                            # tests only
 codegen/run.sh                                         # regenerate after refreshing contract/
 codegen/run.sh --check                                 # what the drift gate runs

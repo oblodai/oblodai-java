@@ -9,15 +9,21 @@ snapshot.
 ## [1.3.0] — 2026-08-26
 
 First release of the Java SDK, generated from and verified against contract snapshot
-`c2d8d4b733ea` (gateway commit `7ec04293c426`, exported 2026-08-26). Upgrading from the 1.2 line:
+`de2c4a5d15d1` (gateway commit `2cc44c16f516`, exported 2026-08-26). Upgrading from the 1.2 line:
 see [MIGRATION-1.3.md](MIGRATION-1.3.md).
 
 ### The API
 
+- **One API key.** A merchant has a single key pair and it signs every signed route, money in and
+  money out alike; the payout credential pair and the payout-key option are gone. There is no
+  `payoutKey(publicId, secret)`, no `RequestOptions.preferPayoutKey(...)`, no
+  `OBLODAI_PAYOUT_PUBLIC_ID` / `OBLODAI_PAYOUT_SECRET`, and no key-kind fallback on
+  `batches().info(...)`. The route registry's `auth` is `public`, `key` or `onboard`, and onboarding
+  answers with `api_key` alone. `merchant.wrong_key_kind` has left the catalogue with the split keys:
+  only a merchant still holding a legacy `oblodai_pk_…` / `oblodai_wk_…` pair can meet it.
 - `Oblodai` — blocking client, built with `Oblodai.builder()`; every option falls back to the
-  environment (`OBLODAI_PUBLIC_ID`, `OBLODAI_SECRET`, `OBLODAI_PAYOUT_PUBLIC_ID`,
-  `OBLODAI_PAYOUT_SECRET`, `OBLODAI_BASE_URL`, `OBLODAI_ADMIN_TOKEN`, `OBLODAI_ALLOW_INSECURE`,
-  `OBLODAI_LOG`).
+  environment (`OBLODAI_PUBLIC_ID`, `OBLODAI_SECRET`, `OBLODAI_BASE_URL`, `OBLODAI_ADMIN_TOKEN`,
+  `OBLODAI_ALLOW_INSECURE`, `OBLODAI_LOG`).
 - `OblodaiAsync` — the same surface returning `CompletableFuture`, over the same engine, connections,
   retry policy and learned clock skew. `Oblodai#async()` or `builder().buildAsync()`.
 - All 107 merchant routes across 16 namespaces: `payments`, `refunds`, `payouts`, `payoutLinks`,
@@ -40,8 +46,8 @@ see [MIGRATION-1.3.md](MIGRATION-1.3.md).
   `wallets().refundBlockedDeposit(...)` to send a deposit that landed on one back.
 - Rehearsal webhooks carry `test: true` in the signed body as well as `X-Webhook-Test: true`;
   `delivery.isTest()` and `WebhookVerifier.isTestEvent(event)` read it.
-- `RequestOptions`: `idempotencyKey`, `timeout`, `deadline`, `header`, `preferPayoutKey` — on every
-  method of both trees, aliases and no-argument list forms included.
+- `RequestOptions`: `idempotencyKey`, `timeout`, `deadline`, `header` — on every method of both
+  trees, aliases and no-argument list forms included.
 - Both clients are `AutoCloseable`, and cancelling a future the async client returned aborts the HTTP
   exchange in flight instead of stopping at a stage.
 
@@ -100,8 +106,9 @@ see [MIGRATION-1.3.md](MIGRATION-1.3.md).
 - Unit: signing and webhook vectors from the contract snapshot, plus the retry, idempotency, skew,
   URL and header rules against a fake `HttpClient`.
 - Contract: every one of the 107 routes is called through **both** the blocking and the asynchronous
-  client and checked for method, path, key kind, admin token and idempotency header; the generated
-  registry is compared to `contract.json` field by field (`method`, `path`, `auth`, `idempotent`,
+  client and checked for method, path, the one API key, the admin token and the idempotency header;
+  the generated registry is compared to `contract.json` field by field (`method`, `path`, `auth`,
+  `idempotent`,
   `safe`, `bare`, `list`), with a test that proves the comparison catches a flipped flag; every
   recorded golden body is decoded by its model and its key set compared field by field.
 - Parity: the two trees are checked by reflection to expose the same methods with the same parameter

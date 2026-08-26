@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
  * <p>This is the non-blocking form of {@link com.oblodai.resources.Settings}: the same methods,
  * returning {@link CompletableFuture} and {@link com.oblodai.core.AsyncPager}.
  */
-public final class Settings extends SettingsPayoutKeyRoutes {
+public final class Settings extends SettingsSweepAndAllowlistRoutes {
 
     /**
      * @param transport the engine to call through

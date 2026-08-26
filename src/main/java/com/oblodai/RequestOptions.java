@@ -14,30 +14,22 @@ import java.util.Map;
  * oblodai.payouts().create(request, RequestOptions.of().idempotencyKey(orderId).timeout(Duration.ofSeconds(10)));
  * }</pre>
  *
- * <p>The options are {@code idempotencyKey}, {@code timeout}, {@code deadline}, {@code header} and
- * {@code preferPayoutKey}.
+ * <p>The options are {@code idempotencyKey}, {@code timeout}, {@code deadline} and {@code header}.
  */
 public final class RequestOptions {
 
-    private static final RequestOptions NONE =
-            new RequestOptions(null, null, null, false, Map.of());
+    private static final RequestOptions NONE = new RequestOptions(null, null, null, Map.of());
 
     private final String idempotencyKey;
     private final Long timeoutMs;
     private final Long deadlineMs;
-    private final boolean preferPayoutKey;
     private final Map<String, String> headers;
 
     private RequestOptions(
-            String idempotencyKey,
-            Long timeoutMs,
-            Long deadlineMs,
-            boolean preferPayoutKey,
-            Map<String, String> headers) {
+            String idempotencyKey, Long timeoutMs, Long deadlineMs, Map<String, String> headers) {
         this.idempotencyKey = idempotencyKey;
         this.timeoutMs = timeoutMs;
         this.deadlineMs = deadlineMs;
-        this.preferPayoutKey = preferPayoutKey;
         this.headers = headers;
     }
 
@@ -60,7 +52,7 @@ public final class RequestOptions {
      * @return a copy carrying the key
      */
     public RequestOptions idempotencyKey(String key) {
-        return new RequestOptions(key, timeoutMs, deadlineMs, preferPayoutKey, headers);
+        return new RequestOptions(key, timeoutMs, deadlineMs, headers);
     }
 
     /**
@@ -70,8 +62,7 @@ public final class RequestOptions {
      * @return a copy carrying the timeout
      */
     public RequestOptions timeout(Duration timeout) {
-        return new RequestOptions(
-                idempotencyKey, timeout.toMillis(), deadlineMs, preferPayoutKey, headers);
+        return new RequestOptions(idempotencyKey, timeout.toMillis(), deadlineMs, headers);
     }
 
     /**
@@ -81,19 +72,7 @@ public final class RequestOptions {
      * @return a copy carrying the deadline
      */
     public RequestOptions deadline(Duration deadline) {
-        return new RequestOptions(
-                idempotencyKey, timeoutMs, deadline.toMillis(), preferPayoutKey, headers);
-    }
-
-    /**
-     * Signs with the payout key on a route that accepts either kind (for instance {@code
-     * batches.info} for a payout batch).
-     *
-     * @param prefer true to prefer the payout key pair
-     * @return a copy carrying the preference
-     */
-    public RequestOptions preferPayoutKey(boolean prefer) {
-        return new RequestOptions(idempotencyKey, timeoutMs, deadlineMs, prefer, headers);
+        return new RequestOptions(idempotencyKey, timeoutMs, deadline.toMillis(), headers);
     }
 
     /**
@@ -111,8 +90,7 @@ public final class RequestOptions {
         RequestBuilder.assertCallerHeader(name, value);
         Map<String, String> merged = new LinkedHashMap<>(headers);
         merged.put(name, value);
-        return new RequestOptions(
-                idempotencyKey, timeoutMs, deadlineMs, preferPayoutKey, Map.copyOf(merged));
+        return new RequestOptions(idempotencyKey, timeoutMs, deadlineMs, Map.copyOf(merged));
     }
 
     /** The caller's idempotency key, or null. */
@@ -133,10 +111,5 @@ public final class RequestOptions {
     /** Extra headers for this call, never null. */
     public Map<String, String> headers() {
         return headers;
-    }
-
-    /** Whether to prefer the payout key pair on an {@code any}-gated route. */
-    public boolean isPreferPayoutKey() {
-        return preferPayoutKey;
     }
 }

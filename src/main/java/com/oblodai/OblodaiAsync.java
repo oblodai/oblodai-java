@@ -98,17 +98,17 @@ public final class OblodaiAsync implements AutoCloseable {
         return payments;
     }
 
-    /** Refunds and the resolution of underpaid invoices. Payout key. */
+    /** Refunds and the resolution of underpaid invoices. */
     public Refunds refunds() {
         return refunds;
     }
 
-    /** Outgoing transfers to external addresses. Payout key. */
+    /** Outgoing transfers to external addresses. */
     public Payouts payouts() {
         return payouts;
     }
 
-    /** Payout links (cheques): funds reserved now, claimed later. Payout key. */
+    /** Payout links (cheques): funds reserved now, claimed later. */
     public PayoutLinks payoutLinks() {
         return payoutLinks;
     }
@@ -123,7 +123,7 @@ public final class OblodaiAsync implements AutoCloseable {
         return batches;
     }
 
-    /** Internal, instant, fee-free moves between platform balances. Payout key. */
+    /** Internal, instant, fee-free moves between platform balances. */
     public Transfers transfers() {
         return transfers;
     }
@@ -143,7 +143,7 @@ public final class OblodaiAsync implements AutoCloseable {
         return documents;
     }
 
-    /** Revenue splits: a share of every payment forwarded to a partner. Payout key. */
+    /** Revenue splits: a share of every payment forwarded to a partner. */
     public Splits splits() {
         return splits;
     }

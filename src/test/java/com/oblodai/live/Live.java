@@ -36,7 +36,7 @@ final class Live {
 
     /**
      * Onboards a fresh merchant, opens its sandbox store and returns a client holding the sandbox
-     * key. A sandbox key is both key kinds at once, so one client can drive the whole journey.
+     * key. That one key signs every route, so one client drives the whole journey.
      *
      * @param prefix a label that ends up in the merchant's email address
      * @return a client for the new sandbox store

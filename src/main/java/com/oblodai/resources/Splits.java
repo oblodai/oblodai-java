@@ -15,7 +15,7 @@ import com.oblodai.models.SplitOptIn;
 import com.oblodai.models.SplitRule;
 
 /**
- * Revenue splits: a percentage of every payment forwarded to a partner. Payout key.
+ * Revenue splits: a percentage of every payment forwarded to a partner.
  */
 public final class Splits extends Resource {
 

@@ -18,10 +18,11 @@ import org.junit.jupiter.api.TestFactory;
 
 /**
  * The generated route registry is the contract snapshot, field for field. Not just the set of
- * routes: the method, the path, the key kind, whether the gateway deduplicates the write, whether a
- * transport failure may be re-sent, whether the answer is bytes rather than an envelope, and which
- * list shape it is. Every one of those decides how the SDK treats money, and none of them is
- * inferred from the path — {@code safe} in particular is the core's own hand-classified verdict.
+ * routes: the method, the path, which credential its gate wants, whether the gateway deduplicates
+ * the write, whether a transport failure may be re-sent, whether the answer is bytes rather than an
+ * envelope, and which list shape it is. Every one of those decides how the SDK treats money, and
+ * none of them is inferred from the path — {@code safe} in particular is the core's own
+ * hand-classified verdict.
  */
 class RoutesTest {
 
@@ -117,6 +118,32 @@ class RoutesTest {
         ObjectNode otherAuth = ((ObjectNode) route).deepCopy();
         otherAuth.put("auth", "public");
         assertEquals(List.of("auth"), differences(spec, otherAuth));
+    }
+
+    @Test
+    void everySignedRouteIsGatedByTheOneApiKeyAndNothingElse() {
+        // Three gates, and only three: unsigned, the merchant's API key, the admin token. A fourth
+        // value would mean a credential the SDK cannot produce — the codegen refuses to emit one.
+        Set<RouteAuth> seen = new LinkedHashSet<>();
+        Routes.ALL.values().forEach(spec -> seen.add(spec.auth()));
+        assertEquals(Set.of(RouteAuth.PUBLIC, RouteAuth.KEY, RouteAuth.ONBOARD), seen);
+        assertEquals(
+                Set.of("POST /v1/merchants", "POST /v1/merchants/{id}/sandbox"),
+                Routes.ALL.entrySet().stream()
+                        .filter(e -> e.getValue().auth() == RouteAuth.ONBOARD)
+                        .map(java.util.Map.Entry::getKey)
+                        .collect(java.util.stream.Collectors.toSet()),
+                "the admin token gates merchant provisioning and nothing else");
+        for (String key :
+                List.of(
+                        "POST /v1/payout",
+                        "POST /v1/payment",
+                        "POST /v1/payment/refund",
+                        "POST /v1/batch/info",
+                        "POST /v1/auto-withdraw/set",
+                        "POST /v1/sandbox/faucet")) {
+            assertEquals(RouteAuth.KEY, Routes.of(key).auth(), key + " is signed with the API key");
+        }
     }
 
     @Test

@@ -9,7 +9,7 @@ import com.oblodai.core.Transport;
 /**
  * Generated PDF and CSV documents. Every report method answers with the bytes themselves
  * ({@link FileResult}); a range too large to render inline goes through an asynchronous job
- * ({@code createJob} then {@code jobInfo} then {@code jobFile}). Payment key.
+ * ({@code createJob} then {@code jobInfo} then {@code jobFile}).
  *
  * <p>What each document accepts — language, format, period — is carried by {@link DocumentQuery}.
  */

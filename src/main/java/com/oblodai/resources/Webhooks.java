@@ -59,7 +59,7 @@ public final class Webhooks extends Resource {
 
     /**
      * {@code POST /v1/webhooks/rotate-secret} — mints a new secret; the old one keeps verifying
-     * until {@code previous_secret_valid_until}. Payout key.
+     * until {@code previous_secret_valid_until}.
      *
      * @return the new secret, and how long the old one stays valid
      */
@@ -144,7 +144,7 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * {@code POST /v1/test-webhook/payout} — a sample payout event. Payout key.
+     * {@code POST /v1/test-webhook/payout} — a sample payout event.
      *
      * @param request what the sample event should say
      * @return what was delivered, and how the endpoint answered
