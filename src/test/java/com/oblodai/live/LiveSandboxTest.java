@@ -97,7 +97,7 @@ class LiveSandboxTest {
                         .payments()
                         .create(
                                 new PaymentRequest()
-                                        .amount("1")
+                                        .amount("5")
                                         .currency("USDT")
                                         .network(Network.TRON)
                                         .orderId(key + "-o"),
@@ -107,7 +107,7 @@ class LiveSandboxTest {
                         .payments()
                         .create(
                                 new PaymentRequest()
-                                        .amount("1")
+                                        .amount("5")
                                         .currency("USDT")
                                         .network(Network.TRON)
                                         .orderId(key + "-o"),
