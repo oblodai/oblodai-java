@@ -5,11 +5,22 @@ All notable changes to the Oblodai Java SDK are documented here. The format foll
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The version tracks the SDK family: 2.0 is
 the line generated from the gateway's OpenAPI contract.
 
-## [2.0.0] - 2026-09-25
+## [2.0.0] — Unreleased
 
 Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`) by the backend's
 `tools/sdkgen`; the runtime around it is hand-written. Breaking: see
 [MIGRATION-2.0.md](MIGRATION-2.0.md) for every renamed method and option.
+
+### Added
+
+- `X-Request-ID` on every call (yours or a fresh UUID), the same on every attempt.
+- `withOptions(...)`, `withRawResponse(...)` (`ApiResponse`: status, headers, request id), request
+  and response hooks.
+- `Pager.byPage()`, `AsyncPager.byPage(...)`.
+- Waiters for long-running operations: `jobs().batch(...)`, `jobs().document(...)` with
+  `waitFor()` and `download()`, and `jobs().follow(operationId, answer)` for any of them.
+- The shared conformance suite of the backend runs in the tests; the README code and the examples
+  run against a scripted gateway.
 
 ### Changed
 
@@ -31,17 +42,6 @@ Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`)
   status classes (`x-status-classes` → `PaymentStatus.isFinal()`/`isSuccess()`, which `Statuses`
   reads) and the non-money numbers of requests (`Facts.NON_MONEY_NUMBERS`). The methods table of
   the README is generated too.
-
-### Added
-
-- `X-Request-ID` on every call (yours or a fresh UUID), the same on every attempt.
-- `withOptions(...)`, `withRawResponse(...)` (`ApiResponse`: status, headers, request id), request
-  and response hooks.
-- `Pager.byPage()`, `AsyncPager.byPage(...)`.
-- Waiters for long-running operations: `jobs().batch(...)`, `jobs().document(...)` with
-  `waitFor()` and `download()`, and `jobs().follow(operationId, answer)` for any of them.
-- The shared conformance suite of the backend runs in the tests; the README code and the examples
-  run against a scripted gateway.
 
 ### Removed
 
