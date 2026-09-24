@@ -16,10 +16,12 @@ import com.oblodai.core.Signing;
 import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.errors.WebhookPayloadException;
+import com.oblodai.generated.Facts;
 import com.oblodai.generated.Routes;
 import com.oblodai.generated.models.WireObject;
 import com.oblodai.support.Clients;
 import com.oblodai.support.MockHttpClient;
+import com.oblodai.webhooks.WebhookDeliveryInfo;
 import com.oblodai.webhooks.WebhookHeaders;
 import com.oblodai.webhooks.WebhookVerifier;
 import java.io.IOException;
@@ -213,6 +215,70 @@ class ConformanceTest {
             return;
         }
         fail("expected webhook." + check.path("expect").asText());
+    }
+
+    /**
+     * A real delivery of every event of the contract verifies (with the current secret and, as a
+     * receiver that has not swapped yet, the previous one), parses into its kind's model and exposes
+     * every delivery header of the spec.
+     */
+    @TestFactory
+    List<DynamicTest> webhookDeliveries() {
+        Path dir = requireSuite();
+        JsonNode suite = read(dir.resolve("webhook_delivery.json"));
+        Source src = source(dir, suite);
+        List<DynamicTest> out = new ArrayList<>();
+        Set<String> events = new HashSet<>();
+        src.vectors().forEach(d -> events.add(d.path("event").asText()));
+        Set<String> known = new HashSet<>();
+        Facts.WEBHOOK_KINDS.values().forEach(k -> known.addAll(k.events()));
+        out.add(DynamicTest.dynamicTest("a delivery of every event this release knows", () -> assertEquals(known, events)));
+        for (JsonNode check : suite.path("checks")) {
+            assertEquals("webhook_delivery", check.path("kind").asText());
+            for (JsonNode d : src.vectors()) {
+                String name = check.path("name").asText() + " - " + d.path("event").asText() + " (" + check.path("key").asText() + ")";
+                out.add(DynamicTest.dynamicTest(name, () -> delivery(check, d, suite.path("headers"))));
+            }
+        }
+        return out;
+    }
+
+    private static void delivery(JsonNode check, JsonNode d, JsonNode fields) {
+        String secret =
+                switch (check.path("key").asText()) {
+                    case "current" -> d.path("secret").asText();
+                    case "previous" -> d.path("previous_secret").asText();
+                    default -> throw new AssertionError("key " + check.path("key"));
+                };
+        Map<String, String> headers = new LinkedHashMap<>();
+        d.path("headers").fields().forEachRemaining(e -> headers.put(e.getKey(), e.getValue().asText()));
+        long ts = d.path("ts").asLong();
+        WebhookDeliveryInfo delivery =
+                WebhookVerifier.verifyDelivery(
+                        d.path("payload").asText().getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                        WebhookHeaders.of(headers),
+                        WebhookVerifier.options(secret).clock(() -> ts));
+        String kind = d.path("kind").asText();
+        assertTrue(WebhookVerifier.isKnownEvent(delivery.event()), kind);
+        assertEquals(kind, delivery.event().type());
+        assertInstanceOf(Facts.WEBHOOK_KINDS.get(kind).model(), delivery.event().typed());
+        fields.fields()
+                .forEachRemaining(
+                        e -> {
+                            String want = headers.get(e.getKey());
+                            Object got =
+                                    switch (e.getValue().asText()) {
+                                        case "" -> want;
+                                        case "id" -> delivery.id();
+                                        case "event_id" -> delivery.eventId();
+                                        case "event_type" -> delivery.eventType();
+                                        case "event_time" -> String.valueOf(delivery.eventTime());
+                                        case "sent_at" -> String.valueOf(delivery.sentAt());
+                                        default -> throw new AssertionError(
+                                                "the delivery info has no field " + e.getValue() + " for " + e.getKey());
+                                    };
+                            assertEquals(want, got, e.getValue().asText() + " != " + e.getKey());
+                        });
     }
 
     // --- calls ------------------------------------------------------------------------------------
