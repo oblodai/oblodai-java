@@ -21,8 +21,8 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>{@code body} is the byte-exact request body; GETs sign an empty body.
  * </ul>
  *
- * <p>Pure: no clock, no I/O. The unit tests replay the vectors the gateway's own test suite exports
- * in {@code contract/contract.json}.
+ * <p>Pure: no clock, no I/O. The conformance tests replay the core's vectors from the contract's
+ * {@code x-oblodai-signing}.
  */
 public final class Signing {
 
