@@ -4,6 +4,12 @@ Everything Central needs lives in the `release` profile of `pom.xml`. An ordinar
 touch it: `mvn verify` on a machine with no Sonatype account and no GPG key produces the jar, the
 sources jar and the javadoc jar, and never asks for a credential.
 
+**The version bump is scripted for the whole SDK family.** From the backend checkout,
+`tools/sdkgen/release.sh X.Y.Z` raises the version in all eight SDKs (manifest, version constant,
+lock files, the install lines of the READMEs), closes the `## [X.Y.Z] — Unreleased` (or
+`## [Unreleased]`) section of every `CHANGELOG.md` with today's date, commits and tags `vX.Y.Z`
+locally; `-n` only checks. Pushing the tag — the step that publishes — stays manual.
+
 ## What you need once
 
 1. **A Central Portal account** at <https://central.sonatype.com> with the `com.oblodai` namespace
@@ -55,8 +61,8 @@ and in the portal's search within a few hours.
 Then tag it:
 
 ```bash
-git tag -a v2.0.0 -m "Java SDK 2.0.0"
-git push origin v2.0.0
+git tag -a vX.Y.Z -m "Java SDK X.Y.Z"
+git push origin vX.Y.Z
 ```
 
 ## In CI
