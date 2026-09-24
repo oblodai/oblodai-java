@@ -23,6 +23,10 @@ import com.oblodai.generated.models.PayoutRequest;
 import com.oblodai.support.Clients;
 import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
+import com.oblodai.core.JobSupport;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -175,5 +179,27 @@ class JobsTest {
         ConfigException notLro =
                 assertThrows(ConfigException.class, () -> oblodai.jobs().follow("getBatchInfo", submitted));
         assertEquals("sdk.lro_unresolved", notLro.code());
+    }
+
+    @Test
+    void aTypedWaiterFindsItsOperationByThePollModel() {
+        String batch = JobSupport.createOf(BatchInfoResponse.class);
+        assertEquals(BatchInfoResponse.class, Facts.LRO.get(batch).model());
+        String document = JobSupport.createOf(DocumentJobView.class);
+        assertEquals(DocumentJobView.class, Facts.LRO.get(document).model());
+        ConfigException none = assertThrows(ConfigException.class, () -> JobSupport.createOf(String.class));
+        assertEquals("sdk.lro_unresolved", none.code());
+    }
+
+    @Test
+    void theTypedWaitersNameNoOperation() throws IOException {
+        for (String file : List.of("Jobs.java", "AsyncJobs.java")) {
+            String src = Files.readString(Path.of("src/main/java/com/oblodai", file));
+            for (String operationId : Routes.BY_OPERATION_ID.keySet()) {
+                assertTrue(
+                        !src.contains("\"" + operationId + "\""),
+                        file + " names the operation " + operationId + ": resolve it from Facts.LRO by the poll model");
+            }
+        }
     }
 }

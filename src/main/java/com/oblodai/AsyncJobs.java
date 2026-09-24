@@ -11,7 +11,8 @@ import com.oblodai.generated.models.DocumentJobView;
 /**
  * Waiters for long-running operations (non-blocking): a batch submitted by {@code batches().create*} or
  * {@code payouts().createTransferBatch}, a document export started by {@code documents().createJob}.
- * Which operations those are is {@link Lro}.
+ * Which operations those are is {@link Lro}; a typed waiter finds its own there by the model its
+ * poll answers with ({@link JobSupport#createOf}), naming no operation.
  *
  * <pre>{@code
  * BatchSubmitResponse submitted = oblodai.batches().createPayout(request);
@@ -43,8 +44,9 @@ public final class AsyncJobs {
      * @return its job; {@code waitFor()} polls {@code batches().getInfo}
      */
     public AsyncJob<BatchInfoResponse> batch(BatchSubmitResponse submitted, RequestOptions options) {
-        String id = JobSupport.id("createPayoutBatch", submitted);
-        return JobSupport.asyncJob(transport, "createPayoutBatch", id, submitted, options);
+        String create = JobSupport.createOf(BatchInfoResponse.class);
+        String id = JobSupport.id(create, submitted);
+        return JobSupport.asyncJob(transport, create, id, submitted, options);
     }
 
     /**
@@ -52,7 +54,7 @@ public final class AsyncJobs {
      * @return its job
      */
     public AsyncJob<BatchInfoResponse> batch(String batchId) {
-        return JobSupport.asyncJob(transport, "createPayoutBatch", batchId, null, null);
+        return JobSupport.asyncJob(transport, JobSupport.createOf(BatchInfoResponse.class), batchId, null, null);
     }
 
     /**
@@ -70,8 +72,9 @@ public final class AsyncJobs {
      * @return its job
      */
     public AsyncJob<DocumentJobView> document(DocumentJobAccepted accepted, RequestOptions options) {
-        String id = JobSupport.id("createDocumentJob", accepted);
-        return JobSupport.asyncJob(transport, "createDocumentJob", id, accepted, options);
+        String create = JobSupport.createOf(DocumentJobView.class);
+        String id = JobSupport.id(create, accepted);
+        return JobSupport.asyncJob(transport, create, id, accepted, options);
     }
 
     /**
@@ -79,14 +82,14 @@ public final class AsyncJobs {
      * @return its job
      */
     public AsyncJob<DocumentJobView> document(String jobId) {
-        return JobSupport.asyncJob(transport, "createDocumentJob", jobId, null, null);
+        return JobSupport.asyncJob(transport, JobSupport.createOf(DocumentJobView.class), jobId, null, null);
     }
 
     /**
      * Any long-running call of the contract, by its create {@code operationId} - a key of {@link
      * com.oblodai.generated.Facts#LRO}, including one newer than the typed waiters above.
      *
-     * @param createOperationId the create operation, e.g. {@code "createPayoutBatch"}
+     * @param createOperationId the create operation, a key of {@link com.oblodai.generated.Facts#LRO}
      * @param answer the create call's answer
      * @return its job; {@code waitFor()} returns the poll answer as its generated model
      * @throws com.oblodai.errors.ConfigException {@code sdk.lro_unresolved} when the operation is
