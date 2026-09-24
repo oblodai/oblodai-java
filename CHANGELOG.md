@@ -2,9 +2,45 @@
 
 All notable changes to the Oblodai Java SDK are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html). The version tracks the SDK family: 1.3 is
-the line that signs requests with the gateway's five-field recipe and is generated from its contract
-snapshot.
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html). The version tracks the SDK family: 2.0 is
+the line generated from the gateway's OpenAPI contract.
+
+## [2.0.0] - 2026-09-25
+
+Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`) by the backend's
+`tools/sdkgen`; the runtime around it is hand-written. Breaking: see
+[MIGRATION-2.0.md](MIGRATION-2.0.md) for every renamed method and option.
+
+### Changed
+
+- Resources, models and the route table live in `com.oblodai.generated` and are regenerated, never
+  edited; `names.lock` fixes the public names, and `make ci` fails on drift.
+- One method per operation (`client.<resource>().<operationId without the resource>`), parameters as
+  generated models with builders, path parameters first, query parameters as `*Query` models.
+- Amounts are `BigDecimal`; a builder also takes a decimal string, never a `double`. A `double` in a
+  request body is `sdk.float_amount` before anything is sent. `Money` takes and returns `BigDecimal`.
+- Models keep unknown fields (`extra()`) and unknown enum values (`isKnown() == false`); `toString()`
+  is short and hides secrets.
+- `RequestOptions` has exactly five options: `idempotencyKey`, `timeout` (`Duration`), `maxRetries`,
+  `extraHeaders`, `requestId`.
+- Errors print as `[code] text (request_id=...)`; `text()` gives the message alone.
+- Webhook events wrap the verified body with typed views from the generated models.
+
+### Added
+
+- `X-Request-ID` on every call (yours or a fresh UUID), the same on every attempt.
+- `withOptions(...)`, `withRawResponse(...)` (`ApiResponse`: status, headers, request id), request
+  and response hooks.
+- `Pager.byPage()`, `AsyncPager.byPage(...)`.
+- Waiters for long-running operations: `jobs().batch(...)`, `jobs().document(...)` with
+  `waitFor()` and `download()`.
+- The shared conformance suite of the backend runs in the tests; the README code and the examples
+  run against a scripted gateway.
+
+### Removed
+
+- The hand-written resources and models, the `codegen/` generator and the `contract/` snapshot; the
+  Kotlin request DSL; `builder().objectMapper(...)`; per-call `deadline` and `header(...)`.
 
 ## [1.3.0] — 2026-08-26
 

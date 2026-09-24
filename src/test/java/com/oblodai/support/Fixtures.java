@@ -106,4 +106,28 @@ public final class Fixtures {
                 + "\"lang\":\"en\",\"period\":{\"from\":\"2026-09-01\",\"to\":\"2026-09-30\"},\"created_at\":\"2026-09-24T10:00:00Z\","
                 + "\"updated_at\":\"2026-09-24T10:00:00Z\"}";
     }
+
+    /**
+     * @param uuid the invoice id
+     * @param sequence the event sequence
+     * @return a verified-looking {@code type=payment} webhook body
+     */
+    public static String paymentWebhook(String uuid, long sequence) {
+        return "{\"type\":\"payment\",\"uuid\":\"" + uuid + "\",\"order_id\":\"o-" + uuid + "\","
+                + "\"status\":\"paid\",\"amount\":\"25\",\"currency\":\"USDT\",\"network\":\"tron\","
+                + "\"payer_amount\":\"25\",\"payer_currency\":\"USDT\",\"payment_amount\":\"25\","
+                + "\"payer_address\":\"T\",\"payer_address_is_refundable\":true,\"additional_data\":\"\","
+                + "\"txid\":\"tx\",\"is_final\":true,\"sequence\":" + sequence + ","
+                + "\"event_at\":\"2026-09-24T10:00:00Z\"}";
+    }
+
+    /**
+     * @param valid whether the payout would be accepted
+     * @return a {@code PayoutValidateResult}
+     */
+    public static String payoutValidation(boolean valid) {
+        return "{\"valid\":" + valid + ",\"amount\":\"10.50\",\"commission\":\"1\","
+                + "\"payer_amount\":\"11.50\",\"currency\":\"USDT\",\"network\":\"tron\","
+                + "\"fee_bearer\":\"merchant\",\"maturity_note\":\"\"}";
+    }
 }

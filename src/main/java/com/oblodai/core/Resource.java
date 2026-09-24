@@ -19,7 +19,8 @@ import java.util.function.Function;
  * </ul>
  *
  * <p>Each has an {@code *Async} form over the same transport. A result the model cannot read is a
- * {@link ContractException} ({@code sdk.bad_envelope}), never an unchecked exception from the parser.
+ * {@link com.oblodai.errors.ContractException} ({@code sdk.bad_envelope}), never an unchecked exception
+ * from the parser.
  */
 public abstract class Resource {
 

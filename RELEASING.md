@@ -35,19 +35,15 @@ sources jar and the javadoc jar, and never asks for a credential.
 ## Cutting a release
 
 ```bash
-# 1. The contract snapshot is current and the generated sources match it.
-codegen/run.sh --check
+# 1. Every gate is green against the backend the release is generated from: generated code
+#    matches its contract (drift, names.lock), build, lint, tests, conformance, package.
+OBLODAI_BACKEND=../oblodai-backend make ci
 
-# 2. Everything is green, including the live tier against a gateway.
-mvn -o verify
-OBLODAI_LIVE_URL=http://127.0.0.1:8095 mvn -o verify
+# 2. Version, changelog, docs.
+#    - pom.xml <version> and Oblodai.VERSION agree (make ci checks it).
+#    - CHANGELOG.md gets the release's section and date; MIGRATION notes for a breaking change.
 
-# 3. Version, changelog, docs.
-#    - pom.xml <version> and Oblodai.VERSION must agree; a test would not catch a mismatch.
-#    - CHANGELOG.md gets the release's section and date.
-#    - README/AGENTS route and error-code counts match contract/contract.json.
-
-# 4. Publish.
+# 3. Publish.
 mvn -Prelease deploy -Dgpg.keyname=<KEY_ID> -Dgpg.passphrase=<PASSPHRASE>
 ```
 
@@ -59,8 +55,8 @@ and in the portal's search within a few hours.
 Then tag it:
 
 ```bash
-git tag -a v1.3.0 -m "Java SDK 1.3.0"
-git push origin v1.3.0
+git tag -a v2.0.0 -m "Java SDK 2.0.0"
+git push origin v2.0.0
 ```
 
 ## In CI

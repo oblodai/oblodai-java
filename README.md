@@ -11,7 +11,7 @@
 
 Payments, payouts, payment links, splits, static wallets, webhooks — one API key.
 
-<img src="https://img.shields.io/badge/maven-com.oblodai%3Aoblodai--sdk%201.3.0-C71A36?style=flat-square" alt="maven">
+<img src="https://img.shields.io/badge/maven-com.oblodai%3Aoblodai--sdk%202.0.0-C71A36?style=flat-square" alt="maven">
 <a href="https://github.com/oblodai/oblodai-java/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/oblodai/oblodai-java/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
 <img src="https://img.shields.io/badge/java-17%2B-007396?style=flat-square" alt="Java 17+">
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-000000?style=flat-square" alt="License: MIT"></a>
@@ -22,17 +22,15 @@ Payments, payouts, payment links, splits, static wallets, webhooks — one API k
 
 ---
 
-The official Java / Kotlin SDK for the **Oblodai** payment gateway: accepting payments, payouts,
-bulk operations (batches), payment links, payout links (crypto cheques), splits, static wallets,
-transfers, webhooks. Request signing, response parsing, typed errors, idempotency and retries — out
-of the box. Java 17 or newer, one runtime dependency (Jackson) over the JDK's own
-`java.net.http.HttpClient`; the Kotlin extensions — coroutines and a request DSL — are optional
-dependencies that a Java project never pulls.
+The official Java / Kotlin SDK for the **Oblodai** payment gateway: payments, payouts, batches,
+payment links, payout links (crypto cheques), splits, static wallets, webhooks, documents. Java 17
+or newer; one runtime dependency (Jackson, for the JSON tree) over the JDK's own
+`java.net.http.HttpClient`. Kotlin gets coroutines and flows from the same artifact.
 
-> **Base URL.** Defaults to `https://api.oblodai.com`. Override `baseUrl(...)` and supply your own
-> keys at initialisation if needed. The scheme must be `https://`; plain `http://` is accepted only
-> for loopback (`http://127.0.0.1:8095`) or with the explicit allow-insecure option
-> (`allowInsecureBaseUrl(true)`, or `OBLODAI_ALLOW_INSECURE=1`).
+Version 2 is generated from the gateway's OpenAPI contract: every resource, method and model under
+`com.oblodai.generated` comes from `openapi.json` by `tools/sdkgen`, and a drift check keeps it
+that way. The runtime around it - signing, retries, idempotency, pagination, errors, webhooks - is
+written by hand, once. Coming from 1.x? See [MIGRATION-2.0.md](MIGRATION-2.0.md).
 
 ## Installation
 
@@ -40,440 +38,283 @@ dependencies that a Java project never pulls.
 <dependency>
   <groupId>com.oblodai</groupId>
   <artifactId>oblodai-sdk</artifactId>
-  <version>1.3.0</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 
 ```gradle
-implementation("com.oblodai:oblodai-sdk:1.3.0")
+implementation("com.oblodai:oblodai-sdk:2.0.0")
 ```
 
-Java 17 or newer. Jackson is the only runtime dependency; the HTTP client is the JDK's own
-`java.net.http.HttpClient`. Kotlin users get coroutines and a request DSL from the same artifact —
-`kotlin-stdlib` and `kotlinx-coroutines` are declared `optional`, so add them yourself if you want
-that half.
+## Keys
 
-## Where to get keys
-
-One API key, and it signs everything. Take it from the [dashboard](https://my.oblodai.com) under
-**API keys**: a public id `oblodai_<hex>` and a secret `oblodai_live_<hex>`, shown once. That pair
-signs every signed route — money in and money out alike, invoices and payouts, settings and
-documents.
-
-The sandbox pair comes from sandbox onboarding (`merchants().createSandbox(...)`, or the dashboard):
-a public id `test_oblodai_<hex>` with the secret `oblodai_test_<hex>`. It behaves exactly like the
-live pair against sandbox data.
-
-A second credential exists only for platforms that onboard merchants on a self-hosted gateway: an
-**admin token**, set with `adminToken(...)` (or `OBLODAI_ADMIN_TOKEN`). It is sent as `X-Admin-Token`
-on the unsigned `merchants()` provisioning routes and on nothing else.
-
-> **Legacy split keys.** Merchants onboarded before the single-key change may still hold a split
-> pair — `oblodai_pk_<hex>` for money in, `oblodai_wk_<hex>` for money out — and only they can see a
-> 403 `merchant.wrong_key_kind`. If you do, replace the pair with an API key in the dashboard; this
-> SDK carries one pair and does not switch between kinds.
+One API key signs every route: a public id `oblodai_<hex>` and a secret `oblodai_live_<hex>` from the
+[dashboard](https://my.oblodai.com) (sandbox: `test_oblodai_<hex>` / `oblodai_test_<hex>`). They
+fall back to `OBLODAI_PUBLIC_ID` and `OBLODAI_SECRET`. The only other credential is the admin token
+of a self-hosted gateway (`adminToken(...)`, `OBLODAI_ADMIN_TOKEN`), sent on the onboarding route
+alone.
 
 ## Quick start
+
+Configure the client once and share it: it is immutable and thread-safe.
 
 ```java
 Oblodai oblodai = Oblodai.builder()
         .publicId(System.getenv("OBLODAI_PUBLIC_ID"))
         .secret(System.getenv("OBLODAI_SECRET"))
         .build();
-
-Payment invoice = oblodai.payments().create(new PaymentRequest()
-        .amount("25")                 // amounts are decimal strings, never floats
-        .currency("USDT")             // what you price in: a fiat (USD, EUR, …) or a crypto asset
-        .network(Network.TRON)        // omit it to let the payer choose the network on the pay page
-        .orderId("order-1001")        // your reference; the invoice is idempotent per order_id
-        .urlCallback("https://shop.example/oblodai/webhook"));
-
-System.out.println(invoice.url() + " " + invoice.address() + " " + invoice.status()); // created
 ```
 
-Price in fiat with `.amount("25").currency("USD").toCurrency("USDT")` — `currency` is what you
-charge, `to_currency` the asset the payer sends.
-
-Money out uses the same key. Dry-run it first, then create it under your own idempotency key so a
-lost response can never become a second payout:
+Accept a payment:
 
 ```java
-PayoutValidation check = oblodai.payouts().validate(new PayoutValidateRequest()
-        .amount("10").currency("USDT").network(Network.TRON).address(address));
+PaymentView invoice = oblodai.payments().create(PaymentRequest.builder()
+        .amount("25")                  // a decimal string or a BigDecimal, never a double
+        .currency("USDT")
+        .orderId("order-1001")         // your reference; the invoice is idempotent per order
+        .urlCallback("https://shop.example/oblodai/webhook")
+        .build());
 
-Payout payout = oblodai.payouts().create(new PayoutRequest()
-        .amount("10").currency("USDT").network(Network.TRON).address(address)
-        .orderId("payout-42"), RequestOptions.of().idempotencyKey("payout-42"));
-
-System.out.println(check.commission() + " fee, payout " + payout.uuid() + " " + payout.status());
+System.out.println(invoice.url());     // send the payer here
 ```
 
-Runnable programs live in [`examples/`](examples).
+Read it back (webhooks are the source of truth; this is for reconciliation):
+
+```java
+PaymentInfoResult now = oblodai.payments().getInfo(
+        LookupRequest.builder().uuid(invoice.uuid()).build());
+
+if (Statuses.isPaymentPaid(now.status())) {
+    BigDecimal received = Money.toBigDecimal(now.merchantAmount());   // exact, never a double
+    System.out.println("paid, " + received + " credited");
+}
+```
+
+Send a payout under your own idempotency key - a retry after a crash can never pay twice:
+
+```java
+PayoutItem payout = oblodai.payouts().create(
+        PayoutRequest.builder()
+                .amount(new BigDecimal("10.50"))
+                .currency("USDT")
+                .network("tron")
+                .address("TXYZ")
+                .orderId("withdrawal-77")
+                .build(),
+        RequestOptions.of().idempotencyKey("withdrawal-77"));   // one key for every retry
+```
 
 ### Amounts
 
-Amounts are decimal strings end to end (USDT has 6 decimals, BTC 8, ETH 18). Never parse one into a
-`double`, and never compare two amount strings with `String.compareTo` — `"10"` sorts before `"9"`.
+Amounts are `BigDecimal` in the models and decimal strings on the wire. A builder takes a
+`BigDecimal` or a decimal string (`.amount("10.50")`); there is no `double` overload, and a `double`
+that slips in anyway (`putExtra`, a parsed map) fails with `sdk.float_amount` before anything is
+sent. `Money` adds, subtracts and compares amounts exactly and refuses a `double` too.
+
+## Resources and methods
+
+`client.<resource>().<method>(params, options)`: the resource is the contract's tag, the method its
+`operationId` without the resource name. Parameters are a model built with its builder
+(`PaymentRequest.builder()...build()`); path parameters come first, query parameters are a
+`*Query` model. Every method has an overload with a trailing `RequestOptions`, and overloads
+without the optional parts. The full list is in [`names.lock`](names.lock).
+
+| resource | methods |
+| --- | --- |
+| `account()` | `getBalance`, `getSummary`, `listExchangeRates` |
+| `apiAllowlist()` | `addEntry`, `list`, `removeEntry`, `setEnabled` |
+| `batches()` | `createPayment`, `createPayout`, `createRefund`, `getInfo` |
+| `checkout()` | `get`, `getOnramp`, `getPublicPaymentLink`, `getQr`, `getSourceOfFundsForm`, `listCurrencies`, `paymentLink`, `selectMethod`, `startOnramp`, `submitSourceOfFunds` |
+| `documents()` | `createJob`, `downloadJobFile`, `getBalance`, `getBatch`, `getFees`, `getJob`, `getLedger`, `getPaymentLink`, `getPayoutLinkCheque`, `getReferrals`, `getSigned`, `getSplit`, `getStatement`, `getWalletStatement` |
+| `paymentLinks()` | `create`, `get`, `list`, `toggle` |
+| `payments()` | `cancel`, `create`, `getAmlLinks`, `getCheckoutConfig`, `getInfo`, `getQr`, `listHistory`, `listServices`, `resolve`, `sendEmail`, `setCheckoutConfig` |
+| `payoutLinks()` | `cancel`, `claimPayout`, `create`, `createBatch`, `get`, `getPayoutClaim`, `list` |
+| `payouts()` | `approve`, `calculate`, `cancel`, `create`, `createMass`, `createTransferBatch`, `getInfo`, `listHistory`, `listServices`, `transferToPersonal`, `transferToUser`, `validate` |
+| `referrals()` | `getInfo` |
+| `refunds()` | `blockedWallet`, `payment` |
+| `sandbox()` | `faucet`, `listWebhooks`, `onboardStore`, `replayWebhook`, `reset`, `simulateDeposit` |
+| `settings()` | `configureVrcs`, `deleteAutoWithdrawRule`, `getAccuracy`, `getAutoConvert`, `getAutoRefund`, `getPaymentFeeConfig`, `getPayoutFeeConfig`, `getRefundFeeConfig`, `listAcceptedCurrencies`, `listApiLog`, `listAutoWithdrawRules`, `listDiscounts`, `setAcceptedCurrencies`, `setAccuracy`, `setAutoConvert`, `setAutoRefund`, `setAutoWithdrawRule`, `setDiscount`, `setPaymentFeeConfig`, `setPayoutFeeConfig`, `setRefundFeeConfig` |
+| `splits()` | `createRule`, `deleteRule`, `getConfig`, `getRecipientOptIn`, `listRules`, `setConfig`, `setRecipientOptIn` |
+| `wallets()` | `block`, `create`, `getQr` |
+| `webhooks()` | `listDeliveries`, `register`, `requeueDelivery`, `resendPayment`, `rotateSecret`, `sendLegacyTest`, `sendTestConversion`, `sendTestPayment`, `sendTestPayout`, `sendTestWallet`, `setActive` |
+
+Models keep fields this SDK version does not know yet (`extra()`, sent back as they came), and an
+enum value it does not know parses (`PaymentStatus.of("new_status").isKnown() == false`).
+`toString()` is short and never shows a secret.
+
+## Per-call options
+
+Five options, all explicit: `idempotencyKey`, `timeout` (a `Duration`, per attempt), `maxRetries`,
+`extraHeaders` and `requestId` (sent as `X-Request-ID`; a fresh UUID when not set, the same on
+every attempt of the call). `withOptions(...)` makes a copy of the client with other defaults.
 
 ```java
-System.out.println(Money.add("10.000000", "0.5"));      // "10.500000"
-System.out.println(Money.compare("25", "25.000000"));   // 0 — equal at any scale
-System.out.println(Money.isZero("0.000000"));           // true
-System.out.println(Money.toBigDecimal("1.5"));          // when you deliberately want one
+oblodai.account().getBalance(RequestOptions.of()
+        .timeout(Duration.ofSeconds(5))       // per attempt
+        .maxRetries(0)                        // this call only
+        .extraHeader("X-Trace", "t-42")
+        .requestId("order-1001-balance"));    // sent as X-Request-ID
+
+Oblodai patient = oblodai.withOptions(RequestOptions.of().timeout(Duration.ofSeconds(60)));
 ```
 
-Anything that is not a plain decimal (`"1e3"`, an empty string, 64+ characters) is a
-`ConfigException` with code `sdk.bad_amount`, refused before it is sent. A JSON number arriving
-where the contract says string is refused too, rather than silently stringified.
+## Lists
 
-### Async
+A list method returns a lazy `Pager`: iterate it for every item, `byPage()` for every page,
+`firstPage()` for one, `all(max)` to collect. Nothing is requested until it is consumed.
 
 ```java
-OblodaiAsync client = oblodai.async();                 // same engine, connections and clock
-CompletableFuture<Payment> invoice = client.payments().create(request);
-CompletableFuture<List<Payout>> all = client.payouts().history().all(500);
-```
-
-Every future fails with an `OblodaiException` as its cause, and `cancel(true)` on any future the SDK
-returned aborts the HTTP exchange in flight and stops the retry loop.
-
-### Kotlin
-
-The Java SDK is the Kotlin SDK: `com.oblodai.kotlin` adds coroutines and builders on the same types.
-
-```kotlin
-val oblodai = Oblodai.builder().publicId(id).secret(secret).build().async()
-
-val invoice = oblodai.payments().create(payment {
-    amount("25"); currency("USDT"); network(Network.TRON); orderId("order-1001")
-}).await()
-
-oblodai.payments().history().asFlow().take(100).collect { println(it.uuid()) }
-```
-
-`await()` throws the SDK's own exception rather than a `CompletionException` wrapper, and cancelling
-the coroutine cancels the call. `asFlow()` is pull-based: it asks for the next page only once the
-collector has taken the last item of the previous one, so nothing is dropped and nothing is fetched
-that the collector never reads.
-
-## Sandbox / testing
-
-The sandbox is a chainless copy of the gateway: fake balance from a faucet, simulated deposits, real
-signed webhooks. Integrate against it first — a sandbox key is the only thing that changes.
-
-```java
-Oblodai sandbox = Oblodai.builder()
-        .publicId(System.getenv("OBLODAI_PUBLIC_ID"))       // test_oblodai_…
-        .secret(System.getenv("OBLODAI_SECRET"))            // oblodai_test_…
-        .build();
-
-sandbox.sandbox().faucet(new SandboxFaucetRequest().asset("USDT").amount("100"));
-sandbox.sandbox().deposit(new SandboxDepositRequest().invoiceId(invoiceId).amount("25"));
-
-sandbox.webhooks().testPayment(new TestWebhookPaymentRequest().uuid(invoiceId).status("paid"));
-for (WebhookDelivery delivery : sandbox.sandbox().webhooks()) System.out.println(delivery.status());
-
-sandbox.sandbox().reset();                                  // cancels open invoices, zeroes balances
-```
-
-`sandbox().replay(deliveryId)` re-sends a delivery you have already seen. Rehearsal deliveries — from
-`webhooks().testPayment/testPayout/testWallet(...)` or from the sandbox — are signed exactly like
-live ones and carry `test: true` in the signed body and `X-Webhook-Test: true` on the request, so
-`delivery.isTest()` is true for them: never act on one as if money moved.
-
-`faucet(...)` and `reset()` are signed like every other route — the sandbox key calls them itself.
-
-## Method overview
-
-Sixteen namespaces cover all 107 merchant routes of the contract snapshot.
-
-| Namespace        | Methods                                                                                                                                                                                     | Routes |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -----: |
-| `payments()`     | create · info/get · cancel · history/list · batch · qr · services · sendEmail · resend · publicView · select · publicQr                                                                       |     12 |
-| `refunds()`      | create · resolve · batch                                                                                                                                                                     |      3 |
-| `payouts()`      | create · validate · calculate · info/get · cancel · approve · history/list · mass · batch · services · get/setFeeConfig · get/setRefundFeeConfig                                              |     14 |
-| `payoutLinks()`  | create · info/get · list · cancel · batch · cheque · claimPreview · claim                                                                                                                     |      8 |
-| `paymentLinks()` | create · info/get · list · toggle · publicView · checkout                                                                                                                                    |      6 |
-| `batches()`      | info (poll an asynchronous batch)                                                                                                                                                            |      1 |
-| `transfers()`    | toPersonal · toUser · batch                                                                                                                                                                  |      3 |
-| `wallets()`      | create · qr · block · refundBlockedDeposit                                                                                                                                                   |      4 |
-| `webhooks()`     | register · rotateSecret · deliveries · testPayment/testPayout/testWallet · test(kind, …)                                                                                                      |      7 |
-| `documents()`    | statement · ledger · balanceCertificate · feeSchedule · splitReport · batchReport · linkReport · walletStatement · referralsReport · createJob · jobInfo · jobFile · download                  |     13 |
-| `splits()`       | createRule · listRules · deleteRule · get/setConfig · get/setOptIn                                                                                                                            |      7 |
-| `settings()`     | setDiscount · listDiscounts · get/setAccuracy · get/setAutoRefund · listAccepted · setAccepted · get/setPaymentFeeConfig · list/set/deleteAutoWithdraw · list/add/remove/enableApiAllowlist    |     17 |
-| `account()`      | balance · referral · vrcs                                                                                                                                                                    |      3 |
-| `catalog()`      | currencies · exchangeRates                                                                                                                                                                   |      2 |
-| `sandbox()`      | faucet · deposit · webhooks · replay · reset                                                                                                                                                 |      5 |
-| `merchants()`    | create · createSandbox (provisioning; unsigned, `adminToken(...)` on a self-hosted gateway)                                                                                                   |      2 |
-
-Lookups accept a bare id or a request object: `payments().info(uuid)`,
-`payments().info(new PaymentInfoRequest().orderId("order-1001"))`. Synchronous batches are capped per
-call — `payouts().mass(...)` at 100 elements, `payoutLinks().batch(...)` at 500 — and report each
-element separately, so a 200 can still contain failures. Asynchronous batches (`payments().batch`,
-`payouts().batch`, `refunds().batch`, `transfers().batch`) take up to 5000 elements and are polled
-with `batches().info(...)`. Documents come back as a `FileResult` (`bytes`, `contentType`,
-`filename`). Payer-facing routes — `payments().publicView/select/publicQr`,
-`paymentLinks().publicView/checkout`, `payoutLinks().claimPreview/claim` — need no credentials.
-
-### Lists
-
-List methods return a `Pager<T>`. Nothing is requested until you consume it, and the walk follows the
-gateway's own `paginate.has_pages` flag.
-
-```java
-Page<Payment> page = oblodai.payments().history(new PaymentHistoryRequest().limit(50)).firstPage();
-
-for (Payout payout : oblodai.payouts().history(new PayoutHistoryRequest().status("confirmed"))) {
-    process(payout);                                    // one page fetched at a time
+int seen = 0;
+for (PaymentView p : oblodai.payments().listHistory()) {            // every item, page by page
+    System.out.println(p.orderId() + " " + p.status());
+    seen++;
 }
-
-List<Payout> refunds = oblodai.payouts().history(new PayoutHistoryRequest().kind("refund")).all(1000);
-Stream<Payment> stream = oblodai.payments().history().stream();
-```
-
-### Statuses
-
-- Invoice: `select → created → confirm_check → paid | paid_over | wrong_amount | expired | cancelled`.
-  `Statuses.isPaymentPaid(...)` covers `paid`/`paid_over`; `wrong_amount` (underpaid) waits for
-  `refunds().resolve(...)`; `Statuses.isPaymentFinal(...)` covers the rest.
-- Payout: `pending → approved → awaiting_cosign → broadcasting → sent → confirmed | failed | cancelled`.
-
-Prefer webhooks for state changes; poll `info` only as a fallback.
-
-The vocabularies (`PaymentStatus`, `PayoutStatus`, `Network`, …) are **open**: the values this
-snapshot knows are interned constants you can compare with `==`, and a value the gateway starts
-sending that this SDK has never heard of arrives as an instance carrying that exact string —
-`status.wire()` is what the gateway said, `status.isKnown()` says it is new. They are not Java enums,
-so there is no `switch` over them and no `UNKNOWN` constant. An event kind newer than this SDK
-arrives the same way, as an `UnknownEvent` carrying the raw `type`. A gateway that grows its
-vocabulary can neither break a deployed client nor have what it said thrown away.
-
-## Webhooks
-
-Register an endpoint with `webhooks().register(url)`; the response carries the signing secret, shown
-once. Then verify every delivery over the **raw** request bytes — a framework that parsed and
-re-serialized the body has already changed them, and the signature will not match.
-
-```java
-byte[] rawBody = exchange.getRequestBody().readAllBytes();   // the RAW bytes, always
-
-WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
-        rawBody,
-        WebhookHeaders.ofMulti(exchange.getRequestHeaders()), // or of(Map), or a lambda
-        WebhookVerifier.options(secret).previousSecret(previousSecret));
-
-if (delivery.isTest()) return;                               // a rehearsal: no money moved
-if (!seen.add(delivery.id())) return;                        // X-Webhook-Id, stable across retries
-if (delivery.event() instanceof PaymentEvent payment && payment.status() == PaymentStatus.PAID) {
-    markOrderPaid(payment.orderId());
+for (Page<PaymentView> page : oblodai.payments().listHistory(
+        HistoryRequest.builder().limit(100L).build()).byPage()) {  // one request per page
+    System.out.println(page.items().size() + " of " + page.total());
 }
-```
-
-The checks run headers → MAC → freshness → body, so the freshness window is never an oracle for an
-unauthenticated caller. A secret that is null or blank, and a negative tolerance, are a
-`ConfigException` before any crypto (`Duration.ZERO` disables the freshness check deliberately,
-sub-second windows are honoured). Deduplicate on `delivery.id()`; drop out-of-order deliveries with
-`WebhookVerifier.isStale(event, lastSequence)`. After `webhooks().rotateSecret()` keep the previous
-secret for at least 26 hours: deliveries queued before the rotation stay signed with it for their
-whole retry life. Verification is a standalone class — no client, no API key, no network.
-
-An event type this snapshot does not know decodes to an `UnknownEvent` that keeps the raw string;
-`WebhookVerifier.isKnownEvent(event)` tells them apart. What your receiver answers matters, because
-the gateway retries anything that is not 2xx:
-
-```java
-WebhookEvent event;
-try {
-    event = WebhookVerifier.verify(rawBody, headers, options);
-} catch (SignatureException notFromTheGateway) {
-    return 401;                       // the ONLY failure that deserves a 401
-} catch (WebhookPayloadException unreadable) {
-    return 400;                       // authentic delivery, body is not an event: webhook.bad_payload
-}
-if (!WebhookVerifier.isKnownEvent(event)) return 200;   // newer than this SDK: acknowledge, ignore
 ```
 
 ## Errors
 
-Every failure is an `OblodaiException` carrying the API's error envelope: `code()`
-(`payout.insufficient_funds`), `httpStatus()`, `retryable()`, `retryAfter()`, `requestId()`,
-`field()` (400s), `synthetic()` (a proxy answered, not the gateway). Quote `requestId()` to support.
-
-| Class                                             | HTTP        | When                                                        |
-| ------------------------------------------------- | ----------- | ----------------------------------------------------------- |
-| `ValidationException`                             | 400         | the request is malformed or a field is rejected              |
-| `AuthenticationException`                         | 401         | bad signature, bad timestamp, unknown public id              |
-| `PermissionException`                             | 403         | IP not on the allow-list, feature disabled                   |
-| `NotFoundException`                               | 404         | no such object                                               |
-| `ConflictException` / `IdempotencyConflictException` | 409       | state conflict; the key was reused with a different body     |
-| `RateLimitException`                              | 429         | rate limited — honour `retryAfter()`                         |
-| `UnavailableException`                            | 503         | gateway temporarily unavailable                              |
-| `InternalException`                               | other 5xx   | gateway fault                                                |
-| `TransportException`                              | no response | connection failure, timeout, deadline                        |
-| `ConfigException`                                 | not sent    | `sdk.bad_config`, `sdk.missing_credentials`, `sdk.bad_idempotency_key`, `sdk.idempotency_unsupported`, `sdk.bad_path_param`, `sdk.bad_header`, `sdk.bad_amount` |
-| `ContractException`                               | unreadable  | `sdk.bad_envelope`, `sdk.response_too_large`                 |
-| `WebhookPayloadException`                         | —           | `webhook.bad_payload`: authentic delivery, not an event      |
-| `SignatureException`                              | —           | webhook signature or freshness check failed                  |
-
-A code is `family.reason`, and the contract snapshot carries all 469 of them — `ErrorCodes.ALL`, and
-`ErrorCodes.isKnown(code)` for one. Branch on the code, not on the message:
+Everything the SDK throws is an unchecked `OblodaiException` with `code()` (`family.reason`),
+`httpStatus()`, `retryable()`, `retryAfter()`, `requestId()` and `field()`; `getMessage()` reads
+`[code] text (request_id=...)`. Subclasses by status: `ValidationException` 400,
+`AuthenticationException` 401, `PermissionException` 403, `NotFoundException` 404,
+`ConflictException` / `IdempotencyConflictException` 409, `RateLimitException` 429,
+`UnavailableException` 503, `InternalException`, `TransportException` (no response),
+`ConfigException` (refused before sending), `ContractException` (an answer the SDK cannot read).
 
 ```java
+String code = null;
 try {
-    oblodai.payouts().create(request);
+    oblodai.payments().getInfo(LookupRequest.builder().uuid("missing").build());
 } catch (OblodaiException e) {
-    switch (e.code()) {
-        case "payout.insufficient_funds", "payout.funds_maturing" ->
-                scheduleRetry(e.retryAfter() == null ? 60 : e.retryAfter());
-        default -> throw e;   // the SDK already retried what was safe to retry
-    }
+    System.err.println(e.getMessage());   // [payment.not_found] … (request_id=…)
+    code = e.code();                      // retryable(), field(), requestId() as well
 }
 ```
 
-Codes worth handling by name: `payout.insufficient_funds` and `payout.funds_maturing` (both
-retryable), `idempotency.key_reused`, `invoice.not_payable`, `payment.not_found`,
-`merchant.bad_signature`, `request.rate_limited`.
+## Retries and idempotency
 
-`toString()` and `details()` never include the raw response body, so a log cannot spill an invoice
-payload or a cheque passcode; `raw()` is there for deliberate inspection.
+A call is retried (two retries by default, exponential backoff with jitter, `Retry-After`
+honoured) only when repeating it cannot duplicate an effect: a read-only route, or a write the
+gateway deduplicates by `Idempotency-Key`. The SDK generates that key for such routes and reuses it
+on every attempt; your own key (`RequestOptions.idempotencyKey`) makes it survive a restart. A
+write the gateway does not deduplicate is never re-sent after a timeout or a proxy error, and a key
+passed to it is refused (`sdk.idempotency_unsupported`). A 409 `idempotency.in_progress` waits and
+repeats with the same key. One deadline (90 s by default) bounds the whole call.
 
-## Retries, idempotency and timeouts
-
-- An error is retried only when the API says `retryable`. Answers without an API envelope (a proxy
-  502/503) and transport failures are retried only on read routes or keyed writes. "Read route" is
-  not a guess about the path: it is the `safe` flag the gateway states for each route in the contract
-  snapshot. `Retry-After` wins over the computed backoff, capped by `maxRetryAfterMs`.
-- Create-type routes get an `Idempotency-Key` automatically — one per logical call, reused on every
-  retry — so a timeout can never produce a second payout. Pass your own key to make retries safe
-  across process restarts. On routes the gateway does not deduplicate the SDK **refuses** a key
-  (`sdk.idempotency_unsupported`) — list methods included, where it is refused as the pager is built
-  rather than quietly dropped: the header would be ignored, and only the SDK would believe a re-send
-  was safe.
-- Every method takes an optional last argument, `RequestOptions` — every method, including the
-  aliases (`get`, `list`) and the no-argument list forms:
+## Raw responses and hooks
 
 ```java
-oblodai.payouts().create(request, RequestOptions.of()
-        .idempotencyKey(orderId)                  // your own key; generated for you when omitted
-        .timeout(Duration.ofSeconds(10))          // per attempt
-        .deadline(Duration.ofSeconds(45))         // whole call, retries and pauses included
-        .header("X-Tenant", "acme"));             // one call only, on top of the client-wide headers
+ApiResponse<PaymentView> raw = oblodai.withRawResponse(c -> c.payments().create(
+        PaymentRequest.builder().amount("25").currency("USDT").build()));
+System.out.println(raw.status() + " " + raw.requestId() + " " + raw.value().uuid());
+
+Oblodai observed = Oblodai.builder()
+        .onRequest(r -> System.out.println("-> " + r.operationId() + " #" + r.attempt()))
+        .onResponse(r -> System.out.println("<- " + r.status() + " in " + r.elapsed()))
+        .build();
+observed.close();
 ```
 
-- On a 401 that means a bad signature or timestamp, the SDK reads the server's `Date`, re-signs once,
-  and keeps the offset only if that attempt got past authentication. The offset is shared by every
-  call the client makes and corrected atomically, so concurrent calls on a skewed host converge on
-  one correction instead of undoing each other's.
-- Redirects are never followed; if an injected `HttpClient` follows one, the SDK notices the answer
-  came from another URL and fails the call.
-- A response body is read under a ceiling — 8 MiB for a JSON envelope, 64 MiB for a document — and a
-  larger answer fails the call with `sdk.response_too_large` instead of the process.
+## Long-running operations
+
+Batches and document exports finish in the background. `jobs()` follows them: `waitFor()` polls
+until the status is terminal (`completed`, `stopped`, `done`, `failed`, `expired`) and returns that
+answer; `download()` fetches an export's file.
+
+```java
+BatchSubmitResponse submitted = oblodai.batches().createPayout(PayoutBatchRequest.builder()
+        .payouts(List.of(PayoutRequest.builder()
+                .amount("5").currency("USDT").network("tron").address("TXYZ").orderId("b-1")
+                .build()))
+        .build());
+BatchInfoResponse batch = oblodai.jobs().batch(submitted).waitFor();   // polls until terminal
+System.out.println(batch.status() + ": " + batch.succeeded() + "/" + batch.total());
+
+DocumentJobAccepted export = oblodai.documents().createJob(
+        DocumentJobRequest.builder().kind(DocumentJobKind.STATEMENT).build());
+Job<?> job = oblodai.jobs().document(export);
+job.waitFor(Duration.ofMinutes(2), Duration.ofSeconds(3));
+FileResult file = job.download();                                   // .writeTo(Path.of(...))
+System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
+```
+
+## Webhooks
+
+Verify over the raw request bytes; deduplicate on `eventId()` (`X-Webhook-Event-Id`); never act on
+a test delivery. `event().asPayment()`, `asPayout()`, `asWallet()`, `asConversion()` give the typed
+event; an event kind this SDK does not know is still delivered, with its raw `type()` and
+`fields()`.
+
+```java
+try {
+    WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
+            rawBody,                                    // the RAW bytes, not a re-serialized body
+            WebhookHeaders.of(headers),
+            WebhookVerifier.options(secret));
+    if (delivery.isTest()) {
+        return 200;                                     // a rehearsal: no money moved
+    }
+    if (delivery.event().type().equals("payment")) {
+        System.out.println(delivery.event().asPayment().status());
+    }
+    return 200;
+} catch (SignatureException e) {
+    return 401;
+}
+```
+
+## Asynchronous client
+
+`oblodai.async()` (or `builder().buildAsync()`) has the same resources returning
+`CompletableFuture`; cancelling a future cancels the HTTP exchange.
+
+```java
+String uuid = oblodai.async().payments()
+        .create(PaymentRequest.builder().amount("25").currency("USDT").build())
+        .thenApply(PaymentView::uuid)
+        .join();
+```
+
+### Kotlin
+
+```kotlin
+val async = oblodai.async()
+val invoice = async.payments().create(
+    PaymentRequest.builder().amount("25").currency("USDT").orderId("order-1001").build()
+).await()                                          // suspends; cancelling cancels the call
+val all = async.payments().listHistory().asFlow().toList()
+println("${invoice.uuid()}: ${all.size} invoices")
+```
 
 ## Configuration
 
-```java
-Oblodai oblodai = Oblodai.builder()
-        .publicId(id).secret(secret)
-        .baseUrl("https://api.oblodai.com")
-        .timeout(Duration.ofSeconds(30))
-        .deadline(Duration.ofSeconds(90))
-        .retry(new RetryOptions(2, 250, 4_000, 30_000))
-        .header("X-Tenant", "acme")
-        .logger(Logger.console(Logger.Level.INFO))
-        .build();
-```
-
-| Builder option                       | Default                                     | What it does                                                     |
-| ------------------------------------ | ------------------------------------------- | ---------------------------------------------------------------- |
-| `publicId(…)` / `secret(…)`          | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET`      | the merchant's API key; the secret signs and is never sent        |
-| `adminToken(…)`                      | `OBLODAI_ADMIN_TOKEN`                       | `X-Admin-Token`, sent on merchant provisioning routes only        |
-| `baseUrl(…)`                         | `OBLODAI_BASE_URL`, else `https://api.oblodai.com` | API origin; a path prefix is kept                          |
-| `allowInsecureBaseUrl(boolean)`      | `OBLODAI_ALLOW_INSECURE=1`, else `false`    | permits a plain-http base URL away from loopback                  |
-| `timeout(Duration)`                  | 30 s                                        | per attempt                                                       |
-| `deadline(Duration)`                 | 90 s                                        | whole call, retries and pauses included                           |
-| `retry(RetryOptions)`                | 2 retries, 250 ms base, 4 s cap, 30 s `Retry-After` cap | `RetryOptions.none()` disables retrying                |
-| `header(name, value)`                | —                                           | a header on every request; names the SDK owns are refused          |
-| `logger(Logger)`                     | `OBLODAI_LOG`, else silent                  | structured logging; fields arrive already redacted                |
-| `objectMapper(ObjectMapper)`         | the SDK's own configuration                 | JSON mapper to decode with                                        |
-| `httpClient(HttpClient)`             | one the SDK builds and closes itself        | control proxies, TLS, executors                                   |
-| `clock(SkewCorrectingClock)`         | a clock that learns the gateway's time      | the signing clock                                                 |
-| `environment(Map<String,String>)`    | `System.getenv()`                           | replaces the environment the fallbacks read, for tests            |
-
-| Environment variable         | Effect                                                        |
-| ---------------------------- | ------------------------------------------------------------- |
-| `OBLODAI_PUBLIC_ID`          | public id of the API key                                       |
-| `OBLODAI_SECRET`             | secret of the API key                                          |
-| `OBLODAI_ADMIN_TOKEN`        | admin token of a self-hosted gateway                           |
-| `OBLODAI_BASE_URL`           | API origin                                                     |
-| `OBLODAI_LOG`                | `debug` \| `info` \| `warn` \| `error` — log to stderr         |
-| `OBLODAI_ALLOW_INSECURE`     | `1` permits a plain-http base URL                              |
-
-An option set explicitly wins; otherwise the environment is read, then the default.
-
-**Redaction.** The transport redacts sensitive values *before* handing fields to a logger, so an
-injected logger never sees a key, a signature or a cheque passcode — it is not something the logger
-implementation has to remember. The same goes for models that carry a shown-once value —
-`WebhookEndpoint.secret`, `WebhookSecretRotated.secret`, `ApiKeyPair.secret`,
-`PayoutLink.claimToken`/`claimUrl`/`passcode`: readable through their accessor, `[redacted]` in
-`toString()` and in JSON.
-
-**Self-hosted or local gateway.** `baseUrl("http://127.0.0.1:8095")` works out of the box; other
-plain-http hosts need `allowInsecureBaseUrl(true)`. A path prefix in `baseUrl` is kept
-(`https://gw.corp/oblodai` → `https://gw.corp/oblodai/v1/payment`).
-
-```java
-Oblodai.builder().baseUrl("http://127.0.0.1:8095").build();
-Oblodai.builder().baseUrl("http://gw.corp").allowInsecureBaseUrl(true).build();
-```
-
-`header(...)` refuses the names the SDK owns (`Accept`, `Content-Type`, `User-Agent`, `X-Public-Id`,
-`X-Signature`, `X-Timestamp`, `Idempotency-Key`, `X-Admin-Token`) with `sdk.bad_header`, so the admin
-token is not something a caller can bolt onto every request.
-
-The client is `AutoCloseable`: `close()` releases the HTTP client it built for itself (a no-op on
-JDK 17, where `HttpClient` has no close operation). One client per key pair, kept for the life of the
-process, is the intended shape.
-
-## The contract snapshot
-
-`contract/` is exported by the gateway's own test suite from core commit `2cc44c16f516`: the route
-registry (107 merchant routes, each with its method, path, gate — `public`, `key` or `onboard` —
-`idempotent`, `safe`, `bare` and list shape), request DTO schemas with English field docs, enums, all
-469 error codes, signing vectors, golden response bodies recorded from a live gateway and real signed
-webhook deliveries.
-
-`src/main/java/com/oblodai/contract/` is generated from it by `codegen/run.sh` — 92 files, 107 routes,
-469 error codes, 76 request types. `codegen/run.sh --check` is the drift gate: it fails the build when
-the committed sources and the snapshot disagree, and `mvn verify` runs it first. The contract tests
-then check every model against the golden bodies and every route against the registry.
-
-To refresh: replace `contract/`, run `codegen/run.sh`, run `mvn -o verify`, and update the counts
-quoted here and in [AGENTS.md](AGENTS.md).
+| option | environment | default |
+| --- | --- | --- |
+| `publicId(...)` / `secret(...)` | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET` | none |
+| `baseUrl(...)` | `OBLODAI_BASE_URL` | `https://api.oblodai.com` |
+| `adminToken(...)` | `OBLODAI_ADMIN_TOKEN` | none |
+| `allowInsecureBaseUrl(true)` | `OBLODAI_ALLOW_INSECURE=1` | https only, loopback excepted |
+| `logger(...)` | `OBLODAI_LOG=debug\|info\|warn\|error` | silent |
+| `timeout(Duration)` / `deadline(Duration)` | | 30 s per attempt / 90 s per call |
+| `retry(RetryOptions)` / `maxRetries(int)` | | 2 retries |
+| `header(name, value)`, `onRequest(...)`, `onResponse(...)`, `httpClient(...)` | | |
 
 ## Development
 
 ```bash
-git clone https://github.com/oblodai/oblodai-java && cd oblodai-java
-mvn -o verify                                          # drift gate + compile + 521 offline tests + jars
-mvn -o test                                            # tests only
-codegen/run.sh                                         # regenerate after refreshing contract/
-codegen/run.sh --check                                 # what the drift gate runs
-OBLODAI_LIVE_URL=http://127.0.0.1:8095 mvn -o verify   # adds the 18 live tests
-mvn -Prelease deploy                                   # publish to Maven Central; see RELEASING.md
+OBLODAI_BACKEND=../oblodai-backend make ci   # drift, build + lint + tests + conformance, package
 ```
 
-The live tier onboards a merchant on the gateway under test, takes a sandbox key and walks the whole
-money path, including a real signed webhook delivered to a receiver the test starts. Without
-`OBLODAI_LIVE_URL` those tests are skipped.
-
-Every snippet in this file and in [README.ru.md](README.ru.md) is compiled as part of the test build
-(`examples/java/com/oblodai/examples/DocSnippets.java`,
-`examples/kotlin/com/oblodai/examples/DocSnippetsKotlin.kt`), and `DocSnippetsTest` checks that the
-two READMEs carry the same code and that every snippet really appears there.
-
-Writing code with an AI agent? Point it at [AGENTS.md](AGENTS.md). See also
-[CHANGELOG.md](CHANGELOG.md) and [MIGRATION-1.3.md](MIGRATION-1.3.md).
+`make ci` runs Maven in docker (`maven:3-eclipse-temurin-21`, cache in `.m2cache/`). The drift
+check regenerates `src/main/java/com/oblodai/generated` with the backend's `tools/sdkgen` and
+compares; the conformance suite (`tools/sdkgen/conformance`) runs every shared scenario on both
+clients. Never edit generated code: change the contract or the generator, then run `make sdk` in
+the backend.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
