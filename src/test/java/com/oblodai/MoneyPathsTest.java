@@ -7,12 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.oblodai.contract.requests.PaymentRequest;
+import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.TransportException;
 import com.oblodai.errors.ValidationException;
+import com.oblodai.generated.models.ApproveRequest;
+import com.oblodai.generated.models.HistoryRequest;
+import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.time.Duration;
 import java.util.Map;
@@ -47,8 +50,7 @@ class MoneyPathsTest {
                                         .build()
                                         .payouts()
                                         .approve(
-                                                new com.oblodai.contract.requests.PayoutApproveRequest()
-                                                        .uuid("p1"),
+                                                ApproveRequest.builder().uuid("p1").build(),
                                                 RequestOptions.of().idempotencyKey("k1")));
 
         assertEquals(ConfigException.IDEMPOTENCY_UNSUPPORTED, error.code());
@@ -60,7 +62,7 @@ class MoneyPathsTest {
         MockHttpClient http =
                 new MockHttpClient().raw(503, HTML, "content-type", "text/html").ok("{}");
         OblodaiException error =
-                assertThrows(OblodaiException.class, () -> client(http).build().payouts().approve("p1"));
+                assertThrows(OblodaiException.class, () -> client(http).build().payouts().approve(ApproveRequest.builder().uuid("p1").build()));
 
         assertEquals(503, error.httpStatus());
         assertTrue(error.synthetic(), "a proxy answered, not the gateway");
@@ -75,7 +77,7 @@ class MoneyPathsTest {
                         .raw(502, HTML, "content-type", "text/html")
                         .raw(504, HTML, "content-type", "text/html", "retry-after", "0")
                         .ok("{\"balance\":{\"merchant\":[]}}");
-        client(http).build().account().balance();
+        client(http).build().account().getBalance();
         assertEquals(3, http.calls().size());
 
         MockHttpClient limited =
@@ -83,7 +85,7 @@ class MoneyPathsTest {
         OblodaiException error =
                 assertThrows(
                         OblodaiException.class,
-                        () -> client(limited).retry(RetryOptions.none()).build().account().balance());
+                        () -> client(limited).retry(RetryOptions.none()).build().account().getBalance());
         assertEquals(120, error.retryAfter());
     }
 
@@ -93,8 +95,8 @@ class MoneyPathsTest {
         MockHttpClient http =
                 new MockHttpClient()
                         .apiError(409, "{\"code\":\"payout.funds_maturing\",\"retryable\":true,\"retry_after\":0}")
-                        .ok("{\"uuid\":\"p\"}");
-        client(http).build().payouts().approve("p1");
+                        .ok(Fixtures.payout("p"));
+        client(http).build().payouts().approve(ApproveRequest.builder().uuid("p1").build());
         assertEquals(2, http.calls().size());
     }
 
@@ -109,8 +111,8 @@ class MoneyPathsTest {
                                 client(http)
                                         .build()
                                         .payouts()
-                                        .history(
-                                                new com.oblodai.contract.requests.PayoutHistoryRequest(),
+                                        .listHistory(
+                                                HistoryRequest.builder().build(),
                                                 RequestOptions.of().idempotencyKey("k")));
         assertEquals(ConfigException.IDEMPOTENCY_UNSUPPORTED, refused.code());
         assertEquals(0, http.calls().size(), "nothing was sent");
@@ -121,8 +123,8 @@ class MoneyPathsTest {
                         client(http)
                                 .buildAsync()
                                 .payouts()
-                                .history(
-                                        new com.oblodai.contract.requests.PayoutHistoryRequest(),
+                                .listHistory(
+                                        HistoryRequest.builder().build(),
                                         RequestOptions.of().idempotencyKey("k")));
     }
 
@@ -139,7 +141,7 @@ class MoneyPathsTest {
         OblodaiException error =
                 assertThrows(
                         OblodaiException.class,
-                        () -> client(http).retry(RetryOptions.none()).build().account().balance());
+                        () -> client(http).retry(RetryOptions.none()).build().account().getBalance());
         assertEquals("auth.ip_not_allowed", error.code());
         assertEquals(1, http.calls().size(), "no re-sign on an unrelated 401");
     }
@@ -156,8 +158,8 @@ class MoneyPathsTest {
                         .ok("{\"balance\":{\"merchant\":[]}}");
         Oblodai oblodai = client(http).retry(RetryOptions.none()).build();
 
-        assertThrows(OblodaiException.class, () -> oblodai.account().balance());
-        oblodai.account().balance();
+        assertThrows(OblodaiException.class, () -> oblodai.account().getBalance());
+        oblodai.account().getBalance();
 
         long signedAt = Long.parseLong(http.calls().get(2).header("x-timestamp"));
         assertTrue(
@@ -168,7 +170,7 @@ class MoneyPathsTest {
     @Test
     void keepsAPathPrefixOnTheBaseUrlAndSignsTheFullPath() {
         MockHttpClient http = new MockHttpClient().ok("{\"balance\":{\"merchant\":[]}}");
-        client(http).baseUrl("https://gw.corp/oblodai/").build().account().balance();
+        client(http).baseUrl("https://gw.corp/oblodai/").build().account().getBalance();
         assertEquals("https://gw.corp/oblodai/v1/balance", http.onlyCall().uri().toString());
     }
 
@@ -177,7 +179,7 @@ class MoneyPathsTest {
         MockHttpClient http = new MockHttpClient().ok("{\"balance\":{\"merchant\":[]}}");
         assertThrows(ConfigException.class, () -> client(http).header("x-signature", "zz"));
 
-        client(http).header("X-Trace", "t1").build().account().balance();
+        client(http).header("X-Trace", "t1").build().account().getBalance();
         assertTrue(http.onlyCall().header("x-signature").matches("^[0-9a-f]{64}$"));
         assertEquals("t1", http.onlyCall().header("x-trace"));
     }
@@ -187,10 +189,10 @@ class MoneyPathsTest {
         Oblodai oblodai = client(new MockHttpClient()).build();
         assertEquals(
                 ConfigException.BAD_PATH_PARAM,
-                assertThrows(ConfigException.class, () -> oblodai.payments().publicView("..")).code());
+                assertThrows(ConfigException.class, () -> oblodai.checkout().get("..")).code());
         assertEquals(
                 ConfigException.BAD_PATH_PARAM,
-                assertThrows(ConfigException.class, () -> oblodai.payments().publicView("a/b")).code());
+                assertThrows(ConfigException.class, () -> oblodai.checkout().get("a/b")).code());
     }
 
     @Test
@@ -200,7 +202,7 @@ class MoneyPathsTest {
         OblodaiException error =
                 assertThrows(
                         OblodaiException.class,
-                        () -> client(http).retry(RetryOptions.none()).build().account().balance());
+                        () -> client(http).retry(RetryOptions.none()).build().account().getBalance());
         assertEquals(301, error.httpStatus());
         assertTrue(error.getMessage().contains("redirect"));
         assertTrue(error.getMessage().contains("www.api.test"));
@@ -220,7 +222,7 @@ class MoneyPathsTest {
                                         .deadline(Duration.ofMillis(100))
                                         .build()
                                         .account()
-                                        .balance());
+                                        .getBalance());
         assertEquals(TransportException.DEADLINE, error.code());
         assertEquals(1, http.calls().size());
     }
@@ -239,9 +241,10 @@ class MoneyPathsTest {
                                 client(http)
                                         .build()
                                         .payments()
-                                        .create(new PaymentRequest().amount("0").currency("USDT")));
+                                        .create(PaymentRequest.builder().amount("0").currency("USDT").build()));
 
-        assertEquals("too small", error.getMessage());
+        assertEquals("too small", error.text());
+        assertEquals("[payment.below_minimum] too small", error.getMessage());
         assertFalse(error.details().containsKey("raw"), "details() must not carry the body");
         assertTrue(error.toString().contains("payment.below_minimum"), "the code is in toString");
         assertFalse(error.toString().contains("{"), "the JSON body is not");

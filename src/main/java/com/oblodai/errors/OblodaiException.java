@@ -17,6 +17,8 @@ import java.util.Map;
  * This is an unchecked exception: a payment API call fails for business reasons far more often than
  * for reasons a caller can handle locally, and checked exceptions would only be rethrown.
  *
+ * <p>{@link #getMessage()} and {@link #toString()} read {@code [code] text (request_id=...)}.
+ *
  * <p>{@link #toString()} and {@link #details()} never include the raw response body, so a logger
  * cannot spill an invoice payload or a cheque passcode into a log file. The body is available on
  * {@link #raw()} for deliberate inspection.
@@ -119,7 +121,7 @@ public class OblodaiException extends RuntimeException {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("name", getClass().getSimpleName());
         out.put("code", code);
-        out.put("message", getMessage());
+        out.put("message", text());
         out.put("httpStatus", httpStatus);
         out.put("retryable", retryable);
         if (retryAfter != null) out.put("retryAfter", retryAfter);
@@ -129,12 +131,25 @@ public class OblodaiException extends RuntimeException {
         return out;
     }
 
+    /** @return the message alone, without the code and the request id */
+    public String text() {
+        return super.getMessage();
+    }
+
+    /**
+     * @return {@code [code] text (request_id=...)}; the suffix only when there is a request id -
+     *     what a log line needs to reach support with
+     */
+    @Override
+    public String getMessage() {
+        String text = super.getMessage();
+        String out = "[" + code + "] " + (text == null ? "" : text);
+        return requestId != null ? out + " (request_id=" + requestId + ")" : out;
+    }
+
+    /** @return the same as {@link #getMessage()}; the raw body is never included */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append(": ").append(code);
-        if (getMessage() != null && !getMessage().isEmpty()) sb.append(" — ").append(getMessage());
-        if (httpStatus != 0) sb.append(" (HTTP ").append(httpStatus).append(')');
-        if (requestId != null) sb.append(" [request ").append(requestId).append(']');
-        return sb.toString();
+        return getMessage();
     }
 }

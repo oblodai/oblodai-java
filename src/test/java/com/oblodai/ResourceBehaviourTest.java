@@ -5,16 +5,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.oblodai.contract.requests.BatchInfoRequest;
-import com.oblodai.contract.requests.PayoutHistoryRequest;
+import com.oblodai.generated.models.BatchInfoRequest;
 import com.oblodai.core.FileResult;
 import com.oblodai.core.Idempotency;
 import com.oblodai.core.Pager;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.PermissionException;
-import com.oblodai.models.BatchInfo;
-import com.oblodai.models.Payout;
+import com.oblodai.generated.models.BatchInfoResponse;
+import com.oblodai.generated.models.PayoutView;
+import com.oblodai.generated.models.DownloadDocumentJobFileQuery;
+import com.oblodai.generated.models.GetBatchDocumentQuery;
+import com.oblodai.generated.models.GetPaymentLinkDocumentQuery;
+import com.oblodai.generated.models.GetSplitDocumentQuery;
+import com.oblodai.generated.models.HistoryRequest;
+import com.oblodai.generated.models.PaymentRequest;
+import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -38,9 +44,9 @@ class ResourceBehaviourTest {
         // the merchant's API key reads it, and one call is all the SDK makes.
         MockHttpClient http =
                 new MockHttpClient()
-                        .ok("{\"batch_id\":\"b1\",\"kind\":\"payout\",\"status\":\"completed\"}");
+                        .ok(Fixtures.batchInfo("completed"));
 
-        BatchInfo info = client(http).build().batches().info(new BatchInfoRequest().batchId("b1"));
+        BatchInfoResponse info = client(http).build().batches().getInfo(BatchInfoRequest.builder().batchId("b1").build());
 
         assertEquals("b1", info.batchId());
         assertEquals(1, http.calls().size(), "no second attempt under another key");
@@ -56,21 +62,21 @@ class ResourceBehaviourTest {
         PermissionException refused =
                 assertThrows(
                         PermissionException.class,
-                        () -> client(http).build().batches().info(new BatchInfoRequest().batchId("b1")));
+                        () -> client(http).build().batches().getInfo(BatchInfoRequest.builder().batchId("b1").build()));
         assertEquals("auth.ip_not_allowed", refused.code());
         assertEquals(1, http.calls().size(), "a 403 is the caller's answer, not a cue to re-sign");
     }
 
     @Test
     void theAsyncBatchInfoBehavesTheSameWithoutBlocking() {
-        MockHttpClient http = new MockHttpClient().ok("{\"batch_id\":\"b1\"}");
+        MockHttpClient http = new MockHttpClient().ok(Fixtures.batchInfo("processing"));
 
         assertEquals(
                 "b1",
                 client(http)
                         .buildAsync()
                         .batches()
-                        .info(new BatchInfoRequest().batchId("b1"))
+                        .getInfo(BatchInfoRequest.builder().batchId("b1").build())
                         .join()
                         .batchId());
         assertEquals(1, http.calls().size());
@@ -89,7 +95,7 @@ class ResourceBehaviourTest {
                                 "content-disposition",
                                 "attachment; filename=\"statement-2026-01.pdf\"");
 
-        FileResult file = client(http).build().documents().statement();
+        FileResult file = client(http).build().documents().getStatement();
 
         assertEquals("application/pdf", file.contentType());
         assertEquals("statement-2026-01.pdf", file.filename());
@@ -109,7 +115,7 @@ class ResourceBehaviourTest {
                                 "content-disposition",
                                 "attachment; filename*=UTF-8''re%C3%A7u.pdf");
 
-        assertEquals("reçu.pdf", client(http).build().documents().feeSchedule().filename());
+        assertEquals("reçu.pdf", client(http).build().documents().getFees().filename());
     }
 
     @Test
@@ -124,12 +130,10 @@ class ResourceBehaviourTest {
                         .raw(200, "%PDF", "content-type", "application/pdf");
         Oblodai oblodai = client(http).build();
 
-        oblodai.documents().splitReport("i1", new com.oblodai.resources.DocumentQuery());
-        oblodai.documents().linkReport("l1", new com.oblodai.resources.DocumentQuery());
-        oblodai
-                .documents()
-                .batchReport("b1", new com.oblodai.resources.DocumentQuery().format("csv"));
-        oblodai.documents().jobFile("j1");
+        oblodai.documents().getSplit(GetSplitDocumentQuery.builder().uuid("i1").build());
+        oblodai.documents().getPaymentLink(GetPaymentLinkDocumentQuery.builder().uuid("l1").build());
+        oblodai.documents().getBatch(GetBatchDocumentQuery.builder().uuid("b1").format("csv").build());
+        oblodai.documents().downloadJobFile(DownloadDocumentJobFileQuery.builder().jobId("j1").build());
 
         assertTrue(http.calls().get(0).uri().getQuery().contains("uuid=i1"), "split report");
         assertTrue(http.calls().get(1).uri().getQuery().contains("uuid=l1"), "link report");
@@ -141,8 +145,8 @@ class ResourceBehaviourTest {
     @Test
     void anUnconsumedPagerRequestsNothingAndCannotFailTheProcess() {
         MockHttpClient http = new MockHttpClient(); // nothing scripted: any request would fail
-        Pager<Payout> pager =
-                client(http).build().payouts().history(new PayoutHistoryRequest().limit(10));
+        Pager<PayoutView> pager =
+                client(http).build().payouts().listHistory(HistoryRequest.builder().limit(10L).build());
 
         assertNotNull(pager);
         assertTrue(http.calls().isEmpty(), "a list that is never read never asks");
@@ -153,7 +157,7 @@ class ResourceBehaviourTest {
         MockHttpClient http =
                 new MockHttpClient().apiError(404, "{\"code\":\"payment.not_found\",\"retryable\":false}");
         // The future is never joined: an ignored failure must not escape as an uncaught error.
-        client(http).buildAsync().payments().history().firstPage();
+        client(http).buildAsync().payments().listHistory().firstPage();
         System.gc();
         assertEquals(1, http.calls().size());
     }
@@ -183,9 +187,7 @@ class ResourceBehaviourTest {
                                         .build()
                                         .payments()
                                         .create(
-                                                new com.oblodai.contract.requests.PaymentRequest()
-                                                        .amount("1")
-                                                        .currency("USDT"),
+                                                PaymentRequest.builder().amount("1").currency("USDT").build(),
                                                 RequestOptions.of().idempotencyKey("bad key")));
         assertEquals(ConfigException.BAD_IDEMPOTENCY_KEY, error.code());
         assertTrue(http.calls().isEmpty());

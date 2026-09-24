@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * Everything one transport call needs beyond the route: what to send, where to substitute it, and
- * the caller's per-call overrides. Resources build this from a {@link RequestOptions} plus their own
- * body, query and path parameters.
+ * the caller's per-call overrides. Resources build this from their body, query and path parameters
+ * plus a {@link RequestOptions}.
  */
 public final class CallOptions {
 
@@ -17,7 +17,8 @@ public final class CallOptions {
     private String idempotencyKey;
     private Map<String, String> headers = Map.of();
     private Long timeoutMs;
-    private Long deadlineMs;
+    private Integer maxRetries;
+    private String requestId;
 
     /** Empty options. */
     public CallOptions() {}
@@ -32,15 +33,16 @@ public final class CallOptions {
         CallOptions out = new CallOptions();
         if (options != null) {
             out.idempotencyKey = options.idempotencyKey();
-            out.headers = options.headers();
-            out.timeoutMs = options.timeoutMs();
-            out.deadlineMs = options.deadlineMs();
+            out.headers = options.extraHeaders();
+            out.timeoutMs = options.timeout() == null ? null : options.timeout().toMillis();
+            out.maxRetries = options.maxRetries();
+            out.requestId = options.requestId();
         }
         return out;
     }
 
     /**
-     * @param value the request body object; null means an empty JSON object on a POST
+     * @param value the request body (a JSON tree); null means an empty JSON object on a POST
      * @return this
      */
     public CallOptions body(Object value) {
@@ -54,8 +56,12 @@ public final class CallOptions {
      * @return this
      */
     public CallOptions query(String name, Object value) {
-        if (value == null) return this;
-        if (query == null) query = new LinkedHashMap<>();
+        if (value == null) {
+            return this;
+        }
+        if (query == null) {
+            query = new LinkedHashMap<>();
+        }
         query.put(name, value);
         return this;
     }
@@ -64,8 +70,10 @@ public final class CallOptions {
      * @param values query parameters to add, in order
      * @return this
      */
-    public CallOptions query(Map<String, Object> values) {
-        if (values != null) values.forEach(this::query);
+    public CallOptions query(Map<String, ?> values) {
+        if (values != null) {
+            values.forEach(this::query);
+        }
         return this;
     }
 
@@ -75,49 +83,67 @@ public final class CallOptions {
      * @return this
      */
     public CallOptions pathParam(String name, String value) {
-        if (pathParams == null) pathParams = new LinkedHashMap<>();
+        if (pathParams == null) {
+            pathParams = new LinkedHashMap<>();
+        }
         pathParams.put(name, value);
         return this;
     }
 
-    /** Drops the caller's idempotency key: list pages must never reuse one. */
+    /**
+     * @param values path parameters, or null
+     * @return this
+     */
+    public CallOptions pathParams(Map<String, ?> values) {
+        if (values != null) {
+            values.forEach((k, v) -> pathParam(k, v == null ? null : String.valueOf(v)));
+        }
+        return this;
+    }
+
+    /** @return this, without the caller's idempotency key (list pages must never reuse one) */
     public CallOptions withoutIdempotencyKey() {
         this.idempotencyKey = null;
         return this;
     }
 
-    /** The request body. */
+    /** @return the request body */
     public Object body() {
         return body;
     }
 
-    /** Query parameters, or null. */
+    /** @return query parameters, or null */
     public Map<String, Object> query() {
         return query;
     }
 
-    /** Path parameters, or null. */
+    /** @return path parameters, or null */
     public Map<String, String> pathParams() {
         return pathParams;
     }
 
-    /** Extra headers for this call, never null. */
+    /** @return extra headers for this call, never null */
     public Map<String, String> headers() {
         return headers;
     }
 
-    /** The caller's idempotency key, or null. */
+    /** @return the caller's idempotency key, or null */
     public String idempotencyKey() {
         return idempotencyKey;
     }
 
-    /** Per-attempt timeout override, or null. */
+    /** @return per-attempt timeout override in milliseconds, or null */
     public Long timeoutMs() {
         return timeoutMs;
     }
 
-    /** Overall deadline override, or null. */
-    public Long deadlineMs() {
-        return deadlineMs;
+    /** @return retry count override, or null */
+    public Integer maxRetries() {
+        return maxRetries;
+    }
+
+    /** @return the call's {@code X-Request-ID}, or null for a fresh one */
+    public String requestId() {
+        return requestId;
     }
 }

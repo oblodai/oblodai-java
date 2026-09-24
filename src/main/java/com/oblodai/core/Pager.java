@@ -10,16 +10,17 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * What a list method returns: one page on demand, or every item across pages.
+ * What a list method returns: every item across pages, page by page, or just the first page.
  *
  * <p>Nothing is requested until the pager is consumed, and the first page is fetched once however
- * many ways it is read. Iteration follows the gateway's own {@code paginate.has_pages} flag, and
- * stops early on a short page.
+ * many ways it is read. Iteration follows the gateway's own {@code paginate.has_pages} flag and
+ * stops early on an empty page.
  *
  * <pre>{@code
- * Page<Payment> page = oblodai.payments().history(params).firstPage();
- * for (Payment p : oblodai.payments().history(params)) { ... }
- * List<Payout> recent = oblodai.payouts().history(params).all(1000);
+ * for (PaymentView p : oblodai.payments().listHistory(params)) { ... }       // every item
+ * for (Page<PaymentView> page : oblodai.payments().listHistory(params).byPage()) { ... }
+ * Page<PaymentView> first = oblodai.payments().listHistory(params).firstPage();
+ * List<PaymentView> recent = oblodai.payments().listHistory(params).all(1000);
  * }</pre>
  *
  * @param <T> item type
@@ -37,12 +38,12 @@ public final class Pager<T> implements Iterable<T> {
          * @param offset offset into the result set
          * @return that page
          */
-        Page<T> fetch(int limit, int offset);
+        Page<T> fetch(long limit, long offset);
     }
 
     private final PageFetcher<T> fetcher;
-    private final int limit;
-    private final int offset;
+    private final long limit;
+    private final long offset;
     private Page<T> cachedFirst;
 
     /**
@@ -50,80 +51,139 @@ public final class Pager<T> implements Iterable<T> {
      * @param limit page size, or null for {@link #DEFAULT_LIMIT}
      * @param offset first offset, or null for 0
      */
-    public Pager(PageFetcher<T> fetcher, Integer limit, Integer offset) {
+    public Pager(PageFetcher<T> fetcher, Long limit, Long offset) {
+        this(fetcher, limit, offset, null);
+    }
+
+    /**
+     * @param fetcher how to fetch one page
+     * @param limit page size, or null for {@link #DEFAULT_LIMIT}
+     * @param offset first offset, or null for 0
+     * @param first the first page when it is already at hand, else null
+     */
+    public Pager(PageFetcher<T> fetcher, Long limit, Long offset, Page<T> first) {
         this.fetcher = fetcher;
         this.limit = limit == null ? DEFAULT_LIMIT : limit;
         this.offset = offset == null ? 0 : offset;
+        this.cachedFirst = first;
     }
 
-    /** The first page — {@code items} plus {@code paginate}. Fetched once and cached. */
+    /** @return the first page - {@code items} plus {@code paginate}; fetched once and cached */
     public synchronized Page<T> firstPage() {
-        if (cachedFirst == null) cachedFirst = fetcher.fetch(limit, offset);
+        if (cachedFirst == null) {
+            cachedFirst = fetcher.fetch(limit, offset);
+        }
         return cachedFirst;
+    }
+
+    /** @return the page size this pager walks with */
+    public long limit() {
+        return limit;
+    }
+
+    /** @return the offset this pager starts at */
+    public long offset() {
+        return offset;
+    }
+
+    /**
+     * Every page in turn, one request each; the first page is reused when already fetched.
+     *
+     * @return the pages, lazily
+     */
+    public Iterable<Page<T>> byPage() {
+        return () ->
+                new Iterator<>() {
+                    private Page<T> next;
+                    private long nextOffset = offset;
+                    private boolean started;
+                    private boolean exhausted;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (next != null) {
+                            return true;
+                        }
+                        if (exhausted) {
+                            return false;
+                        }
+                        next = started ? fetcher.fetch(limit, nextOffset) : firstPage();
+                        started = true;
+                        nextOffset += next.items().size();
+                        if (next.items().isEmpty() || !next.hasPages()) {
+                            exhausted = true;
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public Page<T> next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        Page<T> out = next;
+                        next = null;
+                        return out;
+                    }
+                };
     }
 
     /** Every item, page by page; each step fetches at most one page. */
     @Override
     public Iterator<T> iterator() {
+        Iterator<Page<T>> pages = byPage().iterator();
         return new Iterator<>() {
             private Iterator<T> current = List.<T>of().iterator();
-            private int nextOffset = offset;
-            private boolean exhausted;
-            private boolean started;
-
-            private void advance() {
-                while (!current.hasNext() && !exhausted) {
-                    Page<T> page = !started ? firstPage() : fetcher.fetch(limit, nextOffset);
-                    started = true;
-                    List<T> items = page.items();
-                    nextOffset += items.size();
-                    current = items.iterator();
-                    boolean more =
-                            !items.isEmpty()
-                                    && page.paginate() != null
-                                    && Boolean.TRUE.equals(page.paginate().hasPages());
-                    if (!more) exhausted = true;
-                }
-            }
 
             @Override
             public boolean hasNext() {
-                advance();
+                while (!current.hasNext() && pages.hasNext()) {
+                    current = pages.next().items().iterator();
+                }
                 return current.hasNext();
             }
 
             @Override
             public T next() {
-                advance();
-                if (!current.hasNext()) throw new NoSuchElementException();
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
                 return current.next();
             }
         };
     }
 
-    /** Every item as a lazy stream. */
+    /** @return every item as a lazy stream */
     public Stream<T> stream() {
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false);
     }
 
-    /** Every item, collected. Use {@link #all(int)} when the result set may be large. */
+    /** @return every item, collected; use {@link #all(int)} when the result set may be large */
     public List<T> all() {
         return all(Integer.MAX_VALUE);
     }
 
     /**
-     * Items collected across pages, stopping at a cap.
+     * Items collected across pages, stopping at a cap without fetching a page past it.
      *
      * @param maxItems most items to collect
      * @return the items
      */
     public List<T> all(int maxItems) {
         List<T> out = new ArrayList<>();
-        for (T item : this) {
-            if (out.size() >= maxItems) break;
-            out.add(item);
+        if (maxItems <= 0) {
+            return out;
+        }
+        Iterator<T> it = iterator();
+        while (out.size() < maxItems && it.hasNext()) {
+            out.add(it.next());
         }
         return out;
+    }
+
+    @Override
+    public String toString() {
+        return "Pager(limit=" + limit + ", offset=" + offset + ", " + (cachedFirst == null ? "not fetched" : "fetched") + ")";
     }
 }

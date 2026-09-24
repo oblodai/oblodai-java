@@ -1,6 +1,7 @@
 package com.oblodai.core;
 
 import java.net.http.HttpHeaders;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -9,21 +10,25 @@ import java.util.Optional;
  * @param status HTTP status
  * @param headers response headers
  * @param body response bytes
+ * @param requestId the {@code X-Request-ID} the SDK sent with the call
  */
-public record RawResponse(int status, HttpHeaders headers, byte[] body) {
+public record RawResponse(int status, HttpHeaders headers, byte[] body, String requestId) {
 
-    /** First value of a response header, case-insensitively. */
+    /**
+     * @param name header name, matched case-insensitively
+     * @return its first value
+     */
     public Optional<String> header(String name) {
         return headers.firstValue(name);
     }
 
-    /** Response content type, or {@code null}. */
+    /** @return the response content type, or {@code null} */
     public String contentType() {
         return headers.firstValue("content-type").orElse(null);
     }
 
-    /** The body as UTF-8 text. */
+    /** @return the body as UTF-8 text */
     public String text() {
-        return new String(body, java.nio.charset.StandardCharsets.UTF_8);
+        return new String(body, StandardCharsets.UTF_8);
     }
 }

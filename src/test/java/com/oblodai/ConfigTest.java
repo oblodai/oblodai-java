@@ -7,13 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.oblodai.contract.PaymentStatus;
-import com.oblodai.contract.PayoutStatus;
+import com.oblodai.generated.models.PaymentStatus;
+import com.oblodai.generated.models.PayoutStatus;
 import com.oblodai.errors.ConfigException;
+import com.oblodai.generated.models.PaymentRequest;
+import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ class ConfigTest {
                                         "OBLODAI_SECRET", "s",
                                         "OBLODAI_BASE_URL", "https://x.test/"))
                         .build();
-        oblodai.account().balance();
+        oblodai.account().getBalance();
 
         assertEquals("https://x.test/v1/balance", http.onlyCall().uri().toString());
         assertEquals("pk", http.onlyCall().header("x-public-id"));
@@ -147,9 +150,15 @@ class ConfigTest {
 
     @Test
     void moneyHelpersWorkAtArbitraryPrecision() {
-        assertEquals("0.3", Money.add("0.1", "0.2"));
-        assertEquals("10.500000", Money.add("10.000000", "0.5"));
-        assertEquals("-0.000001", Money.subtract("1", "1.000001"));
+        assertEquals(new BigDecimal("0.3"), Money.add("0.1", "0.2"));
+        assertEquals(new BigDecimal("10.500000"), Money.add("10.000000", "0.5"));
+        assertEquals(new BigDecimal("-0.000001"), Money.subtract("1", new BigDecimal("1.000001")));
+        assertEquals(0, Money.compare(new BigDecimal("25"), "25.000000"));
+        assertEquals(new BigDecimal("3"), Money.add(1L, 2));
+        assertEquals(
+                "sdk.float_amount",
+                assertThrows(ConfigException.class, () -> Money.add(0.1, "0.2")).code(),
+                "a double is refused, not rounded");
         assertEquals(0, Money.compare("25", "25.000000"));
         assertEquals(1, Money.compare("0.000000000000000001", "0"));
         assertTrue(Money.isZero("0.000000"));
@@ -193,25 +202,25 @@ class ConfigTest {
         assertEquals(PaymentStatus.PAID, PaymentStatus.of("paid"));
         assertSame(PaymentStatus.PAID, PaymentStatus.of("paid"), "known values are interned");
         assertTrue(PaymentStatus.PAID.isKnown());
-        assertEquals("paid", PaymentStatus.PAID.wire());
+        assertEquals("paid", PaymentStatus.PAID.value());
 
         // The value the gateway actually sent must survive: a client that cannot log or report it
         // has nothing to take to support.
         PaymentStatus grown = PaymentStatus.of("teleported");
         assertFalse(grown.isKnown());
-        assertEquals("teleported", grown.wire());
+        assertEquals("teleported", grown.value());
         assertEquals("teleported", grown.toString());
         assertEquals(grown, PaymentStatus.of("teleported"), "equal by value");
         assertFalse(PaymentStatus.PAID.equals(grown));
-        assertTrue(PaymentStatus.VALUES.contains(PaymentStatus.PAID));
-        assertFalse(PaymentStatus.VALUES.contains(grown));
-        assertNull(PaymentStatus.of(null));
+        assertTrue(PaymentStatus.values().contains(PaymentStatus.PAID));
+        assertFalse(PaymentStatus.values().contains(grown));
+        assertThrows(NullPointerException.class, () -> PaymentStatus.of(null));
     }
 
     @Test
     void aStatusTheGatewayGrewSurvivesTheWholeDecode() {
         MockHttpClient http =
-                new MockHttpClient().ok("{\"uuid\":\"u1\",\"status\":\"teleported\"}");
+                new MockHttpClient().ok(Fixtures.payment("u1", "teleported", "25"));
         PaymentStatus status =
                 Oblodai.builder()
                         .publicId("pk")
@@ -221,10 +230,10 @@ class ConfigTest {
                         .environment(Map.of())
                         .build()
                         .payments()
-                        .info("u1")
+                        .create(PaymentRequest.builder().amount("25").currency("USDT").build())
                         .status();
 
         assertFalse(status.isKnown());
-        assertEquals("teleported", status.wire(), "the model keeps what the gateway said");
+        assertEquals("teleported", status.value(), "the model keeps what the gateway said");
     }
 }

@@ -1,32 +1,30 @@
 package com.oblodai.core;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * One page of a list route: {@code {items, paginate}}.
+ * One page of a list route: {@code {items, paginate}}. Iterating a page walks THIS page only; the
+ * {@link Pager} it came from walks every page.
  *
- * @param items the items of this page, newest first on history routes
+ * @param items the items of this page
  * @param paginate totals and the "there is more" flag
  * @param <T> item type
  */
-public record Page<T>(
-        @JsonProperty("items") List<T> items, @JsonProperty("paginate") Paginate paginate) {
+public record Page<T>(List<T> items, Paginate paginate) implements Iterable<T> {
 
-    /** Items, never {@code null}. */
-    @Override
-    public List<T> items() {
-        return items == null ? List.of() : items;
+    /** @return whether the gateway says more pages follow */
+    public boolean hasPages() {
+        return paginate.hasPages();
     }
 
-    /**
-     * Whether the gateway actually answered with a list envelope. A body missing {@code items} or
-     * {@code paginate} decodes into an empty page, which reads exactly like "no results" — so the
-     * resources check this and raise a contract failure instead of handing back a silent nothing.
-     *
-     * @return true when both blocks were present
-     */
-    public boolean isListEnvelope() {
-        return items != null && paginate != null;
+    /** @return how many items match the query in total */
+    public long total() {
+        return paginate.total();
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return items.iterator();
     }
 }

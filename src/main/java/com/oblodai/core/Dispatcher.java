@@ -1,7 +1,5 @@
 package com.oblodai.core;
 
-import com.oblodai.contract.RouteAuth;
-import com.oblodai.contract.RouteSpec;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.OblodaiException;
@@ -12,8 +10,11 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -41,6 +42,15 @@ final class Dispatcher {
      */
     static final long SKEW_CORRECTION_THRESHOLD_SECONDS = Signing.SIGNATURE_SKEW_SECONDS / 2;
 
+    /** The header that ties one call's attempts to the gateway's logs. */
+    static final String HEADER_REQUEST_ID = "X-Request-ID";
+
+    /** Headers whose values a hook never sees. */
+    private static final Set<String> SECRET_HEADERS =
+            Set.of(
+                    Signing.HEADER_SIGNATURE.toLowerCase(Locale.ROOT),
+                    Signing.HEADER_ADMIN_TOKEN.toLowerCase(Locale.ROOT));
+
     private final Transport.Config config;
 
     Dispatcher(Transport.Config config) {
@@ -49,13 +59,43 @@ final class Dispatcher {
 
     /** Everything one call needs to know before its first attempt. */
     Exchange newExchange(RouteSpec route, CallOptions options) {
-        byte[] body = RequestBuilder.serializeBody(config.mapper(), options.body(), route.method());
+        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        if (config.headers() != null) {
+            headers.putAll(config.headers());
+        }
+        // Per-call headers win over the client-wide ones; neither can touch an SDK-owned name.
+        headers.putAll(options.headers());
+        // One id for every attempt: it names the call, not the attempt. The caller's own
+        // X-Request-ID header counts when the option is not set.
+        String requestId = options.requestId();
+        if (requestId == null) {
+            requestId = headers.get(HEADER_REQUEST_ID);
+        }
+        if (requestId == null) {
+            requestId = UUID.randomUUID().toString();
+        }
+        headers.remove(HEADER_REQUEST_ID);
+        RequestBuilder.assertHeader(HEADER_REQUEST_ID, requestId);
+
+        Object body = route.method().equals("GET") ? null : Amounts.prepareBody(options.body());
+        byte[] bytes = RequestBuilder.serializeBody(config.mapper(), body, route.method());
         String idempotencyKey = resolveIdempotencyKey(route, options);
         boolean safeToRepeat = route.safe() || (route.idempotent() && idempotencyKey != null);
-        long deadlineAt =
-                System.currentTimeMillis()
-                        + (options.deadlineMs() != null ? options.deadlineMs() : config.deadlineMs());
-        return new Exchange(route, options, body, idempotencyKey, safeToRepeat, deadlineAt);
+        RetryOptions retry =
+                options.maxRetries() != null
+                        ? config.retry().withMaxRetries(options.maxRetries())
+                        : config.retry();
+        long deadlineAt = System.currentTimeMillis() + config.deadlineMs();
+        return new Exchange(
+                route,
+                options,
+                bytes,
+                idempotencyKey,
+                safeToRepeat,
+                deadlineAt,
+                requestId,
+                Map.copyOf(headers),
+                retry);
     }
 
     // --- the attempt loop -----------------------------------------------------------------------
@@ -71,8 +111,14 @@ final class Dispatcher {
         Map<String, Object> fields = new LinkedHashMap<>();
         fields.put("route", exchange.label());
         fields.put("attempt", exchange.attempt);
+        fields.put("requestId", exchange.requestId);
         fields.put("idempotencyKey", exchange.idempotencyKey);
         log("request", fields);
+        try {
+            beforeSend(request, exchange);
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
+        }
 
         return send(request, exchange)
                 .handle(
@@ -84,16 +130,33 @@ final class Dispatcher {
     private CompletionStage<RawResponse> onFailure(Exchange exchange, Throwable failure) {
         Throwable cause = Transport.unwrap(failure);
         if (exchange.cancelled()) return CompletableFuture.failedFuture(cancelled(exchange));
-        if (Retry.shouldRetry(cause, exchange.attempt, exchange.safeToRepeat, config.retry())) {
+        try {
+            afterAttempt(exchange, 0, null, cause);
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+        if (Retry.shouldRetry(cause, exchange.attempt, exchange.safeToRepeat, exchange.retry)) {
             return retryAfterPause(exchange, cause);
         }
         return CompletableFuture.failedFuture(cause);
     }
 
     private CompletionStage<RawResponse> onResponse(Exchange exchange, RawResponse raw) {
-        if (raw.status() >= 200 && raw.status() < 300) return CompletableFuture.completedFuture(raw);
+        if (raw.status() >= 200 && raw.status() < 300) {
+            try {
+                afterAttempt(exchange, raw.status(), raw, null);
+            } catch (RuntimeException e) {
+                return CompletableFuture.failedFuture(e);
+            }
+            return CompletableFuture.completedFuture(raw);
+        }
 
         OblodaiException failure = classify(exchange.route, raw);
+        try {
+            afterAttempt(exchange, raw.status(), raw, failure);
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
+        }
         Map<String, Object> fields = new LinkedHashMap<>();
         fields.put("route", exchange.label());
         fields.put("status", raw.status());
@@ -106,7 +169,7 @@ final class Dispatcher {
             if (resigned != null) return resigned;
         }
 
-        if (Retry.shouldRetry(failure, exchange.attempt, exchange.safeToRepeat, config.retry())) {
+        if (Retry.shouldRetry(failure, exchange.attempt, exchange.safeToRepeat, exchange.retry)) {
             return retryAfterPause(exchange, failure);
         }
         return CompletableFuture.failedFuture(failure);
@@ -144,7 +207,7 @@ final class Dispatcher {
     }
 
     private CompletionStage<RawResponse> retryAfterPause(Exchange exchange, Throwable cause) {
-        long delay = Retry.delayMs(cause, exchange.attempt, config.retry());
+        long delay = Retry.delayMs(cause, exchange.attempt, exchange.retry);
         if (System.currentTimeMillis() + delay > exchange.deadlineAt) {
             return CompletableFuture.failedFuture(
                     new TransportException(
@@ -154,8 +217,8 @@ final class Dispatcher {
         }
         exchange.attempt++;
         if (delay <= 0) return attempt(exchange);
-        return CompletableFuture.supplyAsync(
-                        () -> null, CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS))
+        return config.sleeper()
+                .sleep(delay)
                 .thenCompose(
                         ignored ->
                                 exchange.cancelled()
@@ -180,18 +243,14 @@ final class Dispatcher {
             return e;
         }
         return new ContractException(
-                route.method() + " " + route.path() + ": HTTP " + raw.status() + " with a success envelope",
+                route.label() + ": HTTP " + raw.status() + " with a success envelope",
                 raw.status(),
                 raw.text());
     }
 
     private HttpRequest buildRequest(Exchange exchange) {
-        Map<String, String> extra = new LinkedHashMap<>();
-        if (config.headers() != null) extra.putAll(config.headers());
-        // Per-call headers win over the client-wide ones; neither can touch an SDK-owned name.
-        extra.putAll(exchange.options.headers());
         String adminToken =
-                exchange.route.auth() == RouteAuth.ONBOARD ? config.adminToken() : null;
+                RouteSpec.AUTH_ONBOARD.equals(exchange.route.auth()) ? config.adminToken() : null;
 
         exchange.signedOffset = config.clock().offset();
         RequestBuilder.BuiltRequest built =
@@ -205,8 +264,9 @@ final class Dispatcher {
                         exchange.idempotencyKey,
                         config.clock().now(exchange.signedOffset),
                         config.userAgent(),
-                        extra,
-                        adminToken);
+                        exchange.headers,
+                        adminToken,
+                        exchange.requestId);
 
         long timeout =
                 Math.min(
@@ -283,7 +343,10 @@ final class Dispatcher {
                             }
                             return CompletableFuture.completedFuture(
                                     new RawResponse(
-                                            response.statusCode(), response.headers(), response.body()));
+                                            response.statusCode(),
+                                            response.headers(),
+                                            response.body(),
+                                            exchange.requestId));
                         })
                 .thenCompose(stage -> stage);
     }
@@ -306,6 +369,57 @@ final class Dispatcher {
         return new TransportException(TransportException.NETWORK, "network error: " + cause, cause);
     }
 
+
+    /** Calls the request hook for the attempt about to be sent. */
+    private void beforeSend(HttpRequest request, Exchange exchange) {
+        exchange.sentAtNanos = System.nanoTime();
+        Hooks hooks = config.hooks();
+        if (hooks == null || (hooks.onRequest() == null && hooks.onResponse() == null)) {
+            exchange.attemptInfo = null;
+            return;
+        }
+        Map<String, String> headers = new LinkedHashMap<>();
+        request.headers()
+                .map()
+                .forEach(
+                        (name, values) ->
+                                headers.put(
+                                        name,
+                                        SECRET_HEADERS.contains(name.toLowerCase(Locale.ROOT))
+                                                ? Redaction.REDACTED
+                                                : String.join(", ", values)));
+        exchange.attemptInfo =
+                new RequestInfo(
+                        request.method(),
+                        request.uri().toString(),
+                        Map.copyOf(headers),
+                        exchange.attempt + 1,
+                        exchange.requestId,
+                        exchange.route.operationId());
+        if (hooks.onRequest() != null) {
+            hooks.onRequest().accept(exchange.attemptInfo);
+        }
+    }
+
+    /** Calls the response hook for the attempt that just ended. */
+    private void afterAttempt(Exchange exchange, int status, RawResponse raw, Throwable error) {
+        Hooks hooks = config.hooks();
+        if (hooks == null || hooks.onResponse() == null || exchange.attemptInfo == null) {
+            return;
+        }
+        Map<String, String> headers = new LinkedHashMap<>();
+        if (raw != null) {
+            raw.headers().map().forEach((name, values) -> headers.put(name, values.isEmpty() ? "" : values.get(0)));
+        }
+        hooks.onResponse()
+                .accept(
+                        new ResponseInfo(
+                                exchange.attemptInfo,
+                                status,
+                                Map.copyOf(headers),
+                                Duration.ofNanos(Math.max(0, System.nanoTime() - exchange.sentAtNanos)),
+                                error));
+    }
 
     private void log(String message, Map<String, Object> fields) {
         config.logger().debug(message, Logger.redactFields(fields));

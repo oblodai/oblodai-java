@@ -3,12 +3,13 @@ package com.oblodai.webhooks;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oblodai.core.Json;
+import com.oblodai.core.Transport;
 import com.oblodai.core.Signing;
 import com.oblodai.errors.WebhookPayloadException;
-import com.oblodai.models.WebhookEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * The two things {@link WebhookVerifier} does to the delivery itself: compare the MACs, and read the
@@ -81,13 +82,10 @@ final class WebhookPayloads {
         if (!body.path("type").isTextual() || !body.path("uuid").isTextual()) {
             throw badPayload("the delivery body lacks the type/uuid fields every event carries");
         }
-        try {
-            return MAPPER.treeToValue(body, WebhookEvent.class);
-        } catch (Exception e) {
-            throw badPayload("the delivery body could not be decoded as an event");
-        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> fields = (Map<String, Object>) Transport.tree(body);
+        return new WebhookEvent(fields);
     }
-
 
     static WebhookPayloadException badPayload(String what) {
         return new WebhookPayloadException(

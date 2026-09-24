@@ -1,68 +1,67 @@
 package com.oblodai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.oblodai.contract.requests.PaymentHistoryRequest;
-import com.oblodai.contract.requests.PayoutHistoryRequest;
 import com.oblodai.core.Page;
-import com.oblodai.models.Payment;
+import com.oblodai.core.Pager;
+import com.oblodai.errors.ConfigException;
+import com.oblodai.errors.ContractException;
+import com.oblodai.generated.models.HistoryRequest;
+import com.oblodai.generated.models.PaymentView;
+import com.oblodai.generated.models.PayoutView;
+import com.oblodai.generated.models.SandboxDelivery;
+import com.oblodai.generated.models.SandboxListWebhooksQuery;
+import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Paging: one page on demand, every item on iteration, and nothing fetched until asked. */
+/** Paged lists: an iterator over every item, {@code byPage()}, the first page, a cap. */
 class PaginationTest {
 
-    private static String page(String items, int offset, int total, int perPage, boolean more) {
-        return "{\"items\":"
-                + items
-                + ",\"paginate\":{\"total\":"
-                + total
-                + ",\"per_page\":"
-                + perPage
-                + ",\"offset\":"
-                + offset
-                + ",\"has_pages\":"
-                + more
-                + "}}";
+    private static String page(String items, long offset, boolean more) {
+        return Fixtures.page(items, offset, more);
     }
 
-    private static String invoices(String... uuids) {
-        List<String> out = new ArrayList<>();
-        for (String uuid : uuids) out.add("{\"uuid\":\"" + uuid + "\"}");
-        return "[" + String.join(",", out) + "]";
-    }
-
-    private static Oblodai client(MockHttpClient http) {
+    private static Oblodai.Builder builder(MockHttpClient http) {
         return Oblodai.builder()
                 .publicId("p")
                 .secret("s")
                 .baseUrl("https://api.test")
                 .httpClient(http)
-                .environment(Map.of())
-                .build();
+                .environment(Map.of());
+    }
+
+    private static Oblodai client(MockHttpClient http) {
+        return builder(http).build();
+    }
+
+    private static HistoryRequest limit(long limit) {
+        return HistoryRequest.builder().limit(limit).build();
     }
 
     @Test
     void firstPageFetchesOnceAndIterationWalksEveryPage() {
         MockHttpClient http =
                 new MockHttpClient()
-                        .ok(page(invoices("a", "b"), 0, 5, 2, true))
-                        .ok(page(invoices("a", "b"), 0, 5, 2, true))
-                        .ok(page(invoices("c", "d"), 2, 5, 2, true))
-                        .ok(page(invoices("e"), 4, 5, 2, false));
+                        .ok(page(Fixtures.payments("a", "b"), 0, true))
+                        .ok(page(Fixtures.payments("a", "b"), 0, true))
+                        .ok(page(Fixtures.payments("c", "d"), 2, true))
+                        .ok(page(Fixtures.payments("e"), 4, false));
         Oblodai oblodai = client(http);
 
-        Page<Payment> first = oblodai.payments().history(new PaymentHistoryRequest().limit(2)).firstPage();
-        assertEquals(List.of("a", "b"), first.items().stream().map(Payment::uuid).toList());
-        assertTrue(first.paginate().hasPages());
+        Page<PaymentView> first = oblodai.payments().listHistory(limit(2)).firstPage();
+        assertEquals(List.of("a", "b"), first.items().stream().map(PaymentView::uuid).toList());
+        assertTrue(first.hasPages());
+        assertEquals(100, first.total());
         assertEquals(1, http.calls().size());
 
         List<String> seen = new ArrayList<>();
-        for (Payment payment : oblodai.payments().history(new PaymentHistoryRequest().limit(2))) {
+        for (PaymentView payment : oblodai.payments().listHistory(limit(2))) {
             seen.add(payment.uuid());
         }
         assertEquals(List.of("a", "b", "c", "d", "e"), seen);
@@ -72,74 +71,124 @@ class PaginationTest {
     }
 
     @Test
+    void byPageYieldsEveryPageOneRequestEach() {
+        MockHttpClient http =
+                new MockHttpClient()
+                        .ok(page(Fixtures.payments("a", "b"), 0, true))
+                        .ok(page(Fixtures.payments("c"), 2, false));
+        Pager<PaymentView> pager = client(http).payments().listHistory(limit(2));
+
+        List<Integer> sizes = new ArrayList<>();
+        for (Page<PaymentView> page : pager.byPage()) {
+            sizes.add(page.items().size());
+        }
+        assertEquals(List.of(2, 1), sizes);
+        assertEquals(2, http.calls().size());
+
+        // The first page is cached: walking again re-reads only the pages after it.
+        http.ok(page(Fixtures.payments("c"), 2, false));
+        int pages = 0;
+        for (Page<PaymentView> ignored : pager.byPage()) {
+            pages++;
+        }
+        assertEquals(2, pages);
+        assertEquals(3, http.calls().size());
+    }
+
+    @Test
     void nothingIsRequestedUntilThePagerIsConsumed() {
-        MockHttpClient http = new MockHttpClient().ok(page(invoices("a"), 0, 1, 50, false));
-        var pager = client(http).payments().history();
+        MockHttpClient http = new MockHttpClient().ok(page(Fixtures.payments("a"), 0, false));
+        Pager<PaymentView> pager = client(http).payments().listHistory();
         assertTrue(http.calls().isEmpty(), "building the pager sends nothing");
         assertEquals(1, pager.all().size());
         assertEquals(1, http.calls().size());
+        assertTrue(http.onlyCall().body().contains("\"limit\":50"), "the default page size");
     }
 
     @Test
     void allCollectsAcrossPagesWithACap() {
         MockHttpClient http =
                 new MockHttpClient()
-                        .ok(page(invoices("a", "b"), 0, 3, 2, true))
-                        .ok(page(invoices("c"), 2, 3, 2, false));
-        assertEquals(
-                3,
-                client(http)
-                        .payouts()
-                        .history(new PayoutHistoryRequest().limit(2))
-                        .all()
-                        .size());
+                        .ok(page("[" + Fixtures.payout("a") + "," + Fixtures.payout("b") + "]", 0, true))
+                        .ok(page("[" + Fixtures.payout("c") + "]", 2, false));
+        List<PayoutView> payouts = client(http).payouts().listHistory(limit(2)).all();
+        assertEquals(3, payouts.size());
 
-        MockHttpClient capped = new MockHttpClient().ok(page(invoices("a", "b"), 0, 9, 2, true));
-        assertEquals(
-                1,
-                client(capped)
-                        .payments()
-                        .history(new PaymentHistoryRequest().limit(2))
-                        .all(1)
-                        .size());
+        MockHttpClient capped = new MockHttpClient().ok(page(Fixtures.payments("a", "b"), 0, true));
+        assertEquals(1, client(capped).payments().listHistory(limit(2)).all(1).size());
         assertEquals(1, capped.calls().size(), "the cap stops the walk");
+    }
+
+    @Test
+    void aGetListPagesInTheQuery() {
+        String delivery =
+                "{\"id\":\"d1\",\"url\":\"https://shop.test/hook\",\"event_type\":\"invoice.paid\","
+                        + "\"attempts\":1,\"last_error\":\"\",\"payload\":{},\"status\":\"delivered\","
+                        + "\"created_at\":\"2026-09-24T10:00:00Z\",\"updated_at\":\"2026-09-24T10:00:00Z\"}";
+        MockHttpClient http = new MockHttpClient().ok(page("[" + delivery + "]", 5, false));
+        Pager<SandboxDelivery> pager =
+                client(http)
+                        .sandbox()
+                        .listWebhooks(SandboxListWebhooksQuery.builder().limit(10L).offset(5L).build());
+        assertEquals("d1", pager.firstPage().items().get(0).id());
+        assertEquals(
+                "https://api.test/v1/sandbox/webhooks?limit=10&offset=5", http.onlyCall().uri().toString());
+    }
+
+    @Test
+    void aListRefusesAnIdempotencyKeyBeforeSendingAnything() {
+        MockHttpClient http = new MockHttpClient();
+        ConfigException error =
+                assertThrows(
+                        ConfigException.class,
+                        () ->
+                                client(http)
+                                        .payments()
+                                        .listHistory(limit(2), RequestOptions.of().idempotencyKey("k")));
+        assertEquals(ConfigException.IDEMPOTENCY_UNSUPPORTED, error.code());
+        assertTrue(http.calls().isEmpty());
+    }
+
+    @Test
+    void anAnswerThatIsNotAListIsAContractFailure() {
+        MockHttpClient http = new MockHttpClient().ok("{\"items\":\"nope\"}");
+        ContractException error =
+                assertThrows(ContractException.class, () -> client(http).payments().listHistory().firstPage());
+        assertEquals(ContractException.BAD_ENVELOPE, error.code());
     }
 
     @Test
     void theAsyncPagerWalksWithoutBlocking() {
         MockHttpClient http =
                 new MockHttpClient()
-                        .ok(page(invoices("a", "b"), 0, 3, 2, true))
-                        .ok(page(invoices("c"), 2, 3, 2, false));
-        List<Payment> all =
-                Oblodai.builder()
-                        .publicId("p")
-                        .secret("s")
-                        .baseUrl("https://api.test")
-                        .httpClient(http)
-                        .environment(Map.of())
-                        .buildAsync()
-                        .payments()
-                        .history(new PaymentHistoryRequest().limit(2))
-                        .all()
-                        .join();
+                        .ok(page(Fixtures.payments("a", "b"), 0, true))
+                        .ok(page(Fixtures.payments("c"), 2, false));
+        List<PaymentView> all = builder(http).buildAsync().payments().listHistory(limit(2)).all().join();
         assertEquals(3, all.size());
+
+        MockHttpClient paged =
+                new MockHttpClient()
+                        .ok(page(Fixtures.payments("a", "b"), 0, true))
+                        .ok(page(Fixtures.payments("c"), 2, false));
+        List<Integer> sizes = new ArrayList<>();
+        builder(paged)
+                .buildAsync()
+                .payments()
+                .listHistory(limit(2))
+                .byPage(page -> sizes.add(page.items().size()))
+                .join();
+        assertEquals(List.of(2, 1), sizes);
     }
 
     @Test
     void aStreamIsLazyToo() {
         MockHttpClient http =
                 new MockHttpClient()
-                        .ok(page(invoices("a", "b"), 0, 4, 2, true))
-                        .ok(page(invoices("c", "d"), 2, 4, 2, false));
-        assertEquals(
-                List.of("a", "b", "c"),
-                client(http)
-                        .payments()
-                        .history(new PaymentHistoryRequest().limit(2))
-                        .stream()
-                        .map(Payment::uuid)
-                        .limit(3)
-                        .toList());
+                        .ok(page(Fixtures.payments("a", "b"), 0, true))
+                        .ok(page(Fixtures.payments("c"), 2, false));
+        List<String> firstTwo =
+                client(http).payments().listHistory(limit(2)).stream().limit(2).map(PaymentView::uuid).toList();
+        assertEquals(List.of("a", "b"), firstTwo);
+        assertEquals(1, http.calls().size(), "the second page was never needed");
     }
 }

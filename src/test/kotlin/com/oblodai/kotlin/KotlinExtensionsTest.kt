@@ -1,7 +1,9 @@
 package com.oblodai.kotlin
 
 import com.oblodai.Oblodai
-import com.oblodai.contract.Network
+import com.oblodai.generated.models.LookupRequest
+import com.oblodai.generated.models.PaymentRequest
+import com.oblodai.support.Fixtures
 import com.oblodai.errors.NotFoundException
 import com.oblodai.support.MockHttpClient
 import kotlinx.coroutines.flow.take
@@ -25,24 +27,22 @@ class KotlinExtensionsTest {
             .build()
 
     @Test
-    fun `the request DSL builds the same body the fluent setters do`() {
-        val http = MockHttpClient().ok("""{"uuid":"u","order_id":"order-1001"}""")
+    fun `the generated builders read naturally from Kotlin`() {
+        val http = MockHttpClient().ok(Fixtures.payment("u"))
         val invoice =
             client(http)
                 .payments()
                 .create(
-                    payment {
-                        amount("25")
-                        currency("USDT")
-                        network(Network.TRON)
-                        orderId("order-1001")
-                    }
+                    PaymentRequest.builder()
+                        .amount("25")
+                        .currency("USDT")
+                        .orderId("order-1001")
+                        .build()
                 )
 
         assertEquals("u", invoice.uuid())
         val body = http.onlyCall().body()
         assertTrue(body.contains("\"amount\":\"25\""), body)
-        assertTrue(body.contains("\"network\":\"tron\""), body)
         assertTrue(body.contains("\"order_id\":\"order-1001\""), body)
     }
 
@@ -54,9 +54,9 @@ class KotlinExtensionsTest {
                 .apiError(404, """{"code":"payment.not_found","retryable":false}""")
         val async = client(http).async()
 
-        assertEquals(0, async.account().balance().await().balance().merchant().size)
+        assertEquals(0, async.account().getBalance().await().balance().merchant().size)
 
-        val error = assertFailsWith<NotFoundException> { async.payments().info("missing").await() }
+        val error = assertFailsWith<NotFoundException> { async.payments().getInfo(LookupRequest.builder().uuid("missing").build()).await() }
         assertEquals("payment.not_found", error.code())
     }
 
@@ -67,17 +67,17 @@ class KotlinExtensionsTest {
 
         val http =
             MockHttpClient()
-                .ok(page("""[{"uuid":"a"},{"uuid":"b"}]""", 0, true))
-                .ok(page("""[{"uuid":"c"}]""", 2, false))
+                .ok(page(Fixtures.payments("a", "b"), 0, true))
+                .ok(page(Fixtures.payments("c"), 2, false))
         val uuids =
-            client(http).async().payments().history().asFlow().toList().map { it.uuid() }
+            client(http).async().payments().listHistory().asFlow().toList().map { it.uuid() }
         assertEquals(listOf("a", "b", "c"), uuids)
 
         val blocking =
-            MockHttpClient().ok(page("""[{"uuid":"a"},{"uuid":"b"}]""", 0, false))
+            MockHttpClient().ok(page(Fixtures.payments("a", "b"), 0, false))
         assertEquals(
             listOf("a", "b"),
-            client(blocking).payments().history().asSequence().map { it.uuid() }.toList(),
+            client(blocking).payments().listHistory().asSequence().map { it.uuid() }.toList(),
         )
     }
 
@@ -88,14 +88,14 @@ class KotlinExtensionsTest {
         val http = MockHttpClient()
         var uuid = 0
         repeat(5) { pageIndex ->
-            val items = (1..200).joinToString(",") { """{"uuid":"u${uuid++}"}""" }
+            val items = (1..200).joinToString(",") { Fixtures.payment("u${uuid++}") }
             http.ok(
                 """{"items":[$items],"paginate":{"total":1000,"per_page":200,""" +
                     """"offset":${pageIndex * 200},"has_pages":${pageIndex < 4}}}"""
             )
         }
 
-        val collected = client(http).async().payments().history().asFlow().toList()
+        val collected = client(http).async().payments().listHistory().asFlow().toList()
 
         assertEquals(1000, collected.size)
         assertEquals("u0", collected.first().uuid())
@@ -107,14 +107,14 @@ class KotlinExtensionsTest {
     fun `a flow stops walking when the collector stops collecting`() = runBlocking {
         val http = MockHttpClient()
         repeat(2) { pageIndex ->
-            val items = (1..10).joinToString(",") { """{"uuid":"u$it"}""" }
+            val items = (1..10).joinToString(",") { Fixtures.payment("u$it") }
             http.ok(
                 """{"items":[$items],"paginate":{"total":100,"per_page":10,""" +
                     """"offset":${pageIndex * 10},"has_pages":true}}"""
             )
         }
 
-        val firstThree = client(http).async().payments().history().asFlow().take(3).toList()
+        val firstThree = client(http).async().payments().listHistory().asFlow().take(3).toList()
 
         assertEquals(3, firstThree.size)
         assertEquals(1, http.calls().size, "a cancelled collection asks for no further page")

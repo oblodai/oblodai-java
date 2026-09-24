@@ -7,15 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.oblodai.contract.requests.PaymentRequest;
+import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.core.Logger;
+import com.oblodai.core.Redaction;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.core.SkewCorrectingClock;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.TransportException;
-import com.oblodai.models.Balance;
+import com.oblodai.generated.models.BalanceResult;
+import com.oblodai.generated.models.PaymentView;
+import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +53,7 @@ class TransportSafetyTest {
     @Test
     void cancellingTheFutureAbortsTheExchangeInFlight() throws Exception {
         MockHttpClient http = new MockHttpClient().hangs();
-        CompletableFuture<Balance> call = client(http).buildAsync().account().balance();
+        CompletableFuture<BalanceResult> call = client(http).buildAsync().account().getBalance();
 
         // Give the call a moment to reach the client, then cancel it as a caller would.
         for (int i = 0; i < 100 && http.hanging().isEmpty(); i++) Thread.sleep(5);
@@ -67,7 +70,7 @@ class TransportSafetyTest {
     void aCancelledCallSurfacesAsTransportAbortedOnTheBlockingApi() throws Exception {
         MockHttpClient http = new MockHttpClient().hangs();
         OblodaiAsync async = client(http).buildAsync();
-        CompletableFuture<Balance> call = async.account().balance();
+        CompletableFuture<BalanceResult> call = async.account().getBalance();
         for (int i = 0; i < 100 && http.hanging().isEmpty(); i++) Thread.sleep(5);
 
         call.cancel(true);
@@ -93,7 +96,7 @@ class TransportSafetyTest {
                     () -> {
                         try {
                             start.await();
-                            oblodai.account().balance();
+                            oblodai.account().getBalance();
                             succeeded.incrementAndGet();
                         } catch (Throwable failure) {
                             failures.add(failure);
@@ -154,8 +157,8 @@ class TransportSafetyTest {
         MockHttpClient http = new MockHttpClient().ok(BALANCE).ok(BALANCE);
         Oblodai oblodai = client(http).header("X-Tenant", "acme").build();
 
-        oblodai.account().balance(RequestOptions.of().header("X-Trace", "t-1"));
-        oblodai.account().balance();
+        oblodai.account().getBalance(RequestOptions.of().extraHeader("X-Trace", "t-1"));
+        oblodai.account().getBalance();
 
         assertEquals("t-1", http.calls().get(0).header("x-trace"));
         assertEquals("acme", http.calls().get(0).header("x-tenant"), "client headers still ride");
@@ -165,19 +168,19 @@ class TransportSafetyTest {
                 ConfigException.BAD_HEADER,
                 assertThrows(
                                 ConfigException.class,
-                                () -> RequestOptions.of().header("X-Signature", "zz"))
+                                () -> RequestOptions.of().extraHeader("X-Signature", "zz"))
                         .code());
         assertThrows(
-                ConfigException.class, () -> RequestOptions.of().header("X-Note", "two\r\nlines"));
+                ConfigException.class, () -> RequestOptions.of().extraHeader("X-Note", "two\r\nlines"));
     }
 
     @Test
     void theAdminTokenRidesOnlyOnOnboardingRoutes() {
-        MockHttpClient http = new MockHttpClient().ok(BALANCE).ok("{\"merchant_id\":\"m1\"}");
+        MockHttpClient http = new MockHttpClient().ok(BALANCE).ok("{\"created\":true,\"project_id\":\"p1\",\"merchant_id\":\"m1\",\"api_key\":{\"public_id\":\"pk\",\"secret\":\"sk\"}}");
         Oblodai oblodai = client(http).adminToken("adm").build();
 
-        oblodai.account().balance();
-        oblodai.merchants().createSandbox("m1");
+        oblodai.account().getBalance();
+        oblodai.sandbox().onboardStore("m1");
 
         assertEquals(null, http.calls().get(0).header("x-admin-token"), "not on a merchant route");
         assertEquals("adm", http.calls().get(1).header("x-admin-token"));
@@ -189,7 +192,7 @@ class TransportSafetyTest {
         OblodaiException error =
                 assertThrows(
                         OblodaiException.class,
-                        () -> client(http).retry(RetryOptions.none()).build().account().balance());
+                        () -> client(http).retry(RetryOptions.none()).build().account().getBalance());
         assertTrue(error.getMessage().contains("redirect"), error.getMessage());
         assertTrue(error.getMessage().contains("evil.test"), error.getMessage());
     }
@@ -204,21 +207,22 @@ class TransportSafetyTest {
                                 client(http)
                                         .build()
                                         .payments()
-                                        .create(new PaymentRequest().amount("1").currency("USDT")));
+                                        .create(PaymentRequest.builder().amount("1").currency("USDT").build()));
         assertEquals(ContractException.BAD_ENVELOPE, error.code());
         assertFalse(error.getMessage().contains("nested"), "the body is not quoted into the message");
     }
 
     @Test
-    void anAmountFieldThatArrivesAsANumberIsRefusedRatherThanRounded() {
-        MockHttpClient http = new MockHttpClient().ok("{\"uuid\":\"u\",\"amount\":0.30000000000000004}");
-        assertThrows(
-                ContractException.class,
-                () ->
-                        client(http)
-                                .build()
-                                .payments()
-                                .create(new PaymentRequest().amount("1").currency("USDT")));
+    void anAmountFieldThatArrivesAsANumberKeepsEveryDigit() {
+        MockHttpClient http =
+                new MockHttpClient()
+                        .ok(Fixtures.payment("u").replace("\"amount\":\"25\"", "\"amount\":0.30000000000000004"));
+        PaymentView invoice =
+                client(http)
+                        .build()
+                        .payments()
+                        .create(PaymentRequest.builder().amount("1").currency("USDT").build());
+        assertEquals(new java.math.BigDecimal("0.30000000000000004"), invoice.amount());
     }
 
     @Test
@@ -248,12 +252,12 @@ class TransportSafetyTest {
                 };
 
         MockHttpClient http = new MockHttpClient().ok(BALANCE);
-        client(http).logger(recorder).build().account().balance();
+        client(http).logger(recorder).build().account().getBalance();
 
         assertFalse(lines.isEmpty(), "the transport logs its attempts");
         for (Map<String, Object> fields : lines) {
             for (Map.Entry<String, Object> field : fields.entrySet()) {
-                if (Logger.SENSITIVE.matcher(field.getKey()).find()) {
+                if (Redaction.isSensitive(field.getKey())) {
                     assertEquals("[redacted]", field.getValue(), field.getKey());
                 }
                 assertFalse(
