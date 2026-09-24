@@ -60,7 +60,8 @@ WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
 
 Verify over the raw bytes; deduplicate on `delivery.eventId()` (`X-Webhook-Event-Id`); never act on
 `delivery.isTest()`; drop out-of-order events with `WebhookVerifier.isStale(event, lastSequence)`.
-`event.asPayment()` / `asPayout()` / `asWallet()` / `asConversion()` give the typed event; an unknown
+`event.asPayment()` and the other `as<Kind>()` accessors (generated per webhook kind in
+`com.oblodai.generated.WebhookKinds` — never add one by hand) give the typed event; an unknown
 `type()` is still delivered with its `fields()`.
 
 ## Building

@@ -11,11 +11,16 @@ import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.generated.Facts;
+import com.oblodai.generated.WebhookKinds;
 import com.oblodai.generated.models.ConversionWebhook;
 import com.oblodai.webhooks.WebhookEvent;
 import com.oblodai.webhooks.WebhookHeaders;
 import com.oblodai.webhooks.WebhookVerifier;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -219,5 +224,31 @@ class WebhookHardeningTest {
         assertThrows(
                 SignatureException.class,
                 () -> WebhookVerifier.verify(BODY, headers(NOW, sign("whsec_other", NOW, BODY)), rotating));
+    }
+
+    @Test
+    void everyKindHasAGeneratedAccessorAndTheRuntimeNamesNoModel() throws IOException {
+        assertTrue(WebhookKinds.class.isAssignableFrom(WebhookEvent.class), "the accessors come from the generator");
+        for (Facts.WebhookKind kind : Facts.WEBHOOK_KINDS.values()) {
+            boolean found = false;
+            for (Method m : WebhookKinds.class.getDeclaredMethods()) {
+                found |= m.isDefault() && m.getParameterCount() == 0 && m.getReturnType() == kind.model();
+            }
+            assertTrue(found, "no generated accessor for the " + kind.kind() + " kind");
+            for (Method m : WebhookEvent.class.getDeclaredMethods()) {
+                assertTrue(
+                        m.getReturnType() != kind.model(),
+                        "WebhookEvent." + m.getName() + " repeats the " + kind.kind() + " kind by hand");
+            }
+        }
+        String src = Files.readString(Path.of("src/main/java/com/oblodai/webhooks/WebhookEvent.java"));
+        assertFalse(src.contains("com.oblodai.generated.models."), "WebhookEvent names no model of a kind");
+        for (String kind : Facts.KNOWN_WEBHOOK_KINDS) {
+            assertFalse(src.contains("{@code " + kind + "}"), "WebhookEvent lists the kind " + kind + " by hand");
+        }
+        // The public names stay, and each goes through as(): a wallet event is not a payment.
+        WebhookEvent wallet = new WebhookEvent(Map.of("type", "wallet"));
+        assertThrows(IllegalStateException.class, wallet::asPayment);
+        assertThrows(IllegalStateException.class, wallet::asConversion);
     }
 }

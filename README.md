@@ -251,8 +251,9 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 ## Webhooks
 
 Verify over the raw request bytes; deduplicate on `eventId()` (`X-Webhook-Event-Id`); never act on
-a test delivery. `event().asPayment()`, `asPayout()`, `asWallet()`, `asConversion()` give the typed
-event, and `typed()` the model of any kind of the contract (`Facts.WEBHOOK_KINDS`); an event kind
+a test delivery. `event().asPayment()` and the other `as<Kind>()` accessors (one per webhook kind of
+the contract, generated in `WebhookKinds`) give the typed event, and `typed()` the model of any kind
+(`Facts.WEBHOOK_KINDS`); an event kind
 this SDK does not know is still delivered, with its raw `type()` and `fields()`.
 
 ```java
