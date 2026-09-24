@@ -105,4 +105,36 @@ class RequestOptionsTest {
         assertEquals("order-1001", http.calls().get(0).header("x-request-id"));
         assertEquals("from-header", http.calls().get(1).header("x-request-id"));
     }
+    @Test
+    void theFaucetTakesTheKeyInItsBodyAndRefusesItGivenTwice() {
+        // Ruling 10: the faucet deduplicates by its own body field; the option fills it.
+        String faucet =
+                "{\"asset\":\"USDT\",\"amount\":\"5\",\"journal_id\":\"00000000-0000-4000-8000-000000000001\"}";
+        MockHttpClient http = new MockHttpClient().ok(faucet).ok(faucet);
+        Oblodai oblodai = Clients.client(http);
+        oblodai.sandbox()
+                .faucet(
+                        com.oblodai.generated.models.FaucetRequest.builder().amount("5").asset("USDT").build(),
+                        RequestOptions.of().idempotencyKey("tap-1"));
+        assertTrue(http.onlyCall().body().contains("\"idempotency_key\":\"tap-1\""), http.onlyCall().body());
+        assertEquals(null, http.onlyCall().header("Idempotency-Key"));
+
+        // The field and the option both naming the key: ambiguous, refused before the network —
+        // the same rule in every Oblodai SDK.
+        ConfigException error =
+                assertThrows(
+                        ConfigException.class,
+                        () ->
+                                oblodai.sandbox()
+                                        .faucet(
+                                                com.oblodai.generated.models.FaucetRequest.builder()
+                                                        .amount("5")
+                                                        .asset("USDT")
+                                                        .idempotencyKey("own")
+                                                        .build(),
+                                                RequestOptions.of().idempotencyKey("tap-2")));
+        assertEquals(ConfigException.BAD_CONFIG, error.code());
+        assertTrue(error.getMessage().contains("idempotency_key"), error.getMessage());
+        assertEquals(1, http.calls().size());
+    }
 }
