@@ -60,6 +60,29 @@ public final class JobSupport {
         return poll;
     }
 
+    /**
+     * The long-running operation a typed waiter follows: the first create {@code operationId} (in
+     * sorted order, as the Go SDK picks it) whose poll answers with {@code pollModel}.
+     *
+     * @param pollModel the generated model of the poll answer
+     * @return a key of {@link Facts#LRO}
+     * @throws ConfigException {@code sdk.lro_unresolved} when no long-running operation is polled with
+     *     that model
+     */
+    public static String createOf(Class<?> pollModel) {
+        return Facts.LRO.entrySet().stream()
+                .filter(e -> e.getValue().model() == pollModel)
+                .map(Map.Entry::getKey)
+                .sorted()
+                .findFirst()
+                .orElseThrow(
+                        () ->
+                                new ConfigException(
+                                        "sdk.lro_unresolved",
+                                        "no long-running operation is polled with " + pollModel.getSimpleName(),
+                                        null));
+    }
+
     private static RouteSpec route(String operationId) {
         RouteSpec route = Routes.BY_OPERATION_ID.get(operationId);
         if (route == null) {

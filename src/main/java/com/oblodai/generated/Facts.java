@@ -27,6 +27,7 @@ public final class Facts {
      * @param statusField the status field of the poll answer
      * @param terminal the statuses after which the job no longer changes
      * @param download the {@code operationId} that returns the finished job's file, or null
+     * @param model the generated model of the poll answer
      * @param parse the parser of the poll answer
      */
     public record Poll(
@@ -35,6 +36,7 @@ public final class Facts {
             String statusField,
             Set<String> terminal,
             String download,
+            Class<?> model,
             Function<Object, ?> parse) {}
 
     /** {@code create operationId -> how to follow its job}, in the order of the contract. */
@@ -85,6 +87,7 @@ public final class Facts {
                         "status",
                         Set.of("completed", "stopped"),
                         null,
+                        com.oblodai.generated.models.BatchInfoResponse.class,
                         com.oblodai.generated.models.BatchInfoResponse::fromJson));
         lro.put(
                 "createPaymentBatch",
@@ -94,6 +97,7 @@ public final class Facts {
                         "status",
                         Set.of("completed", "stopped"),
                         null,
+                        com.oblodai.generated.models.BatchInfoResponse.class,
                         com.oblodai.generated.models.BatchInfoResponse::fromJson));
         lro.put(
                 "createRefundBatch",
@@ -103,6 +107,7 @@ public final class Facts {
                         "status",
                         Set.of("completed", "stopped"),
                         null,
+                        com.oblodai.generated.models.BatchInfoResponse.class,
                         com.oblodai.generated.models.BatchInfoResponse::fromJson));
         lro.put(
                 "createPayoutBatch",
@@ -112,6 +117,7 @@ public final class Facts {
                         "status",
                         Set.of("completed", "stopped"),
                         null,
+                        com.oblodai.generated.models.BatchInfoResponse.class,
                         com.oblodai.generated.models.BatchInfoResponse::fromJson));
         lro.put(
                 "createDocumentJob",
@@ -121,6 +127,7 @@ public final class Facts {
                         "status",
                         Set.of("done", "failed", "expired"),
                         "downloadDocumentJobFile",
+                        com.oblodai.generated.models.DocumentJobView.class,
                         com.oblodai.generated.models.DocumentJobView::fromJson));
         return Collections.unmodifiableMap(lro);
     }
