@@ -55,9 +55,6 @@ jobs:
             exit 1
           fi
 
-      - name: contract drift
-        run: bash codegen/run.sh --check
-
       - name: build and test
         run: mvn -B verify
 

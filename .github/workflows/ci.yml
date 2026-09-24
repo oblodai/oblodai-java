@@ -1,5 +1,5 @@
-# The same gates a developer runs locally: the contract drift check, then `mvn verify`
-# (compile → 521 offline tests → jar, sources jar, javadoc jar).
+# `mvn verify` (compile with -Werror → offline tests → jar, sources jar, javadoc jar). The drift
+# check and the conformance suite need the backend checkout: run `make ci` locally.
 name: CI
 on:
   push:
@@ -19,7 +19,5 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: temurin
           cache: maven
-      - name: contract drift
-        run: bash codegen/run.sh --check
       - name: build and test
         run: mvn -B verify
