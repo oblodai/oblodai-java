@@ -1,7 +1,7 @@
 package com.oblodai;
 
-import com.oblodai.contract.PaymentStatus;
-import com.oblodai.contract.PayoutStatus;
+import com.oblodai.generated.models.PaymentStatus;
+import com.oblodai.generated.models.PayoutStatus;
 import java.util.List;
 
 /**

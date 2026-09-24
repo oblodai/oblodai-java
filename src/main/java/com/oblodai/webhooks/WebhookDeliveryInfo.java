@@ -1,13 +1,14 @@
 package com.oblodai.webhooks;
 
-import com.oblodai.models.WebhookEvent;
-
 /**
  * A verified delivery: the event, plus the advisory headers worth keeping.
  *
  * @param event the parsed event, verified against the raw bytes it arrived as
- * @param id {@code X-Webhook-Id} — stable across retries of the same delivery; use it as your
- *     deduplication key
+ * @param id {@code X-Webhook-Id} - stable across retries of the same DELIVERY; a resend of the
+ *     same state is a new delivery with a new id, so deduplicate on {@code eventId}
+ * @param eventId {@code X-Webhook-Event-Id} - the id of the STATE this delivery carries: the same
+ *     for the original, every retry and every resend of that state; keep the ids you handled and
+ *     skip repeats. Null from a gateway that does not send it
  * @param eventType {@code X-Webhook-Event} — {@code invoice.&lt;status&gt;}, {@code
  *     payout.&lt;status&gt;} or {@code wallet.paid}
  * @param eventTime {@code X-Webhook-Event-Time} — unix seconds when the state change committed
@@ -18,6 +19,7 @@ import com.oblodai.models.WebhookEvent;
 public record WebhookDeliveryInfo(
         WebhookEvent event,
         String id,
+        String eventId,
         String eventType,
         Long eventTime,
         long sentAt,

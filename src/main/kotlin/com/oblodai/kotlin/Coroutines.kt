@@ -18,9 +18,9 @@ import kotlin.coroutines.resumeWithException
  *
  * ```kotlin
  * val oblodai = Oblodai.builder().publicId(id).secret(secret).build()
- * val invoice = oblodai.async().payments().create(payment {
- *     amount("25"); currency("USDT"); network(Network.TRON); orderId("order-1001")
- * }).await()
+ * val invoice = oblodai.async().payments().create(
+ *     PaymentRequest.builder().amount("25").currency("USDT").orderId("order-1001").build()
+ * ).await()
  * ```
  */
 
@@ -67,8 +67,7 @@ public fun <T : Any> AsyncPager<T>.asFlow(): Flow<T> = flow {
         val page = page(limit(), at).await()
         val items = page.items()
         for (item in items) emit(item)
-        val paginate = page.paginate()
-        if (items.isEmpty() || paginate == null || paginate.hasPages() != true) break
+        if (items.isEmpty() || !page.hasPages()) break
         at += items.size
     }
 }

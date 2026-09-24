@@ -6,13 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.oblodai.core.Signing;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
-import com.oblodai.models.PaymentEvent;
-import com.oblodai.models.WebhookEvent;
-import com.oblodai.support.Contract;
+import com.oblodai.webhooks.WebhookEvent;
 import com.oblodai.webhooks.WebhookDeliveryInfo;
 import com.oblodai.webhooks.WebhookHeaders;
 import com.oblodai.webhooks.WebhookVerifier;
@@ -22,83 +19,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 
 /**
- * Webhook verification against real deliveries. The samples were signed by the gateway's own
- * dispatcher with the endpoint secret in force at that moment — the one the recorded
- * {@code rotate-secret} call returned — and carry the exact bytes that were delivered.
+ * Webhook verification: signatures, the rotation overlap, freshness and the body. The gateway's own
+ * vectors (x-oblodai-signing) run in the conformance suite.
  */
 class WebhookVerifierTest {
-
-    private static final String SECRET =
-            Contract.result("POST /v1/webhooks/rotate-secret").path("secret").asText();
-
-    private static WebhookHeaders headersOf(JsonNode sample) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        sample.path("headers").fields().forEachRemaining(e -> headers.put(e.getKey(), e.getValue().asText()));
-        return WebhookHeaders.of(headers);
-    }
-
-    @TestFactory
-    List<DynamicTest> verifiesEveryRecordedDelivery() {
-        List<DynamicTest> tests = new ArrayList<>();
-        List<JsonNode> samples = Contract.webhookSamples();
-        assertFalse(samples.isEmpty(), "no webhook samples recorded");
-        int index = 0;
-        for (JsonNode sample : samples) {
-            int at = index++;
-            tests.add(
-                    DynamicTest.dynamicTest(
-                            at + " " + sample.path("headers").path("X-Webhook-Event").asText(),
-                            () -> {
-                                byte[] raw = sample.path("raw").asText().getBytes(StandardCharsets.UTF_8);
-                                long ts =
-                                        Long.parseLong(
-                                                sample.path("headers").path("X-Webhook-Timestamp").asText());
-                                WebhookDeliveryInfo delivery =
-                                        WebhookVerifier.verifyDelivery(
-                                                raw,
-                                                headersOf(sample),
-                                                WebhookVerifier.options(SECRET).clock(() -> ts));
-
-                                assertEquals(sample.path("body").path("uuid").asText(), delivery.event().uuid());
-                                assertEquals(
-                                        sample.path("headers").path("X-Webhook-Id").asText(), delivery.id());
-                                assertEquals(
-                                        sample.path("headers").path("X-Webhook-Event").asText(),
-                                        delivery.eventType());
-                                assertEquals(sample.path("body").path("type").asText(), delivery.event().type());
-                                assertNotNull(delivery.event().sequence());
-                                assertTrue(
-                                        delivery.eventType().matches("^(invoice|payout|wallet)\\..+"),
-                                        "event type vocabulary");
-                                // Rehearsals are signed like live deliveries and must be recognisable.
-                                assertEquals(
-                                        sample.path("body").path("test").asBoolean(false),
-                                        delivery.isTest(),
-                                        "rehearsal flag");
-                                assertEquals(
-                                        delivery.isTest(),
-                                        WebhookVerifier.isTestEvent(delivery.event()),
-                                        "the body alone says the same");
-
-                                // The same bytes under any other secret must not verify.
-                                assertThrows(
-                                        SignatureException.class,
-                                        () ->
-                                                WebhookVerifier.verify(
-                                                        raw,
-                                                        headersOf(sample),
-                                                        WebhookVerifier.options("some-other-secret")
-                                                                .previousSecret("another")
-                                                                .clock(() -> ts)));
-                            }));
-        }
-        return tests;
-    }
 
     private static final long TS = 1_755_600_000L;
     private static final String BODY =
@@ -121,7 +48,9 @@ class WebhookVerifierTest {
                         headers(Signing.signWebhook("whsec", TS, BODY), null),
                         WebhookVerifier.options("whsec").clock(() -> TS));
         assertEquals("payment", event.type());
-        assertTrue(event instanceof PaymentEvent);
+        assertEquals("u1", event.uuid());
+        assertEquals("o", event.orderId());
+        assertEquals(7L, event.sequence());
     }
 
     @Test
@@ -215,7 +144,7 @@ class WebhookVerifierTest {
                         WebhookVerifier.options("whsec").clock(() -> TS));
         assertTrue(fromBody.isTest());
         assertTrue(WebhookVerifier.isTestEvent(fromBody.event()));
-        assertEquals(Boolean.TRUE, fromBody.event().test());
+        assertTrue(fromBody.event().test());
 
         // Only the header carries it: still a rehearsal, though the body alone cannot tell.
         Map<String, String> withHeader = new LinkedHashMap<>();

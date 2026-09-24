@@ -6,8 +6,6 @@ import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.errors.WebhookPayloadException;
-import com.oblodai.models.UnknownEvent;
-import com.oblodai.models.WebhookEvent;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.function.LongSupplier;
@@ -61,6 +59,9 @@ public final class WebhookVerifier {
 
     /** Delivery id, stable across retries. */
     public static final String HEADER_ID = "X-Webhook-Id";
+
+    /** The id of the state a delivery carries; the deduplication key. */
+    public static final String HEADER_EVENT_ID = "X-Webhook-Event-Id";
 
     /** Unix seconds the state change committed at. */
     public static final String HEADER_EVENT_TIME = "X-Webhook-Event-Time";
@@ -279,6 +280,7 @@ public final class WebhookVerifier {
         return new WebhookDeliveryInfo(
                 event,
                 headers.first(HEADER_ID),
+                headers.first(HEADER_EVENT_ID),
                 headers.first(HEADER_EVENT),
                 eventTime,
                 timestamp,
@@ -294,8 +296,8 @@ public final class WebhookVerifier {
      * checks the shape, not the origin.
      *
      * @param rawBody the delivery body
-     * @return the event; a {@code type} this snapshot does not know decodes to
-     *     {@link com.oblodai.models.UnknownEvent} rather than failing
+     * @return the event; a {@code type} this snapshot does not know is returned as it is, not
+     *     refused
      * @throws WebhookPayloadException ({@code webhook.bad_payload}) when the body is not an event
      *     object
      */
@@ -316,13 +318,13 @@ public final class WebhookVerifier {
     /**
      * Whether the event is one of the kinds this SDK snapshot models. A {@code false} means the
      * gateway has grown a new event type: the delivery is still verified and readable through
-     * {@link UnknownEvent}, and a receiver should ignore it rather than fail.
+     * {@link WebhookEvent#fields()}, and a receiver should acknowledge it rather than fail.
      *
      * @param event the event just verified, or null
      * @return true for a payment, payout or wallet event
      */
     public static boolean isKnownEvent(WebhookEvent event) {
-        return event != null && !(event instanceof UnknownEvent);
+        return event != null && WebhookEvent.KNOWN_KINDS.contains(event.type());
     }
 
     /**
@@ -333,7 +335,7 @@ public final class WebhookVerifier {
      * @return true when the event is a rehearsal, not a real state change
      */
     public static boolean isTestEvent(WebhookEvent event) {
-        return event != null && Boolean.TRUE.equals(event.test());
+        return event != null && event.test();
     }
 
     /**

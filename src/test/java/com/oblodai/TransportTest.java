@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.oblodai.contract.requests.PaymentAccuracySetRequest;
-import com.oblodai.contract.requests.PaymentRequest;
-import com.oblodai.contract.requests.PayoutRequest;
+import com.oblodai.generated.models.SetAccuracyRequest;
+import com.oblodai.generated.models.PaymentRequest;
+import com.oblodai.generated.models.LookupRequest;
+import com.oblodai.generated.models.PayoutRequest;
+import com.oblodai.generated.models.SandboxListWebhooksQuery;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.core.SkewCorrectingClock;
 import com.oblodai.errors.AuthenticationException;
@@ -19,6 +21,7 @@ import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.RateLimitException;
 import com.oblodai.errors.TransportException;
 import com.oblodai.errors.ValidationException;
+import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.io.IOException;
 import java.time.Duration;
@@ -47,7 +50,7 @@ class TransportTest {
         MockHttpClient http =
                 new MockHttpClient()
                         .ok("{\"items\":[],\"paginate\":{\"total\":0,\"per_page\":10,\"offset\":0,\"has_pages\":false}}");
-        client(http).build().sandbox().webhooks(10, 0).firstPage();
+        client(http).build().sandbox().listWebhooks(SandboxListWebhooksQuery.builder().limit(10L).offset(0L).build()).firstPage();
 
         MockHttpClient.Recorded call = http.onlyCall();
         assertEquals("https://api.test/v1/sandbox/webhooks?limit=10&offset=0", call.uri().toString());
@@ -63,8 +66,8 @@ class TransportTest {
         MockHttpClient http =
                 new MockHttpClient()
                         .apiError(503, "{\"code\":\"db.unavailable\",\"message\":\"down\",\"retryable\":true}")
-                        .ok("{\"uuid\":\"u\"}");
-        client(http).build().payments().create(new PaymentRequest().amount("1").currency("USDT"));
+                        .ok(Fixtures.payment("u"));
+        client(http).build().payments().create(PaymentRequest.builder().amount("1").currency("USDT").build());
 
         assertEquals(2, http.calls().size());
         String key = http.calls().get(0).header("idempotency-key");
@@ -75,14 +78,14 @@ class TransportTest {
 
     @Test
     void honoursACallerKeyAndAddsNoneToReadRoutes() {
-        MockHttpClient http = new MockHttpClient().ok("{\"uuid\":\"u\"}").ok("{\"uuid\":\"u\"}");
+        MockHttpClient http = new MockHttpClient().ok(Fixtures.payout("u")).ok(Fixtures.payment("u"));
         Oblodai oblodai = client(http).build();
         oblodai
                 .payouts()
                 .create(
-                        new PayoutRequest().amount("1").currency("USDT").address("T").orderId("o"),
+                        PayoutRequest.builder().amount("1").currency("USDT").address("T").orderId("o").build(),
                         RequestOptions.of().idempotencyKey("my-key-1"));
-        oblodai.payments().info("u");
+        oblodai.payments().getInfo(LookupRequest.builder().uuid("u").build());
 
         assertEquals("my-key-1", http.calls().get(0).header("idempotency-key"));
         assertNull(http.calls().get(1).header("idempotency-key"));
@@ -93,7 +96,7 @@ class TransportTest {
         MockHttpClient http =
                 new MockHttpClient().apiError(500, "{\"code\":\"internal\",\"retryable\":false}");
         OblodaiException error =
-                assertThrows(OblodaiException.class, () -> client(http).build().account().balance());
+                assertThrows(OblodaiException.class, () -> client(http).build().account().getBalance());
 
         assertEquals("internal", error.code());
         assertEquals(500, error.httpStatus());
@@ -111,7 +114,7 @@ class TransportTest {
                         .apiError(429, rateLimited);
 
         RateLimitException error =
-                assertThrows(RateLimitException.class, () -> client(http).build().account().balance());
+                assertThrows(RateLimitException.class, () -> client(http).build().account().getBalance());
         assertEquals(0, error.retryAfter());
         assertEquals(3, http.calls().size(), "one attempt plus two retries");
     }
@@ -119,7 +122,7 @@ class TransportTest {
     @Test
     void retriesATransportFailureOnlyWhenTheRequestIsSafeToRepeat() {
         MockHttpClient read = new MockHttpClient().fails(new IOException("connection reset")).ok(BALANCE);
-        client(read).build().account().balance();
+        client(read).build().account().getBalance();
         assertEquals(2, read.calls().size(), "a read route is retried");
 
         MockHttpClient write = new MockHttpClient().fails(new IOException("connection reset")).ok("{}");
@@ -130,13 +133,13 @@ class TransportTest {
                                 client(write)
                                         .build()
                                         .settings()
-                                        .setAccuracy(new PaymentAccuracySetRequest().enabled(true)));
+                                        .setAccuracy(SetAccuracyRequest.builder().enabled(true).build()));
         assertEquals(TransportException.NETWORK, error.code());
         assertEquals(1, write.calls().size(), "an unkeyed write is never re-sent");
 
         MockHttpClient keyed =
-                new MockHttpClient().fails(new IOException("connection reset")).ok("{\"uuid\":\"u\"}");
-        client(keyed).build().payments().create(new PaymentRequest().amount("1").currency("USDT"));
+                new MockHttpClient().fails(new IOException("connection reset")).ok(Fixtures.payment("u"));
+        client(keyed).build().payments().create(PaymentRequest.builder().amount("1").currency("USDT").build());
         assertEquals(2, keyed.calls().size(), "a keyed write is deduplicated, so it may repeat");
     }
 
@@ -158,16 +161,16 @@ class TransportTest {
                         () ->
                                 oblodai
                                         .payments()
-                                        .create(new PaymentRequest().amount("0").currency("USDT")));
+                                        .create(PaymentRequest.builder().amount("0").currency("USDT").build()));
         assertEquals("payment.below_minimum", validation.code());
         assertEquals("amount", validation.field());
         assertEquals("rq-1", validation.requestId());
         assertEquals("payment", validation.family());
 
-        assertThrows(AuthenticationException.class, () -> oblodai.account().balance());
+        assertThrows(AuthenticationException.class, () -> oblodai.account().getBalance());
         assertThrows(
                 IdempotencyConflictException.class,
-                () -> oblodai.payments().create(new PaymentRequest().amount("1").currency("USDT")));
+                () -> oblodai.payments().create(PaymentRequest.builder().amount("1").currency("USDT").build()));
     }
 
     @Test
@@ -181,7 +184,7 @@ class TransportTest {
                                 "date",
                                 httpDate(serverNow))
                         .ok(BALANCE);
-        client(http).retry(RetryOptions.none()).build().account().balance();
+        client(http).retry(RetryOptions.none()).build().account().getBalance();
 
         assertEquals(2, http.calls().size());
         long signedAt = Long.parseLong(http.calls().get(1).header("x-timestamp"));
@@ -200,19 +203,19 @@ class TransportTest {
                                         .retry(RetryOptions.none())
                                         .build()
                                         .account()
-                                        .balance());
+                                        .getBalance());
         assertEquals(TransportException.TIMEOUT, error.code());
     }
 
     @Test
     void signsMoneyOutAndMoneyInWithTheOneApiKey() {
         // A merchant has one key; a payout and an invoice go out under the same public id.
-        MockHttpClient http = new MockHttpClient().ok("{\"uuid\":\"p\"}").ok("{\"uuid\":\"i\"}");
+        MockHttpClient http = new MockHttpClient().ok(Fixtures.payout("p")).ok(Fixtures.payment("i"));
         Oblodai oblodai = client(http).build();
         oblodai
                 .payouts()
-                .create(new PayoutRequest().amount("1").currency("USDT").address("T").orderId("o"));
-        oblodai.payments().create(new PaymentRequest().amount("1").currency("USDT"));
+                .create(PayoutRequest.builder().amount("1").currency("USDT").address("T").orderId("o").build());
+        oblodai.payments().create(PaymentRequest.builder().amount("1").currency("USDT").build());
 
         assertEquals("pk_test_1", http.calls().get(0).header("x-public-id"));
         assertEquals("pk_test_1", http.calls().get(1).header("x-public-id"));
@@ -228,9 +231,9 @@ class TransportTest {
                         .environment(Map.of())
                         .build();
 
-        assertNotNull(oblodai.catalog().currencies());
+        assertNotNull(oblodai.checkout().listCurrencies());
         ConfigException missing =
-                assertThrows(ConfigException.class, () -> oblodai.account().balance());
+                assertThrows(ConfigException.class, () -> oblodai.account().getBalance());
         assertEquals(ConfigException.MISSING_CREDENTIALS, missing.code());
     }
 
@@ -242,11 +245,11 @@ class TransportTest {
                         .apiError(404, "{\"code\":\"payment.not_found\",\"retryable\":false}");
         OblodaiAsync async = client(http).buildAsync();
 
-        assertNotNull(async.account().balance().join());
+        assertNotNull(async.account().getBalance().join());
         Throwable failure =
                 assertThrows(
                                 java.util.concurrent.CompletionException.class,
-                                () -> async.payments().info("missing").join())
+                                () -> async.payments().getInfo(LookupRequest.builder().uuid("missing").build()).join())
                         .getCause();
         assertInstanceOf(OblodaiException.class, failure);
         assertEquals("payment.not_found", ((OblodaiException) failure).code());

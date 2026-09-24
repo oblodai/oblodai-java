@@ -1,9 +1,6 @@
 package com.oblodai.core;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Minimal structured logging contract. Anything with debug/info/warn/error(message, fields) fits
@@ -70,7 +67,7 @@ public interface Logger {
             private void emit(Level at, String message, Map<String, Object> fields) {
                 if (at.ordinal() < level.ordinal()) return;
                 String line = "[oblodai] " + at + " " + message;
-                System.err.println(fields == null || fields.isEmpty() ? line : line + " " + redact(fields));
+                System.err.println(fields == null || fields.isEmpty() ? line : line + " " + Redaction.redact(fields));
             }
 
             @Override
@@ -95,9 +92,6 @@ public interface Logger {
         };
     }
 
-    /** Pattern of field names whose values are replaced before logging. */
-    Pattern SENSITIVE = Pattern.compile("secret|signature|passcode|token|authorization|password", Pattern.CASE_INSENSITIVE);
-
     /**
      * The transport's redaction hook: a copy of the fields with sensitive values replaced.
      *
@@ -107,20 +101,6 @@ public interface Logger {
     @SuppressWarnings("unchecked")
     static Map<String, Object> redactFields(Map<String, Object> fields) {
         if (fields == null || fields.isEmpty()) return Map.of();
-        return (Map<String, Object>) redact(fields);
-    }
-
-    /** Replaces values of sensitive-looking keys, recursively, without touching the original. */
-    static Object redact(Object value) {
-        if (value instanceof Map<?, ?> map) {
-            Map<String, Object> out = new LinkedHashMap<>();
-            for (Map.Entry<?, ?> e : map.entrySet()) {
-                String key = String.valueOf(e.getKey());
-                out.put(key, SENSITIVE.matcher(key).find() ? "[redacted]" : redact(e.getValue()));
-            }
-            return out;
-        }
-        if (value instanceof List<?> list) return list.stream().map(Logger::redact).toList();
-        return value;
+        return (Map<String, Object>) Redaction.redact(fields);
     }
 }

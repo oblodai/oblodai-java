@@ -51,7 +51,8 @@ class EnvelopeTest {
                         "{\"error\":{\"code\":\"internal.oops\",\"message\":{\"nested\":1},\"field\":7,"
                                 + "\"request_id\":\"req-1\"}}");
         assertEquals("internal.oops", error.code());
-        assertEquals("HTTP 500", error.getMessage());
+        assertEquals("HTTP 500", error.text());
+        assertEquals("[internal.oops] HTTP 500 (request_id=req-1)", error.getMessage());
         assertNull(error.field());
         assertEquals("req-1", error.requestId());
     }

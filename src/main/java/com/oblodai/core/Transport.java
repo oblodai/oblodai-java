@@ -1,17 +1,22 @@
 package com.oblodai.core;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oblodai.contract.RouteSpec;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.TransportException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.http.HttpClient;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
 
 /**
  * The HTTP engine every resource goes through. One lifecycle, written once and shared by the
@@ -19,7 +24,10 @@ import java.util.concurrent.CompletionException;
  * timeout, read the envelope under a size ceiling, classify the failure, retry per policy, correct a
  * skewed clock.
  *
- * <p>{@link #callRaw} serves the few {@code bare} routes that answer with bytes instead of JSON.
+ * <p>A successful call answers with the envelope's {@code result} as a plain JSON tree - maps,
+ * lists, strings, {@link Long}/{@link BigInteger} for integers, {@link BigDecimal} for fractions,
+ * booleans - which the generated models parse. {@link #callRaw} serves the {@code bare} routes that
+ * answer with bytes.
  *
  * <p>Cancelling the future a call returns cancels the HTTP exchange in flight and stops the retry
  * loop; the blocking API surfaces that as {@code transport.aborted}.
@@ -28,13 +36,19 @@ public final class Transport {
 
     private final Config config;
     private final Dispatcher dispatcher;
+    private final Consumer<RawResponse> observer;
 
     /**
      * @param config everything the transport needs; built by the client from its options
      */
     public Transport(Config config) {
+        this(config, null);
+    }
+
+    private Transport(Config config, Consumer<RawResponse> observer) {
         this.config = config;
         this.dispatcher = new Dispatcher(config);
+        this.observer = observer;
     }
 
     /**
@@ -52,6 +66,8 @@ public final class Transport {
      * @param adminToken admin token of a self-hosted gateway; only onboarding routes send it
      * @param userAgent the SDK's user agent
      * @param mapper JSON mapper
+     * @param hooks request and response hooks
+     * @param sleeper how to wait between attempts
      */
     public record Config(
             String baseUrl,
@@ -65,19 +81,68 @@ public final class Transport {
             Map<String, String> headers,
             String adminToken,
             String userAgent,
-            ObjectMapper mapper) {}
+            ObjectMapper mapper,
+            Hooks hooks,
+            Sleeper sleeper) {
 
-    /** The JSON mapper the client decodes with. */
+        @Override
+        public String toString() {
+            return "Transport.Config[baseUrl="
+                    + baseUrl
+                    + ", credentials="
+                    + credentials
+                    + ", retry="
+                    + retry
+                    + ", timeoutMs="
+                    + timeoutMs
+                    + ", deadlineMs="
+                    + deadlineMs
+                    + ", headers="
+                    + headers.keySet()
+                    + ", adminToken="
+                    + (adminToken == null ? null : "***")
+                    + "]";
+        }
+    }
+
+    /** @return the configuration */
+    public Config config() {
+        return config;
+    }
+
+    /**
+     * A transport over the same connections and clock with a different configuration (what {@code
+     * withOptions} builds).
+     *
+     * @param changed the new configuration
+     * @return the transport
+     */
+    public Transport derive(Config changed) {
+        return new Transport(changed, observer);
+    }
+
+    /**
+     * A transport that hands every successful raw response to {@code observer} before it is
+     * decoded (what {@code withRawResponse} builds).
+     *
+     * @param observer called with each 2xx answer
+     * @return the transport
+     */
+    public Transport observing(Consumer<RawResponse> observer) {
+        return new Transport(config, observer);
+    }
+
+    /** @return the JSON mapper the client decodes with */
     public ObjectMapper mapper() {
         return config.mapper();
     }
 
-    /** The HTTP client this transport sends with. */
+    /** @return the HTTP client this transport sends with */
     public HttpClient httpClient() {
         return config.httpClient();
     }
 
-    /** The signing clock, exposed for tests and for reading the learned skew. */
+    /** @return the signing clock, exposed for tests and for reading the learned skew */
     public SkewCorrectingClock clock() {
         return config.clock();
     }
@@ -85,24 +150,22 @@ public final class Transport {
     // --- blocking API ---------------------------------------------------------------------------
 
     /**
-     * Calls an envelope route and decodes its {@code result}.
+     * Calls an envelope route and returns its {@code result} as a JSON tree.
      *
      * @param route the route
      * @param options body, query, path parameters and per-call overrides
-     * @param type the type to decode the result into
-     * @param <T> result type
-     * @return the decoded result
+     * @return the result, or {@code null} when it is JSON null
      */
-    public <T> T call(RouteSpec route, CallOptions options, JavaType type) {
-        return await(callAsync(route, options, type));
+    public Object call(RouteSpec route, CallOptions options) {
+        return await(callAsync(route, options));
     }
 
     /**
-     * Calls a {@code bare} route and returns the response bytes.
+     * Calls a route and returns the raw 2xx response.
      *
      * @param route the route
      * @param options query, path parameters and per-call overrides
-     * @return the raw 2xx response
+     * @return the raw response
      */
     public RawResponse callRaw(RouteSpec route, CallOptions options) {
         return await(callRawAsync(route, options));
@@ -115,13 +178,11 @@ public final class Transport {
      *
      * @param route the route
      * @param options body, query, path parameters and per-call overrides
-     * @param type the type to decode the result into
-     * @param <T> result type
-     * @return a future of the decoded result; it fails with an {@link OblodaiException} cause
+     * @return a future of the result tree; it fails with an {@link OblodaiException}
      */
-    public <T> CompletableFuture<T> callAsync(RouteSpec route, CallOptions options, JavaType type) {
+    public CompletableFuture<Object> callAsync(RouteSpec route, CallOptions options) {
         CompletableFuture<RawResponse> raw = callRawAsync(route, options);
-        CompletableFuture<T> decoded = raw.thenApply(answer -> decode(route, answer, type));
+        CompletableFuture<Object> decoded = raw.thenApply(answer -> result(route, answer));
         // thenApply gives a fresh future: without this the caller's cancel() would stop at it and
         // never reach the socket.
         return linkCancellation(decoded, raw);
@@ -159,15 +220,22 @@ public final class Transport {
                         (raw, failure) -> {
                             if (failure != null) {
                                 result.completeExceptionally(unwrap(failure));
-                            } else {
+                                return;
+                            }
+                            try {
+                                if (observer != null) {
+                                    observer.accept(raw);
+                                }
                                 result.complete(raw);
+                            } catch (RuntimeException e) {
+                                result.completeExceptionally(e);
                             }
                         });
         return result;
     }
 
     /** Makes cancelling {@code derived} cancel {@code source} as well. */
-    private static <T> CompletableFuture<T> linkCancellation(
+    static <T> CompletableFuture<T> linkCancellation(
             CompletableFuture<T> derived, CompletableFuture<?> source) {
         CompletableFuture<T> out =
                 new CompletableFuture<>() {
@@ -191,7 +259,16 @@ public final class Transport {
 
     // --- decoding -------------------------------------------------------------------------------
 
-    private <T> T decode(RouteSpec route, RawResponse raw, JavaType type) {
+    /**
+     * The {@code result} of a success envelope, as a JSON tree.
+     *
+     * @param route the route that answered
+     * @param raw its 2xx answer
+     * @return the result, or {@code null} for JSON null
+     * @throws ContractException when the body is not a success envelope, or is the gateway's
+     *     "already processed, too large to replay" marker
+     */
+    public Object result(RouteSpec route, RawResponse raw) {
         JsonNode result =
                 Envelope.decode(
                         config.mapper(),
@@ -201,52 +278,72 @@ public final class Transport {
                         raw.header("location").orElse(null));
         // The gateway replays a cached response by Idempotency-Key; when the original was too large
         // to cache it answers {ok, idempotent_replay: true, detail} instead of the object.
-        if (result != null && result.isObject() && result.path("idempotent_replay").asBoolean(false)) {
+        if (result != null
+                && result.isObject()
+                && result.path("idempotent_replay").asBoolean(false)) {
             throw new ContractException(
-                    route.method()
-                            + " "
-                            + route.path()
+                    route.label()
                             + ": the request was already processed but its response was too large to"
-                            + " replay — fetch the result by order_id/reference ("
+                            + " replay - fetch the result by order_id/reference ("
                             + result.path("detail").asText("")
                             + ")",
                     raw.status(),
                     null);
         }
-        if (result == null || result.isNull()) return null;
-        try {
-            return config.mapper().convertValue(result, type);
-        } catch (IllegalArgumentException badShape) {
-            // A field of the wrong JSON type is a contract failure, not a programming error: it must
-            // reach the caller as an SDK exception, and without quoting the body into the message.
-            throw new ContractException(
-                    route.method()
-                            + " "
-                            + route.path()
-                            + ": the result does not match "
-                            + type
-                            + " ("
-                            + rootMessage(badShape)
-                            + ")",
-                    raw.status(),
-                    result);
-        }
+        return tree(result);
     }
 
-    /** The innermost message of a binder failure, without the value it choked on. */
-    private static String rootMessage(Throwable failure) {
-        Throwable cause = failure;
-        while (cause.getCause() != null) cause = cause.getCause();
-        String message = cause.getMessage();
-        if (message == null) return cause.getClass().getSimpleName();
-        int at = message.indexOf(" (through reference chain");
-        String head = at < 0 ? message : message.substring(0, at);
-        return head.length() > 200 ? head.substring(0, 200) + "…" : head;
+    /**
+     * A Jackson tree as plain Java values: objects become ordered maps, arrays lists, integers
+     * {@link Long} (or {@link BigInteger} past its range), fractions {@link BigDecimal}.
+     *
+     * @param node the node, or null
+     * @return the value
+     */
+    public static Object tree(JsonNode node) {
+        if (node == null || node.isNull() || node.isMissingNode()) {
+            return null;
+        }
+        if (node.isObject()) {
+            Map<String, Object> out = new LinkedHashMap<>();
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> e = fields.next();
+                out.put(e.getKey(), tree(e.getValue()));
+            }
+            return out;
+        }
+        if (node.isArray()) {
+            List<Object> out = new ArrayList<>(node.size());
+            for (JsonNode item : node) {
+                out.add(tree(item));
+            }
+            return out;
+        }
+        if (node.isTextual()) {
+            return node.textValue();
+        }
+        if (node.isBoolean()) {
+            return node.booleanValue();
+        }
+        if (node.isIntegralNumber()) {
+            return node.canConvertToLong() ? (Object) node.longValue() : node.bigIntegerValue();
+        }
+        if (node.isNumber()) {
+            return node.decimalValue();
+        }
+        return node.asText();
     }
 
     // --- helpers --------------------------------------------------------------------------------
 
-    /** Waits for a future, unwrapping its cause so callers catch an {@link OblodaiException}. */
+    /**
+     * Waits for a future, unwrapping its cause so callers catch an {@link OblodaiException}.
+     *
+     * @param future the future
+     * @param <T> its value
+     * @return the value
+     */
     public static <T> T await(CompletableFuture<T> future) {
         try {
             return future.join();
@@ -258,8 +355,12 @@ public final class Transport {
     }
 
     private static RuntimeException rethrow(Throwable cause) {
-        if (cause instanceof OblodaiException e) return e;
-        if (cause instanceof RuntimeException e) return e;
+        if (cause instanceof RuntimeException e) {
+            return e;
+        }
+        if (cause instanceof Error e) {
+            throw e;
+        }
         return new TransportException(TransportException.NETWORK, String.valueOf(cause), cause);
     }
 

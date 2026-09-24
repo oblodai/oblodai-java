@@ -1,13 +1,13 @@
 package com.oblodai;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oblodai.contract.ContractVersion;
 import com.oblodai.core.Credentials;
+import com.oblodai.core.Hooks;
 import com.oblodai.core.Json;
 import com.oblodai.core.Logger;
 import com.oblodai.core.RequestBuilder;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.core.SkewCorrectingClock;
+import com.oblodai.core.Sleeper;
 import com.oblodai.core.Transport;
 import com.oblodai.errors.ConfigException;
 import java.net.URI;
@@ -31,7 +31,8 @@ final class ClientSettings {
     HttpClient httpClient;
     RetryOptions retry = RetryOptions.DEFAULT;
     Logger logger;
-    ObjectMapper mapper;
+    Hooks hooks = Hooks.NONE;
+    Sleeper sleeper;
     SkewCorrectingClock clock;
     long timeoutMs = 30_000;
     long deadlineMs = 90_000;
@@ -87,7 +88,49 @@ final class ClientSettings {
                         Map.copyOf(headers),
                         firstSet(adminToken, env("OBLODAI_ADMIN_TOKEN"), null),
                         userAgent(),
-                        mapper != null ? mapper : Json.mapper()));
+                        Json.mapper(),
+                        hooks,
+                        sleeper != null ? sleeper : Sleeper.DEFAULT));
+    }
+
+    /**
+     * The transport of a client copy with other defaults.
+     *
+     * @param transport the original client's transport
+     * @param defaults the new defaults
+     * @return the derived transport, sharing connections and clock
+     */
+    static Transport derive(Transport transport, RequestOptions defaults) {
+        if (defaults == null) {
+            return transport;
+        }
+        if (defaults.idempotencyKey() != null || defaults.requestId() != null) {
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG,
+                    "withOptions: idempotencyKey and requestId name one call; pass them per call",
+                    defaults.idempotencyKey() != null ? "idempotencyKey" : "requestId");
+        }
+        Transport.Config c = transport.config();
+        Map<String, String> headers = new LinkedHashMap<>(c.headers());
+        headers.putAll(defaults.extraHeaders());
+        return transport.derive(
+                new Transport.Config(
+                        c.baseUrl(),
+                        c.credentials(),
+                        c.httpClient(),
+                        defaults.maxRetries() != null
+                                ? c.retry().withMaxRetries(defaults.maxRetries())
+                                : c.retry(),
+                        c.clock(),
+                        c.logger(),
+                        defaults.timeout() != null ? defaults.timeout().toMillis() : c.timeoutMs(),
+                        c.deadlineMs(),
+                        Map.copyOf(headers),
+                        c.adminToken(),
+                        c.userAgent(),
+                        c.mapper(),
+                        c.hooks(),
+                        c.sleeper()));
     }
 
     /**
@@ -136,9 +179,7 @@ final class ClientSettings {
     private static String userAgent() {
         return "oblodai-java/"
                 + Oblodai.VERSION
-                + " (contract "
-                + ContractVersion.HASH.substring(0, 12)
-                + "; jdk "
+                + " (jdk "
                 + System.getProperty("java.version", "?")
                 + ")";
     }

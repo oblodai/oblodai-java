@@ -1,194 +1,221 @@
 package com.oblodai;
 
+import com.oblodai.core.RawResponse;
 import com.oblodai.core.Transport;
-import com.oblodai.resources.async.Account;
-import com.oblodai.resources.async.Batches;
-import com.oblodai.resources.async.Catalog;
-import com.oblodai.resources.async.Documents;
-import com.oblodai.resources.async.Merchants;
-import com.oblodai.resources.async.PaymentLinks;
-import com.oblodai.resources.async.Payments;
-import com.oblodai.resources.async.PayoutLinks;
-import com.oblodai.resources.async.Payouts;
-import com.oblodai.resources.async.Refunds;
-import com.oblodai.resources.async.Sandbox;
-import com.oblodai.resources.async.Settings;
-import com.oblodai.resources.async.Splits;
-import com.oblodai.resources.async.Transfers;
-import com.oblodai.resources.async.Wallets;
-import com.oblodai.resources.async.Webhooks;
+import com.oblodai.generated.resources.async.Account;
+import com.oblodai.generated.resources.async.ApiAllowlist;
+import com.oblodai.generated.resources.async.Batches;
+import com.oblodai.generated.resources.async.Checkout;
+import com.oblodai.generated.resources.async.Documents;
+import com.oblodai.generated.resources.async.PaymentLinks;
+import com.oblodai.generated.resources.async.Payments;
+import com.oblodai.generated.resources.async.PayoutLinks;
+import com.oblodai.generated.resources.async.Payouts;
+import com.oblodai.generated.resources.async.Referrals;
+import com.oblodai.generated.resources.async.Refunds;
+import com.oblodai.generated.resources.async.Sandbox;
+import com.oblodai.generated.resources.async.Settings;
+import com.oblodai.generated.resources.async.Splits;
+import com.oblodai.generated.resources.async.Wallets;
+import com.oblodai.generated.resources.async.Webhooks;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
- * The same API as {@link Oblodai}, returning {@link java.util.concurrent.CompletableFuture}. It
- * runs over the same engine, the same connections, the same retry policy and the same learned
- * clock skew — a blocking and an asynchronous client built from one transport share all of it.
+ * The same API as {@link Oblodai}, returning {@link CompletableFuture}. It runs over the same
+ * engine, connections, retry policy and learned clock skew.
  *
- * <p>Build one with {@code Oblodai.builder()....buildAsync()}, or take one from an existing
- * blocking client with {@link Oblodai#async()}; {@link #blocking()} goes back the other way.
+ * <p>Build one with {@code Oblodai.builder()....buildAsync()}, or take one from a blocking client
+ * with {@link Oblodai#async()}; {@link #blocking()} goes back the other way.
  *
  * <pre>{@code
- * OblodaiAsync oblodai = Oblodai.builder()
- *         .publicId(System.getenv("OBLODAI_PUBLIC_ID"))
- *         .secret(System.getenv("OBLODAI_SECRET"))
- *         .buildAsync();
- *
- * oblodai.payments()
- *         .create(new PaymentRequest()
- *                 .amount("25")            // amounts are decimal strings, never floats
- *                 .currency("USDT")
- *                 .network(Network.TRON)
- *                 .orderId("order-1001"))
- *         .thenAccept(invoice -> System.out.println(invoice.uuid()))
- *         .join();
+ * oblodai.async().payments()
+ *         .create(PaymentRequest.builder().amount("25").currency("USDT").orderId("order-1001").build())
+ *         .thenAccept(invoice -> System.out.println(invoice.uuid()));
  * }</pre>
  *
- * <p>Every future fails with an {@link com.oblodai.errors.OblodaiException} as its cause, the same
- * exception the blocking client would have thrown.
- *
- * <p>Immutable and safe to share across threads.
+ * <p>Every future fails with the {@link com.oblodai.errors.OblodaiException} the blocking client
+ * would have thrown; cancelling one cancels the HTTP exchange in flight.
  */
 public final class OblodaiAsync implements AutoCloseable {
 
     private final Transport transport;
-    private final Payments payments;
-    private final Refunds refunds;
     private final boolean ownsHttpClient;
+    private final Payments payments;
+    private final PaymentLinks paymentLinks;
+    private final Refunds refunds;
     private final Payouts payouts;
     private final PayoutLinks payoutLinks;
-    private final PaymentLinks paymentLinks;
     private final Batches batches;
-    private final Transfers transfers;
-    private final Wallets wallets;
-    private final Webhooks webhooks;
-    private final Documents documents;
     private final Splits splits;
-    private final Settings settings;
+    private final Wallets wallets;
     private final Account account;
-    private final Catalog catalog;
+    private final Webhooks webhooks;
+    private final Settings settings;
+    private final ApiAllowlist apiAllowlist;
+    private final Referrals referrals;
+    private final Documents documents;
+    private final Checkout checkout;
     private final Sandbox sandbox;
-    private final Merchants merchants;
-
-    OblodaiAsync(Transport transport) {
-        this(transport, false);
-    }
+    private final AsyncJobs jobs;
 
     OblodaiAsync(Transport transport, boolean ownsHttpClient) {
         this.transport = transport;
         this.ownsHttpClient = ownsHttpClient;
         this.payments = new Payments(transport);
+        this.paymentLinks = new PaymentLinks(transport);
         this.refunds = new Refunds(transport);
         this.payouts = new Payouts(transport);
         this.payoutLinks = new PayoutLinks(transport);
-        this.paymentLinks = new PaymentLinks(transport);
         this.batches = new Batches(transport);
-        this.transfers = new Transfers(transport);
-        this.wallets = new Wallets(transport);
-        this.webhooks = new Webhooks(transport);
-        this.documents = new Documents(transport);
         this.splits = new Splits(transport);
-        this.settings = new Settings(transport);
+        this.wallets = new Wallets(transport);
         this.account = new Account(transport);
-        this.catalog = new Catalog(transport);
+        this.webhooks = new Webhooks(transport);
+        this.settings = new Settings(transport);
+        this.apiAllowlist = new ApiAllowlist(transport);
+        this.referrals = new Referrals(transport);
+        this.documents = new Documents(transport);
+        this.checkout = new Checkout(transport);
         this.sandbox = new Sandbox(transport);
-        this.merchants = new Merchants(transport);
+        this.jobs = new AsyncJobs(transport);
     }
 
-    /** Invoices: create, look up, cancel, list, and the payer-facing checkout endpoints. */
+    /** @return Invoices: create, look up, cancel, list, resolve. */
     public Payments payments() {
         return payments;
     }
 
-    /** Refunds and the resolution of underpaid invoices. */
-    public Refunds refunds() {
-        return refunds;
-    }
-
-    /** Outgoing transfers to external addresses. */
-    public Payouts payouts() {
-        return payouts;
-    }
-
-    /** Payout links (cheques): funds reserved now, claimed later. */
-    public PayoutLinks payoutLinks() {
-        return payoutLinks;
-    }
-
-    /** Reusable payment links: each checkout spawns an invoice. */
+    /** @return Reusable payment links: each checkout spawns an invoice. */
     public PaymentLinks paymentLinks() {
         return paymentLinks;
     }
 
-    /** Progress of asynchronous batches. */
+    /** @return Refunds of payments and of blocked wallets. */
+    public Refunds refunds() {
+        return refunds;
+    }
+
+    /** @return Outgoing transfers, internal transfers and their fees. */
+    public Payouts payouts() {
+        return payouts;
+    }
+
+    /** @return Payout links (cheques): funds reserved now, claimed later. */
+    public PayoutLinks payoutLinks() {
+        return payoutLinks;
+    }
+
+    /** @return Asynchronous batches of payments, payouts and refunds; follow them with {@link #jobs()}. */
     public Batches batches() {
         return batches;
     }
 
-    /** Internal, instant, fee-free moves between platform balances. */
-    public Transfers transfers() {
-        return transfers;
-    }
-
-    /** Static deposit wallets: one permanent address per customer. */
-    public Wallets wallets() {
-        return wallets;
-    }
-
-    /** Webhook endpoint management and delivery inspection. */
-    public Webhooks webhooks() {
-        return webhooks;
-    }
-
-    /** Generated PDF and CSV documents. */
-    public Documents documents() {
-        return documents;
-    }
-
-    /** Revenue splits: a share of every payment forwarded to a partner. */
+    /** @return Revenue splits: a share of every payment forwarded to a partner. */
     public Splits splits() {
         return splits;
     }
 
-    /** Merchant-level configuration exposed over the API. */
-    public Settings settings() {
-        return settings;
+    /** @return Static deposit wallets: one permanent address per customer. */
+    public Wallets wallets() {
+        return wallets;
     }
 
-    /** Balances and account-level facts. */
+    /** @return Balances, the account summary and exchange rates. */
     public Account account() {
         return account;
     }
 
-    /** Public reference data: currencies and exchange rates. No credentials needed. */
-    public Catalog catalog() {
-        return catalog;
+    /** @return Webhook endpoints, test deliveries and the delivery log. */
+    public Webhooks webhooks() {
+        return webhooks;
     }
 
-    /** Developer sandbox: fake money, simulated deposits, a webhook inspector. */
+    /** @return Merchant-level configuration exposed over the API. */
+    public Settings settings() {
+        return settings;
+    }
+
+    /** @return The IP allowlist of the API key. */
+    public ApiAllowlist apiAllowlist() {
+        return apiAllowlist;
+    }
+
+    /** @return The referral programme. */
+    public Referrals referrals() {
+        return referrals;
+    }
+
+    /** @return PDF and CSV documents, and document export jobs. */
+    public Documents documents() {
+        return documents;
+    }
+
+    /** @return The payer-facing checkout: public, no credentials. */
+    public Checkout checkout() {
+        return checkout;
+    }
+
+    /** @return Developer sandbox: fake money, simulated deposits, a webhook inspector. */
     public Sandbox sandbox() {
         return sandbox;
     }
 
-    /** Merchant provisioning, for platforms that onboard merchants themselves. */
-    public Merchants merchants() {
-        return merchants;
+    /** @return waiters for long-running operations: batches and document jobs */
+    public AsyncJobs jobs() {
+        return jobs;
     }
 
-    /** The same API blocking, over this client's engine, connections and clock. */
+    /** @return the blocking API over the same engine */
     public Oblodai blocking() {
-        return new Oblodai(transport);
+        return new Oblodai(transport, false);
     }
 
     /**
-     * Releases the HTTP client this client built for itself; one supplied through
-     * {@code httpClient(...)} is left alone. Calls in flight are not cancelled.
+     * A copy of this client whose calls use other defaults; see {@link
+     * Oblodai#withOptions(RequestOptions)}.
+     *
+     * @param defaults the new defaults
+     * @return the copy
      */
-    @Override
-    public void close() {
-        if (ownsHttpClient) ClientSettings.closeHttpClient(transport.httpClient());
+    public OblodaiAsync withOptions(RequestOptions defaults) {
+        return new OblodaiAsync(ClientSettings.derive(transport, defaults), false);
     }
 
-    /** The transport, for advanced use: custom routes, tests, reading the learned clock skew. */
+    /**
+     * Runs calls on a copy of this client and completes with the value of {@code call} together
+     * with the HTTP side of the last successful call it made.
+     *
+     * @param call what to run, on the copy it is given
+     * @param <T> its value
+     * @return a future of the value and the raw answer
+     */
+    public <T> CompletableFuture<ApiResponse<T>> withRawResponse(
+            Function<OblodaiAsync, CompletableFuture<T>> call) {
+        AtomicReference<RawResponse> last = new AtomicReference<>();
+        return call.apply(new OblodaiAsync(transport.observing(last::set), false))
+                .thenApply(
+                        value -> {
+                            RawResponse raw = last.get();
+                            if (raw == null) {
+                                throw new IllegalStateException(
+                                        "withRawResponse: the function made no API call");
+                            }
+                            return new ApiResponse<>(value, raw);
+                        });
+    }
+
+    /** @return the transport, for advanced use */
     public Transport transport() {
         return transport;
+    }
+
+    /** Releases the HTTP client this client built for itself. */
+    @Override
+    public void close() {
+        if (ownsHttpClient) {
+            ClientSettings.closeHttpClient(transport.httpClient());
+        }
     }
 }

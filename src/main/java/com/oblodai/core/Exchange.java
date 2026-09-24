@@ -1,6 +1,6 @@
 package com.oblodai.core;
 
-import com.oblodai.contract.RouteSpec;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,6 +17,15 @@ final class Exchange {
     final String idempotencyKey;
     final boolean safeToRepeat;
     final long deadlineAt;
+    final String requestId;
+    final Map<String, String> headers;
+    final RetryOptions retry;
+
+    /** The request hook's view of the attempt in flight, or null without hooks. */
+    RequestInfo attemptInfo;
+
+    /** When the attempt in flight was handed to the HTTP client. */
+    long sentAtNanos;
 
     /** Attempt number: 0 while the first attempt is in flight. */
     int attempt;
@@ -42,13 +51,19 @@ final class Exchange {
             byte[] body,
             String idempotencyKey,
             boolean safeToRepeat,
-            long deadlineAt) {
+            long deadlineAt,
+            String requestId,
+            Map<String, String> headers,
+            RetryOptions retry) {
         this.route = route;
         this.options = options;
         this.body = body;
         this.idempotencyKey = idempotencyKey;
         this.safeToRepeat = safeToRepeat;
         this.deadlineAt = deadlineAt;
+        this.requestId = requestId;
+        this.headers = headers;
+        this.retry = retry;
     }
 
     String label() {

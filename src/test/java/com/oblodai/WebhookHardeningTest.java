@@ -2,7 +2,7 @@ package com.oblodai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,8 +10,7 @@ import com.oblodai.core.Signing;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
-import com.oblodai.models.UnknownEvent;
-import com.oblodai.models.WebhookEvent;
+import com.oblodai.webhooks.WebhookEvent;
 import com.oblodai.webhooks.WebhookHeaders;
 import com.oblodai.webhooks.WebhookVerifier;
 import java.nio.charset.StandardCharsets;
@@ -141,17 +140,15 @@ class WebhookHardeningTest {
                 failure instanceof com.oblodai.errors.WebhookPayloadException,
                 "and it has its own class to catch");
 
+        // A body of the right kind with a field of the wrong type verifies (the delivery is
+        // authentic); reading it as the typed event is where it fails, in the same family.
         String wrongTypes = "{\"type\":\"payment\",\"uuid\":\"u1\",\"sequence\":\"seven\"}";
+        WebhookEvent event =
+                WebhookVerifier.verify(wrongTypes, headers(NOW, sign(SECRET, NOW, wrongTypes)), options());
+        assertNull(event.sequence());
         assertEquals(
                 ContractException.WEBHOOK_BAD_PAYLOAD,
-                assertThrows(
-                                ContractException.class,
-                                () ->
-                                        WebhookVerifier.verify(
-                                                wrongTypes,
-                                                headers(NOW, sign(SECRET, NOW, wrongTypes)),
-                                                options()))
-                        .code());
+                assertThrows(ContractException.class, event::asPayment).code());
     }
 
     @Test
@@ -162,7 +159,7 @@ class WebhookHardeningTest {
         WebhookEvent event =
                 WebhookVerifier.verify(body, headers(NOW, sign(SECRET, NOW, body)), options());
 
-        UnknownEvent unknown = assertInstanceOf(UnknownEvent.class, event);
+        WebhookEvent unknown = event;
         assertEquals("settlement", unknown.type());
         assertEquals("s1", unknown.uuid());
         assertEquals(12L, unknown.sequence());

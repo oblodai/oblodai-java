@@ -1,8 +1,6 @@
 package com.oblodai.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oblodai.contract.RouteAuth;
-import com.oblodai.contract.RouteSpec;
 import com.oblodai.errors.ConfigException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -79,6 +77,7 @@ public final class RequestBuilder {
      * @param userAgent the SDK's user agent
      * @param extraHeaders caller headers; ones colliding with an SDK-owned header are dropped
      * @param adminToken admin token to attach, on the onboarding routes that take one; null otherwise
+     * @param requestId the call's {@code X-Request-ID}, or null
      * @return the request to send
      */
     public static BuiltRequest build(
@@ -92,7 +91,8 @@ public final class RequestBuilder {
             long ts,
             String userAgent,
             Map<String, String> extraHeaders,
-            String adminToken) {
+            String adminToken,
+            String requestId) {
 
         String path = joinPath(baseUrl, fillPath(route.path(), pathParams));
         String queryString = queryString(query);
@@ -115,8 +115,12 @@ public final class RequestBuilder {
         boolean hasBody = !route.method().equals("GET");
         if (hasBody) headers.put("Content-Type", "application/json");
         if (idempotencyKey != null) headers.put(Signing.HEADER_IDEMPOTENCY_KEY, idempotencyKey);
+        if (requestId != null) {
+            assertHeader(Dispatcher.HEADER_REQUEST_ID, requestId);
+            headers.put(Dispatcher.HEADER_REQUEST_ID, requestId);
+        }
 
-        if (route.auth() == RouteAuth.KEY) {
+        if (RouteSpec.AUTH_KEY.equals(route.auth())) {
             if (credentials == null) {
                 throw new ConfigException(
                         ConfigException.MISSING_CREDENTIALS,
