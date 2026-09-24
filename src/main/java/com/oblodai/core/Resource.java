@@ -192,17 +192,25 @@ public abstract class Resource {
     /**
      * A route the gateway does not deduplicate by header but whose body has its own {@code
      * idempotency_key} field: the call's {@code idempotencyKey} option goes into that field, and no
-     * header is sent.
+     * header is sent. The key given both ways — in the field and as the option — is refused before
+     * the network, as in every Oblodai SDK.
      *
      * @param body the request body, mutable
      * @param field the body field
      * @param options per-call options, or null
      * @return the options without the key
+     * @throws ConfigException the body already carries its own key
      */
     protected RequestOptions idempotencyKeyToBody(
             Map<String, Object> body, String field, RequestOptions options) {
         if (options == null || options.idempotencyKey() == null) {
             return options;
+        }
+        if (body.get(field) != null) {
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG,
+                    field + " is given twice: in the request and as the idempotencyKey option; pass one",
+                    "idempotencyKey");
         }
         body.put(field, options.idempotencyKey());
         return options.withoutIdempotencyKey();
