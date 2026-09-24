@@ -81,4 +81,31 @@ public final class Jobs {
     public Job<DocumentJobView> document(String jobId) {
         return JobSupport.job(transport, "createDocumentJob", jobId, null, null);
     }
+
+    /**
+     * Any long-running call of the contract, by its create {@code operationId} - a key of {@link
+     * com.oblodai.generated.Facts#LRO}, including one newer than the typed waiters above.
+     *
+     * @param createOperationId the create operation, e.g. {@code "createPayoutBatch"}
+     * @param answer the create call's answer
+     * @return its job; {@code waitFor()} returns the poll answer as its generated model
+     * @throws com.oblodai.errors.ConfigException {@code sdk.lro_unresolved} when the operation is
+     *     not long-running
+     */
+    public Job<Object> follow(String createOperationId, Object answer) {
+        return follow(createOperationId, answer, null);
+    }
+
+    /**
+     * @param createOperationId the create operation, a key of {@link com.oblodai.generated.Facts#LRO}
+     * @param answer the create call's answer
+     * @param options options for the polls and the download: timeout, retries, headers
+     * @return its job
+     * @throws com.oblodai.errors.ConfigException {@code sdk.lro_unresolved} when the operation is
+     *     not long-running
+     */
+    public Job<Object> follow(String createOperationId, Object answer, RequestOptions options) {
+        String id = JobSupport.id(createOperationId, answer);
+        return JobSupport.job(transport, createOperationId, id, answer, options);
+    }
 }

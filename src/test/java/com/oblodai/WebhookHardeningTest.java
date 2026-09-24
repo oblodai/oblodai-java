@@ -10,6 +10,8 @@ import com.oblodai.core.Signing;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
+import com.oblodai.generated.Facts;
+import com.oblodai.generated.models.ConversionWebhook;
 import com.oblodai.webhooks.WebhookEvent;
 import com.oblodai.webhooks.WebhookHeaders;
 import com.oblodai.webhooks.WebhookVerifier;
@@ -169,6 +171,29 @@ class WebhookHardeningTest {
         assertTrue(WebhookVerifier.isTestEvent(unknown), "the helpers work on it");
         assertTrue(WebhookVerifier.isStale(unknown, 12L));
         assertFalse(WebhookVerifier.isStale(unknown, 11L));
+    }
+
+    @Test
+    void everyKindOfTheContractIsKnownAndTyped() {
+        assertEquals(Facts.KNOWN_WEBHOOK_KINDS, WebhookEvent.KNOWN_KINDS, "the runtime keeps no list of its own");
+        assertTrue(WebhookEvent.KNOWN_KINDS.contains("conversion"));
+        // A conversion event is keyed by id, not uuid: the contract's body has no uuid field.
+        String body =
+                "{\"type\":\"conversion\",\"id\":\"c1\",\"mode\":\"auto\",\"from\":\"USDT\",\"to\":\"TRX\","
+                        + "\"sent\":\"10\",\"fee_percent\":\"1\",\"status\":\"completed\",\"reason\":\"\","
+                        + "\"is_final\":true,\"document_url\":\"\",\"created_at\":\"2026-09-25T00:00:00Z\","
+                        + "\"completed_at\":\"2026-09-25T00:00:00Z\",\"sequence\":3,"
+                        + "\"event_at\":\"2026-09-25T00:00:00Z\"}";
+        WebhookEvent event = WebhookVerifier.verify(body, headers(NOW, sign(SECRET, NOW, body)), options());
+        assertTrue(WebhookVerifier.isKnownEvent(event));
+        assertNull(event.uuid());
+        assertTrue(event.typed() instanceof ConversionWebhook, "the model comes from the contract's table");
+        assertEquals("c1", event.asConversion().id());
+        assertThrows(IllegalStateException.class, event::asPayment);
+
+        String unknown = "{\"type\":\"settlement\",\"uuid\":\"s1\"}";
+        WebhookEvent later = WebhookVerifier.verify(unknown, headers(NOW, sign(SECRET, NOW, unknown)), options());
+        assertNull(later.typed(), "a kind this SDK does not know has no model");
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.oblodai.core;
 
 import com.oblodai.errors.JobTimeoutException;
 import java.time.Duration;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,6 +26,7 @@ public final class Job<T> {
     private final Object result;
     private final Supplier<T> poll;
     private final Function<T, String> status;
+    private final Set<String> terminal;
     private final Supplier<FileResult> download;
     private final Sleeper sleeper;
 
@@ -33,6 +35,7 @@ public final class Job<T> {
      * @param result the create call's answer
      * @param poll one poll
      * @param status the status of a poll answer
+     * @param terminal the statuses after which this job no longer changes
      * @param download the finished job's file, or null when the job makes none
      * @param sleeper how to wait between polls
      */
@@ -41,12 +44,14 @@ public final class Job<T> {
             Object result,
             Supplier<T> poll,
             Function<T, String> status,
+            Set<String> terminal,
             Supplier<FileResult> download,
             Sleeper sleeper) {
         this.id = id;
         this.result = result;
         this.poll = poll;
         this.status = status;
+        this.terminal = Set.copyOf(terminal);
         this.download = download;
         this.sleeper = sleeper;
     }
@@ -77,7 +82,8 @@ public final class Job<T> {
     }
 
     /**
-     * Polls every {@code interval} until the status is terminal ({@code com.oblodai.Lro.TERMINAL_STATUSES}).
+     * Polls every {@code interval} until the status is terminal (one of the {@code terminal}
+     * statuses of its operation's {@code x-sdk-poll}).
      *
      * @param timeout how long to wait in total
      * @param interval pause between polls
@@ -89,7 +95,7 @@ public final class Job<T> {
         while (true) {
             T answer = poll.get();
             String now = status.apply(answer);
-            if (JobSupport.TERMINAL.contains(now)) {
+            if (terminal.contains(now)) {
                 return answer;
             }
             long remaining = deadline - System.nanoTime();

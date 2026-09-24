@@ -32,9 +32,10 @@ nothing is deprecated - it is renamed.
 
 ## Methods
 
-Every route, its 1.x method(s) and its 2.0 method. The 2.0 names are fixed in
-[`names.lock`](names.lock) (snake_case there, camelCase in Java); a later contract can add names but
-never silently drop or rename one.
+Every route, its 1.x method(s) and its 2.0 method. The 2.0 names are frozen in
+[`names.2.0.txt`](names.2.0.txt) (snake_case there, camelCase in Java); [`names.lock`](names.lock)
+holds the current ones - a later contract adds names there (the generator writes them) but never
+silently drops or renames one.
 
 | route | 1.x | 2.0 |
 | --- | --- | --- |

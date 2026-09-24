@@ -116,27 +116,31 @@ PayoutItem payout = oblodai.payouts().create(
 `client.<ресурс>().<метод>(параметры, опции)`: ресурс — тег контракта, метод — его `operationId`
 без имени ресурса. Параметры — модель со своим builder'ом (`PaymentRequest.builder()...build()`);
 параметры пути идут первыми, параметры запроса — модель `*Query`. У каждого метода есть перегрузка
-с `RequestOptions` последним аргументом и перегрузки без необязательных частей. Полный список — в
-[`names.lock`](names.lock).
+с `RequestOptions` последним аргументом и перегрузки без необязательных частей. Таблица ниже
+генерируется из контракта `tools/sdkgen`.
 
-| ресурс | методы |
+<!-- sdkgen:methods -->
+16 ресурсов, 120 методов.
+
+| Ресурс | Методы |
 | --- | --- |
-| `account()` | `getBalance`, `getSummary`, `listExchangeRates` |
-| `apiAllowlist()` | `addEntry`, `list`, `removeEntry`, `setEnabled` |
-| `batches()` | `createPayment`, `createPayout`, `createRefund`, `getInfo` |
-| `checkout()` | `get`, `getOnramp`, `getPublicPaymentLink`, `getQr`, `getSourceOfFundsForm`, `listCurrencies`, `paymentLink`, `selectMethod`, `startOnramp`, `submitSourceOfFunds` |
-| `documents()` | `createJob`, `downloadJobFile`, `getBalance`, `getBatch`, `getFees`, `getJob`, `getLedger`, `getPaymentLink`, `getPayoutLinkCheque`, `getReferrals`, `getSigned`, `getSplit`, `getStatement`, `getWalletStatement` |
-| `paymentLinks()` | `create`, `get`, `list`, `toggle` |
-| `payments()` | `cancel`, `create`, `getAmlLinks`, `getCheckoutConfig`, `getInfo`, `getQr`, `listHistory`, `listServices`, `resolve`, `sendEmail`, `setCheckoutConfig` |
-| `payoutLinks()` | `cancel`, `claimPayout`, `create`, `createBatch`, `get`, `getPayoutClaim`, `list` |
-| `payouts()` | `approve`, `calculate`, `cancel`, `create`, `createMass`, `createTransferBatch`, `getInfo`, `listHistory`, `listServices`, `transferToPersonal`, `transferToUser`, `validate` |
+| `payments()` | `create` · `getInfo` · `getQr` · `listHistory` · `listServices` · `cancel` · `sendEmail` · `setCheckoutConfig` · `getCheckoutConfig` · `getAmlLinks` · `resolve` |
+| `paymentLinks()` | `create` · `list` · `get` · `toggle` |
+| `refunds()` | `payment` · `blockedWallet` |
+| `payouts()` | `create` · `createMass` · `getInfo` · `listHistory` · `calculate` · `validate` · `cancel` · `approve` · `listServices` · `transferToPersonal` · `transferToUser` · `createTransferBatch` |
+| `payoutLinks()` | `create` · `createBatch` · `list` · `get` · `cancel` · `getPayoutClaim` · `claimPayout` |
+| `batches()` | `createPayment` · `createRefund` · `createPayout` · `getInfo` |
+| `splits()` | `createRule` · `listRules` · `deleteRule` · `setConfig` · `getConfig` · `setRecipientOptIn` · `getRecipientOptIn` |
+| `wallets()` | `create` · `block` · `getQr` |
+| `account()` | `getBalance` · `getSummary` · `listExchangeRates` |
+| `webhooks()` | `resendPayment` · `register` · `listDeliveries` · `requeueDelivery` · `sendLegacyTest` · `sendTestPayment` · `sendTestWallet` · `sendTestPayout` · `sendTestConversion` · `rotateSecret` · `setActive` |
+| `settings()` | `setAccuracy` · `getAccuracy` · `setAutoRefund` · `getAutoRefund` · `setDiscount` · `listDiscounts` · `listApiLog` · `getAutoConvert` · `setAutoConvert` · `setAcceptedCurrencies` · `listAcceptedCurrencies` · `setPayoutFeeConfig` · `getPayoutFeeConfig` · `setRefundFeeConfig` · `getRefundFeeConfig` · `setPaymentFeeConfig` · `getPaymentFeeConfig` · `setAutoWithdrawRule` · `listAutoWithdrawRules` · `deleteAutoWithdrawRule` · `configureVrcs` |
+| `apiAllowlist()` | `list` · `addEntry` · `removeEntry` · `setEnabled` |
 | `referrals()` | `getInfo` |
-| `refunds()` | `blockedWallet`, `payment` |
-| `sandbox()` | `faucet`, `listWebhooks`, `onboardStore`, `replayWebhook`, `reset`, `simulateDeposit` |
-| `settings()` | `configureVrcs`, `deleteAutoWithdrawRule`, `getAccuracy`, `getAutoConvert`, `getAutoRefund`, `getPaymentFeeConfig`, `getPayoutFeeConfig`, `getRefundFeeConfig`, `listAcceptedCurrencies`, `listApiLog`, `listAutoWithdrawRules`, `listDiscounts`, `setAcceptedCurrencies`, `setAccuracy`, `setAutoConvert`, `setAutoRefund`, `setAutoWithdrawRule`, `setDiscount`, `setPaymentFeeConfig`, `setPayoutFeeConfig`, `setRefundFeeConfig` |
-| `splits()` | `createRule`, `deleteRule`, `getConfig`, `getRecipientOptIn`, `listRules`, `setConfig`, `setRecipientOptIn` |
-| `wallets()` | `block`, `create`, `getQr` |
-| `webhooks()` | `listDeliveries`, `register`, `requeueDelivery`, `resendPayment`, `rotateSecret`, `sendLegacyTest`, `sendTestConversion`, `sendTestPayment`, `sendTestPayout`, `sendTestWallet`, `setActive` |
+| `documents()` | `getSigned` · `getBalance` · `getFees` · `getLedger` · `getSplit` · `getPayoutLinkCheque` · `getStatement` · `getBatch` · `getPaymentLink` · `getWalletStatement` · `getReferrals` · `createJob` · `getJob` · `downloadJobFile` |
+| `checkout()` | `getSourceOfFundsForm` · `submitSourceOfFunds` · `getPublicPaymentLink` · `paymentLink` · `listCurrencies` · `get` · `selectMethod` · `startOnramp` · `getOnramp` · `getQr` |
+| `sandbox()` | `onboardStore` · `faucet` · `simulateDeposit` · `reset` · `listWebhooks` · `replayWebhook` |
+<!-- /sdkgen:methods -->
 
 Модели сохраняют поля, которых эта версия SDK ещё не знает (`extra()`, уходят обратно как пришли), а
 незнакомое значение enum разбирается (`PaymentStatus.of("new_status").isKnown() == false`).
@@ -222,8 +226,10 @@ observed.close();
 ## Долгие операции
 
 Пакеты и выгрузки документов завершаются в фоне. `jobs()` следит за ними: `waitFor()` опрашивает,
-пока статус не станет конечным (`completed`, `stopped`, `done`, `failed`, `expired`), и возвращает
-этот ответ; `download()` скачивает файл выгрузки.
+пока статус не станет конечным для этой задачи, и возвращает этот ответ; `download()` скачивает
+файл выгрузки. Какие вызовы долгие, что они опрашивают и какие статусы их завершают — из контракта
+(`x-sdk-poll`, генерируется в `Facts.LRO`); `jobs().follow("<operationId создания>", ответ)` следит
+за любым из них.
 
 ```java
 BatchSubmitResponse submitted = oblodai.batches().createPayout(PayoutBatchRequest.builder()
@@ -246,8 +252,9 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 
 Проверяйте подпись по сырым байтам запроса; дедуплицируйте по `eventId()` (`X-Webhook-Event-Id`);
 не действуйте по тестовой доставке. `event().asPayment()`, `asPayout()`, `asWallet()`,
-`asConversion()` — типизированное событие; событие незнакомого вида всё равно доставляется, с
-исходным `type()` и `fields()`.
+`asConversion()` — типизированное событие, `typed()` — модель события любого вида контракта
+(`Facts.WEBHOOK_KINDS`); событие незнакомого вида всё равно доставляется, с исходным `type()` и
+`fields()`.
 
 ```java
 try {

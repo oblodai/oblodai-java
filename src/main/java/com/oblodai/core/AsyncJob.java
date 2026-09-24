@@ -3,6 +3,7 @@ package com.oblodai.core;
 import com.oblodai.errors.JobTimeoutException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -18,6 +19,7 @@ public final class AsyncJob<T> {
     private final Object result;
     private final Supplier<CompletableFuture<T>> poll;
     private final Function<T, String> status;
+    private final Set<String> terminal;
     private final Supplier<CompletableFuture<FileResult>> download;
     private final Sleeper sleeper;
 
@@ -26,6 +28,7 @@ public final class AsyncJob<T> {
      * @param result the create call's answer
      * @param poll one poll
      * @param status the status of a poll answer
+     * @param terminal the statuses after which this job no longer changes
      * @param download the finished job's file, or null when the job makes none
      * @param sleeper how to wait between polls
      */
@@ -34,12 +37,14 @@ public final class AsyncJob<T> {
             Object result,
             Supplier<CompletableFuture<T>> poll,
             Function<T, String> status,
+            Set<String> terminal,
             Supplier<CompletableFuture<FileResult>> download,
             Sleeper sleeper) {
         this.id = id;
         this.result = result;
         this.poll = poll;
         this.status = status;
+        this.terminal = Set.copyOf(terminal);
         this.download = download;
         this.sleeper = sleeper;
     }
@@ -80,7 +85,7 @@ public final class AsyncJob<T> {
                 .thenCompose(
                         answer -> {
                             String now = status.apply(answer);
-                            if (JobSupport.TERMINAL.contains(now)) {
+                            if (terminal.contains(now)) {
                                 return CompletableFuture.completedFuture(answer);
                             }
                             long remaining = deadline - System.nanoTime();

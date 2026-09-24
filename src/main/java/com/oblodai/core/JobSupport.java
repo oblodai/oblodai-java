@@ -1,22 +1,22 @@
 package com.oblodai.core;
 
-import com.oblodai.Lro;
 import com.oblodai.RequestOptions;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.JobTimeoutException;
+import com.oblodai.generated.Facts;
 import com.oblodai.generated.Routes;
 import com.oblodai.generated.models.WireObject;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
-/** Builds {@link Job}s and {@link AsyncJob}s from the {@link Lro} table. */
+/**
+ * Builds {@link Job}s and {@link AsyncJob}s from the contract's long-running operations ({@link
+ * Facts#LRO}, generated from {@code x-sdk-poll}): the poll, the id and status fields, the terminal
+ * statuses and the download all come from there.
+ */
 public final class JobSupport {
-
-    /** Statuses after which a job no longer changes. */
-    static final Set<String> TERMINAL = Lro.TERMINAL_STATUSES;
 
     private JobSupport() {}
 
@@ -35,24 +35,29 @@ public final class JobSupport {
      * @return its {@code status}, or an empty string
      */
     public static String status(Object answer) {
+        return field(answer, "status");
+    }
+
+    private static String field(Object answer, String name) {
         Object json = answer instanceof WireObject w ? w.toJson() : answer;
-        Object status = json instanceof Map<?, ?> map ? map.get("status") : null;
-        return status == null ? "" : String.valueOf(status);
+        Object value = json instanceof Map<?, ?> map ? map.get(name) : null;
+        return value == null ? "" : String.valueOf(value);
     }
 
     /**
-     * @param createOperationId the create operation, a key of {@link Lro#LRO}
+     * @param createOperationId the create operation, a key of {@link Facts#LRO}
      * @return how to follow its jobs
+     * @throws ConfigException {@code sdk.lro_unresolved} when the operation is not long-running
      */
-    static Lro.Poll poll(String createOperationId) {
-        String pollId = Lro.LRO.get(createOperationId);
-        if (pollId == null) {
+    static Facts.Poll poll(String createOperationId) {
+        Facts.Poll poll = createOperationId == null ? null : Facts.LRO.get(createOperationId);
+        if (poll == null) {
             throw new ConfigException(
                     "sdk.lro_unresolved",
                     createOperationId + " is not a long-running operation",
                     null);
         }
-        return Lro.POLLS.get(pollId);
+        return poll;
     }
 
     private static RouteSpec route(String operationId) {
@@ -72,21 +77,20 @@ public final class JobSupport {
      * @return the job's id
      */
     public static String id(String createOperationId, Object answer) {
-        Lro.Poll poll = poll(createOperationId);
-        Object json = answer instanceof WireObject w ? w.toJson() : answer;
-        Object value = json instanceof Map<?, ?> map ? map.get(poll.idField()) : null;
-        if (value == null || String.valueOf(value).isEmpty()) {
-            throw new ContractException(
-                    "long-running call answered without " + poll.idField(), 200, json);
+        Facts.Poll poll = poll(createOperationId);
+        String value = field(answer, poll.idField());
+        if (value.isEmpty()) {
+            Object json = answer instanceof WireObject w ? w.toJson() : answer;
+            throw new ContractException("long-running call answered without " + poll.idField(), 200, json);
         }
-        return String.valueOf(value);
+        return value;
     }
 
     /**
      * A blocking job.
      *
      * @param transport the engine
-     * @param createOperationId the create operation, a key of {@link Lro#LRO}
+     * @param createOperationId the create operation, a key of {@link Facts#LRO}
      * @param id the job's id
      * @param result the create answer, or null
      * @param options options for the polls (their idempotency key is dropped)
@@ -96,8 +100,8 @@ public final class JobSupport {
     @SuppressWarnings("unchecked")
     public static <T> Job<T> job(
             Transport transport, String createOperationId, String id, Object result, RequestOptions options) {
-        Lro.Poll poll = poll(createOperationId);
-        RouteSpec pollRoute = route(Lro.LRO.get(createOperationId));
+        Facts.Poll poll = poll(createOperationId);
+        RouteSpec pollRoute = route(poll.operation());
         RouteSpec downloadRoute = poll.download() == null ? null : route(poll.download());
         RequestOptions follow = options == null ? null : options.withoutIdempotencyKey().requestId(null);
         Function<Object, T> parse = (Function<Object, T>) poll.parse();
@@ -111,7 +115,8 @@ public final class JobSupport {
                                         pollRoute,
                                         Calls.callOptions(null, null, Map.of(poll.idField(), id), follow)),
                                 parse),
-                JobSupport::status,
+                answer -> field(answer, poll.statusField()),
+                poll.terminal(),
                 downloadRoute == null
                         ? null
                         : () ->
@@ -127,7 +132,7 @@ public final class JobSupport {
      * A non-blocking job.
      *
      * @param transport the engine
-     * @param createOperationId the create operation, a key of {@link Lro#LRO}
+     * @param createOperationId the create operation, a key of {@link Facts#LRO}
      * @param id the job's id
      * @param result the create answer, or null
      * @param options options for the polls (their idempotency key is dropped)
@@ -137,8 +142,8 @@ public final class JobSupport {
     @SuppressWarnings("unchecked")
     public static <T> AsyncJob<T> asyncJob(
             Transport transport, String createOperationId, String id, Object result, RequestOptions options) {
-        Lro.Poll poll = poll(createOperationId);
-        RouteSpec pollRoute = route(Lro.LRO.get(createOperationId));
+        Facts.Poll poll = poll(createOperationId);
+        RouteSpec pollRoute = route(poll.operation());
         RouteSpec downloadRoute = poll.download() == null ? null : route(poll.download());
         RequestOptions follow = options == null ? null : options.withoutIdempotencyKey().requestId(null);
         Function<Object, T> parse = (Function<Object, T>) poll.parse();
@@ -151,7 +156,8 @@ public final class JobSupport {
                                         pollRoute,
                                         Calls.callOptions(null, null, Map.of(poll.idField(), id), follow))
                                 .thenApply(answer -> Calls.parse(pollRoute, answer, parse)),
-                JobSupport::status,
+                answer -> field(answer, poll.statusField()),
+                poll.terminal(),
                 downloadRoute == null
                         ? null
                         : () ->
