@@ -2,6 +2,7 @@ package com.oblodai.webhooks;
 
 import com.oblodai.core.Redaction;
 import com.oblodai.errors.WebhookPayloadException;
+import com.oblodai.generated.Facts;
 import com.oblodai.generated.models.ConversionWebhook;
 import com.oblodai.generated.models.PaymentWebhook;
 import com.oblodai.generated.models.PayoutWebhook;
@@ -12,9 +13,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * A verified webhook delivery body. The fields every event carries have accessors here; the full,
- * typed event is the generated model of its kind: {@link #asPayment()} for {@code type=payment},
- * {@link #asPayout()}, {@link #asWallet()}, {@link #asConversion()}.
+ * A verified webhook delivery body. The fields events carry have accessors here; the full, typed
+ * event is the generated model of its kind: {@link #typed()} for any kind of the contract, or
+ * {@link #asPayment()} for {@code type=payment}, {@link #asPayout()}, {@link #asWallet()}, {@link
+ * #asConversion()}. Which kinds exist and which model each carries is the contract's ({@link
+ * Facts#WEBHOOK_KINDS}, generated).
  *
  * <p>A {@code type} this SDK does not know is not an error: the event is returned with its raw
  * {@code type} and {@link #fields()}, so a receiver built against an older SDK still sees the
@@ -22,13 +25,13 @@ import java.util.function.Function;
  */
 public final class WebhookEvent {
 
-    /** The {@code type} discriminators this SDK models. */
-    public static final List<String> KNOWN_KINDS = List.of("payment", "payout", "wallet", "conversion");
+    /** The {@code type} discriminators this SDK models: {@link Facts#KNOWN_WEBHOOK_KINDS}. */
+    public static final List<String> KNOWN_KINDS = Facts.KNOWN_WEBHOOK_KINDS;
 
     private final Map<String, Object> fields;
 
     /**
-     * @param fields the body as a JSON tree; it must carry string {@code type} and {@code uuid}
+     * @param fields the body as a JSON tree; it must carry a string {@code type}
      */
     public WebhookEvent(Map<String, Object> fields) {
         this.fields = Collections.unmodifiableMap(fields);
@@ -39,9 +42,12 @@ public final class WebhookEvent {
         return (String) fields.get("type");
     }
 
-    /** @return the identifier of the object the event is about */
+    /**
+     * @return the identifier of the invoice, payout or wallet the event is about; null for a kind
+     *     keyed otherwise (a conversion carries {@code id})
+     */
     public String uuid() {
-        return (String) fields.get("uuid");
+        return fields.get("uuid") instanceof String s ? s : null;
     }
 
     /** @return the merchant reference, or null */
@@ -85,30 +91,55 @@ public final class WebhookEvent {
         return fields;
     }
 
+    /**
+     * @return the event as the generated model of its kind ({@link Facts#WEBHOOK_KINDS}), or null
+     *     for a kind this SDK does not know
+     * @throws WebhookPayloadException when the body does not match the model of its kind
+     */
+    public Object typed() {
+        Facts.WebhookKind kind = Facts.WEBHOOK_KINDS.get(type());
+        return kind == null ? null : parse(kind.kind(), kind.parse());
+    }
+
     /** @return the typed payment event ({@code type=payment}) */
     public PaymentWebhook asPayment() {
-        return as("payment", PaymentWebhook::fromJson);
+        return as(PaymentWebhook.class);
     }
 
     /** @return the typed payout event ({@code type=payout}) */
     public PayoutWebhook asPayout() {
-        return as("payout", PayoutWebhook::fromJson);
+        return as(PayoutWebhook.class);
     }
 
     /** @return the typed wallet event ({@code type=wallet}) */
     public WalletWebhook asWallet() {
-        return as("wallet", WalletWebhook::fromJson);
+        return as(WalletWebhook.class);
     }
 
     /** @return the typed conversion event ({@code type=conversion}) */
     public ConversionWebhook asConversion() {
-        return as("conversion", ConversionWebhook::fromJson);
+        return as(ConversionWebhook.class);
     }
 
-    private <T> T as(String kind, Function<Object, T> parse) {
+    /**
+     * @param model the generated model of a kind, e.g. {@code PaymentWebhook.class}
+     * @param <T> the model
+     * @return the event as that model
+     * @throws IllegalStateException when the event is of another kind
+     * @throws WebhookPayloadException when the body does not match the model
+     */
+    public <T> T as(Class<T> model) {
+        String kind = Facts.kindOf(model);
+        if (kind == null) {
+            throw new IllegalArgumentException(model.getName() + " is not the model of a webhook kind");
+        }
         if (!kind.equals(type())) {
             throw new IllegalStateException("a " + type() + " event is not a " + kind + " event");
         }
+        return model.cast(parse(kind, Facts.WEBHOOK_KINDS.get(kind).parse()));
+    }
+
+    private Object parse(String kind, Function<Object, ?> parse) {
         try {
             return parse.apply(fields);
         } catch (IllegalArgumentException e) {

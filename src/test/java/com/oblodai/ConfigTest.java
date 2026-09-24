@@ -195,6 +195,11 @@ class ConfigTest {
         assertFalse(Statuses.isPayoutFinal(PayoutStatus.SENT));
         assertTrue(Statuses.isPayoutFinal(PayoutStatus.CONFIRMED));
         assertTrue(Statuses.isPayoutSucceeded(PayoutStatus.CONFIRMED));
+        // The classes are the contract's (x-status-classes), not a copy.
+        assertEquals(PaymentStatus.finalValues(), Statuses.FINAL_PAYMENT_STATUSES);
+        assertEquals(PayoutStatus.finalValues(), Statuses.FINAL_PAYOUT_STATUSES);
+        assertFalse(Statuses.isPaymentFinal(PaymentStatus.UNDER_REVIEW));
+        assertFalse(Statuses.isPaymentPaid(PaymentStatus.of("new_status")));
     }
 
     @Test

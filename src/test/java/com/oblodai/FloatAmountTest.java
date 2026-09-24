@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.oblodai.core.Amounts;
+import com.oblodai.generated.Facts;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.support.Clients;
@@ -87,7 +88,8 @@ class FloatAmountTest {
     }
 
     @Test
-    void theNonMoneyNumbersAreEveryNumberFieldOfTheGeneratedModels() throws IOException {
+    void theNonMoneyNumbersAreTheContractsNumberFieldsOfRequests() throws IOException {
+        assertEquals(Facts.NON_MONEY_NUMBERS, Amounts.NON_MONEY_NUMBERS, "the runtime keeps no list of its own");
         Set<String> doubles = new TreeSet<>();
         try (Stream<Path> files = Files.list(Path.of("src/main/java/com/oblodai/generated/models"))) {
             for (Path file : files.toList()) {
@@ -105,6 +107,7 @@ class FloatAmountTest {
                 }
             }
         }
-        assertEquals(new TreeSet<>(Amounts.NON_MONEY_NUMBERS), doubles);
+        // Request fields only: a number field of a response is not in the list, and needs not be.
+        assertTrue(doubles.containsAll(Amounts.NON_MONEY_NUMBERS), doubles + " vs " + Amounts.NON_MONEY_NUMBERS);
     }
 }

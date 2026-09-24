@@ -79,8 +79,8 @@ final class WebhookPayloads {
         if (body == null || !body.isObject()) {
             throw badPayload("the delivery body is not a JSON object");
         }
-        if (!body.path("type").isTextual() || !body.path("uuid").isTextual()) {
-            throw badPayload("the delivery body lacks the type/uuid fields every event carries");
+        if (!body.path("type").isTextual()) {
+            throw badPayload("the delivery body lacks the string type field every event carries");
         }
         @SuppressWarnings("unchecked")
         Map<String, Object> fields = (Map<String, Object>) Transport.tree(body);

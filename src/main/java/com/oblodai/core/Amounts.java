@@ -1,6 +1,7 @@
 package com.oblodai.core;
 
 import com.oblodai.errors.ConfigException;
+import com.oblodai.generated.Facts;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -21,11 +22,11 @@ public final class Amounts {
     public static final String FLOAT_AMOUNT = "sdk.float_amount";
 
     /**
-     * Request fields the contract types as a JSON {@code number} that are not money (a tolerance in
-     * percent). A float anywhere else in a body is an amount losing precision; a unit test keeps
-     * this set equal to the {@code number} fields of the generated request models.
+     * Request fields the contract types as a JSON {@code number}, so they are not money (a
+     * tolerance in percent): {@link Facts#NON_MONEY_NUMBERS}, generated from the contract. A float
+     * anywhere else in a body is an amount losing precision.
      */
-    public static final Set<String> NON_MONEY_NUMBERS = Set.of("accuracy_payment_percent");
+    public static final Set<String> NON_MONEY_NUMBERS = Facts.NON_MONEY_NUMBERS;
 
     private Amounts() {}
 

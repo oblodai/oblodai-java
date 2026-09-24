@@ -86,6 +86,33 @@ public final class PaymentStatus implements WireObject {
         return value;
     }
 
+    private static final List<PaymentStatus> finalValues = List.of(PAID, PAID_OVER, WRONG_AMOUNT, EXPIRED, CANCELLED);
+
+    private static final List<PaymentStatus> successValues = List.of(PAID, PAID_OVER);
+
+    /** @return the values after which nothing else can happen, in the order of the contract */
+    public static List<PaymentStatus> finalValues() {
+        return finalValues;
+    }
+
+    /** @return the final values that are a success, in the order of the contract */
+    public static List<PaymentStatus> successValues() {
+        return successValues;
+    }
+
+    /**
+     * @return whether nothing else can happen after this value; a value this SDK version does not
+     *     know is not final
+     */
+    public boolean isFinal() {
+        return finalValues.contains(this);
+    }
+
+    /** @return whether this is a final value that is a success */
+    public boolean isSuccess() {
+        return successValues.contains(this);
+    }
+
     /** @return whether this SDK version knows the value */
     public boolean isKnown() {
         return registry.get(value) == this;

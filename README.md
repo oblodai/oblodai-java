@@ -117,26 +117,30 @@ sent. `Money` adds, subtracts and compares amounts exactly and refuses a `double
 `operationId` without the resource name. Parameters are a model built with its builder
 (`PaymentRequest.builder()...build()`); path parameters come first, query parameters are a
 `*Query` model. Every method has an overload with a trailing `RequestOptions`, and overloads
-without the optional parts. The full list is in [`names.lock`](names.lock).
+without the optional parts. The table below is generated from the contract by `tools/sdkgen`.
 
-| resource | methods |
+<!-- sdkgen:methods -->
+16 resources, 120 methods.
+
+| Resource | Methods |
 | --- | --- |
-| `account()` | `getBalance`, `getSummary`, `listExchangeRates` |
-| `apiAllowlist()` | `addEntry`, `list`, `removeEntry`, `setEnabled` |
-| `batches()` | `createPayment`, `createPayout`, `createRefund`, `getInfo` |
-| `checkout()` | `get`, `getOnramp`, `getPublicPaymentLink`, `getQr`, `getSourceOfFundsForm`, `listCurrencies`, `paymentLink`, `selectMethod`, `startOnramp`, `submitSourceOfFunds` |
-| `documents()` | `createJob`, `downloadJobFile`, `getBalance`, `getBatch`, `getFees`, `getJob`, `getLedger`, `getPaymentLink`, `getPayoutLinkCheque`, `getReferrals`, `getSigned`, `getSplit`, `getStatement`, `getWalletStatement` |
-| `paymentLinks()` | `create`, `get`, `list`, `toggle` |
-| `payments()` | `cancel`, `create`, `getAmlLinks`, `getCheckoutConfig`, `getInfo`, `getQr`, `listHistory`, `listServices`, `resolve`, `sendEmail`, `setCheckoutConfig` |
-| `payoutLinks()` | `cancel`, `claimPayout`, `create`, `createBatch`, `get`, `getPayoutClaim`, `list` |
-| `payouts()` | `approve`, `calculate`, `cancel`, `create`, `createMass`, `createTransferBatch`, `getInfo`, `listHistory`, `listServices`, `transferToPersonal`, `transferToUser`, `validate` |
+| `payments()` | `create` · `getInfo` · `getQr` · `listHistory` · `listServices` · `cancel` · `sendEmail` · `setCheckoutConfig` · `getCheckoutConfig` · `getAmlLinks` · `resolve` |
+| `paymentLinks()` | `create` · `list` · `get` · `toggle` |
+| `refunds()` | `payment` · `blockedWallet` |
+| `payouts()` | `create` · `createMass` · `getInfo` · `listHistory` · `calculate` · `validate` · `cancel` · `approve` · `listServices` · `transferToPersonal` · `transferToUser` · `createTransferBatch` |
+| `payoutLinks()` | `create` · `createBatch` · `list` · `get` · `cancel` · `getPayoutClaim` · `claimPayout` |
+| `batches()` | `createPayment` · `createRefund` · `createPayout` · `getInfo` |
+| `splits()` | `createRule` · `listRules` · `deleteRule` · `setConfig` · `getConfig` · `setRecipientOptIn` · `getRecipientOptIn` |
+| `wallets()` | `create` · `block` · `getQr` |
+| `account()` | `getBalance` · `getSummary` · `listExchangeRates` |
+| `webhooks()` | `resendPayment` · `register` · `listDeliveries` · `requeueDelivery` · `sendLegacyTest` · `sendTestPayment` · `sendTestWallet` · `sendTestPayout` · `sendTestConversion` · `rotateSecret` · `setActive` |
+| `settings()` | `setAccuracy` · `getAccuracy` · `setAutoRefund` · `getAutoRefund` · `setDiscount` · `listDiscounts` · `listApiLog` · `getAutoConvert` · `setAutoConvert` · `setAcceptedCurrencies` · `listAcceptedCurrencies` · `setPayoutFeeConfig` · `getPayoutFeeConfig` · `setRefundFeeConfig` · `getRefundFeeConfig` · `setPaymentFeeConfig` · `getPaymentFeeConfig` · `setAutoWithdrawRule` · `listAutoWithdrawRules` · `deleteAutoWithdrawRule` · `configureVrcs` |
+| `apiAllowlist()` | `list` · `addEntry` · `removeEntry` · `setEnabled` |
 | `referrals()` | `getInfo` |
-| `refunds()` | `blockedWallet`, `payment` |
-| `sandbox()` | `faucet`, `listWebhooks`, `onboardStore`, `replayWebhook`, `reset`, `simulateDeposit` |
-| `settings()` | `configureVrcs`, `deleteAutoWithdrawRule`, `getAccuracy`, `getAutoConvert`, `getAutoRefund`, `getPaymentFeeConfig`, `getPayoutFeeConfig`, `getRefundFeeConfig`, `listAcceptedCurrencies`, `listApiLog`, `listAutoWithdrawRules`, `listDiscounts`, `setAcceptedCurrencies`, `setAccuracy`, `setAutoConvert`, `setAutoRefund`, `setAutoWithdrawRule`, `setDiscount`, `setPaymentFeeConfig`, `setPayoutFeeConfig`, `setRefundFeeConfig` |
-| `splits()` | `createRule`, `deleteRule`, `getConfig`, `getRecipientOptIn`, `listRules`, `setConfig`, `setRecipientOptIn` |
-| `wallets()` | `block`, `create`, `getQr` |
-| `webhooks()` | `listDeliveries`, `register`, `requeueDelivery`, `resendPayment`, `rotateSecret`, `sendLegacyTest`, `sendTestConversion`, `sendTestPayment`, `sendTestPayout`, `sendTestWallet`, `setActive` |
+| `documents()` | `getSigned` · `getBalance` · `getFees` · `getLedger` · `getSplit` · `getPayoutLinkCheque` · `getStatement` · `getBatch` · `getPaymentLink` · `getWalletStatement` · `getReferrals` · `createJob` · `getJob` · `downloadJobFile` |
+| `checkout()` | `getSourceOfFundsForm` · `submitSourceOfFunds` · `getPublicPaymentLink` · `paymentLink` · `listCurrencies` · `get` · `selectMethod` · `startOnramp` · `getOnramp` · `getQr` |
+| `sandbox()` | `onboardStore` · `faucet` · `simulateDeposit` · `reset` · `listWebhooks` · `replayWebhook` |
+<!-- /sdkgen:methods -->
 
 Models keep fields this SDK version does not know yet (`extra()`, sent back as they came), and an
 enum value it does not know parses (`PaymentStatus.of("new_status").isKnown() == false`).
@@ -222,8 +226,10 @@ observed.close();
 ## Long-running operations
 
 Batches and document exports finish in the background. `jobs()` follows them: `waitFor()` polls
-until the status is terminal (`completed`, `stopped`, `done`, `failed`, `expired`) and returns that
-answer; `download()` fetches an export's file.
+until the status is terminal for that job and returns that answer; `download()` fetches an
+export's file. Which calls are long-running, what they poll and which statuses end them is the
+contract's (`x-sdk-poll`, generated into `Facts.LRO`); `jobs().follow("<create operationId>", answer)`
+follows any of them.
 
 ```java
 BatchSubmitResponse submitted = oblodai.batches().createPayout(PayoutBatchRequest.builder()
@@ -246,8 +252,8 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 
 Verify over the raw request bytes; deduplicate on `eventId()` (`X-Webhook-Event-Id`); never act on
 a test delivery. `event().asPayment()`, `asPayout()`, `asWallet()`, `asConversion()` give the typed
-event; an event kind this SDK does not know is still delivered, with its raw `type()` and
-`fields()`.
+event, and `typed()` the model of any kind of the contract (`Facts.WEBHOOK_KINDS`); an event kind
+this SDK does not know is still delivered, with its raw `type()` and `fields()`.
 
 ```java
 try {

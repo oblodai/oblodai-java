@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.oblodai.core.AsyncJob;
 import com.oblodai.core.FileResult;
 import com.oblodai.core.Job;
+import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.JobTimeoutException;
+import com.oblodai.generated.Facts;
 import com.oblodai.generated.Routes;
 import com.oblodai.generated.models.BatchInfoResponse;
 import com.oblodai.generated.models.BatchStatus;
@@ -23,6 +25,8 @@ import com.oblodai.support.Fixtures;
 import com.oblodai.support.MockHttpClient;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 /** Spec §3.8: long-running operations - batches and document exports - have a waiter. */
@@ -122,5 +126,54 @@ class JobsTest {
                 assertTrue(Routes.BY_OPERATION_ID.get(poll.download()).bare(), poll.download());
             }
         }
+    }
+
+    @Test
+    void theLroTableIsTheContracts() {
+        assertEquals(Facts.LRO.keySet(), Lro.LRO.keySet(), "the runtime keeps no list of its own");
+        for (var entry : Facts.LRO.entrySet()) {
+            assertEquals(entry.getValue().operation(), Lro.LRO.get(entry.getKey()));
+            assertTrue(Lro.TERMINAL_STATUSES.containsAll(entry.getValue().terminal()), entry.getKey());
+        }
+        Set<String> union = new TreeSet<>();
+        Facts.LRO.values().forEach(p -> union.addAll(p.terminal()));
+        assertEquals(union, new TreeSet<>(Lro.TERMINAL_STATUSES));
+    }
+
+    @Test
+    void aJobStopsOnlyAtItsOwnTerminalStatuses() {
+        // "completed" ends a batch, not a document job: each job waits for its own statuses.
+        MockHttpClient http =
+                new MockHttpClient()
+                        .ok(Fixtures.documentJob("completed"))
+                        .ok(Fixtures.documentJob("expired"));
+        Job<DocumentJobView> job = Clients.client(http).jobs().document("j1");
+        assertEquals("expired", job.waitFor(Duration.ofMinutes(1), Duration.ZERO).status().value());
+        assertEquals(2, http.calls().size());
+    }
+
+    @Test
+    void anyLongRunningCallIsFollowedByItsOperationId() {
+        MockHttpClient http =
+                new MockHttpClient()
+                        .ok(Fixtures.batchSubmitted())
+                        .ok(Fixtures.batchInfo("processing"))
+                        .ok(Fixtures.batchInfo("completed"))
+                        .ok(Fixtures.batchInfo("stopped"));
+        Oblodai oblodai = Clients.client(http);
+
+        BatchSubmitResponse submitted = oblodai.batches().createPayout(batch());
+        Job<?> job = oblodai.jobs().follow("createPayoutBatch", submitted);
+        assertEquals("b1", job.id());
+        Object done = job.waitFor(Duration.ofMinutes(1), Duration.ZERO);
+        assertTrue(done instanceof BatchInfoResponse info && info.status() == BatchStatus.COMPLETED, String.valueOf(done));
+        assertEquals(3, http.calls().size());
+
+        AsyncJob<?> async = oblodai.async().jobs().follow("createPayoutBatch", submitted);
+        assertEquals(BatchStatus.STOPPED, ((BatchInfoResponse) async.waitFor().join()).status());
+
+        ConfigException notLro =
+                assertThrows(ConfigException.class, () -> oblodai.jobs().follow("getBatchInfo", submitted));
+        assertEquals("sdk.lro_unresolved", notLro.code());
     }
 }

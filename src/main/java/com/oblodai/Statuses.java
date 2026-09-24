@@ -5,28 +5,19 @@ import com.oblodai.generated.models.PayoutStatus;
 import java.util.List;
 
 /**
- * The two lifecycles, as predicates.
- *
- * <p>Invoice: {@code select → created → confirm_check → paid | paid_over | wrong_amount | expired |
- * cancelled}. Payout: {@code pending → approved → awaiting_cosign → broadcasting → sent → confirmed |
- * failed | cancelled}.
+ * The two lifecycles, as predicates. Which statuses are final and which of those are a success is
+ * the contract's ({@code x-status-classes}, generated into {@code PaymentStatus.isFinal()} /
+ * {@code isSuccess()} and the same on {@code PayoutStatus}); these helpers read it.
  *
  * <p>Prefer webhooks for state changes and poll {@code info} only as a fallback.
  */
 public final class Statuses {
 
-    /** Invoice statuses after which nothing else can happen. */
-    public static final List<PaymentStatus> FINAL_PAYMENT_STATUSES =
-            List.of(
-                    PaymentStatus.PAID,
-                    PaymentStatus.PAID_OVER,
-                    PaymentStatus.WRONG_AMOUNT,
-                    PaymentStatus.EXPIRED,
-                    PaymentStatus.CANCELLED);
+    /** Invoice statuses after which nothing else can happen: the contract's {@code x-status-classes}. */
+    public static final List<PaymentStatus> FINAL_PAYMENT_STATUSES = PaymentStatus.finalValues();
 
-    /** Payout statuses after which nothing else can happen. */
-    public static final List<PayoutStatus> FINAL_PAYOUT_STATUSES =
-            List.of(PayoutStatus.CONFIRMED, PayoutStatus.FAILED, PayoutStatus.CANCELLED);
+    /** Payout statuses after which nothing else can happen: the contract's {@code x-status-classes}. */
+    public static final List<PayoutStatus> FINAL_PAYOUT_STATUSES = PayoutStatus.finalValues();
 
     private Statuses() {}
 
@@ -35,7 +26,7 @@ public final class Statuses {
      * @return whether the invoice has reached a state it cannot leave
      */
     public static boolean isPaymentFinal(PaymentStatus status) {
-        return FINAL_PAYMENT_STATUSES.contains(status);
+        return status != null && status.isFinal();
     }
 
     /**
@@ -46,7 +37,7 @@ public final class Statuses {
      * @return whether the invoice was paid in full or over
      */
     public static boolean isPaymentPaid(PaymentStatus status) {
-        return status == PaymentStatus.PAID || status == PaymentStatus.PAID_OVER;
+        return status != null && status.isSuccess();
     }
 
     /**
@@ -65,7 +56,7 @@ public final class Statuses {
      * @return whether the payout has reached a state it cannot leave
      */
     public static boolean isPayoutFinal(PayoutStatus status) {
-        return FINAL_PAYOUT_STATUSES.contains(status);
+        return status != null && status.isFinal();
     }
 
     /**
@@ -73,6 +64,6 @@ public final class Statuses {
      * @return whether the payout reached the chain and is irreversible
      */
     public static boolean isPayoutSucceeded(PayoutStatus status) {
-        return status == PayoutStatus.CONFIRMED;
+        return status != null && status.isSuccess();
     }
 }
