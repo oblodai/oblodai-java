@@ -19,7 +19,7 @@ import java.util.function.LongSupplier;
  *   X-Webhook-Timestamp:      unix seconds
  *   X-Webhook-Signature:      hex(HMAC-SHA256(secret, "&lt;ts&gt;." + rawBody))
  *   X-Webhook-Signature-Prev: the same with the previous secret — only during a rotation overlap
- *   X-Webhook-Event:          invoice.&lt;status&gt; | payout.&lt;status&gt; | wallet.paid
+ *   X-Webhook-Event:          the event name (the events of each kind: Facts.WEBHOOK_KINDS)
  *   X-Webhook-Id:             stable per delivery, identical across retries — deduplicate on it
  *   X-Webhook-Event-Time:     unix seconds when the state change committed
  *   X-Webhook-Test:           true on a rehearsal delivery — no money moved
@@ -321,7 +321,7 @@ public final class WebhookVerifier {
      * {@link WebhookEvent#fields()}, and a receiver should acknowledge it rather than fail.
      *
      * @param event the event just verified, or null
-     * @return true for a payment, payout or wallet event
+     * @return true for a kind of {@link com.oblodai.generated.Facts#KNOWN_WEBHOOK_KINDS}
      */
     public static boolean isKnownEvent(WebhookEvent event) {
         return event != null && WebhookEvent.KNOWN_KINDS.contains(event.type());

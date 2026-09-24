@@ -9,8 +9,8 @@ package com.oblodai.webhooks;
  * @param eventId {@code X-Webhook-Event-Id} - the id of the STATE this delivery carries: the same
  *     for the original, every retry and every resend of that state; keep the ids you handled and
  *     skip repeats. Null from a gateway that does not send it
- * @param eventType {@code X-Webhook-Event} — {@code invoice.&lt;status&gt;}, {@code
- *     payout.&lt;status&gt;} or {@code wallet.paid}
+ * @param eventType {@code X-Webhook-Event} — the event name, one of the events of a kind in {@link
+ *     com.oblodai.generated.Facts#WEBHOOK_KINDS}
  * @param eventTime {@code X-Webhook-Event-Time} — unix seconds when the state change committed
  * @param sentAt {@code X-Webhook-Timestamp} — unix seconds when this attempt was sent
  * @param isTest a rehearsal delivery ({@code X-Webhook-Test: true}, or {@code test: true} in the

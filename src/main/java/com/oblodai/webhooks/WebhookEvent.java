@@ -3,10 +3,7 @@ package com.oblodai.webhooks;
 import com.oblodai.core.Redaction;
 import com.oblodai.errors.WebhookPayloadException;
 import com.oblodai.generated.Facts;
-import com.oblodai.generated.models.ConversionWebhook;
-import com.oblodai.generated.models.PaymentWebhook;
-import com.oblodai.generated.models.PayoutWebhook;
-import com.oblodai.generated.models.WalletWebhook;
+import com.oblodai.generated.WebhookKinds;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -14,16 +11,16 @@ import java.util.function.Function;
 
 /**
  * A verified webhook delivery body. The fields events carry have accessors here; the full, typed
- * event is the generated model of its kind: {@link #typed()} for any kind of the contract, or
- * {@link #asPayment()} for {@code type=payment}, {@link #asPayout()}, {@link #asWallet()}, {@link
- * #asConversion()}. Which kinds exist and which model each carries is the contract's ({@link
+ * event is the generated model of its kind: {@link #typed()} for any kind of the contract, or the
+ * accessor of one kind, {@code as<Kind>()} (e.g. {@code asPayment()}), generated per kind in {@link
+ * WebhookKinds}. Which kinds exist and which model each carries is the contract's ({@link
  * Facts#WEBHOOK_KINDS}, generated).
  *
  * <p>A {@code type} this SDK does not know is not an error: the event is returned with its raw
  * {@code type} and {@link #fields()}, so a receiver built against an older SDK still sees the
  * delivery ({@link WebhookVerifier#isKnownEvent} tells the two apart).
  */
-public final class WebhookEvent {
+public final class WebhookEvent implements WebhookKinds {
 
     /** The {@code type} discriminators this SDK models: {@link Facts#KNOWN_WEBHOOK_KINDS}. */
     public static final List<String> KNOWN_KINDS = Facts.KNOWN_WEBHOOK_KINDS;
@@ -37,14 +34,14 @@ public final class WebhookEvent {
         this.fields = Collections.unmodifiableMap(fields);
     }
 
-    /** @return {@code payment}, {@code payout}, {@code wallet}, {@code conversion} or a newer kind */
+    /** @return a kind of {@link Facts#KNOWN_WEBHOOK_KINDS}, or a newer kind this SDK does not know */
     public String type() {
         return (String) fields.get("type");
     }
 
     /**
-     * @return the identifier of the invoice, payout or wallet the event is about; null for a kind
-     *     keyed otherwise (a conversion carries {@code id})
+     * @return the identifier of the object the event is about; null for a kind whose body keys it
+     *     otherwise (see its model in {@link Facts#WEBHOOK_KINDS})
      */
     public String uuid() {
         return fields.get("uuid") instanceof String s ? s : null;
@@ -101,33 +98,14 @@ public final class WebhookEvent {
         return kind == null ? null : parse(kind.kind(), kind.parse());
     }
 
-    /** @return the typed payment event ({@code type=payment}) */
-    public PaymentWebhook asPayment() {
-        return as(PaymentWebhook.class);
-    }
-
-    /** @return the typed payout event ({@code type=payout}) */
-    public PayoutWebhook asPayout() {
-        return as(PayoutWebhook.class);
-    }
-
-    /** @return the typed wallet event ({@code type=wallet}) */
-    public WalletWebhook asWallet() {
-        return as(WalletWebhook.class);
-    }
-
-    /** @return the typed conversion event ({@code type=conversion}) */
-    public ConversionWebhook asConversion() {
-        return as(ConversionWebhook.class);
-    }
-
     /**
-     * @param model the generated model of a kind, e.g. {@code PaymentWebhook.class}
+     * @param model the generated model of a kind ({@link Facts.WebhookKind#model()})
      * @param <T> the model
      * @return the event as that model
      * @throws IllegalStateException when the event is of another kind
      * @throws WebhookPayloadException when the body does not match the model
      */
+    @Override
     public <T> T as(Class<T> model) {
         String kind = Facts.kindOf(model);
         if (kind == null) {
