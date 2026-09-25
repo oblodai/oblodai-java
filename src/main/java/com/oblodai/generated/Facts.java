@@ -49,8 +49,11 @@ public final class Facts {
      * @param model the generated model of the body
      * @param parse the parser of the body
      * @param events the event names of this kind, sorted
+     * @param idField the body field holding the id of the object the event is about, as the
+     *     contract declares it; null when the body has no such field
      */
-    public record WebhookKind(String kind, Class<?> model, Function<Object, ?> parse, List<String> events) {}
+    public record WebhookKind(
+            String kind, Class<?> model, Function<Object, ?> parse, List<String> events, String idField) {}
 
     /** {@code type -> its kind}, sorted by {@code type}. */
     public static final Map<String, WebhookKind> WEBHOOK_KINDS = webhookKinds();
@@ -140,28 +143,32 @@ public final class Facts {
                         "conversion",
                         com.oblodai.generated.models.ConversionWebhook.class,
                         com.oblodai.generated.models.ConversionWebhook::fromJson,
-                        List.of("conversion.completed", "conversion.refunded")));
+                        List.of("conversion.completed", "conversion.refunded"),
+                        "id"));
         kinds.put(
                 "payment",
                 new WebhookKind(
                         "payment",
                         com.oblodai.generated.models.PaymentWebhook.class,
                         com.oblodai.generated.models.PaymentWebhook::fromJson,
-                        List.of("invoice.cancelled", "invoice.confirm_check", "invoice.created", "invoice.expired", "invoice.paid", "invoice.paid_over", "invoice.select", "invoice.under_review", "invoice.wrong_amount")));
+                        List.of("invoice.cancelled", "invoice.confirm_check", "invoice.created", "invoice.expired", "invoice.paid", "invoice.paid_over", "invoice.select", "invoice.under_review", "invoice.wrong_amount"),
+                        "uuid"));
         kinds.put(
                 "payout",
                 new WebhookKind(
                         "payout",
                         com.oblodai.generated.models.PayoutWebhook.class,
                         com.oblodai.generated.models.PayoutWebhook::fromJson,
-                        List.of("payout.approved", "payout.awaiting_cosign", "payout.broadcasting", "payout.cancelled", "payout.confirmed", "payout.failed", "payout.pending", "payout.sent")));
+                        List.of("payout.approved", "payout.awaiting_cosign", "payout.broadcasting", "payout.cancelled", "payout.confirmed", "payout.failed", "payout.pending", "payout.sent"),
+                        "uuid"));
         kinds.put(
                 "wallet",
                 new WebhookKind(
                         "wallet",
                         com.oblodai.generated.models.WalletWebhook.class,
                         com.oblodai.generated.models.WalletWebhook::fromJson,
-                        List.of("wallet.paid")));
+                        List.of("wallet.paid"),
+                        "uuid"));
         return Collections.unmodifiableMap(kinds);
     }
 }

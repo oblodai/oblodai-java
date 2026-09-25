@@ -179,4 +179,32 @@ class ReadmeExamplesTest {
                         "{}".getBytes(StandardCharsets.UTF_8),
                         com.oblodai.webhooks.WebhookHeaders.of(Map.of("X-Webhook-Timestamp", "1", "X-Webhook-Signature", "00"))));
     }
+
+    /**
+     * Ordering is per object, and a conversion's object is its {@code id}: conversion B arriving
+     * after conversion A with a lower sequence is B's first state and is applied; an older state of
+     * A arriving late is dropped.
+     */
+    @Test
+    void theWebhookReceiverOrdersEachConversionOnItsOwn() {
+        WebhookReceiver receiver = new WebhookReceiver("whsec", null);
+        long now = System.currentTimeMillis() / 1000;
+        List<Boolean> applied = new ArrayList<>();
+        int n = 0;
+        for (String body :
+                List.of(
+                        "{\"type\":\"conversion\",\"id\":\"A\",\"status\":\"completed\",\"sequence\":5}",
+                        "{\"type\":\"conversion\",\"id\":\"B\",\"status\":\"completed\",\"sequence\":3}",
+                        "{\"type\":\"conversion\",\"id\":\"A\",\"status\":\"refunded\",\"sequence\":4}")) {
+            Map<String, String> headers =
+                    Map.of(
+                            "X-Webhook-Timestamp", Long.toString(now),
+                            "X-Webhook-Signature", Signing.signWebhook("whsec", now, body),
+                            "X-Webhook-Event-Id", "ev-" + n++);
+            int before = receiver.appliedCount();
+            assertEquals(200, receiver.handle(body.getBytes(StandardCharsets.UTF_8), com.oblodai.webhooks.WebhookHeaders.of(headers)));
+            applied.add(receiver.appliedCount() > before);
+        }
+        assertEquals(List.of(true, true, false), applied);
+    }
 }
