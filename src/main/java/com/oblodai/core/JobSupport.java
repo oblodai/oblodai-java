@@ -30,14 +30,6 @@ public final class JobSupport {
                         + timeout);
     }
 
-    /**
-     * @param answer a poll answer
-     * @return its {@code status}, or an empty string
-     */
-    public static String status(Object answer) {
-        return field(answer, "status");
-    }
-
     private static String field(Object answer, String name) {
         Object json = answer instanceof WireObject w ? w.toJson() : answer;
         Object value = json instanceof Map<?, ?> map ? map.get(name) : null;
