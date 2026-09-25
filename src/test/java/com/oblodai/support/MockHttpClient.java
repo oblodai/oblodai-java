@@ -1,5 +1,6 @@
 package com.oblodai.support;
 
+import com.oblodai.generated.SigningProtocol;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.CookieHandler;
@@ -211,7 +212,7 @@ public final class MockHttpClient extends HttpClient {
 
         Long serverNow = serverEpochSeconds;
         if (serverNow != null) {
-            String stamp = headers.get("x-timestamp");
+            String stamp = headers.get(SigningProtocol.REQUEST_HEADER_TIMESTAMP.toLowerCase(java.util.Locale.ROOT));
             long signedAt = stamp == null ? 0 : Long.parseLong(stamp);
             if (Math.abs(serverNow - signedAt) > 300) {
                 Map<String, String> answer = new LinkedHashMap<>();

@@ -11,6 +11,7 @@ import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.generated.Facts;
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.WebhookKinds;
 import com.oblodai.generated.models.ConversionWebhook;
 import com.oblodai.webhooks.WebhookEvent;
@@ -46,9 +47,9 @@ class WebhookHardeningTest {
 
     private static WebhookHeaders headers(long timestamp, String signature) {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("X-Webhook-Timestamp", Long.toString(timestamp));
-        map.put("X-Webhook-Signature", signature);
-        map.put("X-Webhook-Id", "wd_1");
+        map.put(SigningProtocol.WEBHOOK_HEADER_TIMESTAMP, Long.toString(timestamp));
+        map.put(SigningProtocol.WEBHOOK_HEADER_SIGNATURE, signature);
+        map.put(SigningProtocol.WEBHOOK_HEADER_ID, "wd_1");
         return WebhookHeaders.of(map);
     }
 

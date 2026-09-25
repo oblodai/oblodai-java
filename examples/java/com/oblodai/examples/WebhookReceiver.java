@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <ol>
  *   <li>Verify over the raw request bytes; a re-serialized body no longer matches the signature.
- *   <li>Deduplicate on the event id ({@code X-Webhook-Event-Id}): the same for every retry and
- *       every resend of one state.
+ *   <li>Deduplicate on the event id ({@link WebhookDeliveryInfo#eventId()}): the same for every
+ *       retry and every resend of one state.
  *   <li>Drop stale events: keep the last {@code sequence} applied per object.
  * </ol>
  *

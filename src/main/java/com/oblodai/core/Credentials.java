@@ -3,7 +3,7 @@ package com.oblodai.core;
 /**
  * One API key pair.
  *
- * @param publicId public id, sent as {@code X-Public-Id}
+ * @param publicId public id, sent as {@value Signing#HEADER_PUBLIC_ID}
  * @param secret secret the signature is made with; never sent
  */
 public record Credentials(String publicId, String secret) {

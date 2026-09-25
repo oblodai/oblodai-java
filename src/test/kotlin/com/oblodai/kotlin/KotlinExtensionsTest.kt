@@ -1,6 +1,7 @@
 package com.oblodai.kotlin
 
 import com.oblodai.Oblodai
+import com.oblodai.generated.SigningProtocol
 import com.oblodai.generated.models.LookupRequest
 import com.oblodai.generated.models.PaymentRequest
 import com.oblodai.support.Fixtures
@@ -130,8 +131,8 @@ class KotlinExtensionsTest {
                 """"sequence":7,"event_at":"2026-01-01T00:00:00Z"}"""
         val headers =
             mapOf(
-                "X-Webhook-Timestamp" to timestamp.toString(),
-                "X-Webhook-Signature" to
+                SigningProtocol.WEBHOOK_HEADER_TIMESTAMP to timestamp.toString(),
+                SigningProtocol.WEBHOOK_HEADER_SIGNATURE to
                     com.oblodai.core.Signing.signWebhook(secret, timestamp, body),
             )
 

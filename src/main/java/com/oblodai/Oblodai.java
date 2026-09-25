@@ -273,7 +273,8 @@ public final class Oblodai implements AutoCloseable {
         Builder() {}
 
         /**
-         * @param publicId public id of the merchant's API key ({@code X-Public-Id})
+         * @param publicId public id of the merchant's API key ({@value
+         *     com.oblodai.core.Signing#HEADER_PUBLIC_ID})
          * @return this
          */
         public Builder publicId(String publicId) {

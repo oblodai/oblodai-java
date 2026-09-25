@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.TransportException;
 import com.oblodai.errors.UnavailableException;
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.support.Clients;
 import com.oblodai.support.MockHttpClient;
 import java.time.Duration;
@@ -38,7 +39,7 @@ class RequestOptionsTest {
 
         assertEquals(ConfigException.BAD_CONFIG, assertThrows(ConfigException.class, () -> base.timeout(Duration.ZERO)).code());
         assertEquals(ConfigException.BAD_CONFIG, assertThrows(ConfigException.class, () -> base.maxRetries(-1)).code());
-        assertEquals(ConfigException.BAD_HEADER, assertThrows(ConfigException.class, () -> base.extraHeader("X-Signature", "x")).code());
+        assertEquals(ConfigException.BAD_HEADER, assertThrows(ConfigException.class, () -> base.extraHeader(SigningProtocol.REQUEST_HEADER_SIGNATURE, "x")).code());
         assertEquals(ConfigException.BAD_HEADER, assertThrows(ConfigException.class, () -> base.requestId("a\nb")).code());
         assertEquals(
                 ConfigException.BAD_IDEMPOTENCY_KEY,
@@ -117,7 +118,7 @@ class RequestOptionsTest {
                         com.oblodai.generated.models.FaucetRequest.builder().amount("5").asset("USDT").build(),
                         RequestOptions.of().idempotencyKey("tap-1"));
         assertTrue(http.onlyCall().body().contains("\"idempotency_key\":\"tap-1\""), http.onlyCall().body());
-        assertEquals(null, http.onlyCall().header("Idempotency-Key"));
+        assertEquals(null, http.onlyCall().header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY));
 
         // The field and the option both naming the key: ambiguous, refused before the network —
         // the same rule in every Oblodai SDK.

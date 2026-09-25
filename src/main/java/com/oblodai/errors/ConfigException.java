@@ -17,7 +17,11 @@ public class ConfigException extends OblodaiException {
     /** The caller's idempotency key is not a header-safe value. */
     public static final String BAD_IDEMPOTENCY_KEY = "sdk.bad_idempotency_key";
 
-    /** The route does not deduplicate by {@code Idempotency-Key}, so a key must not be sent. */
+    /**
+     * The route does not deduplicate by {@value
+     * com.oblodai.generated.SigningProtocol#REQUEST_HEADER_IDEMPOTENCY_KEY}, so a key must not be
+     * sent.
+     */
     public static final String IDEMPOTENCY_UNSUPPORTED = "sdk.idempotency_unsupported";
 
     /** A path parameter would have rewritten the URL. */

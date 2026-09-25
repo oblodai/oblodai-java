@@ -276,7 +276,7 @@ public final class Transport {
                         raw.text(),
                         raw.header("retry-after").orElse(null),
                         raw.header("location").orElse(null));
-        // The gateway replays a cached response by Idempotency-Key; when the original was too large
+        // The gateway replays a cached response by the idempotency key; when the original was too large
         // to cache it answers {ok, idempotent_replay: true, detail} instead of the object.
         if (result != null
                 && result.isObject()

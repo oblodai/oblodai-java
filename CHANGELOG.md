@@ -43,6 +43,11 @@ Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`)
   status classes (`x-status-classes` → `PaymentStatus.isFinal()`/`isSuccess()`, which `Statuses`
   reads) and the non-money numbers of requests (`Facts.NON_MONEY_NUMBERS`). The methods table of
   the README is generated too.
+- The signing protocol comes from the contract's `x-oblodai-signing` (`SigningProtocol`): the
+  header names of a signed request and of a webhook delivery, the order and separator of both
+  canonical strings, the clock tolerance and the idempotency key limit. `Signing.HEADER_*`,
+  `Signing.SIGNATURE_SKEW_SECONDS`, `WebhookVerifier.HEADER_*`,
+  `WebhookVerifier.DEFAULT_TOLERANCE_SECONDS` and `Idempotency.MAX_KEY_LENGTH` stay, as aliases.
 
 ### Removed
 

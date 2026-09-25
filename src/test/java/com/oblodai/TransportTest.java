@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.SetAccuracyRequest;
 import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.generated.models.LookupRequest;
@@ -56,9 +57,9 @@ class TransportTest {
         assertEquals("https://api.test/v1/sandbox/webhooks?limit=10&offset=0", call.uri().toString());
         assertEquals("GET", call.method());
         assertEquals("", call.body() == null ? "" : call.body());
-        assertEquals("pk_test_1", call.header("x-public-id"));
-        assertTrue(call.header("x-signature").matches("^[0-9a-f]{64}$"));
-        assertNotNull(call.header("x-timestamp"));
+        assertEquals("pk_test_1", call.header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
+        assertTrue(call.header(SigningProtocol.REQUEST_HEADER_SIGNATURE).matches("^[0-9a-f]{64}$"));
+        assertNotNull(call.header(SigningProtocol.REQUEST_HEADER_TIMESTAMP));
     }
 
     @Test
@@ -70,10 +71,10 @@ class TransportTest {
         client(http).build().payments().create(PaymentRequest.builder().amount("1").currency("USDT").build());
 
         assertEquals(2, http.calls().size());
-        String key = http.calls().get(0).header("idempotency-key");
+        String key = http.calls().get(0).header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY);
         assertTrue(key.matches("^[0-9a-f-]{36}$"), "a generated key is a uuid");
-        assertEquals(key, http.calls().get(1).header("idempotency-key"), "reused on the retry");
-        assertTrue(http.calls().get(1).header("x-signature").matches("^[0-9a-f]{64}$"), "re-signed");
+        assertEquals(key, http.calls().get(1).header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY), "reused on the retry");
+        assertTrue(http.calls().get(1).header(SigningProtocol.REQUEST_HEADER_SIGNATURE).matches("^[0-9a-f]{64}$"), "re-signed");
     }
 
     @Test
@@ -87,8 +88,8 @@ class TransportTest {
                         RequestOptions.of().idempotencyKey("my-key-1"));
         oblodai.payments().getInfo(LookupRequest.builder().uuid("u").build());
 
-        assertEquals("my-key-1", http.calls().get(0).header("idempotency-key"));
-        assertNull(http.calls().get(1).header("idempotency-key"));
+        assertEquals("my-key-1", http.calls().get(0).header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY));
+        assertNull(http.calls().get(1).header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY));
     }
 
     @Test
@@ -187,7 +188,7 @@ class TransportTest {
         client(http).retry(RetryOptions.none()).build().account().getBalance();
 
         assertEquals(2, http.calls().size());
-        long signedAt = Long.parseLong(http.calls().get(1).header("x-timestamp"));
+        long signedAt = Long.parseLong(http.calls().get(1).header(SigningProtocol.REQUEST_HEADER_TIMESTAMP));
         assertTrue(Math.abs(signedAt - serverNow) < 5, "the retry signs with the gateway's clock");
     }
 
@@ -217,8 +218,8 @@ class TransportTest {
                 .create(PayoutRequest.builder().amount("1").currency("USDT").address("T").orderId("o").build());
         oblodai.payments().create(PaymentRequest.builder().amount("1").currency("USDT").build());
 
-        assertEquals("pk_test_1", http.calls().get(0).header("x-public-id"));
-        assertEquals("pk_test_1", http.calls().get(1).header("x-public-id"));
+        assertEquals("pk_test_1", http.calls().get(0).header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
+        assertEquals("pk_test_1", http.calls().get(1).header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
     }
 
     @Test

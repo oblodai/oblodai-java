@@ -8,6 +8,7 @@ import com.oblodai.ApiResponse;
 import com.oblodai.Oblodai;
 import com.oblodai.core.FileResult;
 import com.oblodai.core.Signing;
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.PaymentInfoResult;
 import com.oblodai.generated.models.PaymentView;
 import com.oblodai.generated.models.PayoutItem;
@@ -85,7 +86,7 @@ class ReadmeExamplesTest {
         assertEquals("u1", invoice.uuid());
         assertEquals("paid", now.status().value());
         assertEquals("p1", payout.uuid());
-        assertEquals("withdrawal-77", http.calls().get(2).header("idempotency-key"));
+        assertEquals("withdrawal-77", http.calls().get(2).header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY));
         assertTrue(http.calls().get(0).body().contains("\"amount\":\"25\""));
     }
 
@@ -130,7 +131,7 @@ class ReadmeExamplesTest {
         String body = Fixtures.paymentWebhook("u1", 3);
         long now = System.currentTimeMillis() / 1000;
         Map<String, String> headers =
-                Map.of("X-Webhook-Timestamp", Long.toString(now), "X-Webhook-Signature", Signing.signWebhook("whsec", now, body));
+                Map.of(SigningProtocol.WEBHOOK_HEADER_TIMESTAMP, Long.toString(now), SigningProtocol.WEBHOOK_HEADER_SIGNATURE, Signing.signWebhook("whsec", now, body));
         byte[] raw = body.getBytes(StandardCharsets.UTF_8);
         assertEquals(200, ReadmeSnippets.webhooks(raw, headers, "whsec"));
         assertEquals(401, ReadmeSnippets.webhooks(raw, headers, "another-secret"));
@@ -167,9 +168,9 @@ class ReadmeExamplesTest {
         for (String body : List.of(Fixtures.paymentWebhook("u1", 5), Fixtures.paymentWebhook("u1", 5), "not json")) {
             Map<String, String> headers =
                     Map.of(
-                            "X-Webhook-Timestamp", Long.toString(now),
-                            "X-Webhook-Signature", Signing.signWebhook("whsec", now, body),
-                            "X-Webhook-Event-Id", "ev-1");
+                            SigningProtocol.WEBHOOK_HEADER_TIMESTAMP, Long.toString(now),
+                            SigningProtocol.WEBHOOK_HEADER_SIGNATURE, Signing.signWebhook("whsec", now, body),
+                            SigningProtocol.WEBHOOK_HEADER_EVENT_ID, "ev-1");
             statuses.add(receiver.handle(body.getBytes(StandardCharsets.UTF_8), com.oblodai.webhooks.WebhookHeaders.of(headers)));
         }
         assertEquals(List.of(200, 200, 400), statuses);
@@ -177,7 +178,7 @@ class ReadmeExamplesTest {
                 401,
                 receiver.handle(
                         "{}".getBytes(StandardCharsets.UTF_8),
-                        com.oblodai.webhooks.WebhookHeaders.of(Map.of("X-Webhook-Timestamp", "1", "X-Webhook-Signature", "00"))));
+                        com.oblodai.webhooks.WebhookHeaders.of(Map.of(SigningProtocol.WEBHOOK_HEADER_TIMESTAMP, "1", SigningProtocol.WEBHOOK_HEADER_SIGNATURE, "00"))));
     }
 
     /**
@@ -198,9 +199,9 @@ class ReadmeExamplesTest {
                         "{\"type\":\"conversion\",\"id\":\"A\",\"status\":\"refunded\",\"sequence\":4}")) {
             Map<String, String> headers =
                     Map.of(
-                            "X-Webhook-Timestamp", Long.toString(now),
-                            "X-Webhook-Signature", Signing.signWebhook("whsec", now, body),
-                            "X-Webhook-Event-Id", "ev-" + n++);
+                            SigningProtocol.WEBHOOK_HEADER_TIMESTAMP, Long.toString(now),
+                            SigningProtocol.WEBHOOK_HEADER_SIGNATURE, Signing.signWebhook("whsec", now, body),
+                            SigningProtocol.WEBHOOK_HEADER_EVENT_ID, "ev-" + n++);
             int before = receiver.appliedCount();
             assertEquals(200, receiver.handle(body.getBytes(StandardCharsets.UTF_8), com.oblodai.webhooks.WebhookHeaders.of(headers)));
             applied.add(receiver.appliedCount() > before);

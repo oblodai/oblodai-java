@@ -7,9 +7,9 @@ package com.oblodai.core;
  *   <li><b>Can it succeed?</b> — the gateway's {@code retryable} flag (authoritative when the
  *       gateway wrote the envelope), or a transient status on an answer that carries no envelope.
  *   <li><b>Is repeating safe?</b> — only for read-only routes and for writes the gateway
- *       deduplicates by {@code Idempotency-Key}. A write the gateway does not deduplicate is never
- *       re-sent once it MAY have reached the gateway: a transport error or a proxy 503 after the
- *       request left the socket could mean the payout already happened.
+ *       deduplicates by {@value Signing#HEADER_IDEMPOTENCY_KEY}. A write the gateway does not
+ *       deduplicate is never re-sent once it MAY have reached the gateway: a transport error or a
+ *       proxy 503 after the request left the socket could mean the payout already happened.
  * </ol>
  *
  * <p>An enveloped error on an unsafe write is still retried when {@code retryable} — the gateway

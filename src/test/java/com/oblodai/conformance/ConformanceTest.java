@@ -11,8 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oblodai.Oblodai;
 import com.oblodai.OblodaiAsync;
 import com.oblodai.RequestOptions;
+import com.oblodai.core.CallOptions;
 import com.oblodai.core.RouteSpec;
 import com.oblodai.core.Signing;
+import com.oblodai.core.SkewCorrectingClock;
 import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.errors.WebhookPayloadException;
@@ -103,14 +105,38 @@ class ConformanceTest {
         return cur;
     }
 
-    private record Source(JsonNode signing, List<JsonNode> vectors) {}
+    /**
+     * @param signing the spec's {@code x-oblodai-signing}
+     * @param vectors the suite's vectors
+     * @param headers role -> header name, from the spec by the suite's {@code header_names}: the
+     *     suite never names a header, so a rename in the contract that has not reached the SDK
+     *     fails here instead of passing against the SDK's own constants
+     */
+    private record Source(JsonNode signing, List<JsonNode> vectors, Map<String, String> headers) {
+
+        String header(String role) {
+            String name = headers.get(role);
+            assertNotNull(name, "no header of the role " + role + " in header_names");
+            return name;
+        }
+    }
 
     private static Source source(Path dir, JsonNode suite) {
         JsonNode spec = read(dir.resolve(suite.path("source").path("spec").asText()).normalize());
         List<JsonNode> vectors = new ArrayList<>();
         pointer(spec, suite.path("source").path("pointer").asText()).forEach(vectors::add);
         assertTrue(!vectors.isEmpty(), "no vectors in the spec");
-        return new Source(spec.get("x-oblodai-signing"), vectors);
+        Map<String, String> headers = new LinkedHashMap<>();
+        JsonNode names = suite.path("header_names");
+        if (!names.isMissingNode()) {
+            JsonNode list = pointer(spec, names.path("pointer").asText());
+            JsonNode roles = names.path("roles");
+            assertEquals(roles.size(), list.size(), "header_names roles vs " + names.path("pointer").asText());
+            for (int i = 0; i < roles.size(); i++) {
+                headers.put(roles.get(i).asText(), list.get(i).asText());
+            }
+        }
+        return new Source(spec.get("x-oblodai-signing"), vectors, headers);
     }
 
     // --- signing ----------------------------------------------------------------------------------
@@ -134,7 +160,9 @@ class ConformanceTest {
                                     String method = v.path("method").asText();
                                     String uri = v.path("request_uri").asText();
                                     String body = v.path("body").asText();
-                                    if (check.path("kind").asText().equals("request_canonical")) {
+                                    if (check.path("kind").asText().equals("request_headers")) {
+                                        requestHeaders(check, v, src);
+                                    } else if (check.path("kind").asText().equals("request_canonical")) {
                                         assertEquals(
                                                 v.path("canonical").asText(),
                                                 Signing.canonicalString(ts, method, uri, idem, body));
@@ -151,6 +179,48 @@ class ConformanceTest {
         return out;
     }
 
+    /**
+     * The vector's request, sent by the signing transport every generated method goes through, with
+     * the vector's key and a clock at its {@code ts}, carries the spec's headers with the vector's
+     * values; without a key, the idempotency header is not sent at all.
+     */
+    private static void requestHeaders(JsonNode check, JsonNode v, Source src) {
+        String key = v.path("idempotency_key").asText();
+        long ts = v.path("ts").asLong();
+        String publicId = check.path("public_id").asText();
+        MockHttpClient http = new MockHttpClient().ok("{}");
+        Oblodai client =
+                Oblodai.builder()
+                        .publicId(publicId)
+                        .secret(v.path("secret").asText())
+                        .baseUrl("https://api.test")
+                        .httpClient(http)
+                        .environment(Map.of())
+                        .clock(new SkewCorrectingClock(() -> ts))
+                        .build();
+        RouteSpec route =
+                new RouteSpec(
+                        "conformanceRequestHeaders",
+                        v.path("method").asText(),
+                        v.path("request_uri").asText(),
+                        RouteSpec.AUTH_KEY,
+                        !key.isEmpty(),
+                        false,
+                        false,
+                        null);
+        CallOptions options =
+                CallOptions.from(RequestOptions.of().idempotencyKey(key.isEmpty() ? null : key).maxRetries(0))
+                        .body(v.path("body").asText().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        client.transport().call(route, options);
+        MockHttpClient.Recorded sent = http.onlyCall();
+        assertEquals(v.path("request_uri").asText(), sent.uri().getRawPath()
+                + (sent.uri().getRawQuery() == null ? "" : "?" + sent.uri().getRawQuery()));
+        assertEquals(publicId, sent.header(src.header("public_id")), "public_id");
+        assertEquals(v.path("signature").asText(), sent.header(src.header("signature")), "signature");
+        assertEquals(Long.toString(ts), sent.header(src.header("timestamp")), "timestamp");
+        assertEquals(key.isEmpty() ? null : key, sent.header(src.header("idempotency_key")), "idempotency_key");
+    }
+
     @TestFactory
     List<DynamicTest> webhooks() {
         Path dir = requireSuite();
@@ -161,13 +231,13 @@ class ConformanceTest {
         for (JsonNode check : suite.path("checks")) {
             for (int i = 0; i < src.vectors().size(); i++) {
                 JsonNode v = src.vectors().get(i);
-                out.add(DynamicTest.dynamicTest(check.path("name").asText() + "#" + i, () -> webhook(check, v, skew)));
+                out.add(DynamicTest.dynamicTest(check.path("name").asText() + "#" + i, () -> webhook(check, v, skew, src)));
             }
         }
         return out;
     }
 
-    private static void webhook(JsonNode check, JsonNode v, long skew) {
+    private static void webhook(JsonNode check, JsonNode v, long skew, Source src) {
         String secret = v.path("secret").asText();
         long ts = v.path("ts").asLong();
         String payload = v.path("payload").asText();
@@ -192,8 +262,8 @@ class ConformanceTest {
             default -> {}
         }
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("X-Webhook-Timestamp", Long.toString(ts));
-        headers.put("X-Webhook-Signature", signature);
+        headers.put(src.header("timestamp"), Long.toString(ts));
+        headers.put(src.header("signature"), signature);
         long now = ts + offset;
         WebhookVerifier.Options options =
                 WebhookVerifier.options(secret).tolerance(Duration.ofSeconds(skew)).clock(() -> now);
@@ -233,17 +303,23 @@ class ConformanceTest {
         Set<String> known = new HashSet<>();
         Facts.WEBHOOK_KINDS.values().forEach(k -> known.addAll(k.events()));
         out.add(DynamicTest.dynamicTest("a delivery of every event this release knows", () -> assertEquals(known, events)));
+        Set<String> roles = new HashSet<>();
+        suite.path("fields").fieldNames().forEachRemaining(roles::add);
+        out.add(
+                DynamicTest.dynamicTest(
+                        "a delivery field or the signature check for every header role",
+                        () -> assertEquals(src.headers().keySet(), roles)));
         for (JsonNode check : suite.path("checks")) {
             assertEquals("webhook_delivery", check.path("kind").asText());
             for (JsonNode d : src.vectors()) {
                 String name = check.path("name").asText() + " - " + d.path("event").asText() + " (" + check.path("key").asText() + ")";
-                out.add(DynamicTest.dynamicTest(name, () -> delivery(check, d, suite.path("headers"))));
+                out.add(DynamicTest.dynamicTest(name, () -> delivery(check, d, suite.path("fields"), src)));
             }
         }
         return out;
     }
 
-    private static void delivery(JsonNode check, JsonNode d, JsonNode fields) {
+    private static void delivery(JsonNode check, JsonNode d, JsonNode fields, Source src) {
         String secret =
                 switch (check.path("key").asText()) {
                     case "current" -> d.path("secret").asText();
@@ -265,7 +341,7 @@ class ConformanceTest {
         fields.fields()
                 .forEachRemaining(
                         e -> {
-                            String want = headers.get(e.getKey());
+                            String want = headers.get(src.header(e.getKey()));
                             Object got =
                                     switch (e.getValue().asText()) {
                                         case "" -> want;
@@ -399,12 +475,13 @@ class ConformanceTest {
         return c;
     }
 
-    private static void check(JsonNode scenario, MockHttpClient http, List<Long> delays, Object result, Throwable error)
+    private static void check(
+            JsonNode scenario, MockHttpClient http, List<Long> delays, Object result, Throwable error, String idemHeader)
             throws IOException {
         JsonNode expect = scenario.path("expect");
         assertEquals(expect.path("requests").asInt(), http.calls().size(), "requests");
         List<String> keys = new ArrayList<>();
-        http.calls().forEach(c -> keys.add(c.header("idempotency-key")));
+        http.calls().forEach(c -> keys.add(c.header(idemHeader)));
         if (expect.path("idempotency_key").asText().equals("absent")) {
             keys.forEach(k -> assertEquals(null, k, "no key expected"));
         } else if (expect.path("idempotency_key").asText().equals("present")) {
@@ -502,6 +579,8 @@ class ConformanceTest {
     List<DynamicTest> calls() throws Exception {
         Path dir = requireSuite();
         Map<String, Target> operations = operations();
+        // The key is looked up under the spec's name, so a rename that has not reached the SDK fails.
+        String idemHeader = source(dir, read(dir.resolve("signing.json"))).header("idempotency_key");
         List<DynamicTest> out = new ArrayList<>();
         for (JsonNode scenario : scenarios(dir)) {
             String op = scenario.path("call").path("operation").asText();
@@ -524,7 +603,7 @@ class ConformanceTest {
                                 } catch (Throwable t) {
                                     error = cause(t);
                                 }
-                                check(scenario, http, sleeper.pauses, result, error);
+                                check(scenario, http, sleeper.pauses, result, error, idemHeader);
                             }));
             out.add(
                     DynamicTest.dynamicTest(
@@ -542,7 +621,7 @@ class ConformanceTest {
                                 } catch (Throwable t) {
                                     error = cause(t);
                                 }
-                                check(scenario, http, sleeper.pauses, result, error);
+                                check(scenario, http, sleeper.pauses, result, error, idemHeader);
                             }));
         }
         return out;
