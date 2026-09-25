@@ -123,7 +123,7 @@ class RawOptionsHooksTest {
         assertEquals("https://api.test/v1/balance", requests.get(0).url());
         String signature =
                 requests.get(0).headers().entrySet().stream()
-                        .filter(e -> e.getKey().equalsIgnoreCase(SigningProtocol.REQUEST_HEADER_SIGNATURE.toLowerCase(java.util.Locale.ROOT)))
+                        .filter(e -> e.getKey().equalsIgnoreCase(SigningProtocol.HEADER_SIGNATURE.toLowerCase(java.util.Locale.ROOT)))
                         .findFirst()
                         .orElseThrow()
                         .getValue();

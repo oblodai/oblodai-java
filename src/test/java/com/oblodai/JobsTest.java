@@ -73,7 +73,7 @@ class JobsTest {
         assertEquals("https://api.test/v1/batch/info", http.calls().get(1).uri().toString());
         assertTrue(http.calls().get(1).body().contains("\"batch_id\":\"b1\""));
         assertEquals(List.of(250L, 250L), sleeper.pauses, "a pause between polls, none after the last");
-        assertEquals(null, http.calls().get(1).header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY), "polls carry no key");
+        assertEquals(null, http.calls().get(1).header(SigningProtocol.HEADER_IDEMPOTENCY_KEY), "polls carry no key");
     }
 
     @Test

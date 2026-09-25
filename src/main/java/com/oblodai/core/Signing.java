@@ -3,6 +3,7 @@ package com.oblodai.core;
 import com.oblodai.generated.SigningProtocol;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -11,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
  * x-oblodai-signing} declares it ({@link SigningProtocol}):
  *
  * <pre>
- *   canonical = the parts of SigningProtocol.REQUEST_CANONICAL joined by REQUEST_CANONICAL_SEPARATOR
+ *   canonical = the parts of SigningProtocol.REQUEST_CANONICAL_ORDER joined by REQUEST_CANONICAL_SEPARATOR
  *   signature = hex(HMAC-SHA256(secret, canonical))
  * </pre>
  *
@@ -21,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>{@code METHOD} is upper case.
  *   <li>{@code request_uri} is path plus raw query ({@code /v1/x?limit=1}), never the origin.
  *   <li>{@code idempotency_key} is the empty string when no {@value
- *       SigningProtocol#REQUEST_HEADER_IDEMPOTENCY_KEY} header is sent — empty, not absent: the
+ *       SigningProtocol#HEADER_IDEMPOTENCY_KEY} header is sent — empty, not absent: the
  *       separator is always there.
  *   <li>{@code body} is the byte-exact request body; GETs sign an empty body.
  * </ul>
@@ -32,20 +33,20 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public final class Signing {
 
-    /** Public id of the signing key: {@link SigningProtocol#REQUEST_HEADER_PUBLIC_ID}. */
-    public static final String HEADER_PUBLIC_ID = SigningProtocol.REQUEST_HEADER_PUBLIC_ID;
+    /** Public id of the signing key: {@link SigningProtocol#HEADER_PUBLIC_ID}. */
+    public static final String HEADER_PUBLIC_ID = SigningProtocol.HEADER_PUBLIC_ID;
 
-    /** Hex HMAC of the canonical string: {@link SigningProtocol#REQUEST_HEADER_SIGNATURE}. */
-    public static final String HEADER_SIGNATURE = SigningProtocol.REQUEST_HEADER_SIGNATURE;
+    /** Hex HMAC of the canonical string: {@link SigningProtocol#HEADER_SIGNATURE}. */
+    public static final String HEADER_SIGNATURE = SigningProtocol.HEADER_SIGNATURE;
 
-    /** Unix seconds the signature was made at: {@link SigningProtocol#REQUEST_HEADER_TIMESTAMP}. */
-    public static final String HEADER_TIMESTAMP = SigningProtocol.REQUEST_HEADER_TIMESTAMP;
+    /** Unix seconds the signature was made at: {@link SigningProtocol#HEADER_TIMESTAMP}. */
+    public static final String HEADER_TIMESTAMP = SigningProtocol.HEADER_TIMESTAMP;
 
     /**
      * Deduplication key of a write the gateway caches: {@link
-     * SigningProtocol#REQUEST_HEADER_IDEMPOTENCY_KEY}.
+     * SigningProtocol#HEADER_IDEMPOTENCY_KEY}.
      */
-    public static final String HEADER_IDEMPOTENCY_KEY = SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY;
+    public static final String HEADER_IDEMPOTENCY_KEY = SigningProtocol.HEADER_IDEMPOTENCY_KEY;
 
     /**
      * Admin token of a self-hosted gateway; only merchant provisioning uses it. Not part of the
@@ -61,12 +62,23 @@ public final class Signing {
     /** The string that gets signed. Exposed so a mismatch can be diffed against the gateway's log. */
     public static String canonicalString(
             long ts, String method, String requestUri, String idempotencyKey, byte[] body) {
-        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
-        join(
-                SigningProtocol.REQUEST_CANONICAL,
+        return canonicalString(
+                SigningProtocol.REQUEST_CANONICAL_ORDER,
                 SigningProtocol.REQUEST_CANONICAL_SEPARATOR,
-                part -> requestPart(part, ts, method, requestUri, idempotencyKey, body),
-                out::writeBytes);
+                ts, method, requestUri, idempotencyKey, body);
+    }
+
+    /** The canonical string by the given order and separator; the public one passes the generated. */
+    static String canonicalString(
+            List<String> order,
+            String separator,
+            long ts,
+            String method,
+            String requestUri,
+            String idempotencyKey,
+            byte[] body) {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        join(order, separator, part -> requestPart(part, ts, method, requestUri, idempotencyKey, body), out::writeBytes);
         return out.toString(StandardCharsets.UTF_8);
     }
 
@@ -82,7 +94,7 @@ public final class Signing {
             String secret, long ts, String method, String requestUri, String idempotencyKey, byte[] body) {
         Mac mac = mac(secret);
         join(
-                SigningProtocol.REQUEST_CANONICAL,
+                SigningProtocol.REQUEST_CANONICAL_ORDER,
                 SigningProtocol.REQUEST_CANONICAL_SEPARATOR,
                 part -> requestPart(part, ts, method, requestUri, idempotencyKey, body),
                 mac::update);
@@ -99,7 +111,7 @@ public final class Signing {
      * Webhook signature, as the gateway's dispatcher makes it:
      *
      * <pre>
-     *   canonical = the parts of SigningProtocol.WEBHOOK_CANONICAL joined by WEBHOOK_CANONICAL_SEPARATOR
+     *   canonical = the parts of SigningProtocol.WEBHOOK_CANONICAL_ORDER joined by WEBHOOK_CANONICAL_SEPARATOR
      *   signature = hex(HMAC-SHA256(secret, canonical))
      * </pre>
      *
@@ -107,10 +119,16 @@ public final class Signing {
      * re-encoded parse of them.
      */
     public static String signWebhook(String secret, long ts, byte[] payload) {
+        return signWebhook(
+                SigningProtocol.WEBHOOK_CANONICAL_ORDER, SigningProtocol.WEBHOOK_CANONICAL_SEPARATOR, secret, ts, payload);
+    }
+
+    /** The webhook signature by the given order and separator; the public one passes the generated. */
+    static String signWebhook(List<String> order, String separator, String secret, long ts, byte[] payload) {
         Mac mac = mac(secret);
         join(
-                SigningProtocol.WEBHOOK_CANONICAL,
-                SigningProtocol.WEBHOOK_CANONICAL_SEPARATOR,
+                order,
+                separator,
                 part ->
                         switch (part) {
                             case "ts" -> bytes(Long.toString(ts));

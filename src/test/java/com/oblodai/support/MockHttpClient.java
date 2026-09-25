@@ -212,7 +212,7 @@ public final class MockHttpClient extends HttpClient {
 
         Long serverNow = serverEpochSeconds;
         if (serverNow != null) {
-            String stamp = headers.get(SigningProtocol.REQUEST_HEADER_TIMESTAMP.toLowerCase(java.util.Locale.ROOT));
+            String stamp = headers.get(SigningProtocol.HEADER_TIMESTAMP.toLowerCase(java.util.Locale.ROOT));
             long signedAt = stamp == null ? 0 : Long.parseLong(stamp);
             if (Math.abs(serverNow - signedAt) > 300) {
                 Map<String, String> answer = new LinkedHashMap<>();

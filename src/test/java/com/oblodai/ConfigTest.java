@@ -47,7 +47,7 @@ class ConfigTest {
         oblodai.account().getBalance();
 
         assertEquals("https://x.test/v1/balance", http.onlyCall().uri().toString());
-        assertEquals("pk", http.onlyCall().header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
+        assertEquals("pk", http.onlyCall().header(SigningProtocol.HEADER_PUBLIC_ID));
     }
 
     @Test

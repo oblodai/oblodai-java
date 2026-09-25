@@ -51,7 +51,7 @@ class ResourceBehaviourTest {
 
         assertEquals("b1", info.batchId());
         assertEquals(1, http.calls().size(), "no second attempt under another key");
-        assertEquals("pk", http.onlyCall().header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
+        assertEquals("pk", http.onlyCall().header(SigningProtocol.HEADER_PUBLIC_ID));
     }
 
     @Test
@@ -81,7 +81,7 @@ class ResourceBehaviourTest {
                         .join()
                         .batchId());
         assertEquals(1, http.calls().size());
-        assertEquals("pk", http.onlyCall().header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
+        assertEquals("pk", http.onlyCall().header(SigningProtocol.HEADER_PUBLIC_ID));
     }
 
     @Test

@@ -18,18 +18,18 @@ import java.util.function.LongSupplier;
  * SigningProtocol}:
  *
  * <ul>
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_TIMESTAMP}: unix seconds
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_SIGNATURE}: hex(HMAC-SHA256(secret, canonical)), the
- *       canonical string being {@link SigningProtocol#WEBHOOK_CANONICAL} over the timestamp and the
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_TIMESTAMP}: unix seconds
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_SIGNATURE}: hex(HMAC-SHA256(secret, canonical)), the
+ *       canonical string being {@link SigningProtocol#WEBHOOK_CANONICAL_ORDER} over the timestamp and the
  *       raw body ({@link com.oblodai.core.Signing#signWebhook(String, long, byte[])})
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_SIGNATURE_PREV}: the same with the previous secret —
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_SIGNATURE_PREV}: the same with the previous secret —
  *       only during a rotation overlap
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_EVENT}: the event name (the events of each kind:
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT}: the event name (the events of each kind:
  *       Facts.WEBHOOK_KINDS)
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_ID}: stable per delivery, identical across retries
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_EVENT_ID}: the id of the state the delivery carries —
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_ID}: stable per delivery, identical across retries
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT_ID}: the id of the state the delivery carries —
  *       deduplicate on it
- *   <li>{@value SigningProtocol#WEBHOOK_HEADER_EVENT_TIME}: unix seconds when the state change
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT_TIME}: unix seconds when the state change
  *       committed
  *   <li>{@value #HEADER_TEST}: true on a rehearsal delivery — no money moved
  * </ul>
@@ -54,39 +54,39 @@ import java.util.function.LongSupplier;
  */
 public final class WebhookVerifier {
 
-    /** Unix seconds the delivery attempt was signed at: {@link SigningProtocol#WEBHOOK_HEADER_TIMESTAMP}. */
-    public static final String HEADER_TIMESTAMP = SigningProtocol.WEBHOOK_HEADER_TIMESTAMP;
+    /** Unix seconds the delivery attempt was signed at: {@link SigningProtocol#HEADER_WEBHOOK_TIMESTAMP}. */
+    public static final String HEADER_TIMESTAMP = SigningProtocol.HEADER_WEBHOOK_TIMESTAMP;
 
-    /** Signature made with the endpoint's current secret: {@link SigningProtocol#WEBHOOK_HEADER_SIGNATURE}. */
-    public static final String HEADER_SIGNATURE = SigningProtocol.WEBHOOK_HEADER_SIGNATURE;
+    /** Signature made with the endpoint's current secret: {@link SigningProtocol#HEADER_WEBHOOK_SIGNATURE}. */
+    public static final String HEADER_SIGNATURE = SigningProtocol.HEADER_WEBHOOK_SIGNATURE;
 
     /**
      * Signature made with the previous secret, during a rotation overlap: {@link
-     * SigningProtocol#WEBHOOK_HEADER_SIGNATURE_PREV}.
+     * SigningProtocol#HEADER_WEBHOOK_SIGNATURE_PREV}.
      */
-    public static final String HEADER_SIGNATURE_PREV = SigningProtocol.WEBHOOK_HEADER_SIGNATURE_PREV;
+    public static final String HEADER_SIGNATURE_PREV = SigningProtocol.HEADER_WEBHOOK_SIGNATURE_PREV;
 
-    /** The event type of the delivery: {@link SigningProtocol#WEBHOOK_HEADER_EVENT}. */
-    public static final String HEADER_EVENT = SigningProtocol.WEBHOOK_HEADER_EVENT;
+    /** The event type of the delivery: {@link SigningProtocol#HEADER_WEBHOOK_EVENT}. */
+    public static final String HEADER_EVENT = SigningProtocol.HEADER_WEBHOOK_EVENT;
 
-    /** Delivery id, stable across retries: {@link SigningProtocol#WEBHOOK_HEADER_ID}. */
-    public static final String HEADER_ID = SigningProtocol.WEBHOOK_HEADER_ID;
+    /** Delivery id, stable across retries: {@link SigningProtocol#HEADER_WEBHOOK_ID}. */
+    public static final String HEADER_ID = SigningProtocol.HEADER_WEBHOOK_ID;
 
     /**
      * The id of the state a delivery carries; the deduplication key: {@link
-     * SigningProtocol#WEBHOOK_HEADER_EVENT_ID}.
+     * SigningProtocol#HEADER_WEBHOOK_EVENT_ID}.
      */
-    public static final String HEADER_EVENT_ID = SigningProtocol.WEBHOOK_HEADER_EVENT_ID;
+    public static final String HEADER_EVENT_ID = SigningProtocol.HEADER_WEBHOOK_EVENT_ID;
 
-    /** Unix seconds the state change committed at: {@link SigningProtocol#WEBHOOK_HEADER_EVENT_TIME}. */
-    public static final String HEADER_EVENT_TIME = SigningProtocol.WEBHOOK_HEADER_EVENT_TIME;
+    /** Unix seconds the state change committed at: {@link SigningProtocol#HEADER_WEBHOOK_EVENT_TIME}. */
+    public static final String HEADER_EVENT_TIME = SigningProtocol.HEADER_WEBHOOK_EVENT_TIME;
 
     /**
      * {@code true} on a rehearsal delivery; the body then carries {@code test: true} as well. Only
-     * rehearsals send it, and the contract's {@code x-oblodai-signing} lists the headers of a live
-     * delivery, so this name is not among the generated {@link SigningProtocol} constants.
+     * rehearsals send it: {@link SigningProtocol#HEADER_WEBHOOK_TEST}, from the contract's
+     * {@code x-oblodai-signing.webhook.test_header}.
      */
-    public static final String HEADER_TEST = "X-Webhook-Test";
+    public static final String HEADER_TEST = SigningProtocol.HEADER_WEBHOOK_TEST;
 
     /**
      * Default freshness window, in seconds, on either side of the delivery timestamp: {@link
