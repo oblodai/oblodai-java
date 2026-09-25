@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * A verified webhook delivery body. The fields events carry have accessors here; the full, typed
- * event is the generated model of its kind: {@link #typed()} for any kind of the contract, or the
+ * A verified webhook delivery body. The accessors here read the fields every kind carries ({@code
+ * sequence}, {@code is_final}, {@code test}: the generator refuses a contract whose webhook body
+ * lacks one), the object's id ({@link #objectId()}) and a few fields most kinds carry (null where a
+ * kind has none). The full, typed event is the generated model of its kind: {@link #typed()} for any kind of the contract, or the
  * accessor of one kind, {@code as<Kind>()} (e.g. {@code asPayment()}), generated per kind in {@link
  * WebhookKinds}. Which kinds exist and which model each carries is the contract's ({@link
  * Facts#WEBHOOK_KINDS}, generated).
@@ -63,7 +65,10 @@ public final class WebhookEvent implements WebhookKinds {
         return fields.get("uuid") instanceof String s ? s : null;
     }
 
-    /** @return the merchant reference, or null */
+    /**
+     * @return the merchant reference where the kind's body has one (see its model in {@link
+     *     Facts#WEBHOOK_KINDS}), else null
+     */
     public String orderId() {
         return fields.get("order_id") instanceof String s ? s : null;
     }
