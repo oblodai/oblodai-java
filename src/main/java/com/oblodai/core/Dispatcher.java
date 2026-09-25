@@ -4,6 +4,7 @@ import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.OblodaiException;
 import com.oblodai.errors.TransportException;
+import com.oblodai.generated.models.ErrorCode;
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -31,9 +32,12 @@ import java.util.concurrent.TimeoutException;
  */
 final class Dispatcher {
 
-    /** Error codes that mean the gateway rejected the signature because of the MAC or the clock. */
+    /**
+     * Error codes that mean the gateway rejected the signature because of the MAC or the clock:
+     * the generated {@link ErrorCode} constants, so a code renamed in the contract fails to compile.
+     */
     private static final Set<String> SIGNATURE_FAILURE_CODES =
-            Set.of("merchant.bad_signature", "auth.bad_timestamp");
+            Set.of(ErrorCode.MERCHANT_BAD_SIGNATURE.value(), ErrorCode.AUTH_BAD_TIMESTAMP.value());
 
     /**
      * How far a measured server offset must be from the offset the request was signed with before

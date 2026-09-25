@@ -1,5 +1,6 @@
 package com.oblodai.errors;
 
+import com.oblodai.generated.models.ErrorCode;
 import java.util.Set;
 
 /** Builds the right {@link ApiException} subclass from an error envelope and the HTTP status. */
@@ -46,7 +47,7 @@ public final class ApiErrors {
         String requestId = detail.requestId();
         String field = detail.field();
 
-        if ("idempotency.key_reused".equals(code)) {
+        if (ErrorCode.IDEMPOTENCY_KEY_REUSED.value().equals(code)) {
             return new IdempotencyConflictException(
                     code, message, httpStatus, retryable, retryAfter, requestId, field, synthetic, raw);
         }
