@@ -5,7 +5,7 @@ All notable changes to the Oblodai Java SDK are documented here. The format foll
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The version tracks the SDK family: 2.0 is
 the line generated from the gateway's OpenAPI contract.
 
-## [2.0.0] — Unreleased
+## [2.0.0] — 2026-09-25
 
 Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`) by the backend's
 `tools/sdkgen`; the runtime around it is hand-written. Breaking: see
