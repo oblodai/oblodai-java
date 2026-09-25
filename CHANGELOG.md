@@ -38,7 +38,8 @@ Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`)
 - Webhook events wrap the verified body with typed views from the generated models.
 - The API facts the runtime acts on come from the contract, not from hand-kept lists:
   long-running operations (`x-sdk-poll` → `Facts.LRO`; `Lro` and each job's terminal statuses read
-  it), webhook kinds and their models (`Facts.WEBHOOK_KINDS`; `WebhookEvent.KNOWN_KINDS`, `typed()`),
+  it), webhook kinds, their models and the field holding each kind's object id
+  (`Facts.WEBHOOK_KINDS`; `WebhookEvent.KNOWN_KINDS`, `typed()`, `objectId()`),
   status classes (`x-status-classes` → `PaymentStatus.isFinal()`/`isSuccess()`, which `Statuses`
   reads) and the non-money numbers of requests (`Facts.NON_MONEY_NUMBERS`). The methods table of
   the README is generated too.

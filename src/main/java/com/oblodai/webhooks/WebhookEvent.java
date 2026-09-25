@@ -40,8 +40,24 @@ public final class WebhookEvent implements WebhookKinds {
     }
 
     /**
-     * @return the identifier of the object the event is about; null for a kind whose body keys it
-     *     otherwise (see its model in {@link Facts#WEBHOOK_KINDS})
+     * The id of the object the event is about: the body field its kind names ({@link
+     * Facts.WebhookKind#idField()}, as the contract declares it). Key per-object state — the last
+     * {@link #sequence()} — on it together with {@link #type()}.
+     *
+     * @return the object's id; null for a kind this SDK does not know (which field identifies its
+     *     object is not guessed), or a body without a string there
+     */
+    public String objectId() {
+        Facts.WebhookKind kind = Facts.WEBHOOK_KINDS.get(type());
+        String field = kind == null ? null : kind.idField();
+        return field != null && fields.get(field) instanceof String s ? s : null;
+    }
+
+    /**
+     * The body's {@code uuid} field, kept for compatibility. Not every kind names its object by
+     * {@code uuid}: use {@link #objectId()} for the id of the object of any kind.
+     *
+     * @return the {@code uuid} field, or null when the body has none
      */
     public String uuid() {
         return fields.get("uuid") instanceof String s ? s : null;
@@ -138,6 +154,6 @@ public final class WebhookEvent implements WebhookKinds {
 
     @Override
     public String toString() {
-        return "WebhookEvent(type=" + type() + ", uuid=" + uuid() + ", fields=" + Redaction.redact(fields) + ")";
+        return "WebhookEvent(type=" + type() + ", objectId=" + objectId() + ", fields=" + Redaction.redact(fields) + ")";
     }
 }

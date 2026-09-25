@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A webhook receiver, in the shape every framework reduces to: read the RAW bytes, verify, then act.
@@ -33,6 +34,7 @@ public final class WebhookReceiver {
 
     private final Set<String> seen = ConcurrentHashMap.newKeySet();
     private final Map<String, Long> lastSequence = new ConcurrentHashMap<>();
+    private final AtomicInteger applied = new AtomicInteger();
     private final WebhookVerifier.Options options;
 
     /**
@@ -67,6 +69,11 @@ public final class WebhookReceiver {
         System.out.println("listening on http://localhost:" + port + "/oblodai/webhook");
     }
 
+    /** @return how many deliveries this receiver acted on: not repeats, rehearsals or stale states */
+    public int appliedCount() {
+        return applied.get();
+    }
+
     /**
      * @param rawBody the exact request bytes
      * @param headers the request headers
@@ -89,18 +96,22 @@ public final class WebhookReceiver {
             return 200; // a rehearsal: signed like a live delivery, but no money moved
         }
         WebhookEvent event = delivery.event();
-        if (WebhookVerifier.isStale(event, lastSequence.get(event.uuid()))) {
+        // The object: its kind and the id the contract names for that kind (a conversion's is `id`,
+        // not `uuid`). A kind this SDK does not know has no known id and is not ordered.
+        String object = event.objectId() == null ? null : event.type() + ":" + event.objectId();
+        if (object != null && WebhookVerifier.isStale(event, lastSequence.get(object))) {
             return 200;
         }
-        if (event.sequence() != null) {
-            lastSequence.put(event.uuid(), event.sequence());
+        if (object != null && event.sequence() != null) {
+            lastSequence.put(object, event.sequence());
         }
+        applied.incrementAndGet();
         switch (event.type()) {
             case "payment" -> {
                 PaymentWebhook payment = event.asPayment();
                 System.out.println("invoice " + payment.orderId() + " is " + payment.status());
             }
-            case "payout" -> System.out.println("payout " + event.uuid() + " is " + event.asPayout().status());
+            case "payout" -> System.out.println("payout " + event.objectId() + " is " + event.asPayout().status());
             default -> System.out.println("a " + event.type() + " event; acknowledged");
         }
         return 200; // answer 2xx quickly; the gateway retries anything else

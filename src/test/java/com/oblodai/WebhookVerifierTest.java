@@ -173,11 +173,27 @@ class WebhookVerifierTest {
         WebhookEvent alien = WebhookVerifier.parse("{\"type\":\"alien\",\"uuid\":\"x\"}");
         assertEquals("alien", alien.type());
         assertEquals("x", alien.uuid());
+        assertEquals(null, alien.objectId()); // which field identifies an unknown kind is not guessed
         assertFalse(WebhookVerifier.isStale(alien, 7L));
 
         // A body that is not an event at all is a contract failure, not a signature failure.
         assertEquals(
                 "webhook.bad_payload",
                 assertThrows(ContractException.class, () -> WebhookVerifier.parse("[1,2,3]")).code());
+    }
+
+    /** objectId() reads the field the contract names for the kind: a conversion's is id, not uuid. */
+    @Test
+    void objectIdIsTheFieldTheContractNamesForTheKind() {
+        for (com.oblodai.generated.Facts.WebhookKind kind : com.oblodai.generated.Facts.WEBHOOK_KINDS.values()) {
+            assertNotNull(kind.idField(), kind.kind());
+            WebhookEvent event =
+                    WebhookVerifier.parse("{\"type\":\"" + kind.kind() + "\",\"" + kind.idField() + "\":\"obj-1\"}");
+            assertEquals("obj-1", event.objectId(), kind.kind());
+        }
+        WebhookEvent conversion =
+                WebhookVerifier.parse("{\"type\":\"conversion\",\"id\":\"c1\",\"sequence\":2}");
+        assertEquals("c1", conversion.objectId());
+        assertEquals(null, conversion.uuid());
     }
 }

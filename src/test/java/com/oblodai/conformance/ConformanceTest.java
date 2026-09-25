@@ -468,6 +468,28 @@ class ConformanceTest {
         return String.valueOf(value);
     }
 
+    /** forward_compat webhooks: a body parses, keeps its raw type, and is known exactly as expected. */
+    @TestFactory
+    List<DynamicTest> webhookParse() {
+        JsonNode suite = read(requireSuite().resolve("forward_compat.json"));
+        List<DynamicTest> out = new ArrayList<>();
+        for (JsonNode c : suite.path("webhooks")) {
+            out.add(
+                    DynamicTest.dynamicTest(
+                            c.path("name").asText(),
+                            () -> {
+                                com.oblodai.webhooks.WebhookEvent event =
+                                        WebhookVerifier.parse(JSON.writeValueAsString(c.path("body")));
+                                assertEquals(c.path("expect").path("type").asText(), event.type());
+                                assertEquals(
+                                        c.path("expect").path("known").asBoolean(),
+                                        WebhookVerifier.isKnownEvent(event));
+                            }));
+        }
+        assertTrue(!out.isEmpty(), "forward_compat.json has no webhook bodies");
+        return out;
+    }
+
     private static List<JsonNode> scenarios(Path dir) {
         List<JsonNode> out = new ArrayList<>();
         for (String name : List.of("retry", "money", "forward_compat")) {
