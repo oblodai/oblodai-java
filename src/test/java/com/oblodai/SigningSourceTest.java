@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,41 @@ class SigningSourceTest {
                 for (String name : lower) {
                     if (text.contains(name)) {
                         offenders.add(main.relativize(file) + ": " + name);
+                    }
+                }
+            }
+        }
+        assertEquals(List.of(), offenders);
+    }
+
+    /**
+     * No hand-written source spells a literal of the body or idempotency-key limit — decimal (with or
+     * without an {@code L} suffix), or {@code 1 << n} for a power of two; digit separators
+     * ({@code 1_048_576}) do not hide one. Both are read from {@link SigningProtocol}, so a changed
+     * limit reaches the SDK by regeneration alone. The skew is not scanned for: its value is also an
+     * HTTP status class ({@code < 300}); the alias tests hold it.
+     */
+    @Test
+    void noSigningLimitIsSpelledOutsideGenerated() throws IOException {
+        List<Pattern> pats = new ArrayList<>();
+        for (long limit : new long[] {SigningProtocol.MAX_BODY, SigningProtocol.MAX_IDEMPOTENCY_KEY_LENGTH}) {
+            pats.add(Pattern.compile("(?<![\\w.])" + limit + "[lL]?(?![\\w.])"));
+        }
+        if (Long.bitCount(SigningProtocol.MAX_BODY) == 1) {
+            pats.add(Pattern.compile(
+                    "\\b1[lL]?\\s*<<\\s*" + Long.numberOfTrailingZeros(SigningProtocol.MAX_BODY) + "\\b"));
+        }
+        List<String> offenders = new ArrayList<>();
+        Path main = Path.of("src", "main");
+        try (Stream<Path> files = Files.walk(main)) {
+            for (Path file : files.filter(Files::isRegularFile).sorted().toList()) {
+                if (file.toString().contains("/generated/")) {
+                    continue;
+                }
+                String text = Files.readString(file, StandardCharsets.UTF_8).replaceAll("(?<=\\d)_(?=\\d)", "");
+                for (Pattern p : pats) {
+                    if (p.matcher(text).find()) {
+                        offenders.add(main.relativize(file) + ": " + p.pattern());
                     }
                 }
             }
