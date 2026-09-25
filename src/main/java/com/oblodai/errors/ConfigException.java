@@ -19,7 +19,7 @@ public class ConfigException extends OblodaiException {
 
     /**
      * The route does not deduplicate by {@value
-     * com.oblodai.generated.SigningProtocol#REQUEST_HEADER_IDEMPOTENCY_KEY}, so a key must not be
+     * com.oblodai.generated.SigningProtocol#HEADER_IDEMPOTENCY_KEY}, so a key must not be
      * sent.
      */
     public static final String IDEMPOTENCY_UNSUPPORTED = "sdk.idempotency_unsupported";

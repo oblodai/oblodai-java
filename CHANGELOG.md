@@ -45,9 +45,13 @@ Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`)
   the README is generated too.
 - The signing protocol comes from the contract's `x-oblodai-signing` (`SigningProtocol`): the
   header names of a signed request and of a webhook delivery, the order and separator of both
-  canonical strings, the clock tolerance and the idempotency key limit. `Signing.HEADER_*`,
-  `Signing.SIGNATURE_SKEW_SECONDS`, `WebhookVerifier.HEADER_*`,
-  `WebhookVerifier.DEFAULT_TOLERANCE_SECONDS` and `Idempotency.MAX_KEY_LENGTH` stay, as aliases.
+  canonical strings, the clock tolerance and the limits (`HEADER_*`, `HEADER_WEBHOOK_*`,
+  `REQUEST_CANONICAL_ORDER`, `WEBHOOK_CANONICAL_ORDER`, `SIGNATURE_ALGORITHM`, `SKEW_SECONDS`,
+  `MAX_BODY`, `MAX_IDEMPOTENCY_KEY_LENGTH`). `Signing.HEADER_*`, `Signing.SIGNATURE_SKEW_SECONDS`,
+  `WebhookVerifier.HEADER_*` (the rehearsal header `WebhookVerifier.HEADER_TEST` too, from
+  `webhook.test_header`), `WebhookVerifier.DEFAULT_TOLERANCE_SECONDS` and
+  `Idempotency.MAX_KEY_LENGTH` stay, as aliases. The conformance suite checks the request a signed
+  call sends — method, path and query, body and the headers under the contract's names.
 
 ### Removed
 

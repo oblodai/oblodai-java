@@ -169,7 +169,7 @@ class TransportSafetyTest {
                 ConfigException.BAD_HEADER,
                 assertThrows(
                                 ConfigException.class,
-                                () -> RequestOptions.of().extraHeader(SigningProtocol.REQUEST_HEADER_SIGNATURE, "zz"))
+                                () -> RequestOptions.of().extraHeader(SigningProtocol.HEADER_SIGNATURE, "zz"))
                         .code());
         assertThrows(
                 ConfigException.class, () -> RequestOptions.of().extraHeader("X-Note", "two\r\nlines"));
@@ -266,6 +266,6 @@ class TransportSafetyTest {
                         "a signing secret must not reach an injected logger");
             }
         }
-        assertNotNull(http.onlyCall().header(SigningProtocol.REQUEST_HEADER_SIGNATURE));
+        assertNotNull(http.onlyCall().header(SigningProtocol.HEADER_SIGNATURE));
     }
 }

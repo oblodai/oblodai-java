@@ -39,7 +39,7 @@ class RequestOptionsTest {
 
         assertEquals(ConfigException.BAD_CONFIG, assertThrows(ConfigException.class, () -> base.timeout(Duration.ZERO)).code());
         assertEquals(ConfigException.BAD_CONFIG, assertThrows(ConfigException.class, () -> base.maxRetries(-1)).code());
-        assertEquals(ConfigException.BAD_HEADER, assertThrows(ConfigException.class, () -> base.extraHeader(SigningProtocol.REQUEST_HEADER_SIGNATURE, "x")).code());
+        assertEquals(ConfigException.BAD_HEADER, assertThrows(ConfigException.class, () -> base.extraHeader(SigningProtocol.HEADER_SIGNATURE, "x")).code());
         assertEquals(ConfigException.BAD_HEADER, assertThrows(ConfigException.class, () -> base.requestId("a\nb")).code());
         assertEquals(
                 ConfigException.BAD_IDEMPOTENCY_KEY,
@@ -118,7 +118,7 @@ class RequestOptionsTest {
                         com.oblodai.generated.models.FaucetRequest.builder().amount("5").asset("USDT").build(),
                         RequestOptions.of().idempotencyKey("tap-1"));
         assertTrue(http.onlyCall().body().contains("\"idempotency_key\":\"tap-1\""), http.onlyCall().body());
-        assertEquals(null, http.onlyCall().header(SigningProtocol.REQUEST_HEADER_IDEMPOTENCY_KEY));
+        assertEquals(null, http.onlyCall().header(SigningProtocol.HEADER_IDEMPOTENCY_KEY));
 
         // The field and the option both naming the key: ambiguous, refused before the network —
         // the same rule in every Oblodai SDK.

@@ -35,9 +35,9 @@ class WebhookVerifierTest {
 
     private static WebhookHeaders headers(String signature, String previousSignature) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(SigningProtocol.WEBHOOK_HEADER_TIMESTAMP.toLowerCase(java.util.Locale.ROOT), String.valueOf(TS));
-        headers.put(SigningProtocol.WEBHOOK_HEADER_SIGNATURE.toLowerCase(java.util.Locale.ROOT), signature);
-        if (previousSignature != null) headers.put(SigningProtocol.WEBHOOK_HEADER_SIGNATURE_PREV.toLowerCase(java.util.Locale.ROOT), previousSignature);
+        headers.put(SigningProtocol.HEADER_WEBHOOK_TIMESTAMP.toLowerCase(java.util.Locale.ROOT), String.valueOf(TS));
+        headers.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE.toLowerCase(java.util.Locale.ROOT), signature);
+        if (previousSignature != null) headers.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE_PREV.toLowerCase(java.util.Locale.ROOT), previousSignature);
         return WebhookHeaders.of(headers);
     }
 
@@ -76,7 +76,7 @@ class WebhookVerifierTest {
                         () ->
                                 WebhookVerifier.verify(
                                         BODY,
-                                        WebhookHeaders.of(Map.of(SigningProtocol.WEBHOOK_HEADER_SIGNATURE.toLowerCase(java.util.Locale.ROOT), "aa")),
+                                        WebhookHeaders.of(Map.of(SigningProtocol.HEADER_WEBHOOK_SIGNATURE.toLowerCase(java.util.Locale.ROOT), "aa")),
                                         WebhookVerifier.options("whsec")));
         assertEquals(SignatureException.MISSING_HEADER, missing.code());
     }
@@ -149,9 +149,9 @@ class WebhookVerifierTest {
 
         // Only the header carries it: still a rehearsal, though the body alone cannot tell.
         Map<String, String> withHeader = new LinkedHashMap<>();
-        withHeader.put(SigningProtocol.WEBHOOK_HEADER_TIMESTAMP.toLowerCase(java.util.Locale.ROOT), String.valueOf(TS));
-        withHeader.put(SigningProtocol.WEBHOOK_HEADER_SIGNATURE.toLowerCase(java.util.Locale.ROOT), Signing.signWebhook("whsec", TS, BODY));
-        withHeader.put("X-Webhook-Test", "true");
+        withHeader.put(SigningProtocol.HEADER_WEBHOOK_TIMESTAMP.toLowerCase(java.util.Locale.ROOT), String.valueOf(TS));
+        withHeader.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE.toLowerCase(java.util.Locale.ROOT), Signing.signWebhook("whsec", TS, BODY));
+        withHeader.put(SigningProtocol.HEADER_WEBHOOK_TEST, "true");
         WebhookDeliveryInfo fromHeader =
                 WebhookVerifier.verifyDelivery(
                         BODY.getBytes(StandardCharsets.UTF_8),

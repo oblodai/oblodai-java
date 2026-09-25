@@ -182,9 +182,12 @@ class ConformanceTest {
     /**
      * The vector's request, sent by the signing transport every generated method goes through, with
      * the vector's key and a clock at its {@code ts}, carries the spec's headers with the vector's
-     * values; without a key, the idempotency header is not sent at all.
+     * values; without a key, the idempotency header is not sent at all. The body goes in the way a
+     * generated method passes it — a parsed JSON value the transport serializes — and the request
+     * that reached the wire is the vector's own (method, path + raw query, body bytes), so a
+     * matching signature proves the SDK signed what it sent.
      */
-    private static void requestHeaders(JsonNode check, JsonNode v, Source src) {
+    private static void requestHeaders(JsonNode check, JsonNode v, Source src) throws IOException {
         String key = v.path("idempotency_key").asText();
         long ts = v.path("ts").asLong();
         String publicId = check.path("public_id").asText();
@@ -208,11 +211,16 @@ class ConformanceTest {
                         false,
                         false,
                         null);
+        String body = v.path("body").asText();
         CallOptions options =
-                CallOptions.from(RequestOptions.of().idempotencyKey(key.isEmpty() ? null : key).maxRetries(0))
-                        .body(v.path("body").asText().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                CallOptions.from(RequestOptions.of().idempotencyKey(key.isEmpty() ? null : key).maxRetries(0));
+        if (!v.path("method").asText().equals("GET")) {
+            options.body(JSON.readValue(body, LinkedHashMap.class));
+        }
         client.transport().call(route, options);
         MockHttpClient.Recorded sent = http.onlyCall();
+        assertEquals(v.path("method").asText(), sent.method(), "method");
+        assertEquals(body, sent.body() == null ? "" : sent.body(), "body");
         assertEquals(v.path("request_uri").asText(), sent.uri().getRawPath()
                 + (sent.uri().getRawQuery() == null ? "" : "?" + sent.uri().getRawQuery()));
         assertEquals(publicId, sent.header(src.header("public_id")), "public_id");

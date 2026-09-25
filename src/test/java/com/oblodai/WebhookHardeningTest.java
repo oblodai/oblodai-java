@@ -47,9 +47,9 @@ class WebhookHardeningTest {
 
     private static WebhookHeaders headers(long timestamp, String signature) {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put(SigningProtocol.WEBHOOK_HEADER_TIMESTAMP, Long.toString(timestamp));
-        map.put(SigningProtocol.WEBHOOK_HEADER_SIGNATURE, signature);
-        map.put(SigningProtocol.WEBHOOK_HEADER_ID, "wd_1");
+        map.put(SigningProtocol.HEADER_WEBHOOK_TIMESTAMP, Long.toString(timestamp));
+        map.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE, signature);
+        map.put(SigningProtocol.HEADER_WEBHOOK_ID, "wd_1");
         return WebhookHeaders.of(map);
     }
 

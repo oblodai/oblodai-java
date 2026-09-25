@@ -131,8 +131,8 @@ class KotlinExtensionsTest {
                 """"sequence":7,"event_at":"2026-01-01T00:00:00Z"}"""
         val headers =
             mapOf(
-                SigningProtocol.WEBHOOK_HEADER_TIMESTAMP to timestamp.toString(),
-                SigningProtocol.WEBHOOK_HEADER_SIGNATURE to
+                SigningProtocol.HEADER_WEBHOOK_TIMESTAMP to timestamp.toString(),
+                SigningProtocol.HEADER_WEBHOOK_SIGNATURE to
                     com.oblodai.core.Signing.signWebhook(secret, timestamp, body),
             )
 

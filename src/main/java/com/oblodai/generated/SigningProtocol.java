@@ -16,7 +16,7 @@ public final class SigningProtocol {
     private SigningProtocol() {}
 
     /** The signature algorithm every canonical string is signed with. */
-    public static final String ALGORITHM = "HMAC-SHA256, lowercase hex";
+    public static final String SIGNATURE_ALGORITHM = "HMAC-SHA256, lowercase hex";
 
     /**
      * Clock tolerance in seconds, both ways: the gateway refuses a request signed further from its
@@ -27,66 +27,69 @@ public final class SigningProtocol {
     /** The largest request body the gateway accepts, in bytes. */
     public static final long MAX_BODY = 1048576L;
 
-    /** The longest {@link #REQUEST_HEADER_IDEMPOTENCY_KEY} value the gateway accepts, in characters. */
+    /** The longest {@link #HEADER_IDEMPOTENCY_KEY} value the gateway accepts, in characters. */
     public static final int MAX_IDEMPOTENCY_KEY_LENGTH = 255;
 
     /** Request header of the role {@code public_id}. */
-    public static final String REQUEST_HEADER_PUBLIC_ID = "X-Public-Id";
+    public static final String HEADER_PUBLIC_ID = "X-Public-Id";
 
     /** Request header of the role {@code signature}. */
-    public static final String REQUEST_HEADER_SIGNATURE = "X-Signature";
+    public static final String HEADER_SIGNATURE = "X-Signature";
 
     /** Request header of the role {@code timestamp}. */
-    public static final String REQUEST_HEADER_TIMESTAMP = "X-Timestamp";
+    public static final String HEADER_TIMESTAMP = "X-Timestamp";
 
     /** Request header of the role {@code idempotency_key}. */
-    public static final String REQUEST_HEADER_IDEMPOTENCY_KEY = "Idempotency-Key";
+    public static final String HEADER_IDEMPOTENCY_KEY = "Idempotency-Key";
 
     /** Every header of a signed request, in the order of the roles above. */
     public static final List<String> REQUEST_HEADERS =
-            List.of(REQUEST_HEADER_PUBLIC_ID, REQUEST_HEADER_SIGNATURE, REQUEST_HEADER_TIMESTAMP, REQUEST_HEADER_IDEMPOTENCY_KEY);
+            List.of(HEADER_PUBLIC_ID, HEADER_SIGNATURE, HEADER_TIMESTAMP, HEADER_IDEMPOTENCY_KEY);
 
     /**
      * The parts of a request's canonical string, in order: {@code ts} (unix seconds), {@code METHOD}
      * (upper case), {@code request_uri} (path and raw query), {@code idempotency_key} (empty when
      * none is sent) and {@code body} (the exact bytes).
      */
-    public static final List<String> REQUEST_CANONICAL =
+    public static final List<String> REQUEST_CANONICAL_ORDER =
             List.of("ts", "METHOD", "request_uri", "idempotency_key", "body");
 
     /** What joins the parts of a request's canonical string. */
     public static final String REQUEST_CANONICAL_SEPARATOR = "\n";
 
     /** Webhook delivery header of the role {@code timestamp}. */
-    public static final String WEBHOOK_HEADER_TIMESTAMP = "X-Webhook-Timestamp";
+    public static final String HEADER_WEBHOOK_TIMESTAMP = "X-Webhook-Timestamp";
 
     /** Webhook delivery header of the role {@code signature}. */
-    public static final String WEBHOOK_HEADER_SIGNATURE = "X-Webhook-Signature";
+    public static final String HEADER_WEBHOOK_SIGNATURE = "X-Webhook-Signature";
 
     /** Webhook delivery header of the role {@code signature_prev}. */
-    public static final String WEBHOOK_HEADER_SIGNATURE_PREV = "X-Webhook-Signature-Prev";
+    public static final String HEADER_WEBHOOK_SIGNATURE_PREV = "X-Webhook-Signature-Prev";
 
     /** Webhook delivery header of the role {@code event}. */
-    public static final String WEBHOOK_HEADER_EVENT = "X-Webhook-Event";
+    public static final String HEADER_WEBHOOK_EVENT = "X-Webhook-Event";
 
     /** Webhook delivery header of the role {@code id}. */
-    public static final String WEBHOOK_HEADER_ID = "X-Webhook-Id";
+    public static final String HEADER_WEBHOOK_ID = "X-Webhook-Id";
 
     /** Webhook delivery header of the role {@code event_id}. */
-    public static final String WEBHOOK_HEADER_EVENT_ID = "X-Webhook-Event-Id";
+    public static final String HEADER_WEBHOOK_EVENT_ID = "X-Webhook-Event-Id";
 
     /** Webhook delivery header of the role {@code event_time}. */
-    public static final String WEBHOOK_HEADER_EVENT_TIME = "X-Webhook-Event-Time";
+    public static final String HEADER_WEBHOOK_EVENT_TIME = "X-Webhook-Event-Time";
 
-    /** Every header of a webhook delivery, in the order of the roles above. */
+    /** Rehearsal header (role {@code test}): {@code "true"} on a test delivery, absent from a live one. */
+    public static final String HEADER_WEBHOOK_TEST = "X-Webhook-Test";
+
+    /** Every header of a live webhook delivery, in the order of the roles above (the rehearsal header aside). */
     public static final List<String> WEBHOOK_HEADERS =
-            List.of(WEBHOOK_HEADER_TIMESTAMP, WEBHOOK_HEADER_SIGNATURE, WEBHOOK_HEADER_SIGNATURE_PREV, WEBHOOK_HEADER_EVENT, WEBHOOK_HEADER_ID, WEBHOOK_HEADER_EVENT_ID, WEBHOOK_HEADER_EVENT_TIME);
+            List.of(HEADER_WEBHOOK_TIMESTAMP, HEADER_WEBHOOK_SIGNATURE, HEADER_WEBHOOK_SIGNATURE_PREV, HEADER_WEBHOOK_EVENT, HEADER_WEBHOOK_ID, HEADER_WEBHOOK_EVENT_ID, HEADER_WEBHOOK_EVENT_TIME);
 
     /**
      * The parts of a webhook's canonical string, in order: {@code ts} (unix seconds of the
      * timestamp header) and {@code payload} (the exact body bytes).
      */
-    public static final List<String> WEBHOOK_CANONICAL =
+    public static final List<String> WEBHOOK_CANONICAL_ORDER =
             List.of("ts", "payload");
 
     /** What joins the parts of a webhook's canonical string. */
