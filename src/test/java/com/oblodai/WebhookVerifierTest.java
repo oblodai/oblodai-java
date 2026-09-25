@@ -89,7 +89,7 @@ class WebhookVerifierTest {
                         SignatureException.class,
                         () ->
                                 WebhookVerifier.verify(
-                                        BODY, good, WebhookVerifier.options("whsec").clock(() -> TS + 600)));
+                                        BODY, good, WebhookVerifier.options("whsec").clock(() -> TS + 2L * SigningProtocol.SKEW_SECONDS)));
         assertEquals(SignatureException.STALE_TIMESTAMP, stale.code());
 
         assertEquals(
@@ -98,7 +98,7 @@ class WebhookVerifierTest {
                                 BODY,
                                 good,
                                 WebhookVerifier.options("whsec")
-                                        .clock(() -> TS + 600)
+                                        .clock(() -> TS + 2L * SigningProtocol.SKEW_SECONDS)
                                         .tolerance(Duration.ZERO))
                         .uuid());
     }
