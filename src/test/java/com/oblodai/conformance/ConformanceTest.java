@@ -111,8 +111,11 @@ class ConformanceTest {
      * @param headers role -> header name, from the spec by the suite's {@code header_names}: the
      *     suite never names a header, so a rename in the contract that has not reached the SDK
      *     fails here instead of passing against the SDK's own constants
+     * @param testHeader the rehearsal header name from the spec by {@code header_names.test_pointer},
+     *     "" when the suite has none
      */
-    private record Source(JsonNode signing, List<JsonNode> vectors, Map<String, String> headers) {
+    private record Source(
+            JsonNode signing, List<JsonNode> vectors, Map<String, String> headers, String testHeader) {
 
         String header(String role) {
             String name = headers.get(role);
@@ -127,8 +130,12 @@ class ConformanceTest {
         pointer(spec, suite.path("source").path("pointer").asText()).forEach(vectors::add);
         assertTrue(!vectors.isEmpty(), "no vectors in the spec");
         Map<String, String> headers = new LinkedHashMap<>();
+        String testHeader = "";
         JsonNode names = suite.path("header_names");
         if (!names.isMissingNode()) {
+            if (names.has("test_pointer")) {
+                testHeader = pointer(spec, names.path("test_pointer").asText()).asText();
+            }
             JsonNode list = pointer(spec, names.path("pointer").asText());
             JsonNode roles = names.path("roles");
             assertEquals(roles.size(), list.size(), "header_names roles vs " + names.path("pointer").asText());
@@ -136,7 +143,7 @@ class ConformanceTest {
                 headers.put(roles.get(i).asText(), list.get(i).asText());
             }
         }
-        return new Source(spec.get("x-oblodai-signing"), vectors, headers);
+        return new Source(spec.get("x-oblodai-signing"), vectors, headers, testHeader);
     }
 
     // --- signing ----------------------------------------------------------------------------------
@@ -298,7 +305,8 @@ class ConformanceTest {
     /**
      * A real delivery of every event of the contract verifies (with the current secret and, as a
      * receiver that has not swapped yet, the previous one), parses into its kind's model and exposes
-     * every delivery header of the spec.
+     * every delivery header of the spec; with the spec's rehearsal header it is a test, without it a
+     * live one.
      */
     @TestFactory
     List<DynamicTest> webhookDeliveries() {
@@ -336,12 +344,19 @@ class ConformanceTest {
                 };
         Map<String, String> headers = new LinkedHashMap<>();
         d.path("headers").fields().forEachRemaining(e -> headers.put(e.getKey(), e.getValue().asText()));
+        boolean rehearsal = check.path("test").asBoolean(false);
+        Map<String, String> sent = new LinkedHashMap<>(headers);
+        if (rehearsal) {
+            assertTrue(!src.testHeader().isEmpty(), "no header_names.test_pointer");
+            sent.put(src.testHeader(), "true");
+        }
         long ts = d.path("ts").asLong();
         WebhookDeliveryInfo delivery =
                 WebhookVerifier.verifyDelivery(
                         d.path("payload").asText().getBytes(java.nio.charset.StandardCharsets.UTF_8),
-                        WebhookHeaders.of(headers),
+                        WebhookHeaders.of(sent),
                         WebhookVerifier.options(secret).clock(() -> ts));
+        assertEquals(rehearsal, delivery.isTest(), "isTest (rehearsal header " + src.testHeader() + ")");
         String kind = d.path("kind").asText();
         assertTrue(WebhookVerifier.isKnownEvent(delivery.event()), kind);
         assertEquals(kind, delivery.event().type());
