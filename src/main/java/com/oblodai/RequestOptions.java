@@ -113,7 +113,7 @@ public final class RequestOptions {
     /**
      * One extra header on this call only, merged over the client-wide ones. A name the SDK owns
      * (Accept, Content-Type, User-Agent, the signing headers of {@link
-     * com.oblodai.generated.SigningProtocol#REQUEST_HEADERS}, {@value
+     * com.oblodai.generated.SigningProtocol}, {@value
      * com.oblodai.core.Signing#HEADER_ADMIN_TOKEN}) is refused, as is a value HTTP could not carry.
      *
      * @param name header name
