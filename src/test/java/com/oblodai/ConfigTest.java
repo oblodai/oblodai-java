@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.PaymentStatus;
 import com.oblodai.generated.models.PayoutStatus;
 import com.oblodai.errors.ConfigException;
@@ -46,7 +47,7 @@ class ConfigTest {
         oblodai.account().getBalance();
 
         assertEquals("https://x.test/v1/balance", http.onlyCall().uri().toString());
-        assertEquals("pk", http.onlyCall().header("x-public-id"));
+        assertEquals("pk", http.onlyCall().header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
     }
 
     @Test

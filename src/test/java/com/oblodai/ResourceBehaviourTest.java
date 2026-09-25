@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.BatchInfoRequest;
 import com.oblodai.core.FileResult;
 import com.oblodai.core.Idempotency;
@@ -50,7 +51,7 @@ class ResourceBehaviourTest {
 
         assertEquals("b1", info.batchId());
         assertEquals(1, http.calls().size(), "no second attempt under another key");
-        assertEquals("pk", http.onlyCall().header("x-public-id"));
+        assertEquals("pk", http.onlyCall().header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
     }
 
     @Test
@@ -80,7 +81,7 @@ class ResourceBehaviourTest {
                         .join()
                         .batchId());
         assertEquals(1, http.calls().size());
-        assertEquals("pk", http.onlyCall().header("x-public-id"));
+        assertEquals("pk", http.onlyCall().header(SigningProtocol.REQUEST_HEADER_PUBLIC_ID));
     }
 
     @Test

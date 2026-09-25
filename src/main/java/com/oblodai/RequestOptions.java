@@ -64,7 +64,9 @@ public final class RequestOptions {
      * ({@code sdk.idempotency_unsupported}) on routes it does not: the gateway would ignore it, and
      * the SDK would wrongly believe a re-send is safe.
      *
-     * @param key printable ASCII, at most 255 characters; {@code null} clears it
+     * @param key printable ASCII, at most {@value
+     *     com.oblodai.generated.SigningProtocol#MAX_IDEMPOTENCY_KEY_LENGTH} characters; {@code null}
+     *     clears it
      * @return a copy carrying the key
      * @throws ConfigException {@code sdk.bad_idempotency_key} when it is not a header-safe value
      */
@@ -110,8 +112,9 @@ public final class RequestOptions {
 
     /**
      * One extra header on this call only, merged over the client-wide ones. A name the SDK owns
-     * (Accept, Content-Type, User-Agent, the signing headers, Idempotency-Key, X-Admin-Token) is
-     * refused, as is a value HTTP could not carry.
+     * (Accept, Content-Type, User-Agent, the signing headers of {@link
+     * com.oblodai.generated.SigningProtocol#REQUEST_HEADERS}, {@value
+     * com.oblodai.core.Signing#HEADER_ADMIN_TOKEN}) is refused, as is a value HTTP could not carry.
      *
      * @param name header name
      * @param value header value

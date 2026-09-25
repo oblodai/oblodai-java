@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.core.Logger;
 import com.oblodai.core.Redaction;
@@ -168,7 +169,7 @@ class TransportSafetyTest {
                 ConfigException.BAD_HEADER,
                 assertThrows(
                                 ConfigException.class,
-                                () -> RequestOptions.of().extraHeader("X-Signature", "zz"))
+                                () -> RequestOptions.of().extraHeader(SigningProtocol.REQUEST_HEADER_SIGNATURE, "zz"))
                         .code());
         assertThrows(
                 ConfigException.class, () -> RequestOptions.of().extraHeader("X-Note", "two\r\nlines"));
@@ -265,6 +266,6 @@ class TransportSafetyTest {
                         "a signing secret must not reach an injected logger");
             }
         }
-        assertNotNull(http.onlyCall().header("x-signature"));
+        assertNotNull(http.onlyCall().header(SigningProtocol.REQUEST_HEADER_SIGNATURE));
     }
 }

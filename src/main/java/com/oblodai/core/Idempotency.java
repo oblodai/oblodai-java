@@ -1,6 +1,7 @@
 package com.oblodai.core;
 
 import com.oblodai.errors.ConfigException;
+import com.oblodai.generated.SigningProtocol;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -12,8 +13,8 @@ import java.util.regex.Pattern;
  */
 public final class Idempotency {
 
-    /** Longest key the gateway accepts. */
-    public static final int MAX_KEY_LENGTH = 255;
+    /** Longest key the gateway accepts: {@link SigningProtocol#MAX_IDEMPOTENCY_KEY_LENGTH}. */
+    public static final int MAX_KEY_LENGTH = SigningProtocol.MAX_IDEMPOTENCY_KEY_LENGTH;
 
     private static final Pattern PRINTABLE_ASCII = Pattern.compile("^[\\x21-\\x7e]+$");
 

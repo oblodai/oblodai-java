@@ -10,7 +10,7 @@ package com.oblodai.core;
  * @param path path template, e.g. {@code /v1/pay/{id}}
  * @param auth {@code public} (unsigned), {@code key} (signed with the API key) or {@code onboard}
  *     (the admin token of a self-hosted gateway)
- * @param idempotent the gateway deduplicates this route by {@code Idempotency-Key}
+ * @param idempotent the gateway deduplicates this route by {@value Signing#HEADER_IDEMPOTENCY_KEY}
  * @param safe re-sending without a key cannot duplicate a side effect
  * @param bare the answer is a file, not a JSON envelope
  * @param listKind {@code "paged"} for an {@code {items, paginate}} list, else {@code null}

@@ -256,8 +256,9 @@ public abstract class Resource {
                 throw new ConfigException(
                         ConfigException.IDEMPOTENCY_UNSUPPORTED,
                         route.label()
-                                + " does not deduplicate by Idempotency-Key; remove idempotencyKey"
-                                + " from this call",
+                                + " does not deduplicate by "
+                                + Signing.HEADER_IDEMPOTENCY_KEY
+                                + "; remove idempotencyKey from this call",
                         "idempotencyKey");
             }
             Map<String, Object> rest = new LinkedHashMap<>();

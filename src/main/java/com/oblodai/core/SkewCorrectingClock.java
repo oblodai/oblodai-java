@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 
 /**
- * The clock used for signing. The gateway rejects timestamps more than ±300 s from its own time, so
+ * The clock used for signing. The gateway rejects timestamps more than {@value
+ * Signing#SIGNATURE_SKEW_SECONDS} s from its own time either way, so
  * a host with a drifting clock would get {@code merchant.bad_signature} on every call. The transport
  * learns the server's time from the {@code Date} header of a signature-failure response, re-signs
  * once, and keeps the offset only if that re-signed attempt got past authentication.

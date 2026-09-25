@@ -72,7 +72,7 @@ public final class RequestBuilder {
      * @param query query parameters; null and empty values are dropped
      * @param body already-serialized body bytes
      * @param credentials the merchant's API key pair, or null on public/onboard routes
-     * @param idempotencyKey the {@code Idempotency-Key} to send, or null
+     * @param idempotencyKey the {@value Signing#HEADER_IDEMPOTENCY_KEY} to send, or null
      * @param ts unix seconds to sign with
      * @param userAgent the SDK's user agent
      * @param extraHeaders caller headers; ones colliding with an SDK-owned header are dropped

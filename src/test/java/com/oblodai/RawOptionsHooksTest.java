@@ -11,6 +11,7 @@ import com.oblodai.core.RequestInfo;
 import com.oblodai.core.ResponseInfo;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.UnavailableException;
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.BalanceResult;
 import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.generated.models.PaymentView;
@@ -122,7 +123,7 @@ class RawOptionsHooksTest {
         assertEquals("https://api.test/v1/balance", requests.get(0).url());
         String signature =
                 requests.get(0).headers().entrySet().stream()
-                        .filter(e -> e.getKey().equalsIgnoreCase("x-signature"))
+                        .filter(e -> e.getKey().equalsIgnoreCase(SigningProtocol.REQUEST_HEADER_SIGNATURE.toLowerCase(java.util.Locale.ROOT)))
                         .findFirst()
                         .orElseThrow()
                         .getValue();

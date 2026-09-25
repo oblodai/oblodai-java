@@ -303,8 +303,9 @@ final class Dispatcher {
                         route.method()
                                 + " "
                                 + route.path()
-                                + " does not deduplicate by Idempotency-Key; remove idempotencyKey from"
-                                + " this call",
+                                + " does not deduplicate by "
+                                + Signing.HEADER_IDEMPOTENCY_KEY
+                                + "; remove idempotencyKey from this call",
                         "idempotencyKey");
             }
             return key;

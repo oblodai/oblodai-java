@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.core.RetryOptions;
 import com.oblodai.errors.ConfigException;
@@ -161,7 +162,7 @@ class MoneyPathsTest {
         assertThrows(OblodaiException.class, () -> oblodai.account().getBalance());
         oblodai.account().getBalance();
 
-        long signedAt = Long.parseLong(http.calls().get(2).header("x-timestamp"));
+        long signedAt = Long.parseLong(http.calls().get(2).header(SigningProtocol.REQUEST_HEADER_TIMESTAMP));
         assertTrue(
                 Math.abs(signedAt - System.currentTimeMillis() / 1000) < 5,
                 "one bad Date header must not wedge the client");
@@ -177,10 +178,10 @@ class MoneyPathsTest {
     @Test
     void refusesCallerHeadersThatCollideWithSdkOwnedOnesAndSendsTheRest() {
         MockHttpClient http = new MockHttpClient().ok("{\"balance\":{\"merchant\":[]}}");
-        assertThrows(ConfigException.class, () -> client(http).header("x-signature", "zz"));
+        assertThrows(ConfigException.class, () -> client(http).header(SigningProtocol.REQUEST_HEADER_SIGNATURE, "zz"));
 
         client(http).header("X-Trace", "t1").build().account().getBalance();
-        assertTrue(http.onlyCall().header("x-signature").matches("^[0-9a-f]{64}$"));
+        assertTrue(http.onlyCall().header(SigningProtocol.REQUEST_HEADER_SIGNATURE).matches("^[0-9a-f]{64}$"));
         assertEquals("t1", http.onlyCall().header("x-trace"));
     }
 

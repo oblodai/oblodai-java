@@ -6,6 +6,7 @@ import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.errors.WebhookPayloadException;
+import com.oblodai.generated.SigningProtocol;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.function.LongSupplier;
@@ -13,17 +14,25 @@ import java.util.function.LongSupplier;
 /**
  * Webhook verification. Usable on its own: no client, no API key, no network.
  *
- * <p>Deliveries are signed as:
+ * <p>Deliveries carry these headers; their names are the contract's, from the generated {@link
+ * SigningProtocol}:
  *
- * <pre>
- *   X-Webhook-Timestamp:      unix seconds
- *   X-Webhook-Signature:      hex(HMAC-SHA256(secret, "&lt;ts&gt;." + rawBody))
- *   X-Webhook-Signature-Prev: the same with the previous secret — only during a rotation overlap
- *   X-Webhook-Event:          the event name (the events of each kind: Facts.WEBHOOK_KINDS)
- *   X-Webhook-Id:             stable per delivery, identical across retries — deduplicate on it
- *   X-Webhook-Event-Time:     unix seconds when the state change committed
- *   X-Webhook-Test:           true on a rehearsal delivery — no money moved
- * </pre>
+ * <ul>
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_TIMESTAMP}: unix seconds
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_SIGNATURE}: hex(HMAC-SHA256(secret, canonical)), the
+ *       canonical string being {@link SigningProtocol#WEBHOOK_CANONICAL} over the timestamp and the
+ *       raw body ({@link com.oblodai.core.Signing#signWebhook(String, long, byte[])})
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_SIGNATURE_PREV}: the same with the previous secret —
+ *       only during a rotation overlap
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_EVENT}: the event name (the events of each kind:
+ *       Facts.WEBHOOK_KINDS)
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_ID}: stable per delivery, identical across retries
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_EVENT_ID}: the id of the state the delivery carries —
+ *       deduplicate on it
+ *   <li>{@value SigningProtocol#WEBHOOK_HEADER_EVENT_TIME}: unix seconds when the state change
+ *       committed
+ *   <li>{@value #HEADER_TEST}: true on a rehearsal delivery — no money moved
+ * </ul>
  *
  * <p>Always verify over the <b>raw request bytes</b>. A re-serialized parse will not match: JSON
  * round-trips are not byte-stable, and the signature covers bytes.
@@ -45,32 +54,45 @@ import java.util.function.LongSupplier;
  */
 public final class WebhookVerifier {
 
-    /** Unix seconds the delivery attempt was signed at. */
-    public static final String HEADER_TIMESTAMP = "X-Webhook-Timestamp";
+    /** Unix seconds the delivery attempt was signed at: {@link SigningProtocol#WEBHOOK_HEADER_TIMESTAMP}. */
+    public static final String HEADER_TIMESTAMP = SigningProtocol.WEBHOOK_HEADER_TIMESTAMP;
 
-    /** Signature made with the endpoint's current secret. */
-    public static final String HEADER_SIGNATURE = "X-Webhook-Signature";
+    /** Signature made with the endpoint's current secret: {@link SigningProtocol#WEBHOOK_HEADER_SIGNATURE}. */
+    public static final String HEADER_SIGNATURE = SigningProtocol.WEBHOOK_HEADER_SIGNATURE;
 
-    /** Signature made with the previous secret, during a rotation overlap. */
-    public static final String HEADER_SIGNATURE_PREV = "X-Webhook-Signature-Prev";
+    /**
+     * Signature made with the previous secret, during a rotation overlap: {@link
+     * SigningProtocol#WEBHOOK_HEADER_SIGNATURE_PREV}.
+     */
+    public static final String HEADER_SIGNATURE_PREV = SigningProtocol.WEBHOOK_HEADER_SIGNATURE_PREV;
 
-    /** The event type of the delivery. */
-    public static final String HEADER_EVENT = "X-Webhook-Event";
+    /** The event type of the delivery: {@link SigningProtocol#WEBHOOK_HEADER_EVENT}. */
+    public static final String HEADER_EVENT = SigningProtocol.WEBHOOK_HEADER_EVENT;
 
-    /** Delivery id, stable across retries. */
-    public static final String HEADER_ID = "X-Webhook-Id";
+    /** Delivery id, stable across retries: {@link SigningProtocol#WEBHOOK_HEADER_ID}. */
+    public static final String HEADER_ID = SigningProtocol.WEBHOOK_HEADER_ID;
 
-    /** The id of the state a delivery carries; the deduplication key. */
-    public static final String HEADER_EVENT_ID = "X-Webhook-Event-Id";
+    /**
+     * The id of the state a delivery carries; the deduplication key: {@link
+     * SigningProtocol#WEBHOOK_HEADER_EVENT_ID}.
+     */
+    public static final String HEADER_EVENT_ID = SigningProtocol.WEBHOOK_HEADER_EVENT_ID;
 
-    /** Unix seconds the state change committed at. */
-    public static final String HEADER_EVENT_TIME = "X-Webhook-Event-Time";
+    /** Unix seconds the state change committed at: {@link SigningProtocol#WEBHOOK_HEADER_EVENT_TIME}. */
+    public static final String HEADER_EVENT_TIME = SigningProtocol.WEBHOOK_HEADER_EVENT_TIME;
 
-    /** {@code true} on a rehearsal delivery; the body then carries {@code test: true} as well. */
+    /**
+     * {@code true} on a rehearsal delivery; the body then carries {@code test: true} as well. Only
+     * rehearsals send it, and the contract's {@code x-oblodai-signing} lists the headers of a live
+     * delivery, so this name is not among the generated {@link SigningProtocol} constants.
+     */
     public static final String HEADER_TEST = "X-Webhook-Test";
 
-    /** Default freshness window, in seconds, on either side of the delivery timestamp. */
-    public static final long DEFAULT_TOLERANCE_SECONDS = 300;
+    /**
+     * Default freshness window, in seconds, on either side of the delivery timestamp: {@link
+     * SigningProtocol#SKEW_SECONDS}.
+     */
+    public static final long DEFAULT_TOLERANCE_SECONDS = SigningProtocol.SKEW_SECONDS;
 
     /** A delivery that verified but whose body could not be read as an event. */
     public static final String BAD_PAYLOAD = ContractException.WEBHOOK_BAD_PAYLOAD;
@@ -162,7 +184,8 @@ public final class WebhookVerifier {
      *
      * @param secret the endpoint secret from {@code webhooks().register(...)} or {@code
      *     rotateSecret()}
-     * @return the settings, with a ±300 s freshness window
+     * @return the settings, with a freshness window of {@value SigningProtocol#SKEW_SECONDS} s either
+     *     way
      * @throws ConfigException when the secret is null or blank — an empty key would "verify"
      *     whatever a stranger signed with an empty key
      */
