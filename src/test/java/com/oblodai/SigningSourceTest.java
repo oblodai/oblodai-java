@@ -47,8 +47,23 @@ class SigningSourceTest {
     @Test
     void generatedConstantsAreTheSpecs() throws IOException {
         JsonNode s = signing();
-        assertEquals(names(s.path("headers")), SigningProtocol.REQUEST_HEADERS);
-        assertEquals(names(s.path("webhook").path("headers")), SigningProtocol.WEBHOOK_HEADERS);
+        assertEquals(
+                names(s.path("headers")),
+                List.of(
+                        SigningProtocol.HEADER_PUBLIC_ID,
+                        SigningProtocol.HEADER_SIGNATURE,
+                        SigningProtocol.HEADER_TIMESTAMP,
+                        SigningProtocol.HEADER_IDEMPOTENCY_KEY));
+        assertEquals(
+                names(s.path("webhook").path("headers")),
+                List.of(
+                        SigningProtocol.HEADER_WEBHOOK_TIMESTAMP,
+                        SigningProtocol.HEADER_WEBHOOK_SIGNATURE,
+                        SigningProtocol.HEADER_WEBHOOK_SIGNATURE_PREV,
+                        SigningProtocol.HEADER_WEBHOOK_EVENT,
+                        SigningProtocol.HEADER_WEBHOOK_ID,
+                        SigningProtocol.HEADER_WEBHOOK_EVENT_ID,
+                        SigningProtocol.HEADER_WEBHOOK_EVENT_TIME));
         assertEquals(s.path("webhook").path("test_header").asText(), SigningProtocol.HEADER_WEBHOOK_TEST);
         assertEquals(s.path("skew_seconds").asInt(), SigningProtocol.SKEW_SECONDS);
         assertEquals(s.path("max_body").asLong(), SigningProtocol.MAX_BODY);

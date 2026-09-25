@@ -42,14 +42,10 @@ public final class SigningProtocol {
     /** Request header of the role {@code idempotency_key}. */
     public static final String HEADER_IDEMPOTENCY_KEY = "Idempotency-Key";
 
-    /** Every header of a signed request, in the order of the roles above. */
-    public static final List<String> REQUEST_HEADERS =
-            List.of(HEADER_PUBLIC_ID, HEADER_SIGNATURE, HEADER_TIMESTAMP, HEADER_IDEMPOTENCY_KEY);
-
     /**
-     * The parts of a request's canonical string, in order: {@code ts} (unix seconds), {@code METHOD}
-     * (upper case), {@code request_uri} (path and raw query), {@code idempotency_key} (empty when
-     * none is sent) and {@code body} (the exact bytes).
+     * The parts of a request's canonical string, in order. {@code ts}: unix seconds; {@code METHOD}:
+     * upper case; {@code request_uri}: path and raw query; {@code idempotency_key}: empty when none
+     * is sent; {@code body}: the exact bytes.
      */
     public static final List<String> REQUEST_CANONICAL_ORDER =
             List.of("ts", "METHOD", "request_uri", "idempotency_key", "body");
@@ -81,13 +77,9 @@ public final class SigningProtocol {
     /** Rehearsal header (role {@code test}): {@code "true"} on a test delivery, absent from a live one. */
     public static final String HEADER_WEBHOOK_TEST = "X-Webhook-Test";
 
-    /** Every header of a live webhook delivery, in the order of the roles above (the rehearsal header aside). */
-    public static final List<String> WEBHOOK_HEADERS =
-            List.of(HEADER_WEBHOOK_TIMESTAMP, HEADER_WEBHOOK_SIGNATURE, HEADER_WEBHOOK_SIGNATURE_PREV, HEADER_WEBHOOK_EVENT, HEADER_WEBHOOK_ID, HEADER_WEBHOOK_EVENT_ID, HEADER_WEBHOOK_EVENT_TIME);
-
     /**
-     * The parts of a webhook's canonical string, in order: {@code ts} (unix seconds of the
-     * timestamp header) and {@code payload} (the exact body bytes).
+     * The parts of a webhook's canonical string, in order. {@code ts}: unix seconds of the
+     * timestamp header; {@code payload}: the exact body bytes.
      */
     public static final List<String> WEBHOOK_CANONICAL_ORDER =
             List.of("ts", "payload");

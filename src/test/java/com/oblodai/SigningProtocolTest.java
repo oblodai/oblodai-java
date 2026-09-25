@@ -19,7 +19,11 @@ class SigningProtocolTest {
     @Test
     void requestNamesAreTheGeneratedOnes() {
         assertEquals(
-                SigningProtocol.REQUEST_HEADERS,
+                List.of(
+                        SigningProtocol.HEADER_PUBLIC_ID,
+                        SigningProtocol.HEADER_SIGNATURE,
+                        SigningProtocol.HEADER_TIMESTAMP,
+                        SigningProtocol.HEADER_IDEMPOTENCY_KEY),
                 List.of(
                         Signing.HEADER_PUBLIC_ID,
                         Signing.HEADER_SIGNATURE,
@@ -32,7 +36,14 @@ class SigningProtocolTest {
     @Test
     void webhookNamesAreTheGeneratedOnes() {
         assertEquals(
-                SigningProtocol.WEBHOOK_HEADERS,
+                List.of(
+                        SigningProtocol.HEADER_WEBHOOK_TIMESTAMP,
+                        SigningProtocol.HEADER_WEBHOOK_SIGNATURE,
+                        SigningProtocol.HEADER_WEBHOOK_SIGNATURE_PREV,
+                        SigningProtocol.HEADER_WEBHOOK_EVENT,
+                        SigningProtocol.HEADER_WEBHOOK_ID,
+                        SigningProtocol.HEADER_WEBHOOK_EVENT_ID,
+                        SigningProtocol.HEADER_WEBHOOK_EVENT_TIME),
                 List.of(
                         WebhookVerifier.HEADER_TIMESTAMP,
                         WebhookVerifier.HEADER_SIGNATURE,
