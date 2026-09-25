@@ -1,6 +1,7 @@
 package com.oblodai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -79,17 +80,11 @@ class SigningSourceTest {
         wanted.add(s.path("webhook").path("test_header").asText());
         List<String> lower = wanted.stream().map(n -> n.toLowerCase(Locale.ROOT)).toList();
         List<String> offenders = new ArrayList<>();
-        Path main = Path.of("src", "main");
-        try (Stream<Path> files = Files.walk(main)) {
-            for (Path file : files.filter(Files::isRegularFile).sorted().toList()) {
-                if (file.toString().contains("/generated/")) {
-                    continue;
-                }
-                String text = Files.readString(file, StandardCharsets.UTF_8).toLowerCase(Locale.ROOT);
-                for (String name : lower) {
-                    if (text.contains(name)) {
-                        offenders.add(main.relativize(file) + ": " + name);
-                    }
+        for (Path file : handWritten()) {
+            String text = Files.readString(file, StandardCharsets.UTF_8).toLowerCase(Locale.ROOT);
+            for (String name : lower) {
+                if (text.contains(name)) {
+                    offenders.add(file + ": " + name);
                 }
             }
         }
@@ -114,20 +109,32 @@ class SigningSourceTest {
                     "\\b1[lL]?\\s*<<\\s*" + Long.numberOfTrailingZeros(SigningProtocol.MAX_BODY) + "\\b"));
         }
         List<String> offenders = new ArrayList<>();
-        Path main = Path.of("src", "main");
-        try (Stream<Path> files = Files.walk(main)) {
-            for (Path file : files.filter(Files::isRegularFile).sorted().toList()) {
-                if (file.toString().contains("/generated/")) {
-                    continue;
-                }
-                String text = Files.readString(file, StandardCharsets.UTF_8).replaceAll("(?<=\\d)_(?=\\d)", "");
-                for (Pattern p : pats) {
-                    if (p.matcher(text).find()) {
-                        offenders.add(main.relativize(file) + ": " + p.pattern());
-                    }
+        for (Path file : handWritten()) {
+            String text = Files.readString(file, StandardCharsets.UTF_8).replaceAll("(?<=\\d)_(?=\\d)", "");
+            for (Pattern p : pats) {
+                if (p.matcher(text).find()) {
+                    offenders.add(file + ": " + p.pattern());
                 }
             }
         }
         assertEquals(List.of(), offenders);
+    }
+
+    /**
+     * Every hand-written source that ships or is run: {@code src/main} outside {@code generated}, and
+     * the Java and Kotlin examples (the README tests compile them), as paths relative to the project.
+     */
+    private static List<Path> handWritten() throws IOException {
+        List<Path> out = new ArrayList<>();
+        try (Stream<Path> files = Files.walk(Path.of("src", "main"))) {
+            files.filter(Files::isRegularFile).filter(f -> !f.toString().contains("/generated/")).forEach(out::add);
+        }
+        try (Stream<Path> files = Files.walk(Path.of("examples"))) {
+            files.filter(Files::isRegularFile)
+                    .filter(f -> f.toString().endsWith(".java") || f.toString().endsWith(".kt"))
+                    .forEach(out::add);
+        }
+        assertTrue(out.stream().anyMatch(f -> f.startsWith("examples")), "no examples scanned");
+        return out.stream().sorted().toList();
     }
 }
