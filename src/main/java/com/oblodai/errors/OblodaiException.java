@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Every failure the SDK raises. One family mirrors the gateway's error envelope:
  *
- * <pre>{ "error": { "code", "message", "field"?, "retryable", "retry_after"?, "request_id"? } }</pre>
+ * <pre>{ "error": { "code", "message", "field"?, "details"?, "retryable", "retry_after"?, "request_id"? } }</pre>
  *
  * <p>{@link #retryable()} is authoritative when the gateway wrote the envelope: it is the gateway's
  * own classification of the failure, and the SDK has already retried what it was safe to retry. A
@@ -35,6 +35,8 @@ public class OblodaiException extends RuntimeException {
     private final String field;
     private final boolean synthetic;
     private final transient Object raw;
+    /** Set once by {@link ApiErrors#from}; transient like {@link #raw}, empty after deserialization. */
+    private transient Map<String, String> errorDetails;
 
     /**
      * @param code stable machine code, {@code family.reason}
@@ -111,6 +113,22 @@ public class OblodaiException extends RuntimeException {
         return synthetic;
     }
 
+    /**
+     * Machine-readable facts about the refusal, keys documented by its code (for example {@code
+     * cli.permission_denied} carries {@code required_role} and {@code role}): the envelope's {@code
+     * details}. Named apart from {@link #details()}, the structured-logger view.
+     *
+     * @return the details, unmodifiable; empty when the gateway sent none
+     */
+    public Map<String, String> errorDetails() {
+        return errorDetails == null ? Map.of() : errorDetails;
+    }
+
+    /** Called by {@link ApiErrors#from} right after construction. */
+    void setErrorDetails(Map<String, String> details) {
+        this.errorDetails = Map.copyOf(details);
+    }
+
     /** The decoded error body, or the raw text when it was not JSON. Never logged by default. */
     public Object raw() {
         return raw;
@@ -127,6 +145,7 @@ public class OblodaiException extends RuntimeException {
         if (retryAfter != null) out.put("retryAfter", retryAfter);
         if (requestId != null) out.put("requestId", requestId);
         if (field != null) out.put("field", field);
+        if (!errorDetails().isEmpty()) out.put("details", errorDetails());
         if (synthetic) out.put("synthetic", true);
         return out;
     }

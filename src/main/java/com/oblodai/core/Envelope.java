@@ -8,8 +8,10 @@ import com.oblodai.errors.ContractException;
 import com.oblodai.errors.ErrorDetail;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Response envelopes, as the gateway writes them:
@@ -17,7 +19,7 @@ import java.util.Locale;
  * <pre>
  *   success : { "state": 0, "result": &lt;payload&gt; }
  *   list    : result = { "items": [...], "paginate": { total, per_page, offset, has_pages } }
- *   error   : { "error": { code, message, field?, retryable, retry_after?, request_id? } }
+ *   error   : { "error": { code, message, field?, details?, retryable, retry_after?, request_id? } }
  * </pre>
  *
  * <p>Every non-{@code bare} route uses these; bare routes (PDF documents) bypass this class.
@@ -134,7 +136,19 @@ public final class Envelope {
                 string(error.get("field")),
                 retryable,
                 retryAfterOf(error.get("retry_after")),
-                string(error.get("request_id")));
+                string(error.get("request_id")),
+                detailsOf(error.get("details")));
+    }
+
+    /** The string values of {@code details}; empty when it is absent or not an object. */
+    private static Map<String, String> detailsOf(JsonNode node) {
+        Map<String, String> out = new LinkedHashMap<>();
+        if (node != null && node.isObject()) {
+            for (Map.Entry<String, JsonNode> e : node.properties()) {
+                if (e.getValue().isTextual()) out.put(e.getKey(), e.getValue().textValue());
+            }
+        }
+        return out;
     }
 
     /** A JSON string, or {@code null} for anything else (a number, an object, an absent field). */

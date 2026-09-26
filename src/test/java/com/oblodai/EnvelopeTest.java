@@ -15,6 +15,7 @@ import com.oblodai.errors.OblodaiException;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -55,6 +56,22 @@ class EnvelopeTest {
         assertEquals("[internal.oops] HTTP 500 (request_id=req-1)", error.getMessage());
         assertNull(error.field());
         assertEquals("req-1", error.requestId());
+    }
+
+    @Test
+    void detailsKeepOnlyStringValues() {
+        OblodaiException denied =
+                decode(
+                        403,
+                        "{\"error\":{\"code\":\"cli.permission_denied\",\"retryable\":false,\"details\":"
+                                + "{\"required_role\":\"finance\",\"role\":\"viewer\",\"n\":3,\"x\":null}}}");
+        assertEquals(Map.of("required_role", "finance", "role", "viewer"), denied.errorDetails());
+        assertEquals(denied.errorDetails(), denied.details().get("details"));
+
+        OblodaiException list =
+                decode(403, "{\"error\":{\"code\":\"cli.permission_denied\",\"details\":[\"finance\"]}}");
+        assertTrue(list.errorDetails().isEmpty());
+        assertFalse(list.details().containsKey("details"));
     }
 
     @Test

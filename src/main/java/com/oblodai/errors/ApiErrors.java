@@ -47,6 +47,21 @@ public final class ApiErrors {
         String requestId = detail.requestId();
         String field = detail.field();
 
+        ApiException error = build(httpStatus, code, message, retryable, retryAfter, requestId, field, synthetic, raw);
+        if (!synthetic) error.setErrorDetails(detail.details());
+        return error;
+    }
+
+    private static ApiException build(
+            int httpStatus,
+            String code,
+            String message,
+            boolean retryable,
+            Integer retryAfter,
+            String requestId,
+            String field,
+            boolean synthetic,
+            Object raw) {
         if (ErrorCode.IDEMPOTENCY_KEY_REUSED.value().equals(code)) {
             return new IdempotencyConflictException(
                     code, message, httpStatus, retryable, retryAfter, requestId, field, synthetic, raw);
