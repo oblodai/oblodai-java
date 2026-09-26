@@ -28,8 +28,10 @@ public final class SetRefundFeeRequest implements WireObject {
     }
 
     /**
-     * true — the customer receives net (the customer pays the fee); false — the merchant pays the
-     * fee, the customer receives gross
+     * Who bears the Oblodai commission on refunds. true — the customer: it is deducted from the
+     * refund, which returns at most what the payment credited to your balance. false — you: it is
+     * not deducted and is paid from your balance, on top of what the payment credited. The payer's
+     * network surcharge is never refunded either way.
      *
      * @return the {@code fee_on_customer} field
      */
@@ -128,8 +130,10 @@ public final class SetRefundFeeRequest implements WireObject {
         /**
          * Sets {@code fee_on_customer}.
          *
-         * <p>true — the customer receives net (the customer pays the fee); false — the merchant
-         * pays the fee, the customer receives gross
+         * <p>Who bears the Oblodai commission on refunds. true — the customer: it is deducted from
+         * the refund, which returns at most what the payment credited to your balance. false — you:
+         * it is not deducted and is paid from your balance, on top of what the payment credited.
+         * The payer's network surcharge is never refunded either way.
          *
          * @param feeOnCustomer the value
          * @return this builder

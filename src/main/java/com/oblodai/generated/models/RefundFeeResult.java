@@ -40,7 +40,8 @@ public final class RefundFeeResult implements WireObject {
     }
 
     /**
-     * The effective value: the project setting, or the gateway default if there is none.
+     * The effective value for your refunds: the project setting, or the gateway default if there is
+     * none (automatic refunds then deduct the commission).
      *
      * @return the {@code fee_on_customer} field
      */
@@ -160,7 +161,8 @@ public final class RefundFeeResult implements WireObject {
         /**
          * Sets {@code fee_on_customer}.
          *
-         * <p>The effective value: the project setting, or the gateway default if there is none.
+         * <p>The effective value for your refunds: the project setting, or the gateway default if
+         * there is none (automatic refunds then deduct the commission).
          *
          * @param feeOnCustomer the value
          * @return this builder

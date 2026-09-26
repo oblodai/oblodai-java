@@ -58,11 +58,14 @@ public final class RefundBatchItem implements WireObject {
 
     /**
      * The amount to refund, in the payment coin. Without it the refund is what is still refundable:
-     * the amount paid minus the payer's network surcharge and — when the store's refund fee setting
-     * (getRefundFeeConfig) puts the commission on the customer — minus the Oblodai commission too,
-     * never more than was credited to your balance for this payment, less the refunds already made.
-     * All refunds of a payment together cannot exceed that refundable amount
-     * (refund.exceeds_refundable); POST /v1/payment/refund/calculate shows it.
+     * the refundable amount less the refunds already made. The refundable amount is the most that
+     * all refunds of this payment together can send (refund.exceeds_refundable), and it follows the
+     * store's refund fee setting (getRefundFeeConfig). The payer's network surcharge is never
+     * refunded. When the customer bears the Oblodai commission, it is the amount paid minus the
+     * surcharge and the commission — what was credited to your balance for this payment. When you
+     * bear it, it is the amount paid minus the surcharge: the commission is paid from your balance,
+     * so the refunds debit more than the payment credited, and a balance too small for that fails
+     * with payout.insufficient_funds. POST /v1/payment/refund/calculate shows these numbers.
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -272,12 +275,15 @@ public final class RefundBatchItem implements WireObject {
          * Sets {@code amount}.
          *
          * <p>The amount to refund, in the payment coin. Without it the refund is what is still
-         * refundable: the amount paid minus the payer's network surcharge and — when the store's
-         * refund fee setting (getRefundFeeConfig) puts the commission on the customer — minus the
-         * Oblodai commission too, never more than was credited to your balance for this payment,
-         * less the refunds already made. All refunds of a payment together cannot exceed that
-         * refundable amount (refund.exceeds_refundable); POST /v1/payment/refund/calculate shows
-         * it.
+         * refundable: the refundable amount less the refunds already made. The refundable amount is
+         * the most that all refunds of this payment together can send (refund.exceeds_refundable),
+         * and it follows the store's refund fee setting (getRefundFeeConfig). The payer's network
+         * surcharge is never refunded. When the customer bears the Oblodai commission, it is the
+         * amount paid minus the surcharge and the commission — what was credited to your balance
+         * for this payment. When you bear it, it is the amount paid minus the surcharge: the
+         * commission is paid from your balance, so the refunds debit more than the payment
+         * credited, and a balance too small for that fails with payout.insufficient_funds. POST
+         * /v1/payment/refund/calculate shows these numbers.
          *
          * @param amount the value
          * @return this builder
@@ -291,12 +297,15 @@ public final class RefundBatchItem implements WireObject {
          * Sets {@code amount}.
          *
          * <p>The amount to refund, in the payment coin. Without it the refund is what is still
-         * refundable: the amount paid minus the payer's network surcharge and — when the store's
-         * refund fee setting (getRefundFeeConfig) puts the commission on the customer — minus the
-         * Oblodai commission too, never more than was credited to your balance for this payment,
-         * less the refunds already made. All refunds of a payment together cannot exceed that
-         * refundable amount (refund.exceeds_refundable); POST /v1/payment/refund/calculate shows
-         * it.
+         * refundable: the refundable amount less the refunds already made. The refundable amount is
+         * the most that all refunds of this payment together can send (refund.exceeds_refundable),
+         * and it follows the store's refund fee setting (getRefundFeeConfig). The payer's network
+         * surcharge is never refunded. When the customer bears the Oblodai commission, it is the
+         * amount paid minus the surcharge and the commission — what was credited to your balance
+         * for this payment. When you bear it, it is the amount paid minus the surcharge: the
+         * commission is paid from your balance, so the refunds debit more than the payment
+         * credited, and a balance too small for that fails with payout.insufficient_funds. POST
+         * /v1/payment/refund/calculate shows these numbers.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder

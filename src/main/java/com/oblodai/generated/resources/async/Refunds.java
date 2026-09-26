@@ -45,10 +45,15 @@ public final class Refunds extends Resource {
      * ({@code refund.no_address}): ask the buyer for an address and pass it explicitly. The
      * payment's {@code uuid}/{@code order_id} is required. By default the remaining refundable
      * amount is refunded; you may specify a partial {@code amount}. All refunds of a payment
-     * together cannot exceed its {@code refundable} amount: what was paid minus the payer's network
-     * surcharge (minus our commission when the store's refund fee setting puts it on the customer),
-     * never more than was credited to your balance for it — POST /v1/payment/refund/calculate shows
-     * these numbers without refunding.
+     * together cannot exceed its {@code refundable} amount ({@code refund.exceeds_refundable}), and
+     * the store's refund fee setting (POST /v1/payout/refund-fee-config/get) decides it. The
+     * payer's network surcharge is never refunded. When the customer bears our commission,
+     * {@code refundable} is what was paid minus the surcharge and the commission — what the payment
+     * credited to your balance. When you bear it, {@code refundable} is what was paid minus the
+     * surcharge: the commission is paid from your balance, so the refunds debit more than the
+     * payment credited, and a balance too small for that fails with
+     * {@code payout.insufficient_funds}. POST /v1/payment/refund/calculate shows these numbers
+     * without refunding.
      *
      * <p>Idempotent on {@code (payment, address, amount)}. Refunds to any address are approved
      * automatically. The only exception is a card payment via an on-ramp: a refund TO THE RECORDED
@@ -164,15 +169,19 @@ public final class Refunds extends Resource {
      * {@code amount}, {@code currency}, {@code network}, {@code address} (and whether it is the
      * recorded payer's) — and the numbers behind it: {@code amount_paid}, the payer's network
      * {@code surcharge} (never refunded from your balance), the {@code commission} withheld and who
-     * bears it ({@code commission_bearer}, the store's refund fee setting), {@code credited}, the
+     * bears it ({@code commission_bearer}, the store's refund fee setting: with {@code merchant}
+     * nothing is withheld and you pay the commission from your balance), {@code credited}, the
      * {@code refundable} ceiling for all refunds of the payment together, what is already
      * {@code refunded} and what {@code remaining} can still go. With {@code from_currency} it also
      * estimates the USDT the funding conversion would spend ({@code from_amount}).
      *
      * <p>Runs the same checks as the refund itself and fails with the same error the refund would
      * ({@code refund.exceeds_refundable}, {@code refund.dust}, {@code refund.no_address},
-     * {@code refund.nothing_to_refund}, …) — except the destination address screening, which runs
-     * when the refund is made. Reserves and sends nothing; safe to retry.
+     * {@code refund.nothing_to_refund}, …), including {@code payout.insufficient_funds} when your
+     * available balance does not cover the refund — which, when you bear the commission, can be
+     * more than the payment credited. Not checked: the destination address screening, which runs
+     * when the refund is made, and deposits that are not yet final, which the refund holds back
+     * ({@code payout.funds_maturing}). Reserves and sends nothing; safe to retry.
      *
      * <p>Requires role: Viewer when called with a CLI key.
      *
@@ -187,12 +196,13 @@ public final class Refunds extends Resource {
      * {@code payment.no_lookup}, {@code payment.not_found}, {@code payout.above_limit},
      * {@code payout.address_network_mismatch}, {@code payout.bad_address}, {@code payout.bad_memo},
      * {@code payout.cap_unpriceable}, {@code payout.convert_bad_amount},
-     * {@code payout.convert_no_rate}, {@code payout.convert_same_asset},
-     * {@code payout.convert_unsupported}, {@code payout.daily_cap}, {@code payout.freeze_unknown},
-     * {@code payout.frozen}, {@code payout.memo_conflict}, {@code payout.memo_required},
-     * {@code payout.memo_too_long}, {@code payout.merchant_frozen}, {@code rates.deviation},
-     * {@code rates.no_source}, {@code rates.non_positive}, {@code rates.stale_rate},
-     * {@code refund.bad_amount}, {@code refund.chain_ambiguous},
+     * {@code payout.convert_insufficient}, {@code payout.convert_no_rate},
+     * {@code payout.convert_same_asset}, {@code payout.convert_unsupported},
+     * {@code payout.daily_cap}, {@code payout.freeze_unknown}, {@code payout.frozen},
+     * {@code payout.insufficient_funds}, {@code payout.memo_conflict},
+     * {@code payout.memo_required}, {@code payout.memo_too_long}, {@code payout.merchant_frozen},
+     * {@code rates.deviation}, {@code rates.no_source}, {@code rates.non_positive},
+     * {@code rates.stale_rate}, {@code refund.bad_amount}, {@code refund.chain_ambiguous},
      * {@code refund.destination_internal}, {@code refund.dust}, {@code refund.exceeds_refundable},
      * {@code refund.fence_check}, {@code refund.from_currency_personal_account},
      * {@code refund.from_currency_unsupported}, {@code refund.network_required},
