@@ -31,8 +31,8 @@ public final class LookupRequest implements WireObject {
     }
 
     /**
-     * Your order_id of the object: the payment's for /v1/payment/info, the payout's for
-     * /v1/payout/info.
+     * Your order_id of that object: the payment's in payment operations, the payout's in payout
+     * operations. Used only when uuid is empty.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -41,9 +41,9 @@ public final class LookupRequest implements WireObject {
     }
 
     /**
-     * The Oblodai id of the object being looked up: the invoice (payment) for /v1/payment/info, the
-     * payout or refund for /v1/payout/info. Either uuid or order_id is required; uuid takes
-     * precedence.
+     * Our id (a UUID) of the object the operation acts on: the payment (invoice) in payment
+     * operations, the payout or refund in payout operations. Either uuid or order_id is required;
+     * when both are passed, uuid is used and order_id is ignored.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -149,8 +149,8 @@ public final class LookupRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Your order_id of the object: the payment's for /v1/payment/info, the payout's for
-         * /v1/payout/info.
+         * <p>Your order_id of that object: the payment's in payment operations, the payout's in
+         * payout operations. Used only when uuid is empty.
          *
          * @param orderId the value
          * @return this builder
@@ -163,9 +163,9 @@ public final class LookupRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>The Oblodai id of the object being looked up: the invoice (payment) for
-         * /v1/payment/info, the payout or refund for /v1/payout/info. Either uuid or order_id is
-         * required; uuid takes precedence.
+         * <p>Our id (a UUID) of the object the operation acts on: the payment (invoice) in payment
+         * operations, the payout or refund in payout operations. Either uuid or order_id is
+         * required; when both are passed, uuid is used and order_id is ignored.
          *
          * @param uuid the value
          * @return this builder

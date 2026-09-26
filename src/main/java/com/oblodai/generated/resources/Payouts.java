@@ -405,7 +405,9 @@ public final class Payouts extends Resource {
      * <p>Runs all payout-creation checks — currency, amount, network, address, memo, address
      * screening, fee, freeze/daily limit and balance sufficiency — but reserves and sends nothing.
      * The response is {@code valid: true} with the amounts ({@code amount}, {@code commission},
-     * {@code payer_amount}, {@code fee_bearer}), or the same error that creation would return. The
+     * {@code payer_amount}, {@code fee_bearer}), the destination {@code address}, and for a
+     * {@code from_currency} payout the USDT the funding conversion would spend
+     * ({@code from_amount}, at the current rate), or the same error that creation would return. The
      * body is the same as for POST /v1/payout (order_id is optional for validation).
      *
      * <p>Requires role: Finance when called with a CLI key.
@@ -423,15 +425,17 @@ public final class Payouts extends Resource {
      * {@code payout.above_limit}, {@code payout.address_network_mismatch},
      * {@code payout.amount_below_fee}, {@code payout.bad_address}, {@code payout.bad_amount},
      * {@code payout.bad_memo}, {@code payout.bad_url_callback}, {@code payout.cap_unpriceable},
-     * {@code payout.daily_cap}, {@code payout.destination_internal},
-     * {@code payout.from_currency_unsupported}, {@code payout.insufficient_funds},
-     * {@code payout.memo_conflict}, {@code payout.memo_required}, {@code payout.memo_too_long},
-     * {@code payout.merchant_frozen}, {@code payout.network_required},
-     * {@code payout.reserved_reference}, {@code payout.unsupported_network},
-     * {@code rates.deviation}, {@code rates.no_source}, {@code rates.non_positive},
-     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
-     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
-     * {@code request.rate_limited}, {@code request.reference_invalid},
+     * {@code payout.convert_bad_amount}, {@code payout.convert_insufficient},
+     * {@code payout.convert_no_rate}, {@code payout.convert_same_asset},
+     * {@code payout.convert_unsupported}, {@code payout.daily_cap},
+     * {@code payout.destination_internal}, {@code payout.from_currency_unsupported},
+     * {@code payout.insufficient_funds}, {@code payout.memo_conflict},
+     * {@code payout.memo_required}, {@code payout.memo_too_long}, {@code payout.merchant_frozen},
+     * {@code payout.network_required}, {@code payout.reserved_reference},
+     * {@code payout.unsupported_network}, {@code rates.deviation}, {@code rates.no_source},
+     * {@code rates.non_positive}, {@code request.bad_json}, {@code request.body_read},
+     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.reference_invalid},
      * {@code request.reference_too_long}, {@code request.too_deep},
      * {@code request.unknown_currency}, {@code sandbox.convert_not_available},
      * {@code wallet.static_not_found}, {@code webhook.no_endpoint}.

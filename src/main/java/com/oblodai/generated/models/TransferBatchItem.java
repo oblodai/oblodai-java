@@ -57,6 +57,8 @@ public final class TransferBatchItem implements WireObject {
 
     /**
      * Idempotency key: a retry with the same order_id is a no-op; required in a transfer batch.
+     * Always pass it (or an Idempotency-Key header, which the SDKs send for you): without either,
+     * retrying the request after a network timeout creates a second transfer.
      *
      * @return the {@code order_id} field
      */
@@ -227,7 +229,8 @@ public final class TransferBatchItem implements WireObject {
          * Sets {@code order_id}.
          *
          * <p>Idempotency key: a retry with the same order_id is a no-op; required in a transfer
-         * batch.
+         * batch. Always pass it (or an Idempotency-Key header, which the SDKs send for you):
+         * without either, retrying the request after a network timeout creates a second transfer.
          *
          * @param orderId the value
          * @return this builder

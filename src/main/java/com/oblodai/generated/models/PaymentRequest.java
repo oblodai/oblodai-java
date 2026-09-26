@@ -92,7 +92,10 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * The amount to pay in currency.
+     * The price in currency — what you are paid for the order. The payer can be asked for more: the
+     * invoice's payer_amount adds the network surcharge (the cost of accepting the deposit on the
+     * chosen network, see network_surcharge) and any per-method discount or surcharge; your credit
+     * is amount minus the commission.
      *
      * @return the {@code amount} field
      */
@@ -464,7 +467,10 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>The amount to pay in currency.
+         * <p>The price in currency — what you are paid for the order. The payer can be asked for
+         * more: the invoice's payer_amount adds the network surcharge (the cost of accepting the
+         * deposit on the chosen network, see network_surcharge) and any per-method discount or
+         * surcharge; your credit is amount minus the commission.
          *
          * @param amount the value
          * @return this builder
@@ -477,7 +483,10 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>The amount to pay in currency.
+         * <p>The price in currency — what you are paid for the order. The payer can be asked for
+         * more: the invoice's payer_amount adds the network surcharge (the cost of accepting the
+         * deposit on the chosen network, see network_surcharge) and any per-method discount or
+         * surcharge; your credit is amount minus the commission.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder

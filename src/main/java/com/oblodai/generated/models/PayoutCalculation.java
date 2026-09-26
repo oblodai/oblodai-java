@@ -47,7 +47,8 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * How much will be debited from the balance; null — unknown (the fee cannot be estimated).
+     * How much will be debited from YOUR balance, in currency (the fee included when you bear it);
+     * null — cannot be estimated right now (the fee is unknown and you bear it).
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -56,7 +57,8 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Network fee; null — cannot be estimated right now.
+     * The network fee of the payout, in currency; who bears it is fee_bearer. null — cannot be
+     * estimated right now (the fee oracle or the rate is unavailable), not zero: retry later.
      *
      * @return the {@code commission} field, or {@code null} when absent
      */
@@ -74,7 +76,8 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Who pays the fee: gateway, merchant or recipient.
+     * Who pays the network fee: gateway (Oblodai absorbs it, commission is 0), merchant (added to
+     * amount, the recipient gets the full sum) or recipient (deducted from payer_amount).
      *
      * @return the {@code fee_bearer} field
      */
@@ -101,7 +104,9 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * How much the address will receive; null — unknown.
+     * How much the RECIPIENT receives at the address, in currency (not what you pay — that is
+     * amount). null — cannot be estimated right now (the fee is unknown and the recipient bears
+     * it).
      *
      * @return the {@code payer_amount} field, or {@code null} when absent
      */
@@ -249,8 +254,8 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>How much will be debited from the balance; null — unknown (the fee cannot be
-         * estimated).
+         * <p>How much will be debited from YOUR balance, in currency (the fee included when you
+         * bear it); null — cannot be estimated right now (the fee is unknown and you bear it).
          *
          * @param amount the value
          * @return this builder
@@ -264,8 +269,8 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>How much will be debited from the balance; null — unknown (the fee cannot be
-         * estimated).
+         * <p>How much will be debited from YOUR balance, in currency (the fee included when you
+         * bear it); null — cannot be estimated right now (the fee is unknown and you bear it).
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -277,7 +282,9 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Network fee; null — cannot be estimated right now.
+         * <p>The network fee of the payout, in currency; who bears it is fee_bearer. null — cannot
+         * be estimated right now (the fee oracle or the rate is unavailable), not zero: retry
+         * later.
          *
          * @param commission the value
          * @return this builder
@@ -291,7 +298,9 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Network fee; null — cannot be estimated right now.
+         * <p>The network fee of the payout, in currency; who bears it is fee_bearer. null — cannot
+         * be estimated right now (the fee oracle or the rate is unavailable), not zero: retry
+         * later.
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -316,7 +325,9 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Who pays the fee: gateway, merchant or recipient.
+         * <p>Who pays the network fee: gateway (Oblodai absorbs it, commission is 0), merchant
+         * (added to amount, the recipient gets the full sum) or recipient (deducted from
+         * payer_amount).
          *
          * @param feeBearer the value
          * @return this builder
@@ -329,7 +340,9 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Who pays the fee: gateway, merchant or recipient.
+         * <p>Who pays the network fee: gateway (Oblodai absorbs it, commission is 0), merchant
+         * (added to amount, the recipient gets the full sum) or recipient (deducted from
+         * payer_amount).
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -383,7 +396,9 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>How much the address will receive; null — unknown.
+         * <p>How much the RECIPIENT receives at the address, in currency (not what you pay — that
+         * is amount). null — cannot be estimated right now (the fee is unknown and the recipient
+         * bears it).
          *
          * @param payerAmount the value
          * @return this builder
@@ -397,7 +412,9 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>How much the address will receive; null — unknown.
+         * <p>How much the RECIPIENT receives at the address, in currency (not what you pay — that
+         * is amount). null — cannot be estimated right now (the fee is unknown and the recipient
+         * bears it).
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
