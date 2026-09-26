@@ -871,7 +871,8 @@ public final class Settings extends Resource {
      *
      * <p>Automatically withdraw incoming funds to a given address.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/auto-withdraw/set} ({@code setAutoWithdrawRule}).
      *
@@ -957,7 +958,8 @@ public final class Settings extends Resource {
     /**
      * Delete an auto-withdrawal rule
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/auto-withdraw/delete} ({@code deleteAutoWithdrawRule}).
      *
