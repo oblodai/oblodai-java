@@ -16,44 +16,63 @@ import java.util.Set;
 public final class PayoutValidateResult implements WireObject {
 
     private static final Set<String> FIELDS = Set.of(
+            "address",
             "amount",
             "commission",
             "currency",
             "fee_bearer",
+            "from_amount",
             "funded_by",
             "maturity_note",
             "network",
             "payer_amount",
+            "rate",
             "valid");
 
+    private final String address;
     private final BigDecimal amount;
     private final BigDecimal commission;
     private final String currency;
     private final PayoutFeeBearer feeBearer;
+    private final BigDecimal fromAmount;
     private final String fundedBy;
     private final String maturityNote;
     private final String network;
     private final BigDecimal payerAmount;
+    private final BigDecimal rate;
     private final Boolean valid;
     private final Set<String> nulls;
     private final Map<String, Object> extra;
 
     private PayoutValidateResult(Builder builder) {
+        this.address = builder.address;
         this.amount = builder.amount;
         this.commission = builder.commission;
         this.currency = builder.currency;
         this.feeBearer = builder.feeBearer;
+        this.fromAmount = builder.fromAmount;
         this.fundedBy = builder.fundedBy;
         this.maturityNote = builder.maturityNote;
         this.network = builder.network;
         this.payerAmount = builder.payerAmount;
+        this.rate = builder.rate;
         this.valid = builder.valid;
         this.nulls = Set.copyOf(builder.nulls);
         this.extra = Wire.copyMap(builder.extra);
     }
 
     /**
-     * How much will be debited from the balance.
+     * The destination address the payout will be sent to.
+     *
+     * @return the {@code address} field
+     */
+    public String address() {
+        return address;
+    }
+
+    /**
+     * How much will be debited from the balance, in currency (for a from_currency payout the
+     * currency balance is first funded with it by the conversion, see from_amount).
      *
      * @return the {@code amount} field
      */
@@ -62,7 +81,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Network fee.
+     * Network fee, in currency; who bears it is fee_bearer.
      *
      * @return the {@code commission} field
      */
@@ -86,6 +105,17 @@ public final class PayoutValidateResult implements WireObject {
      */
     public PayoutFeeBearer feeBearer() {
         return feeBearer;
+    }
+
+    /**
+     * How much funded_by (USDT) the conversion will debit to fund amount, at the current rate plus
+     * the conversion spread; the conversion re-prices at execution, so the final figure can differ
+     * slightly. Present only on a from_currency payout.
+     *
+     * @return the {@code from_amount} field, or {@code null} when absent
+     */
+    public BigDecimal fromAmount() {
+        return fromAmount;
     }
 
     /**
@@ -117,12 +147,22 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * How much will reach the recipient.
+     * How much the recipient will receive at address, in currency.
      *
      * @return the {@code payer_amount} field
      */
     public BigDecimal payerAmount() {
         return payerAmount;
+    }
+
+    /**
+     * The rate the from_amount estimate used: USDT per 1 unit of currency. Present only on a
+     * from_currency payout.
+     *
+     * @return the {@code rate} field, or {@code null} when absent
+     */
+    public BigDecimal rate() {
+        return rate;
     }
 
     /**
@@ -147,14 +187,17 @@ public final class PayoutValidateResult implements WireObject {
     /** @return a builder holding this object's values */
     public Builder toBuilder() {
         Builder builder = new Builder();
+        builder.address = this.address;
         builder.amount = this.amount;
         builder.commission = this.commission;
         builder.currency = this.currency;
         builder.feeBearer = this.feeBearer;
+        builder.fromAmount = this.fromAmount;
         builder.fundedBy = this.fundedBy;
         builder.maturityNote = this.maturityNote;
         builder.network = this.network;
         builder.payerAmount = this.payerAmount;
+        builder.rate = this.rate;
         builder.valid = this.valid;
         builder.nulls.addAll(this.nulls);
         builder.extra.putAll(this.extra);
@@ -168,18 +211,22 @@ public final class PayoutValidateResult implements WireObject {
      */
     public static PayoutValidateResult fromMap(Map<String, ?> data) {
         Builder builder = new Builder();
+        builder.address = Wire.required(data, "address", Wire::string, "PayoutValidateResult");
         builder.amount = Wire.required(data, "amount", Wire::decimal, "PayoutValidateResult");
         builder.commission = Wire.required(
                 data, "commission", Wire::decimal, "PayoutValidateResult");
         builder.currency = Wire.required(data, "currency", Wire::string, "PayoutValidateResult");
         builder.feeBearer = Wire.required(
                 data, "fee_bearer", PayoutFeeBearer::fromJson, "PayoutValidateResult");
+        builder.fromAmount = Wire.optional(
+                data, "from_amount", Wire::decimal, "PayoutValidateResult");
         builder.fundedBy = Wire.optional(data, "funded_by", Wire::string, "PayoutValidateResult");
         builder.maturityNote = Wire.required(
                 data, "maturity_note", Wire::string, "PayoutValidateResult");
         builder.network = Wire.required(data, "network", Wire::string, "PayoutValidateResult");
         builder.payerAmount = Wire.required(
                 data, "payer_amount", Wire::decimal, "PayoutValidateResult");
+        builder.rate = Wire.optional(data, "rate", Wire::decimal, "PayoutValidateResult");
         builder.valid = Wire.required(data, "valid", Wire::bool, "PayoutValidateResult");
         builder.nulls.addAll(Wire.nulls(data, FIELDS));
         builder.extra.putAll(Wire.extra(data, FIELDS));
@@ -198,14 +245,17 @@ public final class PayoutValidateResult implements WireObject {
     /** @return the JSON object: set fields, explicit nulls and {@link #extra()} */
     public Map<String, Object> toMap() {
         Map<String, Object> out = new LinkedHashMap<>(this.extra);
+        Wire.put(out, "address", this.address, this.nulls);
         Wire.put(out, "amount", this.amount, this.nulls);
         Wire.put(out, "commission", this.commission, this.nulls);
         Wire.put(out, "currency", this.currency, this.nulls);
         Wire.put(out, "fee_bearer", this.feeBearer, this.nulls);
+        Wire.put(out, "from_amount", this.fromAmount, this.nulls);
         Wire.put(out, "funded_by", this.fundedBy, this.nulls);
         Wire.put(out, "maturity_note", this.maturityNote, this.nulls);
         Wire.put(out, "network", this.network, this.nulls);
         Wire.put(out, "payer_amount", this.payerAmount, this.nulls);
+        Wire.put(out, "rate", this.rate, this.nulls);
         Wire.put(out, "valid", this.valid, this.nulls);
         return out;
     }
@@ -218,14 +268,17 @@ public final class PayoutValidateResult implements WireObject {
     @Override
     public boolean equals(Object other) {
         return other instanceof PayoutValidateResult that
+                && Objects.equals(this.address, that.address)
                 && Objects.equals(this.amount, that.amount)
                 && Objects.equals(this.commission, that.commission)
                 && Objects.equals(this.currency, that.currency)
                 && Objects.equals(this.feeBearer, that.feeBearer)
+                && Objects.equals(this.fromAmount, that.fromAmount)
                 && Objects.equals(this.fundedBy, that.fundedBy)
                 && Objects.equals(this.maturityNote, that.maturityNote)
                 && Objects.equals(this.network, that.network)
                 && Objects.equals(this.payerAmount, that.payerAmount)
+                && Objects.equals(this.rate, that.rate)
                 && Objects.equals(this.valid, that.valid)
                 && this.nulls.equals(that.nulls)
                 && this.extra.equals(that.extra);
@@ -234,14 +287,17 @@ public final class PayoutValidateResult implements WireObject {
     @Override
     public int hashCode() {
         return Objects.hash(
+                this.address,
                 this.amount,
                 this.commission,
                 this.currency,
                 this.feeBearer,
+                this.fromAmount,
                 this.fundedBy,
                 this.maturityNote,
                 this.network,
                 this.payerAmount,
+                this.rate,
                 this.valid,
                 this.nulls,
                 this.extra);
@@ -251,6 +307,8 @@ public final class PayoutValidateResult implements WireObject {
     public String toString() {
         return Wire.describe(
                 "PayoutValidateResult",
+                "address",
+                this.address,
                 "amount",
                 this.amount,
                 "commission",
@@ -259,6 +317,8 @@ public final class PayoutValidateResult implements WireObject {
                 this.currency,
                 "feeBearer",
                 this.feeBearer,
+                "fromAmount",
+                this.fromAmount,
                 "fundedBy",
                 this.fundedBy,
                 "maturityNote",
@@ -267,6 +327,8 @@ public final class PayoutValidateResult implements WireObject {
                 this.network,
                 "payerAmount",
                 this.payerAmount,
+                "rate",
+                this.rate,
                 "valid",
                 this.valid,
                 "extra",
@@ -275,14 +337,17 @@ public final class PayoutValidateResult implements WireObject {
 
     /** Builds a {@link PayoutValidateResult}. */
     public static final class Builder {
+        private String address;
         private BigDecimal amount;
         private BigDecimal commission;
         private String currency;
         private PayoutFeeBearer feeBearer;
+        private BigDecimal fromAmount;
         private String fundedBy;
         private String maturityNote;
         private String network;
         private BigDecimal payerAmount;
+        private BigDecimal rate;
         private Boolean valid;
         private final Set<String> nulls = new LinkedHashSet<>();
         private final Map<String, Object> extra = new LinkedHashMap<>();
@@ -290,9 +355,23 @@ public final class PayoutValidateResult implements WireObject {
         private Builder() {}
 
         /**
+         * Sets {@code address}.
+         *
+         * <p>The destination address the payout will be sent to.
+         *
+         * @param address the value
+         * @return this builder
+         */
+        public Builder address(String address) {
+            this.address = address;
+            return this;
+        }
+
+        /**
          * Sets {@code amount}.
          *
-         * <p>How much will be debited from the balance.
+         * <p>How much will be debited from the balance, in currency (for a from_currency payout the
+         * currency balance is first funded with it by the conversion, see from_amount).
          *
          * @param amount the value
          * @return this builder
@@ -305,7 +384,8 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>How much will be debited from the balance.
+         * <p>How much will be debited from the balance, in currency (for a from_currency payout the
+         * currency balance is first funded with it by the conversion, see from_amount).
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -317,7 +397,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Network fee.
+         * <p>Network fee, in currency; who bears it is fee_bearer.
          *
          * @param commission the value
          * @return this builder
@@ -330,7 +410,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Network fee.
+         * <p>Network fee, in currency; who bears it is fee_bearer.
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -379,6 +459,35 @@ public final class PayoutValidateResult implements WireObject {
         }
 
         /**
+         * Sets {@code from_amount}.
+         *
+         * <p>How much funded_by (USDT) the conversion will debit to fund amount, at the current
+         * rate plus the conversion spread; the conversion re-prices at execution, so the final
+         * figure can differ slightly. Present only on a from_currency payout.
+         *
+         * @param fromAmount the value
+         * @return this builder
+         */
+        public Builder fromAmount(BigDecimal fromAmount) {
+            this.fromAmount = fromAmount;
+            return this;
+        }
+
+        /**
+         * Sets {@code from_amount}.
+         *
+         * <p>How much funded_by (USDT) the conversion will debit to fund amount, at the current
+         * rate plus the conversion spread; the conversion re-prices at execution, so the final
+         * figure can differ slightly. Present only on a from_currency payout.
+         *
+         * @param fromAmount the value as a decimal string, such as {@code "10.50"}
+         * @return this builder
+         */
+        public Builder fromAmount(String fromAmount) {
+            return fromAmount(fromAmount == null ? null : new BigDecimal(fromAmount));
+        }
+
+        /**
          * Sets {@code funded_by}.
          *
          * <p>The currency whose conversion funds the payout (from_currency); present only on such a
@@ -421,7 +530,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>How much will reach the recipient.
+         * <p>How much the recipient will receive at address, in currency.
          *
          * @param payerAmount the value
          * @return this builder
@@ -434,13 +543,40 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>How much will reach the recipient.
+         * <p>How much the recipient will receive at address, in currency.
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
          */
         public Builder payerAmount(String payerAmount) {
             return payerAmount(payerAmount == null ? null : new BigDecimal(payerAmount));
+        }
+
+        /**
+         * Sets {@code rate}.
+         *
+         * <p>The rate the from_amount estimate used: USDT per 1 unit of currency. Present only on a
+         * from_currency payout.
+         *
+         * @param rate the value
+         * @return this builder
+         */
+        public Builder rate(BigDecimal rate) {
+            this.rate = rate;
+            return this;
+        }
+
+        /**
+         * Sets {@code rate}.
+         *
+         * <p>The rate the from_amount estimate used: USDT per 1 unit of currency. Present only on a
+         * from_currency payout.
+         *
+         * @param rate the value as a decimal string, such as {@code "10.50"}
+         * @return this builder
+         */
+        public Builder rate(String rate) {
+            return rate(rate == null ? null : new BigDecimal(rate));
         }
 
         /**
@@ -473,6 +609,7 @@ public final class PayoutValidateResult implements WireObject {
          * @throws IllegalStateException when a required field is not set
          */
         public PayoutValidateResult build() {
+            Wire.require(this.address, "PayoutValidateResult", "address");
             Wire.require(this.amount, "PayoutValidateResult", "amount");
             Wire.require(this.commission, "PayoutValidateResult", "commission");
             Wire.require(this.currency, "PayoutValidateResult", "currency");

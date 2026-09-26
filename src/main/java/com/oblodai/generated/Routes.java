@@ -207,6 +207,18 @@ public final class Routes {
                     false,
                     null);
 
+    /** {@code POST /v1/payment/refund/calculate} ({@code calculateRefund}). */
+    public static final RouteSpec CALCULATE_REFUND =
+            new RouteSpec(
+                    "calculateRefund",
+                    "POST",
+                    "/v1/payment/refund/calculate",
+                    "key",
+                    false,
+                    true,
+                    false,
+                    null);
+
     /** {@code POST /v1/wallet/blocked-address-refund} ({@code refundBlockedWallet}). */
     public static final RouteSpec REFUND_BLOCKED_WALLET =
             new RouteSpec(
@@ -1091,7 +1103,7 @@ public final class Routes {
                     "/v1/referral/info",
                     "key",
                     false,
-                    false,
+                    true,
                     false,
                     null);
 
@@ -1163,7 +1175,7 @@ public final class Routes {
                     "/v1/payout/link/cheque",
                     "key",
                     false,
-                    false,
+                    true,
                     true,
                     null);
 
@@ -1512,6 +1524,7 @@ public final class Routes {
         routes.put("getPaymentLink", GET_PAYMENT_LINK);
         routes.put("togglePaymentLink", TOGGLE_PAYMENT_LINK);
         routes.put("refundPayment", REFUND_PAYMENT);
+        routes.put("calculateRefund", CALCULATE_REFUND);
         routes.put("refundBlockedWallet", REFUND_BLOCKED_WALLET);
         routes.put("createPayout", CREATE_PAYOUT);
         routes.put("createMassPayout", CREATE_MASS_PAYOUT);

@@ -140,7 +140,7 @@ public final class Payments extends Resource {
      * Get payment status
      *
      * <p>Pass {@code uuid} (ours) OR {@code order_id} (yours). Returns the current status and
-     * amounts. If both are given, {@code order_id} takes precedence.
+     * amounts. If both are given, {@code uuid} takes precedence and {@code order_id} is ignored.
      *
      * <p>Requires role: Viewer when called with a CLI key.
      *

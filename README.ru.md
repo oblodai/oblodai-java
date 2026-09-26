@@ -120,13 +120,13 @@ PayoutItem payout = oblodai.payouts().create(
 генерируется из контракта `tools/sdkgen`.
 
 <!-- sdkgen:methods -->
-17 ресурсов, 123 метода.
+17 ресурсов, 124 метода.
 
 | Ресурс | Методы |
 | --- | --- |
 | `payments()` | `create` · `getInfo` · `getQr` · `listHistory` · `listServices` · `cancel` · `sendEmail` · `setCheckoutConfig` · `getCheckoutConfig` · `getAmlLinks` · `resolve` |
 | `paymentLinks()` | `create` · `list` · `get` · `toggle` |
-| `refunds()` | `payment` · `blockedWallet` |
+| `refunds()` | `payment` · `calculate` · `blockedWallet` |
 | `payouts()` | `create` · `createMass` · `getInfo` · `listHistory` · `calculate` · `validate` · `cancel` · `approve` · `listServices` · `transferToPersonal` · `transferToUser` · `createTransferBatch` |
 | `payoutLinks()` | `create` · `createBatch` · `list` · `get` · `cancel` · `getPayoutClaim` · `claimPayout` |
 | `batches()` | `createPayment` · `createRefund` · `createPayout` · `getInfo` |

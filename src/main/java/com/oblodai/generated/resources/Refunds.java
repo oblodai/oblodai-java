@@ -6,6 +6,7 @@ import com.oblodai.generated.Routes;
 import com.oblodai.generated.models.BlockedRefundRequest;
 import com.oblodai.generated.models.BlockedRefundResult;
 import com.oblodai.generated.models.PayoutView;
+import com.oblodai.generated.models.RefundCalculation;
 import com.oblodai.generated.models.RefundRequest;
 import com.oblodai.generated.models.Wire;
 
@@ -41,14 +42,17 @@ public final class Refunds extends Resource {
      * provider's omnibus hot wallet, not the buyer). A refund sent there is irrecoverably lost to
      * someone who never paid, so a request without {@code address} is rejected
      * ({@code refund.no_address}): ask the buyer for an address and pass it explicitly. The
-     * payment's {@code uuid}/{@code order_id} is required. By default the full received amount is
-     * refunded; you may specify a partial {@code amount}.
+     * payment's {@code uuid}/{@code order_id} is required. By default the remaining refundable
+     * amount is refunded; you may specify a partial {@code amount}. All refunds of a payment
+     * together cannot exceed its {@code refundable} amount: what was paid minus the payer's network
+     * surcharge (minus our commission when the store's refund fee setting puts it on the customer),
+     * never more than was credited to your balance for it — POST /v1/payment/refund/calculate shows
+     * these numbers without refunding.
      *
-     * <p>Idempotent on {@code (payment, address, amount)}; in total you cannot refund more than was
-     * paid. Refunds to any address are approved automatically. The only exception is a card payment
-     * via an on-ramp: a refund TO THE RECORDED PAYER ADDRESS of such an invoice is rejected
-     * ({@code refund.omnibus_destination}), because that address belongs to the provider, not the
-     * buyer — send the buyer's address explicitly.
+     * <p>Idempotent on {@code (payment, address, amount)}. Refunds to any address are approved
+     * automatically. The only exception is a card payment via an on-ramp: a refund TO THE RECORDED
+     * PAYER ADDRESS of such an invoice is rejected ({@code refund.omnibus_destination}), because
+     * that address belongs to the provider, not the buyer — send the buyer's address explicitly.
      *
      * <p>A refund is paid in THE SAME coin the buyer paid with. If it has already been converted
      * into a stablecoin by auto-conversion, pass {@code from_currency: "USDT"} — the refund is
@@ -150,6 +154,99 @@ public final class Refunds extends Resource {
      */
     public PayoutView payment() {
         return payment(null, null);
+    }
+
+    /**
+     * Calculate a refund without making it (dry run)
+     *
+     * <p>Takes the same body as POST /v1/payment/refund and answers what that refund would send —
+     * {@code amount}, {@code currency}, {@code network}, {@code address} (and whether it is the
+     * recorded payer's) — and the numbers behind it: {@code amount_paid}, the payer's network
+     * {@code surcharge} (never refunded from your balance), the {@code commission} withheld and who
+     * bears it ({@code commission_bearer}, the store's refund fee setting), {@code credited}, the
+     * {@code refundable} ceiling for all refunds of the payment together, what is already
+     * {@code refunded} and what {@code remaining} can still go. With {@code from_currency} it also
+     * estimates the USDT the funding conversion would spend ({@code from_amount}).
+     *
+     * <p>Runs the same checks as the refund itself and fails with the same error the refund would
+     * ({@code refund.exceeds_refundable}, {@code refund.dust}, {@code refund.no_address},
+     * {@code refund.nothing_to_refund}, …) — except the destination address screening, which runs
+     * when the refund is made. Reserves and sends nothing; safe to retry.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
+     *
+     * <p>{@code POST /v1/payment/refund/calculate} ({@code calculateRefund}).
+     *
+     * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code payment.bad_uuid},
+     * {@code payment.no_lookup}, {@code payment.not_found}, {@code payout.above_limit},
+     * {@code payout.address_network_mismatch}, {@code payout.bad_address}, {@code payout.bad_memo},
+     * {@code payout.cap_unpriceable}, {@code payout.convert_bad_amount},
+     * {@code payout.convert_no_rate}, {@code payout.convert_same_asset},
+     * {@code payout.convert_unsupported}, {@code payout.daily_cap}, {@code payout.freeze_unknown},
+     * {@code payout.frozen}, {@code payout.memo_conflict}, {@code payout.memo_required},
+     * {@code payout.memo_too_long}, {@code payout.merchant_frozen}, {@code rates.deviation},
+     * {@code rates.no_source}, {@code rates.non_positive}, {@code rates.stale_rate},
+     * {@code refund.bad_amount}, {@code refund.chain_ambiguous},
+     * {@code refund.destination_internal}, {@code refund.dust}, {@code refund.exceeds_refundable},
+     * {@code refund.fence_check}, {@code refund.from_currency_personal_account},
+     * {@code refund.from_currency_unsupported}, {@code refund.network_required},
+     * {@code refund.no_address}, {@code refund.nothing_to_refund},
+     * {@code refund.omnibus_destination}, {@code refund.paid_internally},
+     * {@code refund.unsupported_network}, {@code request.bad_json}, {@code request.body_read},
+     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep},
+     * {@code sandbox.convert_not_available}, {@code treasury.no_ccy_map},
+     * {@code wallet.static_not_found}.
+     *
+     * @param params the request body
+     * @param options per-call options ({@code null} for the defaults)
+     * @return the result
+     */
+    public RefundCalculation calculate(RefundRequest params, RequestOptions options) {
+        return call(
+                Routes.CALCULATE_REFUND,
+                null,
+                null,
+                Wire.body(params),
+                options,
+                RefundCalculation::fromJson);
+    }
+
+    /**
+     * Same as {@link #calculate(RefundRequest, RequestOptions)} with the omitted arguments
+     * {@code null}.
+     *
+     * @param params the request body
+     * @return the result
+     */
+    public RefundCalculation calculate(RefundRequest params) {
+        return calculate(params, null);
+    }
+
+    /**
+     * Same as {@link #calculate(RefundRequest, RequestOptions)} with the omitted arguments
+     * {@code null}.
+     *
+     * @param options per-call options ({@code null} for the defaults)
+     * @return the result
+     */
+    public RefundCalculation calculate(RequestOptions options) {
+        return calculate(null, options);
+    }
+
+    /**
+     * Same as {@link #calculate(RefundRequest, RequestOptions)} with the omitted arguments
+     * {@code null}.
+     *
+     * @return the result
+     */
+    public RefundCalculation calculate() {
+        return calculate(null, null);
     }
 
     /**

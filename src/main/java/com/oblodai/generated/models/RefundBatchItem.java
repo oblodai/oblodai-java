@@ -57,10 +57,12 @@ public final class RefundBatchItem implements WireObject {
     }
 
     /**
-     * The amount to refund, in the payment coin; overrides the default. Without it the refund is
+     * The amount to refund, in the payment coin. Without it the refund is what is still refundable:
      * the amount paid minus the payer's network surcharge and — when the store's refund fee setting
      * (getRefundFeeConfig) puts the commission on the customer — minus the Oblodai commission too,
-     * never more than was credited to your balance for this payment.
+     * never more than was credited to your balance for this payment, less the refunds already made.
+     * All refunds of a payment together cannot exceed that refundable amount
+     * (refund.exceeds_refundable); POST /v1/payment/refund/calculate shows it.
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -269,10 +271,13 @@ public final class RefundBatchItem implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>The amount to refund, in the payment coin; overrides the default. Without it the
-         * refund is the amount paid minus the payer's network surcharge and — when the store's
+         * <p>The amount to refund, in the payment coin. Without it the refund is what is still
+         * refundable: the amount paid minus the payer's network surcharge and — when the store's
          * refund fee setting (getRefundFeeConfig) puts the commission on the customer — minus the
-         * Oblodai commission too, never more than was credited to your balance for this payment.
+         * Oblodai commission too, never more than was credited to your balance for this payment,
+         * less the refunds already made. All refunds of a payment together cannot exceed that
+         * refundable amount (refund.exceeds_refundable); POST /v1/payment/refund/calculate shows
+         * it.
          *
          * @param amount the value
          * @return this builder
@@ -285,10 +290,13 @@ public final class RefundBatchItem implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>The amount to refund, in the payment coin; overrides the default. Without it the
-         * refund is the amount paid minus the payer's network surcharge and — when the store's
+         * <p>The amount to refund, in the payment coin. Without it the refund is what is still
+         * refundable: the amount paid minus the payer's network surcharge and — when the store's
          * refund fee setting (getRefundFeeConfig) puts the commission on the customer — minus the
-         * Oblodai commission too, never more than was credited to your balance for this payment.
+         * Oblodai commission too, never more than was credited to your balance for this payment,
+         * less the refunds already made. All refunds of a payment together cannot exceed that
+         * refundable amount (refund.exceeds_refundable); POST /v1/payment/refund/calculate shows
+         * it.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder

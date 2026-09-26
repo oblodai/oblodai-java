@@ -128,6 +128,6 @@ public final class Fixtures {
     public static String payoutValidation(boolean valid) {
         return "{\"valid\":" + valid + ",\"amount\":\"10.50\",\"commission\":\"1\","
                 + "\"payer_amount\":\"11.50\",\"currency\":\"USDT\",\"network\":\"tron\","
-                + "\"fee_bearer\":\"merchant\",\"maturity_note\":\"\"}";
+                + "\"address\":\"T\",\"fee_bearer\":\"merchant\",\"maturity_note\":\"\"}";
     }
 }

@@ -40,7 +40,7 @@ public final class SummaryRequest implements WireObject {
     }
 
     /**
-     * End of the window, exclusive (RFC 3339).
+     * End of the window, exclusive (RFC 3339); must be after from, otherwise summary.bad_window.
      *
      * @return the {@code to} field
      */
@@ -159,7 +159,8 @@ public final class SummaryRequest implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>End of the window, exclusive (RFC 3339).
+         * <p>End of the window, exclusive (RFC 3339); must be after from, otherwise
+         * summary.bad_window.
          *
          * @param to the value
          * @return this builder

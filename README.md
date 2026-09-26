@@ -120,13 +120,13 @@ sent. `Money` adds, subtracts and compares amounts exactly and refuses a `double
 without the optional parts. The table below is generated from the contract by `tools/sdkgen`.
 
 <!-- sdkgen:methods -->
-17 resources, 123 methods.
+17 resources, 124 methods.
 
 | Resource | Methods |
 | --- | --- |
 | `payments()` | `create` · `getInfo` · `getQr` · `listHistory` · `listServices` · `cancel` · `sendEmail` · `setCheckoutConfig` · `getCheckoutConfig` · `getAmlLinks` · `resolve` |
 | `paymentLinks()` | `create` · `list` · `get` · `toggle` |
-| `refunds()` | `payment` · `blockedWallet` |
+| `refunds()` | `payment` · `calculate` · `blockedWallet` |
 | `payouts()` | `create` · `createMass` · `getInfo` · `listHistory` · `calculate` · `validate` · `cancel` · `approve` · `listServices` · `transferToPersonal` · `transferToUser` · `createTransferBatch` |
 | `payoutLinks()` | `create` · `createBatch` · `list` · `get` · `cancel` · `getPayoutClaim` · `claimPayout` |
 | `batches()` | `createPayment` · `createRefund` · `createPayout` · `getInfo` |
