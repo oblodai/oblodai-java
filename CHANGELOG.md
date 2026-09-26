@@ -5,6 +5,17 @@ All notable changes to the Oblodai Java SDK are documented here. The format foll
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The version tracks the SDK family: 2.0 is
 the line generated from the gateway's OpenAPI contract.
 
+## Unreleased
+
+### Added
+
+- `client.cliLogin()` — `start`, `poll`, `logoutCli` (blocking and async): the browser login of the
+  `oblodai` CLI (OAuth 2.0 device authorization) and logout of its key.
+- `OblodaiException.errorDetails()` (`details()` stays the structured-logger view): the
+  machine-readable facts of an error envelope's new `details` object (for example
+  `cli.permission_denied` carries `required_role` and `role`); only string values are kept.
+- Every method's documentation names the minimum team role a CLI key needs to call it.
+
 ## [2.0.0] — 2026-09-25
 
 Generated from the gateway's OpenAPI contract (`services/core/api/openapi.json`) by the backend's
