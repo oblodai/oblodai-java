@@ -34,7 +34,9 @@ public final class TestWebhookKindResult implements WireObject {
     }
 
     /**
-     * Always true: the body was delivered.
+     * Always true: your endpoint received the body and answered, with any HTTP status — ok does not
+     * mean it was accepted; check status_code. If the endpoint cannot be reached, the call fails
+     * with webhook.test_failed.
      *
      * @return the {@code ok} field
      */
@@ -52,7 +54,8 @@ public final class TestWebhookKindResult implements WireObject {
     }
 
     /**
-     * The HTTP status your endpoint responded with.
+     * The HTTP status your endpoint responded with. Only 2xx counts as accepted: a live delivery
+     * answered with anything else is retried and eventually marked dead.
      *
      * @return the {@code status_code} field
      */
@@ -167,7 +170,9 @@ public final class TestWebhookKindResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Always true: the body was delivered.
+         * <p>Always true: your endpoint received the body and answered, with any HTTP status — ok
+         * does not mean it was accepted; check status_code. If the endpoint cannot be reached, the
+         * call fails with webhook.test_failed.
          *
          * @param ok the value
          * @return this builder
@@ -193,7 +198,8 @@ public final class TestWebhookKindResult implements WireObject {
         /**
          * Sets {@code status_code}.
          *
-         * <p>The HTTP status your endpoint responded with.
+         * <p>The HTTP status your endpoint responded with. Only 2xx counts as accepted: a live
+         * delivery answered with anything else is retried and eventually marked dead.
          *
          * @param statusCode the value
          * @return this builder

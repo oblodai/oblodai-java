@@ -57,7 +57,10 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * A partial amount. Defaults to the full received amount.
+     * The amount to refund, in the payment coin; overrides the default. Without it the refund is
+     * the amount paid minus the payer's network surcharge and — when the store's refund fee setting
+     * (getRefundFeeConfig) puts the commission on the customer — minus the Oblodai commission too,
+     * never more than was credited to your balance for this payment.
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -265,7 +268,10 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>A partial amount. Defaults to the full received amount.
+         * <p>The amount to refund, in the payment coin; overrides the default. Without it the
+         * refund is the amount paid minus the payer's network surcharge and — when the store's
+         * refund fee setting (getRefundFeeConfig) puts the commission on the customer — minus the
+         * Oblodai commission too, never more than was credited to your balance for this payment.
          *
          * @param amount the value
          * @return this builder
@@ -278,7 +284,10 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>A partial amount. Defaults to the full received amount.
+         * <p>The amount to refund, in the payment coin; overrides the default. Without it the
+         * refund is the amount paid minus the payer's network surcharge and — when the store's
+         * refund fee setting (getRefundFeeConfig) puts the commission on the customer — minus the
+         * Oblodai commission too, never more than was credited to your balance for this payment.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder

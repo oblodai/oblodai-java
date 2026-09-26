@@ -7,10 +7,10 @@ import com.oblodai.generated.models.AMLLinksRequest;
 import com.oblodai.generated.models.AMLLinksResult;
 import com.oblodai.generated.models.CheckoutConfigRequest;
 import com.oblodai.generated.models.CheckoutConfigView;
-import com.oblodai.generated.models.HistoryRequest;
 import com.oblodai.generated.models.LookupRequest;
 import com.oblodai.generated.models.PageRequest;
 import com.oblodai.generated.models.PayServiceEntry;
+import com.oblodai.generated.models.PaymentHistoryRequest;
 import com.oblodai.generated.models.PaymentInfoResult;
 import com.oblodai.generated.models.PaymentQRResult;
 import com.oblodai.generated.models.PaymentRequest;
@@ -298,7 +298,8 @@ public final class Payments extends Resource {
      * @param options per-call options ({@code null} for the defaults)
      * @return a non-blocking pager over every item
      */
-    public AsyncPager<PaymentView> listHistory(HistoryRequest params, RequestOptions options) {
+    public AsyncPager<PaymentView> listHistory(
+            PaymentHistoryRequest params, RequestOptions options) {
         return pagedAsync(
                 Routes.LIST_PAYMENT_HISTORY,
                 null,
@@ -309,19 +310,19 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Same as {@link #listHistory(HistoryRequest, RequestOptions)} with the omitted arguments
-     * {@code null}.
+     * Same as {@link #listHistory(PaymentHistoryRequest, RequestOptions)} with the omitted
+     * arguments {@code null}.
      *
      * @param params the request body
      * @return a non-blocking pager over every item
      */
-    public AsyncPager<PaymentView> listHistory(HistoryRequest params) {
+    public AsyncPager<PaymentView> listHistory(PaymentHistoryRequest params) {
         return listHistory(params, null);
     }
 
     /**
-     * Same as {@link #listHistory(HistoryRequest, RequestOptions)} with the omitted arguments
-     * {@code null}.
+     * Same as {@link #listHistory(PaymentHistoryRequest, RequestOptions)} with the omitted
+     * arguments {@code null}.
      *
      * @param options per-call options ({@code null} for the defaults)
      * @return a non-blocking pager over every item
@@ -331,8 +332,8 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Same as {@link #listHistory(HistoryRequest, RequestOptions)} with the omitted arguments
-     * {@code null}.
+     * Same as {@link #listHistory(PaymentHistoryRequest, RequestOptions)} with the omitted
+     * arguments {@code null}.
      *
      * @return a non-blocking pager over every item
      */

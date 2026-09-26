@@ -61,7 +61,8 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * The delivery took place (the endpoint responded, with any status).
+     * The delivery took place: the endpoint answered, with any HTTP status — ok does not mean it
+     * was accepted; check status_code.
      *
      * @return the {@code ok} field
      */
@@ -79,7 +80,8 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * The HTTP status returned by the endpoint; only when ok=true.
+     * The HTTP status returned by the endpoint; only when ok=true. Only 2xx counts as accepted: a
+     * live delivery answered with anything else is retried.
      *
      * @return the {@code status_code} field, or {@code null} when absent
      */
@@ -252,7 +254,8 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>The delivery took place (the endpoint responded, with any status).
+         * <p>The delivery took place: the endpoint answered, with any HTTP status — ok does not
+         * mean it was accepted; check status_code.
          *
          * @param ok the value
          * @return this builder
@@ -278,7 +281,8 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code status_code}.
          *
-         * <p>The HTTP status returned by the endpoint; only when ok=true.
+         * <p>The HTTP status returned by the endpoint; only when ok=true. Only 2xx counts as
+         * accepted: a live delivery answered with anything else is retried.
          *
          * @param statusCode the value
          * @return this builder

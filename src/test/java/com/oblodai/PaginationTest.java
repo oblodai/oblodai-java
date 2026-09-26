@@ -9,6 +9,7 @@ import com.oblodai.core.Pager;
 import com.oblodai.errors.ConfigException;
 import com.oblodai.errors.ContractException;
 import com.oblodai.generated.models.HistoryRequest;
+import com.oblodai.generated.models.PaymentHistoryRequest;
 import com.oblodai.generated.models.PaymentView;
 import com.oblodai.generated.models.PayoutView;
 import com.oblodai.generated.models.SandboxDelivery;
@@ -40,7 +41,11 @@ class PaginationTest {
         return builder(http).build();
     }
 
-    private static HistoryRequest limit(long limit) {
+    private static PaymentHistoryRequest limit(long limit) {
+        return PaymentHistoryRequest.builder().limit(limit).build();
+    }
+
+    private static HistoryRequest payoutLimit(long limit) {
         return HistoryRequest.builder().limit(limit).build();
     }
 
@@ -111,7 +116,7 @@ class PaginationTest {
                 new MockHttpClient()
                         .ok(page("[" + Fixtures.payout("a") + "," + Fixtures.payout("b") + "]", 0, true))
                         .ok(page("[" + Fixtures.payout("c") + "]", 2, false));
-        List<PayoutView> payouts = client(http).payouts().listHistory(limit(2)).all();
+        List<PayoutView> payouts = client(http).payouts().listHistory(payoutLimit(2)).all();
         assertEquals(3, payouts.size());
 
         MockHttpClient capped = new MockHttpClient().ok(page(Fixtures.payments("a", "b"), 0, true));
