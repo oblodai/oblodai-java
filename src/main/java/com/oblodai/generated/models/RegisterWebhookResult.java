@@ -34,7 +34,7 @@ public final class RegisterWebhookResult implements WireObject {
     }
 
     /**
-     * Идентификатор эндпоинта.
+     * Endpoint id.
      *
      * @return the {@code endpoint_id} field
      */
@@ -43,8 +43,8 @@ public final class RegisterWebhookResult implements WireObject {
     }
 
     /**
-     * Секрет подписи — только в ответе на ПЕРВУЮ регистрацию, показывается один раз; при смене URL
-     * его нет (потеряли — перевыпустите: /v1/webhooks/rotate-secret).
+     * The signing secret — only in the response to the FIRST registration, shown once; absent when
+     * the URL changes (lost it? reissue it: /v1/webhooks/rotate-secret).
      *
      * @return the {@code secret} field, or {@code null} when absent
      */
@@ -53,7 +53,7 @@ public final class RegisterWebhookResult implements WireObject {
     }
 
     /**
-     * Зарегистрированный URL коллбэка.
+     * The registered callback URL.
      *
      * @return the {@code url} field
      */
@@ -168,7 +168,7 @@ public final class RegisterWebhookResult implements WireObject {
         /**
          * Sets {@code endpoint_id}.
          *
-         * <p>Идентификатор эндпоинта.
+         * <p>Endpoint id.
          *
          * @param endpointId the value
          * @return this builder
@@ -181,8 +181,8 @@ public final class RegisterWebhookResult implements WireObject {
         /**
          * Sets {@code secret}.
          *
-         * <p>Секрет подписи — только в ответе на ПЕРВУЮ регистрацию, показывается один раз; при
-         * смене URL его нет (потеряли — перевыпустите: /v1/webhooks/rotate-secret).
+         * <p>The signing secret — only in the response to the FIRST registration, shown once;
+         * absent when the URL changes (lost it? reissue it: /v1/webhooks/rotate-secret).
          *
          * @param secret the value
          * @return this builder
@@ -195,7 +195,7 @@ public final class RegisterWebhookResult implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Зарегистрированный URL коллбэка.
+         * <p>The registered callback URL.
          *
          * @param url the value
          * @return this builder

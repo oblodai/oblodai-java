@@ -34,7 +34,7 @@ public final class PricingCurrency implements WireObject {
     }
 
     /**
-     * Код для поля currency при создании счёта.
+     * The code for the currency field when creating an invoice.
      *
      * @return the {@code currency} field
      */
@@ -43,7 +43,7 @@ public final class PricingCurrency implements WireObject {
     }
 
     /**
-     * Знаков после запятой.
+     * Decimal places.
      *
      * @return the {@code decimals} field
      */
@@ -52,7 +52,7 @@ public final class PricingCurrency implements WireObject {
     }
 
     /**
-     * Фиат: счёт в нём выставляется, но оплачивается монетой.
+     * Fiat: an invoice can be priced in it, but is paid with a coin.
      *
      * @return the {@code fiat} field
      */
@@ -166,7 +166,7 @@ public final class PricingCurrency implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код для поля currency при создании счёта.
+         * <p>The code for the currency field when creating an invoice.
          *
          * @param currency the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class PricingCurrency implements WireObject {
         /**
          * Sets {@code decimals}.
          *
-         * <p>Знаков после запятой.
+         * <p>Decimal places.
          *
          * @param decimals the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class PricingCurrency implements WireObject {
         /**
          * Sets {@code fiat}.
          *
-         * <p>Фиат: счёт в нём выставляется, но оплачивается монетой.
+         * <p>Fiat: an invoice can be priced in it, but is paid with a coin.
          *
          * @param fiat the value
          * @return this builder

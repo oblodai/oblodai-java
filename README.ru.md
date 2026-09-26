@@ -120,7 +120,7 @@ PayoutItem payout = oblodai.payouts().create(
 генерируется из контракта `tools/sdkgen`.
 
 <!-- sdkgen:methods -->
-16 ресурсов, 120 методов.
+17 ресурсов, 123 метода.
 
 | Ресурс | Методы |
 | --- | --- |
@@ -140,6 +140,7 @@ PayoutItem payout = oblodai.payouts().create(
 | `documents()` | `getSigned` · `getBalance` · `getFees` · `getLedger` · `getSplit` · `getPayoutLinkCheque` · `getStatement` · `getBatch` · `getPaymentLink` · `getWalletStatement` · `getReferrals` · `createJob` · `getJob` · `downloadJobFile` |
 | `checkout()` | `getSourceOfFundsForm` · `submitSourceOfFunds` · `getPublicPaymentLink` · `paymentLink` · `listCurrencies` · `get` · `selectMethod` · `startOnramp` · `getOnramp` · `getQr` |
 | `sandbox()` | `onboardStore` · `faucet` · `simulateDeposit` · `reset` · `listWebhooks` · `replayWebhook` |
+| `cliLogin()` | `start` · `poll` · `logoutCli` |
 <!-- /sdkgen:methods -->
 
 Модели сохраняют поля, которых эта версия SDK ещё не знает (`extra()`, уходят обратно как пришли), а

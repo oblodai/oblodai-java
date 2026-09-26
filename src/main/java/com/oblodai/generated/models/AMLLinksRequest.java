@@ -31,7 +31,7 @@ public final class AMLLinksRequest implements WireObject {
     }
 
     /**
-     * Идентификатор заказа мерчанта.
+     * The merchant's order id.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -40,7 +40,7 @@ public final class AMLLinksRequest implements WireObject {
     }
 
     /**
-     * Идентификатор платежа. Нужен uuid или order_id; приоритет у uuid.
+     * Payment id. Either uuid or order_id is required; uuid takes precedence.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -146,7 +146,7 @@ public final class AMLLinksRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Идентификатор заказа мерчанта.
+         * <p>The merchant's order id.
          *
          * @param orderId the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class AMLLinksRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор платежа. Нужен uuid или order_id; приоритет у uuid.
+         * <p>Payment id. Either uuid or order_id is required; uuid takes precedence.
          *
          * @param uuid the value
          * @return this builder

@@ -28,8 +28,8 @@ public final class SplitConfigRequest implements WireObject {
     }
 
     /**
-     * На сколько секунд откладывать расчёт по сплитам; диапазон 0–7776000 (до 90 суток). 0 —
-     * отправлять доли сразу: риск невозможности возврата берёте на себя.
+     * How many seconds to defer split settlement; range 0–7776000 (up to 90 days). 0 — send shares
+     * immediately: you bear the risk of being unable to refund.
      *
      * @return the {@code refund_hold_seconds} field, or {@code null} when absent
      */
@@ -128,8 +128,8 @@ public final class SplitConfigRequest implements WireObject {
         /**
          * Sets {@code refund_hold_seconds}.
          *
-         * <p>На сколько секунд откладывать расчёт по сплитам; диапазон 0–7776000 (до 90 суток). 0 —
-         * отправлять доли сразу: риск невозможности возврата берёте на себя.
+         * <p>How many seconds to defer split settlement; range 0–7776000 (up to 90 days). 0 — send
+         * shares immediately: you bear the risk of being unable to refund.
          *
          * @param refundHoldSeconds the value
          * @return this builder

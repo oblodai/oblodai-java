@@ -29,7 +29,7 @@ public final class PayoutLinkBatchResult implements WireObject {
     }
 
     /**
-     * Элементы в порядке запроса; result — ответ одиночного POST /v1/payout/link.
+     * Items in request order; result — the response of a single POST /v1/payout/link.
      *
      * @return the {@code items} field
      */
@@ -131,7 +131,7 @@ public final class PayoutLinkBatchResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Элементы в порядке запроса; result — ответ одиночного POST /v1/payout/link.
+         * <p>Items in request order; result — the response of a single POST /v1/payout/link.
          *
          * @param items the value
          * @return this builder

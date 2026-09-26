@@ -45,7 +45,7 @@ public final class AutoConvertResult implements WireObject {
     }
 
     /**
-     * Есть ли приказ. false — остальные поля — умолчания формы.
+     * Whether an order exists. false — the other fields are form defaults.
      *
      * @return the {@code configured} field
      */
@@ -54,7 +54,7 @@ public final class AutoConvertResult implements WireObject {
     }
 
     /**
-     * Включён ли приказ.
+     * Whether the order is enabled.
      *
      * @return the {@code enabled} field
      */
@@ -63,7 +63,8 @@ public final class AutoConvertResult implements WireObject {
     }
 
     /**
-     * Пол одной конвертации в долларах, десятичной строкой (с умолчанием процесса).
+     * The floor for a single conversion in dollars, as a decimal string (with the process default
+     * applied).
      *
      * @return the {@code min_amount} field
      */
@@ -72,7 +73,7 @@ public final class AutoConvertResult implements WireObject {
     }
 
     /**
-     * Режим зачисления: economy или instant.
+     * The crediting mode: economy or instant.
      *
      * @return the {@code mode} field
      */
@@ -81,7 +82,7 @@ public final class AutoConvertResult implements WireObject {
     }
 
     /**
-     * Монеты, которые сводятся; пусто — [], не null.
+     * The coins being converted; empty — [], not null.
      *
      * @return the {@code sources} field
      */
@@ -90,7 +91,7 @@ public final class AutoConvertResult implements WireObject {
     }
 
     /**
-     * Монета, в которую сводится выручка; пусто без приказа.
+     * The coin revenue is converted into; empty without an order.
      *
      * @return the {@code target} field
      */
@@ -229,7 +230,7 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code configured}.
          *
-         * <p>Есть ли приказ. false — остальные поля — умолчания формы.
+         * <p>Whether an order exists. false — the other fields are form defaults.
          *
          * @param configured the value
          * @return this builder
@@ -242,7 +243,7 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Включён ли приказ.
+         * <p>Whether the order is enabled.
          *
          * @param enabled the value
          * @return this builder
@@ -255,7 +256,8 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Пол одной конвертации в долларах, десятичной строкой (с умолчанием процесса).
+         * <p>The floor for a single conversion in dollars, as a decimal string (with the process
+         * default applied).
          *
          * @param minAmount the value
          * @return this builder
@@ -268,7 +270,8 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Пол одной конвертации в долларах, десятичной строкой (с умолчанием процесса).
+         * <p>The floor for a single conversion in dollars, as a decimal string (with the process
+         * default applied).
          *
          * @param minAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -280,7 +283,7 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code mode}.
          *
-         * <p>Режим зачисления: economy или instant.
+         * <p>The crediting mode: economy or instant.
          *
          * @param mode the value
          * @return this builder
@@ -293,7 +296,7 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code mode}.
          *
-         * <p>Режим зачисления: economy или instant.
+         * <p>The crediting mode: economy or instant.
          *
          * @param mode the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -305,7 +308,7 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code sources}.
          *
-         * <p>Монеты, которые сводятся; пусто — [], не null.
+         * <p>The coins being converted; empty — [], not null.
          *
          * @param sources the value
          * @return this builder
@@ -318,7 +321,7 @@ public final class AutoConvertResult implements WireObject {
         /**
          * Sets {@code target}.
          *
-         * <p>Монета, в которую сводится выручка; пусто без приказа.
+         * <p>The coin revenue is converted into; empty without an order.
          *
          * @param target the value
          * @return this builder

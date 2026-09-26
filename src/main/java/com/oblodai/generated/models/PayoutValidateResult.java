@@ -53,7 +53,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Сколько спишется с баланса.
+     * How much will be debited from the balance.
      *
      * @return the {@code amount} field
      */
@@ -62,7 +62,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Сетевая комиссия.
+     * Network fee.
      *
      * @return the {@code commission} field
      */
@@ -71,7 +71,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Валюта выплаты.
+     * Payout currency.
      *
      * @return the {@code currency} field
      */
@@ -80,7 +80,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Кто платит сетевую комиссию.
+     * Who pays the network fee.
      *
      * @return the {@code fee_bearer} field
      */
@@ -89,8 +89,8 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Валюта, конвертацией которой профинансируется выплата (from_currency); есть только у такой
-     * выплаты.
+     * The currency whose conversion funds the payout (from_currency); present only on such a
+     * payout.
      *
      * @return the {@code funded_by} field, or {@code null} when absent
      */
@@ -99,7 +99,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Что именно проверено по балансу и что проверится при исполнении.
+     * What exactly was checked against the balance and what will be checked at execution.
      *
      * @return the {@code maturity_note} field
      */
@@ -108,7 +108,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Сеть выплаты в каноническом написании.
+     * The payout network in canonical spelling.
      *
      * @return the {@code network} field
      */
@@ -117,7 +117,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Сколько дойдёт получателю.
+     * How much will reach the recipient.
      *
      * @return the {@code payer_amount} field
      */
@@ -126,7 +126,7 @@ public final class PayoutValidateResult implements WireObject {
     }
 
     /**
-     * Всегда true: не прошедшая проверка отвечает ошибкой с кодом причины.
+     * Always true: a failed check responds with an error carrying the reason code.
      *
      * @return the {@code valid} field
      */
@@ -292,7 +292,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сколько спишется с баланса.
+         * <p>How much will be debited from the balance.
          *
          * @param amount the value
          * @return this builder
@@ -305,7 +305,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сколько спишется с баланса.
+         * <p>How much will be debited from the balance.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -317,7 +317,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия.
+         * <p>Network fee.
          *
          * @param commission the value
          * @return this builder
@@ -330,7 +330,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия.
+         * <p>Network fee.
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -342,7 +342,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта выплаты.
+         * <p>Payout currency.
          *
          * @param currency the value
          * @return this builder
@@ -355,7 +355,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value
          * @return this builder
@@ -368,7 +368,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -381,8 +381,8 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code funded_by}.
          *
-         * <p>Валюта, конвертацией которой профинансируется выплата (from_currency); есть только у
-         * такой выплаты.
+         * <p>The currency whose conversion funds the payout (from_currency); present only on such a
+         * payout.
          *
          * @param fundedBy the value
          * @return this builder
@@ -395,7 +395,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code maturity_note}.
          *
-         * <p>Что именно проверено по балансу и что проверится при исполнении.
+         * <p>What exactly was checked against the balance and what will be checked at execution.
          *
          * @param maturityNote the value
          * @return this builder
@@ -408,7 +408,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть выплаты в каноническом написании.
+         * <p>The payout network in canonical spelling.
          *
          * @param network the value
          * @return this builder
@@ -421,7 +421,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю.
+         * <p>How much will reach the recipient.
          *
          * @param payerAmount the value
          * @return this builder
@@ -434,7 +434,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю.
+         * <p>How much will reach the recipient.
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -446,7 +446,7 @@ public final class PayoutValidateResult implements WireObject {
         /**
          * Sets {@code valid}.
          *
-         * <p>Всегда true: не прошедшая проверка отвечает ошибкой с кодом причины.
+         * <p>Always true: a failed check responds with an error carrying the reason code.
          *
          * @param valid the value
          * @return this builder

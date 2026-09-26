@@ -62,7 +62,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Сумма ссылки — обещание получателю.
+     * The link amount — a promise to the recipient.
      *
      * @return the {@code amount} field
      */
@@ -71,7 +71,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Получить можно сейчас: ссылка оплачена и не истекла.
+     * Can be claimed now: the link is funded and has not expired.
      *
      * @return the {@code claimable} field
      */
@@ -80,7 +80,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+     * Network fee; null — cannot be estimated right now (zero would mean the claim is free).
      *
      * @return the {@code commission} field, or {@code null} when absent
      */
@@ -89,7 +89,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Актив выплаты.
+     * Payout asset.
      *
      * @return the {@code currency} field
      */
@@ -98,7 +98,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * До какого момента ссылку можно получить (UTC).
+     * Until when the link can be claimed (UTC).
      *
      * @return the {@code expires_at} field
      */
@@ -107,7 +107,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Кто платит сетевую комиссию.
+     * Who pays the network fee.
      *
      * @return the {@code fee_bearer} field
      */
@@ -116,7 +116,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+     * exact — the fee is fixed; estimated — an estimate based on the current network.
      *
      * @return the {@code fee_type} field
      */
@@ -125,7 +125,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Сеть выплаты.
+     * Payout network.
      *
      * @return the {@code network} field
      */
@@ -134,7 +134,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Сообщение от отправителя.
+     * Message from the sender.
      *
      * @return the {@code note} field
      */
@@ -143,7 +143,8 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела сумму).
+     * How much will reach the recipient; null — cannot be said (the fee was not estimated or ate
+     * the amount).
      *
      * @return the {@code payer_amount} field, or {@code null} when absent
      */
@@ -152,7 +153,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Состояние ссылки.
+     * Link state.
      *
      * @return the {@code status} field
      */
@@ -161,7 +162,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
     }
 
     /**
-     * Заголовок от отправителя.
+     * Title from the sender.
      *
      * @return the {@code title} field
      */
@@ -349,7 +350,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма ссылки — обещание получателю.
+         * <p>The link amount — a promise to the recipient.
          *
          * @param amount the value
          * @return this builder
@@ -362,7 +363,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма ссылки — обещание получателю.
+         * <p>The link amount — a promise to the recipient.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -374,7 +375,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code claimable}.
          *
-         * <p>Получить можно сейчас: ссылка оплачена и не истекла.
+         * <p>Can be claimed now: the link is funded and has not expired.
          *
          * @param claimable the value
          * @return this builder
@@ -387,7 +388,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+         * <p>Network fee; null — cannot be estimated right now (zero would mean the claim is free).
          *
          * @param commission the value
          * @return this builder
@@ -401,7 +402,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+         * <p>Network fee; null — cannot be estimated right now (zero would mean the claim is free).
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -413,7 +414,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив выплаты.
+         * <p>Payout asset.
          *
          * @param currency the value
          * @return this builder
@@ -426,7 +427,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code expires_at}.
          *
-         * <p>До какого момента ссылку можно получить (UTC).
+         * <p>Until when the link can be claimed (UTC).
          *
          * @param expiresAt the value
          * @return this builder
@@ -439,7 +440,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value
          * @return this builder
@@ -452,7 +453,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -465,7 +466,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+         * <p>exact — the fee is fixed; estimated — an estimate based on the current network.
          *
          * @param feeType the value
          * @return this builder
@@ -478,7 +479,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+         * <p>exact — the fee is fixed; estimated — an estimate based on the current network.
          *
          * @param feeType the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -491,7 +492,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть выплаты.
+         * <p>Payout network.
          *
          * @param network the value
          * @return this builder
@@ -504,7 +505,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code note}.
          *
-         * <p>Сообщение от отправителя.
+         * <p>Message from the sender.
          *
          * @param note the value
          * @return this builder
@@ -517,8 +518,8 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела
-         * сумму).
+         * <p>How much will reach the recipient; null — cannot be said (the fee was not estimated or
+         * ate the amount).
          *
          * @param payerAmount the value
          * @return this builder
@@ -532,8 +533,8 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела
-         * сумму).
+         * <p>How much will reach the recipient; null — cannot be said (the fee was not estimated or
+         * ate the amount).
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -545,7 +546,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки.
+         * <p>Link state.
          *
          * @param status the value
          * @return this builder
@@ -558,7 +559,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки.
+         * <p>Link state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -571,7 +572,7 @@ public final class PayoutClaimView implements WireObject, PayoutClaimInfo {
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок от отправителя.
+         * <p>Title from the sender.
          *
          * @param title the value
          * @return this builder

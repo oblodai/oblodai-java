@@ -37,7 +37,7 @@ public final class Pagination implements WireObject {
     }
 
     /**
-     * Есть ли записи дальше этой страницы.
+     * Whether there are records beyond this page.
      *
      * @return the {@code has_pages} field
      */
@@ -46,7 +46,7 @@ public final class Pagination implements WireObject {
     }
 
     /**
-     * Смещение этой страницы.
+     * The offset of this page.
      *
      * @return the {@code offset} field
      */
@@ -55,7 +55,7 @@ public final class Pagination implements WireObject {
     }
 
     /**
-     * Размер страницы, которую отдали.
+     * The size of the page returned.
      *
      * @return the {@code per_page} field
      */
@@ -64,7 +64,7 @@ public final class Pagination implements WireObject {
     }
 
     /**
-     * Всего записей по фильтру (на всех страницах).
+     * Total records matching the filter (across all pages).
      *
      * @return the {@code total} field
      */
@@ -186,7 +186,7 @@ public final class Pagination implements WireObject {
         /**
          * Sets {@code has_pages}.
          *
-         * <p>Есть ли записи дальше этой страницы.
+         * <p>Whether there are records beyond this page.
          *
          * @param hasPages the value
          * @return this builder
@@ -199,7 +199,7 @@ public final class Pagination implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение этой страницы.
+         * <p>The offset of this page.
          *
          * @param offset the value
          * @return this builder
@@ -212,7 +212,7 @@ public final class Pagination implements WireObject {
         /**
          * Sets {@code per_page}.
          *
-         * <p>Размер страницы, которую отдали.
+         * <p>The size of the page returned.
          *
          * @param perPage the value
          * @return this builder
@@ -225,7 +225,7 @@ public final class Pagination implements WireObject {
         /**
          * Sets {@code total}.
          *
-         * <p>Всего записей по фильтру (на всех страницах).
+         * <p>Total records matching the filter (across all pages).
          *
          * @param total the value
          * @return this builder

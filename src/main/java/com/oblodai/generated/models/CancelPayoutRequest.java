@@ -28,7 +28,7 @@ public final class CancelPayoutRequest implements WireObject {
     }
 
     /**
-     * Идентификатор выплаты (или возврата) для отмены.
+     * The id of the payout (or refund) to cancel.
      *
      * @return the {@code uuid} field
      */
@@ -126,7 +126,7 @@ public final class CancelPayoutRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор выплаты (или возврата) для отмены.
+         * <p>The id of the payout (or refund) to cancel.
          *
          * @param uuid the value
          * @return this builder

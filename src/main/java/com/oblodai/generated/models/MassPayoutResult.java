@@ -29,7 +29,7 @@ public final class MassPayoutResult implements WireObject {
     }
 
     /**
-     * Элементы в порядке запроса.
+     * Items in request order.
      *
      * @return the {@code items} field
      */
@@ -131,7 +131,7 @@ public final class MassPayoutResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Элементы в порядке запроса.
+         * <p>Items in request order.
          *
          * @param items the value
          * @return this builder

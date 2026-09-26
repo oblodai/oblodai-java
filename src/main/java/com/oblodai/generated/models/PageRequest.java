@@ -31,7 +31,7 @@ public final class PageRequest implements WireObject {
     }
 
     /**
-     * Размер страницы, 1–100; вне диапазона — 25.
+     * Page size, 1–100; out of range — 25.
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -40,7 +40,7 @@ public final class PageRequest implements WireObject {
     }
 
     /**
-     * Смещение от начала списка.
+     * Offset from the start of the list.
      *
      * @return the {@code offset} field, or {@code null} when absent
      */
@@ -146,7 +146,7 @@ public final class PageRequest implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Размер страницы, 1–100; вне диапазона — 25.
+         * <p>Page size, 1–100; out of range — 25.
          *
          * @param limit the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class PageRequest implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение от начала списка.
+         * <p>Offset from the start of the list.
          *
          * @param offset the value
          * @return this builder

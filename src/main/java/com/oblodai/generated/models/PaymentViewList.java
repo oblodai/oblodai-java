@@ -32,7 +32,7 @@ public final class PaymentViewList implements WireObject {
     }
 
     /**
-     * Записи этой страницы.
+     * The records of this page.
      *
      * @return the {@code items} field
      */
@@ -41,7 +41,7 @@ public final class PaymentViewList implements WireObject {
     }
 
     /**
-     * Блок пагинации.
+     * Pagination block.
      *
      * @return the {@code paginate} field
      */
@@ -148,7 +148,7 @@ public final class PaymentViewList implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Записи этой страницы.
+         * <p>The records of this page.
          *
          * @param items the value
          * @return this builder
@@ -161,7 +161,7 @@ public final class PaymentViewList implements WireObject {
         /**
          * Sets {@code paginate}.
          *
-         * <p>Блок пагинации.
+         * <p>Pagination block.
          *
          * @param paginate the value
          * @return this builder

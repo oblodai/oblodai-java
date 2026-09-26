@@ -32,8 +32,8 @@ public final class RefundBatchRequest implements WireObject {
     }
 
     /**
-     * Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop —
-     * прекратить обработку после первой ошибки.
+     * What to do when an item fails: continue (default) — process the rest; stop — stop processing
+     * after the first error.
      *
      * @return the {@code on_error} field, or {@code null} when absent
      */
@@ -42,8 +42,8 @@ public final class RefundBatchRequest implements WireObject {
     }
 
     /**
-     * Массив от 1 до 5000 элементов — те же поля, что у POST /v1/payment/refund; у каждого элемента
-     * обязательны reference (ключ идемпотентности) и uuid либо order_id платежа.
+     * An array of 1 to 5000 items — the same fields as in POST /v1/payment/refund; each item
+     * requires reference (the idempotency key) and the payment's uuid or order_id.
      *
      * @return the {@code refunds} field
      */
@@ -151,8 +151,8 @@ public final class RefundBatchRequest implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop
-         * — прекратить обработку после первой ошибки.
+         * <p>What to do when an item fails: continue (default) — process the rest; stop — stop
+         * processing after the first error.
          *
          * @param onError the value
          * @return this builder
@@ -165,8 +165,8 @@ public final class RefundBatchRequest implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop
-         * — прекратить обработку после первой ошибки.
+         * <p>What to do when an item fails: continue (default) — process the rest; stop — stop
+         * processing after the first error.
          *
          * @param onError the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -179,8 +179,8 @@ public final class RefundBatchRequest implements WireObject {
         /**
          * Sets {@code refunds}.
          *
-         * <p>Массив от 1 до 5000 элементов — те же поля, что у POST /v1/payment/refund; у каждого
-         * элемента обязательны reference (ключ идемпотентности) и uuid либо order_id платежа.
+         * <p>An array of 1 to 5000 items — the same fields as in POST /v1/payment/refund; each item
+         * requires reference (the idempotency key) and the payment's uuid or order_id.
          *
          * @param refunds the value
          * @return this builder

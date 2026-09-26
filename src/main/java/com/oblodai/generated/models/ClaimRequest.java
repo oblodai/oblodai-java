@@ -34,7 +34,7 @@ public final class ClaimRequest implements WireObject {
     }
 
     /**
-     * Адрес получателя в сети выплаты.
+     * The recipient's address on the payout network.
      *
      * @return the {@code address} field
      */
@@ -43,7 +43,7 @@ public final class ClaimRequest implements WireObject {
     }
 
     /**
-     * Memo/tag — только для сетей, где он обязателен.
+     * Memo/tag — only for networks where it is required.
      *
      * @return the {@code memo} field, or {@code null} when absent
      */
@@ -52,8 +52,8 @@ public final class ClaimRequest implements WireObject {
     }
 
     /**
-     * Код получения — если отправитель установил его на ссылку. После 10 неверных вводов ссылка
-     * запирается.
+     * Claim passcode — if the sender set one on the link. After 10 wrong attempts the link is
+     * locked.
      *
      * @return the {@code passcode} field, or {@code null} when absent
      */
@@ -167,7 +167,7 @@ public final class ClaimRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес получателя в сети выплаты.
+         * <p>The recipient's address on the payout network.
          *
          * @param address the value
          * @return this builder
@@ -180,7 +180,7 @@ public final class ClaimRequest implements WireObject {
         /**
          * Sets {@code memo}.
          *
-         * <p>Memo/tag — только для сетей, где он обязателен.
+         * <p>Memo/tag — only for networks where it is required.
          *
          * @param memo the value
          * @return this builder
@@ -193,8 +193,8 @@ public final class ClaimRequest implements WireObject {
         /**
          * Sets {@code passcode}.
          *
-         * <p>Код получения — если отправитель установил его на ссылку. После 10 неверных вводов
-         * ссылка запирается.
+         * <p>Claim passcode — if the sender set one on the link. After 10 wrong attempts the link
+         * is locked.
          *
          * @param passcode the value
          * @return this builder

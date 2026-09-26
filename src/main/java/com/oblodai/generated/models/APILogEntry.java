@@ -46,7 +46,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * Ключ, которым подписан запрос.
+     * The key the request was signed with.
      *
      * @return the {@code api_key_id} field
      */
@@ -55,7 +55,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * Когда пришёл запрос (UTC).
+     * When the request arrived (UTC).
      *
      * @return the {@code created_at} field
      */
@@ -64,7 +64,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * Длительность обработки, мс.
+     * Processing duration, ms.
      *
      * @return the {@code duration_ms} field
      */
@@ -73,7 +73,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * Адрес клиента.
+     * The customer's address.
      *
      * @return the {@code ip} field
      */
@@ -82,7 +82,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * HTTP-метод.
+     * HTTP method.
      *
      * @return the {@code method} field
      */
@@ -91,7 +91,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * Путь запроса.
+     * Request path.
      *
      * @return the {@code path} field
      */
@@ -100,7 +100,7 @@ public final class APILogEntry implements WireObject {
     }
 
     /**
-     * Код ответа.
+     * Response code.
      *
      * @return the {@code status} field
      */
@@ -246,7 +246,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code api_key_id}.
          *
-         * <p>Ключ, которым подписан запрос.
+         * <p>The key the request was signed with.
          *
          * @param apiKeyId the value
          * @return this builder
@@ -259,7 +259,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда пришёл запрос (UTC).
+         * <p>When the request arrived (UTC).
          *
          * @param createdAt the value
          * @return this builder
@@ -272,7 +272,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code duration_ms}.
          *
-         * <p>Длительность обработки, мс.
+         * <p>Processing duration, ms.
          *
          * @param durationMs the value
          * @return this builder
@@ -285,7 +285,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code ip}.
          *
-         * <p>Адрес клиента.
+         * <p>The customer's address.
          *
          * @param ip the value
          * @return this builder
@@ -298,7 +298,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code method}.
          *
-         * <p>HTTP-метод.
+         * <p>HTTP method.
          *
          * @param method the value
          * @return this builder
@@ -311,7 +311,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code path}.
          *
-         * <p>Путь запроса.
+         * <p>Request path.
          *
          * @param path the value
          * @return this builder
@@ -324,7 +324,7 @@ public final class APILogEntry implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Код ответа.
+         * <p>Response code.
          *
          * @param status the value
          * @return this builder

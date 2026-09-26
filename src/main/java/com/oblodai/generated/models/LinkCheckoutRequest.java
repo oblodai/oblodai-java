@@ -41,8 +41,8 @@ public final class LinkCheckoutRequest implements WireObject {
     }
 
     /**
-     * Сумма, которую ввёл покупатель, в валюте цены ссылки; обязательна для open и range, для fixed
-     * игнорируется
+     * The amount the buyer entered, in the link's price currency; required for open and range,
+     * ignored for fixed
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -51,7 +51,7 @@ public final class LinkCheckoutRequest implements WireObject {
     }
 
     /**
-     * Валюта расчёта — монета, которой платит покупатель; нужна, только если ссылка не закрепила
+     * The settlement currency — the coin the buyer pays with; needed only if the link did not pin
      * pinned_currency
      *
      * @return the {@code currency} field, or {@code null} when absent
@@ -61,7 +61,7 @@ public final class LinkCheckoutRequest implements WireObject {
     }
 
     /**
-     * Сеть расчёта; нужна, только если ссылка не закрепила pinned_network
+     * The settlement network; needed only if the link did not pin pinned_network
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -70,8 +70,8 @@ public final class LinkCheckoutRequest implements WireObject {
     }
 
     /**
-     * Номер заказа магазина из встроенного виджета (data-oblodai-order-id); переносится на счёт и в
-     * вебхук для сопоставления с заказом; не ключ идемпотентности
+     * The store's order number from the embedded widget (data-oblodai-order-id); carried over to
+     * the invoice and the webhook for matching with the order; not an idempotency key
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -80,7 +80,7 @@ public final class LinkCheckoutRequest implements WireObject {
     }
 
     /**
-     * Email покупателя — на него автоматически уйдёт чек после оплаты
+     * The buyer's email — a receipt is sent to it automatically after payment
      *
      * @return the {@code payer_email} field, or {@code null} when absent
      */
@@ -211,8 +211,8 @@ public final class LinkCheckoutRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма, которую ввёл покупатель, в валюте цены ссылки; обязательна для open и range,
-         * для fixed игнорируется
+         * <p>The amount the buyer entered, in the link's price currency; required for open and
+         * range, ignored for fixed
          *
          * @param amount the value
          * @return this builder
@@ -225,8 +225,8 @@ public final class LinkCheckoutRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма, которую ввёл покупатель, в валюте цены ссылки; обязательна для open и range,
-         * для fixed игнорируется
+         * <p>The amount the buyer entered, in the link's price currency; required for open and
+         * range, ignored for fixed
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -238,8 +238,8 @@ public final class LinkCheckoutRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта расчёта — монета, которой платит покупатель; нужна, только если ссылка не
-         * закрепила pinned_currency
+         * <p>The settlement currency — the coin the buyer pays with; needed only if the link did
+         * not pin pinned_currency
          *
          * @param currency the value
          * @return this builder
@@ -252,7 +252,7 @@ public final class LinkCheckoutRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть расчёта; нужна, только если ссылка не закрепила pinned_network
+         * <p>The settlement network; needed only if the link did not pin pinned_network
          *
          * @param network the value
          * @return this builder
@@ -265,8 +265,8 @@ public final class LinkCheckoutRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Номер заказа магазина из встроенного виджета (data-oblodai-order-id); переносится на
-         * счёт и в вебхук для сопоставления с заказом; не ключ идемпотентности
+         * <p>The store's order number from the embedded widget (data-oblodai-order-id); carried
+         * over to the invoice and the webhook for matching with the order; not an idempotency key
          *
          * @param orderId the value
          * @return this builder
@@ -279,7 +279,7 @@ public final class LinkCheckoutRequest implements WireObject {
         /**
          * Sets {@code payer_email}.
          *
-         * <p>Email покупателя — на него автоматически уйдёт чек после оплаты
+         * <p>The buyer's email — a receipt is sent to it automatically after payment
          *
          * @param payerEmail the value
          * @return this builder

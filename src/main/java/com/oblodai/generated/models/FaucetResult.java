@@ -35,7 +35,7 @@ public final class FaucetResult implements WireObject {
     }
 
     /**
-     * Зачисленная сумма в точности актива.
+     * The credited amount at the asset's precision.
      *
      * @return the {@code amount} field
      */
@@ -44,7 +44,7 @@ public final class FaucetResult implements WireObject {
     }
 
     /**
-     * Актив пополнения.
+     * Deposit asset.
      *
      * @return the {@code asset} field
      */
@@ -53,7 +53,7 @@ public final class FaucetResult implements WireObject {
     }
 
     /**
-     * Журнальная запись пополнения; повтор с тем же idempotency_key возвращает ту же.
+     * The ledger entry of the top-up; a retry with the same idempotency_key returns the same one.
      *
      * @return the {@code journal_id} field
      */
@@ -167,7 +167,7 @@ public final class FaucetResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Зачисленная сумма в точности актива.
+         * <p>The credited amount at the asset's precision.
          *
          * @param amount the value
          * @return this builder
@@ -180,7 +180,7 @@ public final class FaucetResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Зачисленная сумма в точности актива.
+         * <p>The credited amount at the asset's precision.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -192,7 +192,7 @@ public final class FaucetResult implements WireObject {
         /**
          * Sets {@code asset}.
          *
-         * <p>Актив пополнения.
+         * <p>Deposit asset.
          *
          * @param asset the value
          * @return this builder
@@ -205,7 +205,8 @@ public final class FaucetResult implements WireObject {
         /**
          * Sets {@code journal_id}.
          *
-         * <p>Журнальная запись пополнения; повтор с тем же idempotency_key возвращает ту же.
+         * <p>The ledger entry of the top-up; a retry with the same idempotency_key returns the same
+         * one.
          *
          * @param journalId the value
          * @return this builder

@@ -31,8 +31,8 @@ public final class SetAccuracyRequest implements WireObject {
     }
 
     /**
-     * Допуск в процентах, 1–5. Обязателен при enabled: true; при enabled: false игнорируется
-     * (сбрасывается в 0). Кэп 5 %
+     * Tolerance in percent, 1–5. Required when enabled: true; ignored (reset to 0) when enabled:
+     * false. Capped at 5 %
      *
      * @return the {@code accuracy_percent} field, or {@code null} when absent
      */
@@ -41,7 +41,7 @@ public final class SetAccuracyRequest implements WireObject {
     }
 
     /**
-     * Включить/выключить допуск
+     * Enable/disable the tolerance
      *
      * @return the {@code enabled} field
      */
@@ -148,8 +148,8 @@ public final class SetAccuracyRequest implements WireObject {
         /**
          * Sets {@code accuracy_percent}.
          *
-         * <p>Допуск в процентах, 1–5. Обязателен при enabled: true; при enabled: false игнорируется
-         * (сбрасывается в 0). Кэп 5 %
+         * <p>Tolerance in percent, 1–5. Required when enabled: true; ignored (reset to 0) when
+         * enabled: false. Capped at 5 %
          *
          * @param accuracyPercent the value
          * @return this builder
@@ -162,7 +162,7 @@ public final class SetAccuracyRequest implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Включить/выключить допуск
+         * <p>Enable/disable the tolerance
          *
          * @param enabled the value
          * @return this builder

@@ -10,8 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Приходит, когда конвертация в эконом-режиме исполнена (completed — зачислено) или отменена с
- * возвратом исходной суммы (refunded).
+ * Sent when an economy-mode conversion is executed (completed — credited) or cancelled with the
+ * source amount returned (refunded).
  *
  * <p>Build one with {@link #builder()}; fields the SDK does not know yet are kept in
  * {@link #extra()} and sent back as they came.
@@ -80,7 +80,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Когда завершена (ISO 8601).
+     * When completed (ISO 8601).
      *
      * @return the {@code completed_at} field
      */
@@ -89,7 +89,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Когда конвертация принята (ISO 8601).
+     * When the conversion was accepted (ISO 8601).
      *
      * @return the {@code created_at} field
      */
@@ -98,7 +98,8 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на PDF-чек конвертации; пусто у возврата и когда документы выключены.
+     * A signed link to the PDF conversion receipt; empty for a refund and when documents are
+     * disabled.
      *
      * @return the {@code document_url} field
      */
@@ -107,7 +108,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Когда событие произошло, UTC с миллисекундами (ISO 8601).
+     * When the event happened, UTC with milliseconds (ISO 8601).
      *
      * @return the {@code event_at} field
      */
@@ -116,7 +117,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Комиссия конвертации, в процентах.
+     * Conversion fee, in percent.
      *
      * @return the {@code fee_percent} field
      */
@@ -125,7 +126,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Из какой валюты.
+     * Source currency.
      *
      * @return the {@code from} field
      */
@@ -134,7 +135,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Идентификатор конвертации — тот id, что вернул запрос конвертации.
+     * The conversion id — the id returned by the conversion request.
      *
      * @return the {@code id} field
      */
@@ -143,7 +144,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Всегда true: событие приходит, когда деньги уже зачислены или возвращены.
+     * Always true: the event arrives when the money has already been credited or returned.
      *
      * @return the {@code is_final} field
      */
@@ -152,7 +153,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Режим: economy (исполнена очередью) | instant.
+     * Mode: economy (executed via the queue) | instant.
      *
      * @return the {@code mode} field
      */
@@ -161,7 +162,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Причина возврата (market_below_min | window_expired); пусто у completed.
+     * The refund reason (market_below_min | window_expired); empty for completed.
      *
      * @return the {@code reason} field
      */
@@ -170,7 +171,8 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Сколько зачислено, в валюте to. Есть только у completed; у refunded поля нет.
+     * How much was credited, in the to currency. Present only for completed; refunded has no such
+     * field.
      *
      * @return the {@code received} field, or {@code null} when absent
      */
@@ -179,7 +181,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Сколько отдано, в валюте from.
+     * How much was given, in the from currency.
      *
      * @return the {@code sent} field
      */
@@ -188,8 +190,8 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Глобальный номер события: в пределах одного объекта больший номер новее, меньший — опоздавшая
-     * доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+     * The global event number: within one object a higher number is newer, a lower one is a late
+     * delivery and must be discarded. Always 0 on a rehearsal (test: true).
      *
      * @return the {@code sequence} field
      */
@@ -198,7 +200,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * completed — зачислено; refunded — исходная сумма возвращена.
+     * completed — credited; refunded — the source amount was returned.
      *
      * @return the {@code status} field
      */
@@ -207,9 +209,9 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда true —
-     * внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true обработчик
-     * обязан игнорировать, даже если подпись верна.
+     * Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and always true
+     * — inside the signature. A live event never carries this field: your handler must ignore a
+     * body with test: true even if the signature is valid.
      *
      * @return the {@code test} field, or {@code null} when absent
      */
@@ -218,7 +220,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * В какую валюту.
+     * Target currency.
      *
      * @return the {@code to} field
      */
@@ -227,7 +229,7 @@ public final class ConversionWebhook implements WireObject {
     }
 
     /**
-     * Вид события: payment | payout | wallet | conversion — какое тело пришло.
+     * Event kind: payment | payout | wallet | conversion — which body arrived.
      *
      * @return the {@code type} field
      */
@@ -456,7 +458,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code completed_at}.
          *
-         * <p>Когда завершена (ISO 8601).
+         * <p>When completed (ISO 8601).
          *
          * @param completedAt the value
          * @return this builder
@@ -469,7 +471,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда конвертация принята (ISO 8601).
+         * <p>When the conversion was accepted (ISO 8601).
          *
          * @param createdAt the value
          * @return this builder
@@ -482,8 +484,8 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Подписанная ссылка на PDF-чек конвертации; пусто у возврата и когда документы
-         * выключены.
+         * <p>A signed link to the PDF conversion receipt; empty for a refund and when documents are
+         * disabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -496,7 +498,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code event_at}.
          *
-         * <p>Когда событие произошло, UTC с миллисекундами (ISO 8601).
+         * <p>When the event happened, UTC with milliseconds (ISO 8601).
          *
          * @param eventAt the value
          * @return this builder
@@ -509,7 +511,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Комиссия конвертации, в процентах.
+         * <p>Conversion fee, in percent.
          *
          * @param feePercent the value
          * @return this builder
@@ -522,7 +524,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Комиссия конвертации, в процентах.
+         * <p>Conversion fee, in percent.
          *
          * @param feePercent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -534,7 +536,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Из какой валюты.
+         * <p>Source currency.
          *
          * @param from the value
          * @return this builder
@@ -547,7 +549,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code id}.
          *
-         * <p>Идентификатор конвертации — тот id, что вернул запрос конвертации.
+         * <p>The conversion id — the id returned by the conversion request.
          *
          * @param id the value
          * @return this builder
@@ -560,7 +562,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code is_final}.
          *
-         * <p>Всегда true: событие приходит, когда деньги уже зачислены или возвращены.
+         * <p>Always true: the event arrives when the money has already been credited or returned.
          *
          * @param isFinal the value
          * @return this builder
@@ -573,7 +575,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code mode}.
          *
-         * <p>Режим: economy (исполнена очередью) | instant.
+         * <p>Mode: economy (executed via the queue) | instant.
          *
          * @param mode the value
          * @return this builder
@@ -586,7 +588,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code reason}.
          *
-         * <p>Причина возврата (market_below_min | window_expired); пусто у completed.
+         * <p>The refund reason (market_below_min | window_expired); empty for completed.
          *
          * @param reason the value
          * @return this builder
@@ -599,7 +601,8 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code received}.
          *
-         * <p>Сколько зачислено, в валюте to. Есть только у completed; у refunded поля нет.
+         * <p>How much was credited, in the to currency. Present only for completed; refunded has no
+         * such field.
          *
          * @param received the value
          * @return this builder
@@ -612,7 +615,8 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code received}.
          *
-         * <p>Сколько зачислено, в валюте to. Есть только у completed; у refunded поля нет.
+         * <p>How much was credited, in the to currency. Present only for completed; refunded has no
+         * such field.
          *
          * @param received the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -624,7 +628,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code sent}.
          *
-         * <p>Сколько отдано, в валюте from.
+         * <p>How much was given, in the from currency.
          *
          * @param sent the value
          * @return this builder
@@ -637,7 +641,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code sent}.
          *
-         * <p>Сколько отдано, в валюте from.
+         * <p>How much was given, in the from currency.
          *
          * @param sent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -649,8 +653,8 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code sequence}.
          *
-         * <p>Глобальный номер события: в пределах одного объекта больший номер новее, меньший —
-         * опоздавшая доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+         * <p>The global event number: within one object a higher number is newer, a lower one is a
+         * late delivery and must be discarded. Always 0 on a rehearsal (test: true).
          *
          * @param sequence the value
          * @return this builder
@@ -663,7 +667,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>completed — зачислено; refunded — исходная сумма возвращена.
+         * <p>completed — credited; refunded — the source amount was returned.
          *
          * @param status the value
          * @return this builder
@@ -676,7 +680,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>completed — зачислено; refunded — исходная сумма возвращена.
+         * <p>completed — credited; refunded — the source amount was returned.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -689,9 +693,9 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code test}.
          *
-         * <p>Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда
-         * true — внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true
-         * обработчик обязан игнорировать, даже если подпись верна.
+         * <p>Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and
+         * always true — inside the signature. A live event never carries this field: your handler
+         * must ignore a body with test: true even if the signature is valid.
          *
          * @param test the value
          * @return this builder
@@ -704,7 +708,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>В какую валюту.
+         * <p>Target currency.
          *
          * @param to the value
          * @return this builder
@@ -717,7 +721,7 @@ public final class ConversionWebhook implements WireObject {
         /**
          * Sets {@code type}.
          *
-         * <p>Вид события: payment | payout | wallet | conversion — какое тело пришло.
+         * <p>Event kind: payment | payout | wallet | conversion — which body arrived.
          *
          * @param type the value
          * @return this builder

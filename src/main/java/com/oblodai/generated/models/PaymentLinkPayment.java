@@ -44,7 +44,7 @@ public final class PaymentLinkPayment implements WireObject {
     }
 
     /**
-     * Цена счёта в валюте цены ссылки.
+     * The invoice price in the link's price currency.
      *
      * @return the {@code amount} field
      */
@@ -53,7 +53,7 @@ public final class PaymentLinkPayment implements WireObject {
     }
 
     /**
-     * Когда создан (UTC).
+     * When created (UTC).
      *
      * @return the {@code created_at} field
      */
@@ -62,7 +62,7 @@ public final class PaymentLinkPayment implements WireObject {
     }
 
     /**
-     * Валюта цены.
+     * Price currency.
      *
      * @return the {@code currency} field
      */
@@ -71,7 +71,7 @@ public final class PaymentLinkPayment implements WireObject {
     }
 
     /**
-     * Номер заказа магазина, если виджет его передал.
+     * The store's order number, if the widget passed one.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -80,7 +80,7 @@ public final class PaymentLinkPayment implements WireObject {
     }
 
     /**
-     * Статус платежа.
+     * Payment status.
      *
      * @return the {@code status} field
      */
@@ -89,7 +89,7 @@ public final class PaymentLinkPayment implements WireObject {
     }
 
     /**
-     * Идентификатор платежа.
+     * Payment id.
      *
      * @return the {@code uuid} field
      */
@@ -228,7 +228,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Цена счёта в валюте цены ссылки.
+         * <p>The invoice price in the link's price currency.
          *
          * @param amount the value
          * @return this builder
@@ -241,7 +241,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Цена счёта в валюте цены ссылки.
+         * <p>The invoice price in the link's price currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -253,7 +253,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда создан (UTC).
+         * <p>When created (UTC).
          *
          * @param createdAt the value
          * @return this builder
@@ -266,7 +266,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта цены.
+         * <p>Price currency.
          *
          * @param currency the value
          * @return this builder
@@ -279,7 +279,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Номер заказа магазина, если виджет его передал.
+         * <p>The store's order number, if the widget passed one.
          *
          * @param orderId the value
          * @return this builder
@@ -292,7 +292,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус платежа.
+         * <p>Payment status.
          *
          * @param status the value
          * @return this builder
@@ -305,7 +305,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус платежа.
+         * <p>Payment status.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -318,7 +318,7 @@ public final class PaymentLinkPayment implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор платежа.
+         * <p>Payment id.
          *
          * @param uuid the value
          * @return this builder

@@ -40,8 +40,8 @@ public final class SplitRuleRequest implements WireObject {
     }
 
     /**
-     * Внешний криптоадрес партнёра; доля уходит реальной транзакцией в блокчейне — необратимо.
-     * Ровно один вариант получателя: либо address+network, либо merchant_id.
+     * The partner's external crypto address; the share is sent as a real on-chain transaction —
+     * irreversibly. Exactly one recipient option: either address+network or merchant_id.
      *
      * @return the {@code address} field, or {@code null} when absent
      */
@@ -50,8 +50,8 @@ public final class SplitRuleRequest implements WireObject {
     }
 
     /**
-     * Идентификатор мерчанта-партнёра внутри Oblodai; доля движется по внутреннему учёту и при
-     * возврате отзывается обратно.
+     * The id of the partner merchant within Oblodai; the share moves within internal accounting and
+     * is clawed back on refund.
      *
      * @return the {@code merchant_id} field, or {@code null} when absent
      */
@@ -60,7 +60,7 @@ public final class SplitRuleRequest implements WireObject {
     }
 
     /**
-     * Сеть адреса. Обязательна вместе с address.
+     * The address network. Required together with address.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -69,7 +69,7 @@ public final class SplitRuleRequest implements WireObject {
     }
 
     /**
-     * Комментарий для себя (виден в списке правил).
+     * A note for yourself (visible in the rule list).
      *
      * @return the {@code note} field, or {@code null} when absent
      */
@@ -78,8 +78,8 @@ public final class SplitRuleRequest implements WireObject {
     }
 
     /**
-     * Доля от каждого платежа, строкой: "10" = 10 %, "2.5" = 2.5 %. Больше 0 и не больше 100, шаг
-     * 0.01 %; сумма всех правил не может превышать 100 %.
+     * The share of each payment, as a string: "10" = 10 %, "2.5" = 2.5 %. Greater than 0 and at
+     * most 100, in steps of 0.01 %; the sum of all rules cannot exceed 100 %.
      *
      * @return the {@code percent} field
      */
@@ -209,8 +209,9 @@ public final class SplitRuleRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Внешний криптоадрес партнёра; доля уходит реальной транзакцией в блокчейне —
-         * необратимо. Ровно один вариант получателя: либо address+network, либо merchant_id.
+         * <p>The partner's external crypto address; the share is sent as a real on-chain
+         * transaction — irreversibly. Exactly one recipient option: either address+network or
+         * merchant_id.
          *
          * @param address the value
          * @return this builder
@@ -223,8 +224,8 @@ public final class SplitRuleRequest implements WireObject {
         /**
          * Sets {@code merchant_id}.
          *
-         * <p>Идентификатор мерчанта-партнёра внутри Oblodai; доля движется по внутреннему учёту и
-         * при возврате отзывается обратно.
+         * <p>The id of the partner merchant within Oblodai; the share moves within internal
+         * accounting and is clawed back on refund.
          *
          * @param merchantId the value
          * @return this builder
@@ -237,7 +238,7 @@ public final class SplitRuleRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть адреса. Обязательна вместе с address.
+         * <p>The address network. Required together with address.
          *
          * @param network the value
          * @return this builder
@@ -250,7 +251,7 @@ public final class SplitRuleRequest implements WireObject {
         /**
          * Sets {@code note}.
          *
-         * <p>Комментарий для себя (виден в списке правил).
+         * <p>A note for yourself (visible in the rule list).
          *
          * @param note the value
          * @return this builder
@@ -263,8 +264,8 @@ public final class SplitRuleRequest implements WireObject {
         /**
          * Sets {@code percent}.
          *
-         * <p>Доля от каждого платежа, строкой: "10" = 10 %, "2.5" = 2.5 %. Больше 0 и не больше
-         * 100, шаг 0.01 %; сумма всех правил не может превышать 100 %.
+         * <p>The share of each payment, as a string: "10" = 10 %, "2.5" = 2.5 %. Greater than 0 and
+         * at most 100, in steps of 0.01 %; the sum of all rules cannot exceed 100 %.
          *
          * @param percent the value
          * @return this builder

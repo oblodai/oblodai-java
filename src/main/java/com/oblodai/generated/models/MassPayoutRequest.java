@@ -32,7 +32,7 @@ public final class MassPayoutRequest implements WireObject {
     }
 
     /**
-     * Массив до 100 элементов; поля каждого — как в POST /v1/payout.
+     * An array of up to 100 items; the fields of each are as in POST /v1/payout.
      *
      * @return the {@code payouts} field
      */
@@ -41,7 +41,7 @@ public final class MassPayoutRequest implements WireObject {
     }
 
     /**
-     * Метка происхождения, применяется ко всем элементам без своего source.
+     * The origin label, applied to all items without their own source.
      *
      * @return the {@code source} field, or {@code null} when absent
      */
@@ -148,7 +148,7 @@ public final class MassPayoutRequest implements WireObject {
         /**
          * Sets {@code payouts}.
          *
-         * <p>Массив до 100 элементов; поля каждого — как в POST /v1/payout.
+         * <p>An array of up to 100 items; the fields of each are as in POST /v1/payout.
          *
          * @param payouts the value
          * @return this builder
@@ -161,7 +161,7 @@ public final class MassPayoutRequest implements WireObject {
         /**
          * Sets {@code source}.
          *
-         * <p>Метка происхождения, применяется ко всем элементам без своего source.
+         * <p>The origin label, applied to all items without their own source.
          *
          * @param source the value
          * @return this builder

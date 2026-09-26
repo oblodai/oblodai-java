@@ -61,8 +61,8 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Постоянный адрес для пополнений. На XRP — классический r-адрес ОБЩЕГО кошелька; пополнение
-     * обязано нести destination_tag. На XLM — G-адрес; пополнение обязано нести memo.
+     * A permanent deposit address. On XRP — the classic r-address of a SHARED wallet; a deposit
+     * must carry destination_tag. On XLM — a G-address; a deposit must carry memo.
      *
      * @return the {@code address} field
      */
@@ -71,7 +71,7 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Только XLM: адрес и memo одной строкой (muxed M…, SEP-23).
+     * XLM only: address and memo in one string (muxed M…, SEP-23).
      *
      * @return the {@code address_muxed} field, or {@code null} when absent
      */
@@ -80,7 +80,7 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Только XRP: адрес и тег одной строкой (X-address, XLS-5).
+     * XRP only: address and tag in one string (X-address, XLS-5).
      *
      * @return the {@code address_xaddress} field, or {@code null} when absent
      */
@@ -89,8 +89,8 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * true — кошелёк заблокирован: пополнения на этот адрес НЕ зачисляются (уходят в карантин
-     * оператору, без вебхука и без автовозврата). Публиковать такой адрес нельзя.
+     * true — the wallet is blocked: deposits to this address are NOT credited (they go to operator
+     * quarantine, with no webhook and no auto-refund). Do not publish such an address.
      *
      * @return the {@code blocked} field
      */
@@ -99,7 +99,7 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Валюта пополнений.
+     * Deposit currency.
      *
      * @return the {@code currency} field
      */
@@ -108,8 +108,8 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Только XRP: числовой destination tag этого кошелька — клиент обязан указывать его в каждом
-     * переводе.
+     * XRP only: this wallet's numeric destination tag — the customer must specify it in every
+     * transfer.
      *
      * @return the {@code destination_tag} field, or {@code null} when absent
      */
@@ -118,7 +118,8 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на PDF-справку о реквизитах. Пусто, когда рендер документов выключен.
+     * A signed link to the PDF payment details certificate. Empty when document rendering is
+     * disabled.
      *
      * @return the {@code document_url} field
      */
@@ -127,8 +128,8 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Только XLM: числовой memo (тип ID) этого кошелька — клиент обязан указывать его в каждом
-     * переводе.
+     * XLM only: this wallet's numeric memo (ID type) — the customer must specify it in every
+     * transfer.
      *
      * @return the {@code memo} field, or {@code null} when absent
      */
@@ -137,7 +138,7 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Сеть блокчейна.
+     * Blockchain network.
      *
      * @return the {@code network} field
      */
@@ -146,8 +147,8 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Ваш идентификатор клиента, за которым закреплён адрес (часть тройки идемпотентности
-     * currency+network+order_id).
+     * Your customer identifier the address is assigned to (part of the currency+network+order_id
+     * idempotency triple).
      *
      * @return the {@code order_id} field
      */
@@ -156,7 +157,7 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Зарезервировано (обычно пусто).
+     * Reserved (usually empty).
      *
      * @return the {@code url} field
      */
@@ -165,7 +166,7 @@ public final class StaticWalletView implements WireObject {
     }
 
     /**
-     * Идентификатор статического кошелька.
+     * Static wallet id.
      *
      * @return the {@code uuid} field
      */
@@ -354,9 +355,8 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Постоянный адрес для пополнений. На XRP — классический r-адрес ОБЩЕГО кошелька;
-         * пополнение обязано нести destination_tag. На XLM — G-адрес; пополнение обязано нести
-         * memo.
+         * <p>A permanent deposit address. On XRP — the classic r-address of a SHARED wallet; a
+         * deposit must carry destination_tag. On XLM — a G-address; a deposit must carry memo.
          *
          * @param address the value
          * @return this builder
@@ -369,7 +369,7 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code address_muxed}.
          *
-         * <p>Только XLM: адрес и memo одной строкой (muxed M…, SEP-23).
+         * <p>XLM only: address and memo in one string (muxed M…, SEP-23).
          *
          * @param addressMuxed the value
          * @return this builder
@@ -382,7 +382,7 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code address_xaddress}.
          *
-         * <p>Только XRP: адрес и тег одной строкой (X-address, XLS-5).
+         * <p>XRP only: address and tag in one string (X-address, XLS-5).
          *
          * @param addressXaddress the value
          * @return this builder
@@ -395,8 +395,8 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code blocked}.
          *
-         * <p>true — кошелёк заблокирован: пополнения на этот адрес НЕ зачисляются (уходят в
-         * карантин оператору, без вебхука и без автовозврата). Публиковать такой адрес нельзя.
+         * <p>true — the wallet is blocked: deposits to this address are NOT credited (they go to
+         * operator quarantine, with no webhook and no auto-refund). Do not publish such an address.
          *
          * @param blocked the value
          * @return this builder
@@ -409,7 +409,7 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта пополнений.
+         * <p>Deposit currency.
          *
          * @param currency the value
          * @return this builder
@@ -422,8 +422,8 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code destination_tag}.
          *
-         * <p>Только XRP: числовой destination tag этого кошелька — клиент обязан указывать его в
-         * каждом переводе.
+         * <p>XRP only: this wallet's numeric destination tag — the customer must specify it in
+         * every transfer.
          *
          * @param destinationTag the value
          * @return this builder
@@ -436,8 +436,8 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Подписанная ссылка на PDF-справку о реквизитах. Пусто, когда рендер документов
-         * выключен.
+         * <p>A signed link to the PDF payment details certificate. Empty when document rendering is
+         * disabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -450,8 +450,8 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code memo}.
          *
-         * <p>Только XLM: числовой memo (тип ID) этого кошелька — клиент обязан указывать его в
-         * каждом переводе.
+         * <p>XLM only: this wallet's numeric memo (ID type) — the customer must specify it in every
+         * transfer.
          *
          * @param memo the value
          * @return this builder
@@ -464,7 +464,7 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть блокчейна.
+         * <p>Blockchain network.
          *
          * @param network the value
          * @return this builder
@@ -477,8 +477,8 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш идентификатор клиента, за которым закреплён адрес (часть тройки идемпотентности
-         * currency+network+order_id).
+         * <p>Your customer identifier the address is assigned to (part of the
+         * currency+network+order_id idempotency triple).
          *
          * @param orderId the value
          * @return this builder
@@ -491,7 +491,7 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Зарезервировано (обычно пусто).
+         * <p>Reserved (usually empty).
          *
          * @param url the value
          * @return this builder
@@ -504,7 +504,7 @@ public final class StaticWalletView implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор статического кошелька.
+         * <p>Static wallet id.
          *
          * @param uuid the value
          * @return this builder

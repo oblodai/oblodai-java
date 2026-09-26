@@ -36,7 +36,7 @@ public final class GetBatchDocumentQuery implements WireObject {
     }
 
     /**
-     * UUID батча.
+     * The batch UUID.
      *
      * @return the {@code uuid} field
      */
@@ -45,7 +45,7 @@ public final class GetBatchDocumentQuery implements WireObject {
     }
 
     /**
-     * Язык документа (по умолчанию en); список — document.Languages.
+     * Document language (en by default); the list is document.Languages.
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -54,7 +54,7 @@ public final class GetBatchDocumentQuery implements WireObject {
     }
 
     /**
-     * Формат файла: pdf (по умолчанию) или csv.
+     * File format: pdf (default) or csv.
      *
      * @return the {@code format} field, or {@code null} when absent
      */
@@ -168,7 +168,7 @@ public final class GetBatchDocumentQuery implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>UUID батча.
+         * <p>The batch UUID.
          *
          * @param uuid the value
          * @return this builder
@@ -181,7 +181,7 @@ public final class GetBatchDocumentQuery implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа (по умолчанию en); список — document.Languages.
+         * <p>Document language (en by default); the list is document.Languages.
          *
          * @param lang the value
          * @return this builder
@@ -194,7 +194,7 @@ public final class GetBatchDocumentQuery implements WireObject {
         /**
          * Sets {@code format}.
          *
-         * <p>Формат файла: pdf (по умолчанию) или csv.
+         * <p>File format: pdf (default) or csv.
          *
          * @param format the value
          * @return this builder

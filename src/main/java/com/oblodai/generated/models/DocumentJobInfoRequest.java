@@ -28,7 +28,7 @@ public final class DocumentJobInfoRequest implements WireObject {
     }
 
     /**
-     * Идентификатор задачи из ответа создания.
+     * The job id from the creation response.
      *
      * @return the {@code job_id} field
      */
@@ -126,7 +126,7 @@ public final class DocumentJobInfoRequest implements WireObject {
         /**
          * Sets {@code job_id}.
          *
-         * <p>Идентификатор задачи из ответа создания.
+         * <p>The job id from the creation response.
          *
          * @param jobId the value
          * @return this builder

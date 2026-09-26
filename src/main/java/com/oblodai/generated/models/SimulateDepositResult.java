@@ -38,7 +38,7 @@ public final class SimulateDepositResult implements WireObject {
     }
 
     /**
-     * Сумма депозита в валюте счёта.
+     * The deposit amount in the invoice currency.
      *
      * @return the {@code amount} field
      */
@@ -47,7 +47,7 @@ public final class SimulateDepositResult implements WireObject {
     }
 
     /**
-     * С каким числом подтверждений депозит отдан конвейеру.
+     * The number of confirmations with which the deposit was handed to the pipeline.
      *
      * @return the {@code confirmations} field
      */
@@ -56,7 +56,7 @@ public final class SimulateDepositResult implements WireObject {
     }
 
     /**
-     * Оплачиваемый тестовый счёт.
+     * The test invoice being paid.
      *
      * @return the {@code invoice_id} field
      */
@@ -65,8 +65,8 @@ public final class SimulateDepositResult implements WireObject {
     }
 
     /**
-     * Транзакция депозита (с префиксом песочницы); повтор того же txid проверяет вашу
-     * идемпотентность.
+     * The deposit transaction (with a sandbox prefix); repeating the same txid tests your
+     * idempotency.
      *
      * @return the {@code txid} field
      */
@@ -190,7 +190,7 @@ public final class SimulateDepositResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма депозита в валюте счёта.
+         * <p>The deposit amount in the invoice currency.
          *
          * @param amount the value
          * @return this builder
@@ -203,7 +203,7 @@ public final class SimulateDepositResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма депозита в валюте счёта.
+         * <p>The deposit amount in the invoice currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -215,7 +215,7 @@ public final class SimulateDepositResult implements WireObject {
         /**
          * Sets {@code confirmations}.
          *
-         * <p>С каким числом подтверждений депозит отдан конвейеру.
+         * <p>The number of confirmations with which the deposit was handed to the pipeline.
          *
          * @param confirmations the value
          * @return this builder
@@ -228,7 +228,7 @@ public final class SimulateDepositResult implements WireObject {
         /**
          * Sets {@code invoice_id}.
          *
-         * <p>Оплачиваемый тестовый счёт.
+         * <p>The test invoice being paid.
          *
          * @param invoiceId the value
          * @return this builder
@@ -241,8 +241,8 @@ public final class SimulateDepositResult implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Транзакция депозита (с префиксом песочницы); повтор того же txid проверяет вашу
-         * идемпотентность.
+         * <p>The deposit transaction (with a sandbox prefix); repeating the same txid tests your
+         * idempotency.
          *
          * @param txid the value
          * @return this builder

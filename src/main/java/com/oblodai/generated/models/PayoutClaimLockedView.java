@@ -40,7 +40,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
     }
 
     /**
-     * Получить можно сейчас: ссылка оплачена и не истекла.
+     * Can be claimed now: the link is funded and has not expired.
      *
      * @return the {@code claimable} field
      */
@@ -49,7 +49,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
     }
 
     /**
-     * До какого момента ссылку можно получить (UTC).
+     * Until when the link can be claimed (UTC).
      *
      * @return the {@code expires_at} field
      */
@@ -58,7 +58,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
     }
 
     /**
-     * Всегда true: суммы и сеть покажутся после кода в заголовке X-Claim-Passcode.
+     * Always true: amounts and network are shown after the passcode in the X-Claim-Passcode header.
      *
      * @return the {@code passcode_required} field
      */
@@ -67,7 +67,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
     }
 
     /**
-     * Состояние ссылки.
+     * Link state.
      *
      * @return the {@code status} field
      */
@@ -76,7 +76,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
     }
 
     /**
-     * Заголовок от отправителя.
+     * Title from the sender.
      *
      * @return the {@code title} field
      */
@@ -209,7 +209,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
         /**
          * Sets {@code claimable}.
          *
-         * <p>Получить можно сейчас: ссылка оплачена и не истекла.
+         * <p>Can be claimed now: the link is funded and has not expired.
          *
          * @param claimable the value
          * @return this builder
@@ -222,7 +222,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
         /**
          * Sets {@code expires_at}.
          *
-         * <p>До какого момента ссылку можно получить (UTC).
+         * <p>Until when the link can be claimed (UTC).
          *
          * @param expiresAt the value
          * @return this builder
@@ -235,7 +235,8 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
         /**
          * Sets {@code passcode_required}.
          *
-         * <p>Всегда true: суммы и сеть покажутся после кода в заголовке X-Claim-Passcode.
+         * <p>Always true: amounts and network are shown after the passcode in the X-Claim-Passcode
+         * header.
          *
          * @param passcodeRequired the value
          * @return this builder
@@ -248,7 +249,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки.
+         * <p>Link state.
          *
          * @param status the value
          * @return this builder
@@ -261,7 +262,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки.
+         * <p>Link state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -274,7 +275,7 @@ public final class PayoutClaimLockedView implements WireObject, PayoutClaimInfo 
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок от отправителя.
+         * <p>Title from the sender.
          *
          * @param title the value
          * @return this builder

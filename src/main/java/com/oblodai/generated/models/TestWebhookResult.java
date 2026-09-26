@@ -43,7 +43,7 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * Сколько длилась доставка, мс.
+     * How long the delivery took, ms.
      *
      * @return the {@code duration_ms} field
      */
@@ -52,7 +52,7 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * Почему доставка не состоялась; только при ok=false.
+     * Why the delivery did not take place; only when ok=false.
      *
      * @return the {@code error} field, or {@code null} when absent
      */
@@ -61,7 +61,7 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * Доставка состоялась (endpoint ответил, любым статусом).
+     * The delivery took place (the endpoint responded, with any status).
      *
      * @return the {@code ok} field
      */
@@ -70,7 +70,7 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * Тело подписано секретом endpoint'а проекта.
+     * The body is signed with the project endpoint's secret.
      *
      * @return the {@code signed} field
      */
@@ -79,7 +79,7 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * HTTP-статус ответа endpoint'а; только при ok=true.
+     * The HTTP status returned by the endpoint; only when ok=true.
      *
      * @return the {@code status_code} field, or {@code null} when absent
      */
@@ -88,7 +88,7 @@ public final class TestWebhookResult implements WireObject {
     }
 
     /**
-     * Куда ушло пробное тело.
+     * Where the sample body was sent.
      *
      * @return the {@code url} field
      */
@@ -226,7 +226,7 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code duration_ms}.
          *
-         * <p>Сколько длилась доставка, мс.
+         * <p>How long the delivery took, ms.
          *
          * @param durationMs the value
          * @return this builder
@@ -239,7 +239,7 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code error}.
          *
-         * <p>Почему доставка не состоялась; только при ok=false.
+         * <p>Why the delivery did not take place; only when ok=false.
          *
          * @param error the value
          * @return this builder
@@ -252,7 +252,7 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Доставка состоялась (endpoint ответил, любым статусом).
+         * <p>The delivery took place (the endpoint responded, with any status).
          *
          * @param ok the value
          * @return this builder
@@ -265,7 +265,7 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code signed}.
          *
-         * <p>Тело подписано секретом endpoint'а проекта.
+         * <p>The body is signed with the project endpoint's secret.
          *
          * @param signed the value
          * @return this builder
@@ -278,7 +278,7 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code status_code}.
          *
-         * <p>HTTP-статус ответа endpoint'а; только при ok=true.
+         * <p>The HTTP status returned by the endpoint; only when ok=true.
          *
          * @param statusCode the value
          * @return this builder
@@ -291,7 +291,7 @@ public final class TestWebhookResult implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Куда ушло пробное тело.
+         * <p>Where the sample body was sent.
          *
          * @param url the value
          * @return this builder

@@ -56,7 +56,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Сумма — для режима fixed; обязательна в этом режиме
+     * Amount — for fixed mode; required in this mode
      *
      * @return the {@code amount_fixed} field, or {@code null} when absent
      */
@@ -65,7 +65,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Режим суммы: fixed | open | range
+     * Amount mode: fixed | open | range
      *
      * @return the {@code amount_mode} field
      */
@@ -74,8 +74,8 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Валюта цены — фиат (USD, EUR, RUB, …) или монета; список — pricing_currencies из GET
-     * /v1/currencies
+     * The price currency — fiat (USD, EUR, RUB, …) or a coin; the list is pricing_currencies from
+     * GET /v1/currencies
      *
      * @return the {@code currency} field
      */
@@ -84,7 +84,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Описание на странице оплаты
+     * Description on the payment page
      *
      * @return the {@code description} field, or {@code null} when absent
      */
@@ -93,7 +93,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Срок жизни ссылки, секунд от момента создания; 0 (по умолчанию) — ссылка бессрочная
+     * The link lifetime, in seconds from creation; 0 (default) — the link never expires
      *
      * @return the {@code expires_in_seconds} field, or {@code null} when absent
      */
@@ -102,7 +102,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Верхняя граница — для range; обязательна в этом режиме
+     * Upper bound — for range; required in this mode
      *
      * @return the {@code max_amount} field, or {@code null} when absent
      */
@@ -111,7 +111,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Нижняя граница: необязательный «пол» для open, обязательный минимум для range
+     * Lower bound: an optional "floor" for open, a required minimum for range
      *
      * @return the {@code min_amount} field, or {@code null} when absent
      */
@@ -120,7 +120,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Валюта расчёта (монета), закреплённая за ссылкой; пусто — монету выбирает покупатель
+     * The settlement currency (coin) pinned to the link; empty — the buyer chooses the coin
      *
      * @return the {@code pinned_currency} field, or {@code null} when absent
      */
@@ -129,7 +129,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Сеть расчёта, закреплённая за ссылкой; пусто — сеть выбирает покупатель
+     * The settlement network pinned to the link; empty — the buyer chooses the network
      *
      * @return the {@code pinned_network} field, or {@code null} when absent
      */
@@ -138,7 +138,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
     }
 
     /**
-     * Заголовок на странице оплаты
+     * Title on the payment page
      *
      * @return the {@code title} field, or {@code null} when absent
      */
@@ -317,7 +317,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code amount_fixed}.
          *
-         * <p>Сумма — для режима fixed; обязательна в этом режиме
+         * <p>Amount — for fixed mode; required in this mode
          *
          * @param amountFixed the value
          * @return this builder
@@ -330,7 +330,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code amount_mode}.
          *
-         * <p>Режим суммы: fixed | open | range
+         * <p>Amount mode: fixed | open | range
          *
          * @param amountMode the value
          * @return this builder
@@ -343,7 +343,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code amount_mode}.
          *
-         * <p>Режим суммы: fixed | open | range
+         * <p>Amount mode: fixed | open | range
          *
          * @param amountMode the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -356,8 +356,8 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта цены — фиат (USD, EUR, RUB, …) или монета; список — pricing_currencies из GET
-         * /v1/currencies
+         * <p>The price currency — fiat (USD, EUR, RUB, …) or a coin; the list is pricing_currencies
+         * from GET /v1/currencies
          *
          * @param currency the value
          * @return this builder
@@ -370,7 +370,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code description}.
          *
-         * <p>Описание на странице оплаты
+         * <p>Description on the payment page
          *
          * @param description the value
          * @return this builder
@@ -383,7 +383,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code expires_in_seconds}.
          *
-         * <p>Срок жизни ссылки, секунд от момента создания; 0 (по умолчанию) — ссылка бессрочная
+         * <p>The link lifetime, in seconds from creation; 0 (default) — the link never expires
          *
          * @param expiresInSeconds the value
          * @return this builder
@@ -396,7 +396,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Верхняя граница — для range; обязательна в этом режиме
+         * <p>Upper bound — for range; required in this mode
          *
          * @param maxAmount the value
          * @return this builder
@@ -409,7 +409,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Верхняя граница — для range; обязательна в этом режиме
+         * <p>Upper bound — for range; required in this mode
          *
          * @param maxAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -421,7 +421,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Нижняя граница: необязательный «пол» для open, обязательный минимум для range
+         * <p>Lower bound: an optional "floor" for open, a required minimum for range
          *
          * @param minAmount the value
          * @return this builder
@@ -434,7 +434,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Нижняя граница: необязательный «пол» для open, обязательный минимум для range
+         * <p>Lower bound: an optional "floor" for open, a required minimum for range
          *
          * @param minAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -446,7 +446,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code pinned_currency}.
          *
-         * <p>Валюта расчёта (монета), закреплённая за ссылкой; пусто — монету выбирает покупатель
+         * <p>The settlement currency (coin) pinned to the link; empty — the buyer chooses the coin
          *
          * @param pinnedCurrency the value
          * @return this builder
@@ -459,7 +459,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code pinned_network}.
          *
-         * <p>Сеть расчёта, закреплённая за ссылкой; пусто — сеть выбирает покупатель
+         * <p>The settlement network pinned to the link; empty — the buyer chooses the network
          *
          * @param pinnedNetwork the value
          * @return this builder
@@ -472,7 +472,7 @@ public final class PaymentLinkCreateRequest implements WireObject {
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок на странице оплаты
+         * <p>Title on the payment page
          *
          * @param title the value
          * @return this builder

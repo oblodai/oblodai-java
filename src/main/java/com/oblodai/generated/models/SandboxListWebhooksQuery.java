@@ -33,7 +33,7 @@ public final class SandboxListWebhooksQuery implements WireObject {
     }
 
     /**
-     * Размер страницы (1–100, по умолчанию 25).
+     * Page size (1–100, default 25).
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -42,7 +42,7 @@ public final class SandboxListWebhooksQuery implements WireObject {
     }
 
     /**
-     * Смещение страницы.
+     * Page offset.
      *
      * @return the {@code offset} field, or {@code null} when absent
      */
@@ -148,7 +148,7 @@ public final class SandboxListWebhooksQuery implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Размер страницы (1–100, по умолчанию 25).
+         * <p>Page size (1–100, default 25).
          *
          * @param limit the value
          * @return this builder
@@ -161,7 +161,7 @@ public final class SandboxListWebhooksQuery implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение страницы.
+         * <p>Page offset.
          *
          * @param offset the value
          * @return this builder

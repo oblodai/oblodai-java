@@ -34,7 +34,7 @@ public final class PayServiceLimit implements WireObject {
     }
 
     /**
-     * Единица сумм limit; нет ключа — нет и границ в деньгах.
+     * The unit of the limit amounts; no key — no monetary bounds either.
      *
      * @return the {@code currency} field, or {@code null} when absent
      */
@@ -43,7 +43,7 @@ public final class PayServiceLimit implements WireObject {
     }
 
     /**
-     * Потолок одной выплаты в USD; "" — потолка нет (у приёма — всегда).
+     * The cap for a single payout in USD; "" — no cap (always so for accepting payments).
      *
      * @return the {@code max_amount} field
      */
@@ -52,7 +52,7 @@ public final class PayServiceLimit implements WireObject {
     }
 
     /**
-     * Минимальная сумма в валюте currency: "" — минимума нет, null — не определилась.
+     * The minimum amount in currency: "" — no minimum, null — could not be determined.
      *
      * @return the {@code min_amount} field, or {@code null} when absent
      */
@@ -166,7 +166,7 @@ public final class PayServiceLimit implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Единица сумм limit; нет ключа — нет и границ в деньгах.
+         * <p>The unit of the limit amounts; no key — no monetary bounds either.
          *
          * @param currency the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class PayServiceLimit implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Потолок одной выплаты в USD; "" — потолка нет (у приёма — всегда).
+         * <p>The cap for a single payout in USD; "" — no cap (always so for accepting payments).
          *
          * @param maxAmount the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class PayServiceLimit implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Минимальная сумма в валюте currency: "" — минимума нет, null — не определилась.
+         * <p>The minimum amount in currency: "" — no minimum, null — could not be determined.
          *
          * @param minAmount the value
          * @return this builder

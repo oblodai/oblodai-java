@@ -40,7 +40,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
     }
 
     /**
-     * Сколько оставлено мерчанту — всё, что пришло.
+     * How much was left to the merchant — everything that arrived.
      *
      * @return the {@code amount_kept} field
      */
@@ -49,7 +49,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
     }
 
     /**
-     * Валюта оплаты.
+     * Payment currency.
      *
      * @return the {@code currency} field
      */
@@ -58,7 +58,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
     }
 
     /**
-     * Номер заказа мерчанта.
+     * The merchant's order number.
      *
      * @return the {@code order_id} field
      */
@@ -67,7 +67,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
     }
 
     /**
-     * Идентификатор платежа.
+     * Payment id.
      *
      * @return the {@code payment_uuid} field
      */
@@ -76,7 +76,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
     }
 
     /**
-     * Принятое решение: accepted.
+     * The decision taken: accepted.
      *
      * @return the {@code resolution} field
      */
@@ -208,7 +208,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
         /**
          * Sets {@code amount_kept}.
          *
-         * <p>Сколько оставлено мерчанту — всё, что пришло.
+         * <p>How much was left to the merchant — everything that arrived.
          *
          * @param amountKept the value
          * @return this builder
@@ -221,7 +221,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта оплаты.
+         * <p>Payment currency.
          *
          * @param currency the value
          * @return this builder
@@ -234,7 +234,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Номер заказа мерчанта.
+         * <p>The merchant's order number.
          *
          * @param orderId the value
          * @return this builder
@@ -247,7 +247,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
         /**
          * Sets {@code payment_uuid}.
          *
-         * <p>Идентификатор платежа.
+         * <p>Payment id.
          *
          * @param paymentUuid the value
          * @return this builder
@@ -260,7 +260,7 @@ public final class ResolveAcceptResult implements WireObject, ResolveResult {
         /**
          * Sets {@code resolution}.
          *
-         * <p>Принятое решение: accepted.
+         * <p>The decision taken: accepted.
          *
          * @param resolution the value
          * @return this builder

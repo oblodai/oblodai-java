@@ -28,7 +28,7 @@ public final class WebhookResendResult implements WireObject {
     }
 
     /**
-     * Всегда true: вебхук поставлен в очередь; неудача отвечает ошибкой.
+     * Always true: the webhook has been queued; a failure responds with an error.
      *
      * @return the {@code ok} field
      */
@@ -126,7 +126,7 @@ public final class WebhookResendResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Всегда true: вебхук поставлен в очередь; неудача отвечает ошибкой.
+         * <p>Always true: the webhook has been queued; a failure responds with an error.
          *
          * @param ok the value
          * @return this builder

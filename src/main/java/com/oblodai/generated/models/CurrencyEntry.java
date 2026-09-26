@@ -35,7 +35,7 @@ public final class CurrencyEntry implements WireObject {
     }
 
     /**
-     * Код валюты.
+     * Currency code.
      *
      * @return the {@code currency} field
      */
@@ -44,7 +44,7 @@ public final class CurrencyEntry implements WireObject {
     }
 
     /**
-     * Знаков после запятой в суммах этой валюты.
+     * Decimal places in amounts of this currency.
      *
      * @return the {@code decimals} field
      */
@@ -164,7 +164,7 @@ public final class CurrencyEntry implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты.
+         * <p>Currency code.
          *
          * @param currency the value
          * @return this builder
@@ -177,7 +177,7 @@ public final class CurrencyEntry implements WireObject {
         /**
          * Sets {@code decimals}.
          *
-         * <p>Знаков после запятой в суммах этой валюты.
+         * <p>Decimal places in amounts of this currency.
          *
          * @param decimals the value
          * @return this builder

@@ -31,7 +31,7 @@ public final class ConversionModes implements WireObject {
     }
 
     /**
-     * Конвертация через партию ликвидации.
+     * Conversion via a liquidation batch.
      *
      * @return the {@code economy} field
      */
@@ -40,7 +40,7 @@ public final class ConversionModes implements WireObject {
     }
 
     /**
-     * Мгновенная конвертация по спред-курсу.
+     * Instant conversion at the spread rate.
      *
      * @return the {@code instant} field
      */
@@ -148,7 +148,7 @@ public final class ConversionModes implements WireObject {
         /**
          * Sets {@code economy}.
          *
-         * <p>Конвертация через партию ликвидации.
+         * <p>Conversion via a liquidation batch.
          *
          * @param economy the value
          * @return this builder
@@ -161,7 +161,7 @@ public final class ConversionModes implements WireObject {
         /**
          * Sets {@code instant}.
          *
-         * <p>Мгновенная конвертация по спред-курсу.
+         * <p>Instant conversion at the spread rate.
          *
          * @param instant the value
          * @return this builder

@@ -34,7 +34,7 @@ public final class ExchangeRate implements WireObject {
     }
 
     /**
-     * Цена одной единицы from в to, десятичной строкой.
+     * The price of one unit of from in to, as a decimal string.
      *
      * @return the {@code course} field
      */
@@ -43,7 +43,7 @@ public final class ExchangeRate implements WireObject {
     }
 
     /**
-     * Исходная валюта.
+     * Source currency.
      *
      * @return the {@code from} field
      */
@@ -52,7 +52,7 @@ public final class ExchangeRate implements WireObject {
     }
 
     /**
-     * Валюта котировки.
+     * Quote currency.
      *
      * @return the {@code to} field
      */
@@ -166,7 +166,7 @@ public final class ExchangeRate implements WireObject {
         /**
          * Sets {@code course}.
          *
-         * <p>Цена одной единицы from в to, десятичной строкой.
+         * <p>The price of one unit of from in to, as a decimal string.
          *
          * @param course the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class ExchangeRate implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Исходная валюта.
+         * <p>Source currency.
          *
          * @param from the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class ExchangeRate implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>Валюта котировки.
+         * <p>Quote currency.
          *
          * @param to the value
          * @return this builder

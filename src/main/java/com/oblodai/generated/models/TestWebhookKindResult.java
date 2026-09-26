@@ -34,7 +34,7 @@ public final class TestWebhookKindResult implements WireObject {
     }
 
     /**
-     * Всегда true: тело доставлено.
+     * Always true: the body was delivered.
      *
      * @return the {@code ok} field
      */
@@ -43,7 +43,7 @@ public final class TestWebhookKindResult implements WireObject {
     }
 
     /**
-     * Тело подписано секретом endpoint'а проекта.
+     * The body is signed with the project endpoint's secret.
      *
      * @return the {@code signed} field
      */
@@ -52,7 +52,7 @@ public final class TestWebhookKindResult implements WireObject {
     }
 
     /**
-     * HTTP-статус, которым ответил ваш endpoint.
+     * The HTTP status your endpoint responded with.
      *
      * @return the {@code status_code} field
      */
@@ -167,7 +167,7 @@ public final class TestWebhookKindResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Всегда true: тело доставлено.
+         * <p>Always true: the body was delivered.
          *
          * @param ok the value
          * @return this builder
@@ -180,7 +180,7 @@ public final class TestWebhookKindResult implements WireObject {
         /**
          * Sets {@code signed}.
          *
-         * <p>Тело подписано секретом endpoint'а проекта.
+         * <p>The body is signed with the project endpoint's secret.
          *
          * @param signed the value
          * @return this builder
@@ -193,7 +193,7 @@ public final class TestWebhookKindResult implements WireObject {
         /**
          * Sets {@code status_code}.
          *
-         * <p>HTTP-статус, которым ответил ваш endpoint.
+         * <p>The HTTP status your endpoint responded with.
          *
          * @param statusCode the value
          * @return this builder

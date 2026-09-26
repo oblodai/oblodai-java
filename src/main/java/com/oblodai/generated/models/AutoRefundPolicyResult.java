@@ -34,7 +34,7 @@ public final class AutoRefundPolicyResult implements WireObject {
     }
 
     /**
-     * false — политику не задавали, действует умолчание (обе включены).
+     * false — no policy has been set, the default applies (both enabled).
      *
      * @return the {@code configured} field
      */
@@ -43,7 +43,7 @@ public final class AutoRefundPolicyResult implements WireObject {
     }
 
     /**
-     * Возвращается ли излишек при переплате (paid_over).
+     * Whether the excess of an overpayment (paid_over) is refunded.
      *
      * @return the {@code overpay} field
      */
@@ -52,7 +52,7 @@ public final class AutoRefundPolicyResult implements WireObject {
     }
 
     /**
-     * Возвращаются ли средства при истёкшей недоплате (wrong_amount).
+     * Whether the funds of an expired underpayment (wrong_amount) are refunded.
      *
      * @return the {@code underpay} field
      */
@@ -167,7 +167,7 @@ public final class AutoRefundPolicyResult implements WireObject {
         /**
          * Sets {@code configured}.
          *
-         * <p>false — политику не задавали, действует умолчание (обе включены).
+         * <p>false — no policy has been set, the default applies (both enabled).
          *
          * @param configured the value
          * @return this builder
@@ -180,7 +180,7 @@ public final class AutoRefundPolicyResult implements WireObject {
         /**
          * Sets {@code overpay}.
          *
-         * <p>Возвращается ли излишек при переплате (paid_over).
+         * <p>Whether the excess of an overpayment (paid_over) is refunded.
          *
          * @param overpay the value
          * @return this builder
@@ -193,7 +193,7 @@ public final class AutoRefundPolicyResult implements WireObject {
         /**
          * Sets {@code underpay}.
          *
-         * <p>Возвращаются ли средства при истёкшей недоплате (wrong_amount).
+         * <p>Whether the funds of an expired underpayment (wrong_amount) are refunded.
          *
          * @param underpay the value
          * @return this builder

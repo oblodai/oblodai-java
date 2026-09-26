@@ -50,7 +50,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Правило действует.
+     * The rule is active.
      *
      * @return the {@code active} field
      */
@@ -59,7 +59,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Внешний адрес партнёра; есть у внешнего получателя.
+     * The partner's external address; present for an external recipient.
      *
      * @return the {@code address} field, or {@code null} when absent
      */
@@ -68,7 +68,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Мерчант-партнёр внутри Oblodai; есть у внутреннего получателя.
+     * A partner merchant within Oblodai; present for an internal recipient.
      *
      * @return the {@code merchant_id} field, or {@code null} when absent
      */
@@ -77,7 +77,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Сеть внешнего адреса; есть у внешнего получателя.
+     * The external address's network; present for an external recipient.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -86,7 +86,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Комментарий из создания.
+     * The note from creation.
      *
      * @return the {@code note} field
      */
@@ -95,7 +95,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Доля от каждого платежа в процентах.
+     * The share of each payment, in percent.
      *
      * @return the {@code percent} field
      */
@@ -104,8 +104,8 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * true — доля движется по внутреннему учёту и отзывается при возврате; false — уходит в
-     * блокчейн необратимо.
+     * true — the share moves within internal accounting and is clawed back on refund; false — it
+     * goes on-chain irreversibly.
      *
      * @return the {@code reversible} field
      */
@@ -114,7 +114,7 @@ public final class SplitRuleView implements WireObject {
     }
 
     /**
-     * Идентификатор правила.
+     * Rule id.
      *
      * @return the {@code rule_id} field
      */
@@ -268,7 +268,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code active}.
          *
-         * <p>Правило действует.
+         * <p>The rule is active.
          *
          * @param active the value
          * @return this builder
@@ -281,7 +281,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Внешний адрес партнёра; есть у внешнего получателя.
+         * <p>The partner's external address; present for an external recipient.
          *
          * @param address the value
          * @return this builder
@@ -294,7 +294,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code merchant_id}.
          *
-         * <p>Мерчант-партнёр внутри Oblodai; есть у внутреннего получателя.
+         * <p>A partner merchant within Oblodai; present for an internal recipient.
          *
          * @param merchantId the value
          * @return this builder
@@ -307,7 +307,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть внешнего адреса; есть у внешнего получателя.
+         * <p>The external address's network; present for an external recipient.
          *
          * @param network the value
          * @return this builder
@@ -320,7 +320,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code note}.
          *
-         * <p>Комментарий из создания.
+         * <p>The note from creation.
          *
          * @param note the value
          * @return this builder
@@ -333,7 +333,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code percent}.
          *
-         * <p>Доля от каждого платежа в процентах.
+         * <p>The share of each payment, in percent.
          *
          * @param percent the value
          * @return this builder
@@ -346,7 +346,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code percent}.
          *
-         * <p>Доля от каждого платежа в процентах.
+         * <p>The share of each payment, in percent.
          *
          * @param percent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -358,8 +358,8 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code reversible}.
          *
-         * <p>true — доля движется по внутреннему учёту и отзывается при возврате; false — уходит в
-         * блокчейн необратимо.
+         * <p>true — the share moves within internal accounting and is clawed back on refund; false
+         * — it goes on-chain irreversibly.
          *
          * @param reversible the value
          * @return this builder
@@ -372,7 +372,7 @@ public final class SplitRuleView implements WireObject {
         /**
          * Sets {@code rule_id}.
          *
-         * <p>Идентификатор правила.
+         * <p>Rule id.
          *
          * @param ruleId the value
          * @return this builder

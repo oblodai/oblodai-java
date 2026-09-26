@@ -28,7 +28,7 @@ public final class WalletQRResult implements WireObject {
     }
 
     /**
-     * PNG QR-кода как data:-URI; "" — не удалось отрисовать.
+     * The QR code PNG as a data: URI; "" — rendering failed.
      *
      * @return the {@code image} field
      */
@@ -126,7 +126,7 @@ public final class WalletQRResult implements WireObject {
         /**
          * Sets {@code image}.
          *
-         * <p>PNG QR-кода как data:-URI; "" — не удалось отрисовать.
+         * <p>The QR code PNG as a data: URI; "" — rendering failed.
          *
          * @param image the value
          * @return this builder

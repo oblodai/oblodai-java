@@ -21,7 +21,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Многоразовые ссылки на оплату: одна ссылка — много платежей.
+ * Reusable payment links: one link, many payments.
  *
  * <p>The {@code PaymentLinks} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -34,24 +34,29 @@ public final class PaymentLinks extends Resource {
     }
 
     /**
-     * Создать платёжную ссылку
+     * Create a payment link
      *
-     * <p>Переиспользуемая ссылка (как страница доната): по ней платят много людей, каждый платёж —
-     * свой инвойс со своим адресом. {@code amount_mode}: {@code fixed} (сумма задана в
-     * {@code amount_fixed}), {@code open} (клиент вводит любую сумму, опц. {@code amount_min}),
-     * {@code range} (клиент вводит в диапазоне {@code amount_min}…{@code amount_max}).
-     * {@code currency} — валюта цены (крипто-тикер, напр. {@code USDT}).
+     * <p>A reusable link (like a donation page): many people pay through it, each payment is its
+     * own invoice with its own address. {@code amount_mode}: {@code fixed} (the amount is set in
+     * {@code amount_fixed}), {@code open} (the customer enters any amount, optionally
+     * {@code amount_min}), {@code range} (the customer enters an amount between {@code amount_min}
+     * and {@code amount_max}). {@code currency} — the price currency (a crypto ticker, e.g.
+     * {@code USDT}).
      *
-     * <p>Валюту/сеть оплаты можно **закрепить** ({@code pinned_currency} + {@code pinned_network})
-     * или оставить пустыми — тогда клиент выбирает их на странице оплаты. {@code expires_in} — срок
-     * жизни ссылки в секундах (0 = **бессрочно**; сами инвойсы при этом живут обычный короткий
-     * срок). В ответе — {@code link_id} и {@code url} для клиента.
+     * <p>The payment currency/network can be **pinned** ({@code pinned_currency} +
+     * {@code pinned_network}) or left empty — then the customer picks them on the payment page.
+     * {@code expires_in} — the link lifetime in seconds (0 = **never expires**; the invoices
+     * themselves still have the usual short lifetime). The response contains {@code link_id} and
+     * the {@code url} for the customer.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/link} ({@code createPaymentLink}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.acceptance_blocked},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.acceptance_blocked}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code paylink.bad_amount}, {@code paylink.bad_max},
      * {@code paylink.bad_min}, {@code paylink.bad_mode}, {@code paylink.bad_range},
@@ -87,14 +92,17 @@ public final class PaymentLinks extends Resource {
     }
 
     /**
-     * Список ссылок
+     * List links
      *
-     * <p>Ваши платёжные ссылки, новые сверху.
+     * <p>Your payment links, newest first.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/link/list} ({@code listPaymentLinks}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code paylink.disabled}, {@code request.bad_json}, {@code request.body_read},
@@ -145,14 +153,18 @@ public final class PaymentLinks extends Resource {
     }
 
     /**
-     * Ссылка + её платежи
+     * Link and its payments
      *
-     * <p>По {@code link_id}: конфиг ссылки и собранные по ней платежи ({@code payments[]}).
+     * <p>By {@code link_id}: the link configuration and the payments collected through it
+     * ({@code payments[]}).
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/link/info} ({@code getPaymentLink}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code paylink.bad_id}, {@code paylink.disabled}, {@code paylink.not_found},
@@ -186,14 +198,17 @@ public final class PaymentLinks extends Resource {
     }
 
     /**
-     * Включить/выключить ссылку
+     * Enable/disable a link
      *
-     * <p><code>{link_id, active}</code>. Выключенная ссылка не принимает новые платежи.
+     * <p><code>{link_id, active}</code>. A disabled link does not accept new payments.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/link/toggle} ({@code togglePaymentLink}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code paylink.bad_id}, {@code paylink.disabled}, {@code paylink.not_found},

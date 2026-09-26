@@ -24,7 +24,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Dev-store: тестовые деньги, симуляция депозитов и повтор вебхуков.
+ * Dev store: test money, simulated deposits and webhook replay.
  *
  * <p>The {@code Sandbox} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -37,11 +37,11 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * Создать (или вернуть) dev-store мерчанта
+     * Create (or return) the merchant's dev store
      *
-     * <p>Идемпотентно: у мерчанта максимум один dev-store, повторный вызов возвращает существующий.
-     * Тестовый ключ возвращается каждый раз — он не защищает ничего, кроме тестовых денег.
-     * Вызывается под онбординг-гейтом кабинета, не HMAC-ключом.
+     * <p>Idempotent: a merchant has at most one dev store, a repeated call returns the existing
+     * one. The test key is returned every time — it protects nothing but test money. Called behind
+     * the dashboard onboarding gate, not with the HMAC key.
      *
      * <p><code>POST /v1/merchants/{id}/sandbox</code> ({@code onboardSandboxStore}).
      *
@@ -81,20 +81,22 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * Кран: пополнить тестовый баланс
+     * Faucet: top up the test balance
      *
-     * <p>Только для тестового ключа dev-store. Начисляет тестовые деньги, чтобы гонять
-     * выплаты/возвраты, а не только приём.
+     * <p>Dev-store test key only. Credits test money so you can exercise payouts/refunds, not just
+     * accepting payments.
+     *
+     * <p>Requires role: Admin when called with a CLI key.
      *
      * <p>{@code POST /v1/sandbox/faucet} ({@code sandboxFaucet}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code ledger.account_not_found},
-     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
-     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
+     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -130,27 +132,30 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * Симулировать он-чейн депозит
+     * Simulate an on-chain deposit
      *
-     * <p>Проводит синтетический платёж через настоящий пайплайн зачисления. {@code amount} пустой —
-     * оплатить ровно сколько нужно; {@code confirmations} меньше требуемого — проверка перехода
-     * pending→confirmed (повторите тот же {@code txid} с большим числом); тот же {@code txid}
-     * повторно — проверка вашей идемпотентности.
+     * <p>Runs a synthetic payment through the real crediting pipeline. Empty {@code amount} — pay
+     * exactly the amount due; {@code confirmations} below the required number — tests the
+     * pending→confirmed transition (repeat the same {@code txid} with a higher number); the same
+     * {@code txid} again — tests your idempotency.
+     *
+     * <p>Requires role: Admin when called with a CLI key.
      *
      * <p>{@code POST /v1/sandbox/deposit} ({@code sandboxSimulateDeposit}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code compliance.blocked}, {@code compliance.blocked_address},
-     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
-     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
-     * {@code compliance.sanctions_unavailable}, {@code deposit.generation_stale}, {@code internal},
-     * {@code invoice.bad_deposit}, {@code invoice.corrupt_pay_asset},
-     * {@code invoice.deposit_asset_mismatch}, {@code invoice.generation_stale},
-     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
-     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
+     * {@code compliance.no_destination}, {@code compliance.no_network},
+     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
+     * {@code deposit.generation_stale}, {@code internal}, {@code invoice.bad_deposit},
+     * {@code invoice.corrupt_pay_asset}, {@code invoice.deposit_asset_mismatch},
+     * {@code invoice.generation_stale}, {@code ledger.account_not_found},
+     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
+     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code payment.not_found},
@@ -209,18 +214,21 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * Сбросить dev-store к чистому состоянию
+     * Reset the dev store to a clean state
+     *
+     * <p>Requires role: Admin when called with a CLI key.
      *
      * <p>{@code POST /v1/sandbox/reset} ({@code sandboxReset}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.already_paid},
-     * {@code invoice.corrupt_pay_asset}, {@code invoice.deposit_pending},
-     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
-     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.already_paid}, {@code invoice.corrupt_pay_asset},
+     * {@code invoice.deposit_pending}, {@code ledger.account_not_found},
+     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
+     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payment.not_found}, {@code payout.not_found}, {@code payoutlink.not_found},
@@ -251,12 +259,15 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * Журнал доставок вебхуков dev-store
+     * Dev-store webhook delivery log
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/sandbox/webhooks} ({@code sandboxListWebhooks}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -311,15 +322,18 @@ public final class Sandbox extends Resource {
     }
 
     /**
-     * Переотправить доставку вебхука
+     * Resend a webhook delivery
      *
-     * <p>Ставит доставку заново в очередь настоящего диспетчера — с его ретраями и подписью, как в
-     * проде.
+     * <p>Re-queues the delivery into the real dispatcher — with its retries and signature, as in
+     * production.
+     *
+     * <p>Requires role: Admin when called with a CLI key.
      *
      * <p>{@code POST /v1/sandbox/webhooks/replay} ({@code sandboxReplayWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},

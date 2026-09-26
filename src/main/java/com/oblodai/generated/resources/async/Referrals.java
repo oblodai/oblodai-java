@@ -14,7 +14,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Реферальная программа.
+ * Referral program.
  *
  * <p>The {@code Referrals} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -27,14 +27,17 @@ public final class Referrals extends Resource {
     }
 
     /**
-     * Реферальная информация
+     * Referral information
      *
-     * <p>Ваш реферальный код, приглашённые и начисления.
+     * <p>Your referral code, invitees and earnings.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/referral/info} ({@code getReferralInfo}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},

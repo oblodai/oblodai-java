@@ -28,7 +28,7 @@ public final class VRCSResult implements WireObject {
     }
 
     /**
-     * Включена ли автоконвертация волатильных поступлений в USDT.
+     * Whether auto-conversion of volatile incoming funds to USDT is enabled.
      *
      * @return the {@code enabled} field
      */
@@ -126,7 +126,7 @@ public final class VRCSResult implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Включена ли автоконвертация волатильных поступлений в USDT.
+         * <p>Whether auto-conversion of volatile incoming funds to USDT is enabled.
          *
          * @param enabled the value
          * @return this builder

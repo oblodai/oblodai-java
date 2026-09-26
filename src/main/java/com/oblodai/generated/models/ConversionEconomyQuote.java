@@ -41,7 +41,7 @@ public final class ConversionEconomyQuote implements WireObject {
     }
 
     /**
-     * Доступен ли режим сейчас.
+     * Whether the mode is available right now.
      *
      * @return the {@code available} field
      */
@@ -50,7 +50,7 @@ public final class ConversionEconomyQuote implements WireObject {
     }
 
     /**
-     * Комиссия режима в процентах.
+     * The mode's fee, in percent.
      *
      * @return the {@code fee_percent} field
      */
@@ -59,7 +59,7 @@ public final class ConversionEconomyQuote implements WireObject {
     }
 
     /**
-     * Гарантированный минимум к получению, в валюте котировки.
+     * The guaranteed minimum to receive, in the quote currency.
      *
      * @return the {@code min_out} field
      */
@@ -68,7 +68,7 @@ public final class ConversionEconomyQuote implements WireObject {
     }
 
     /**
-     * Почему недоступен: no_route; пусто — доступен.
+     * Why it is unavailable: no_route; empty — available.
      *
      * @return the {@code reason} field
      */
@@ -77,7 +77,7 @@ public final class ConversionEconomyQuote implements WireObject {
     }
 
     /**
-     * За сколько минут исполняется заявка.
+     * How many minutes the order takes to execute.
      *
      * @return the {@code window_minutes} field
      */
@@ -209,7 +209,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code available}.
          *
-         * <p>Доступен ли режим сейчас.
+         * <p>Whether the mode is available right now.
          *
          * @param available the value
          * @return this builder
@@ -222,7 +222,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Комиссия режима в процентах.
+         * <p>The mode's fee, in percent.
          *
          * @param feePercent the value
          * @return this builder
@@ -235,7 +235,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Комиссия режима в процентах.
+         * <p>The mode's fee, in percent.
          *
          * @param feePercent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -247,7 +247,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code min_out}.
          *
-         * <p>Гарантированный минимум к получению, в валюте котировки.
+         * <p>The guaranteed minimum to receive, in the quote currency.
          *
          * @param minOut the value
          * @return this builder
@@ -260,7 +260,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code min_out}.
          *
-         * <p>Гарантированный минимум к получению, в валюте котировки.
+         * <p>The guaranteed minimum to receive, in the quote currency.
          *
          * @param minOut the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -272,7 +272,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code reason}.
          *
-         * <p>Почему недоступен: no_route; пусто — доступен.
+         * <p>Why it is unavailable: no_route; empty — available.
          *
          * @param reason the value
          * @return this builder
@@ -285,7 +285,7 @@ public final class ConversionEconomyQuote implements WireObject {
         /**
          * Sets {@code window_minutes}.
          *
-         * <p>За сколько минут исполняется заявка.
+         * <p>How many minutes the order takes to execute.
          *
          * @param windowMinutes the value
          * @return this builder

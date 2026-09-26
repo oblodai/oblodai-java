@@ -34,7 +34,7 @@ public final class PaymentLinkLookupRequest implements WireObject {
     }
 
     /**
-     * Размер страницы платежей по ссылке, 1–100; вне диапазона — 25.
+     * The page size for payments through the link, 1–100; out of range — 25.
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -43,7 +43,7 @@ public final class PaymentLinkLookupRequest implements WireObject {
     }
 
     /**
-     * Идентификатор платёжной ссылки.
+     * Payment link id.
      *
      * @return the {@code link_id} field
      */
@@ -52,7 +52,7 @@ public final class PaymentLinkLookupRequest implements WireObject {
     }
 
     /**
-     * Смещение страницы платежей.
+     * The offset of the payments page.
      *
      * @return the {@code offset} field, or {@code null} when absent
      */
@@ -166,7 +166,7 @@ public final class PaymentLinkLookupRequest implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Размер страницы платежей по ссылке, 1–100; вне диапазона — 25.
+         * <p>The page size for payments through the link, 1–100; out of range — 25.
          *
          * @param limit the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class PaymentLinkLookupRequest implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор платёжной ссылки.
+         * <p>Payment link id.
          *
          * @param linkId the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class PaymentLinkLookupRequest implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение страницы платежей.
+         * <p>The offset of the payments page.
          *
          * @param offset the value
          * @return this builder

@@ -19,7 +19,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Постоянные (статические) адреса пополнения под клиента.
+ * Permanent (static) deposit addresses assigned to a customer.
  *
  * <p>The {@code Wallets} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -32,19 +32,23 @@ public final class Wallets extends Resource {
     }
 
     /**
-     * Создать (или получить) статический кошелёк
+     * Create (or get) a static wallet
      *
-     * <p>Постоянный адрес пополнения, закреплённый за мерчантом (и, по желанию, за одним клиентом
-     * через {@code order_id}). Любое пополнение на него сразу падает вам на баланс + шлёт вебхук.
+     * <p>A permanent deposit address assigned to the merchant (and, optionally, to one customer via
+     * {@code order_id}). Any deposit to it is credited to your balance immediately and triggers a
+     * webhook.
      *
-     * <p>Идемпотентно по {@code (currency, network, order_id)}: тот же {@code order_id} вернёт тот
-     * же адрес — удобно закрепить адрес за каждым клиентом.
+     * <p>Idempotent on {@code (currency, network, order_id)}: the same {@code order_id} returns the
+     * same address — handy for assigning an address to each customer.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/wallet} ({@code createWallet}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.daily_quota},
-     * {@code merchant.acceptance_blocked}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.daily_quota}, {@code merchant.acceptance_blocked},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
@@ -83,15 +87,18 @@ public final class Wallets extends Resource {
     }
 
     /**
-     * Заблокировать / разблокировать кошелёк
+     * Block / unblock a wallet
      *
-     * <p>Заблокированный кошелёк перестаёт зачислять новые пополнения. {@code is_force_block} по
-     * умолчанию true (блокировать); передайте false, чтобы снять блокировку.
+     * <p>A blocked wallet stops crediting new deposits. {@code is_force_block} defaults to true
+     * (block); pass false to lift the block.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/wallet/block} ({@code blockWallet}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -126,14 +133,17 @@ public final class Wallets extends Resource {
     }
 
     /**
-     * QR-код адреса
+     * Address QR code
      *
-     * <p>Возвращает PNG data:-URI по полю {@code address} — для {@code <img src>}.
+     * <p>Returns a PNG data: URI for the {@code address} field — for {@code <img src>}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/wallet/qr} ({@code getWalletQr}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code qr.no_address}, {@code request.bad_json}, {@code request.body_read},

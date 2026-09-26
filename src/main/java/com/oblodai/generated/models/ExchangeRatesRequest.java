@@ -41,8 +41,9 @@ public final class ExchangeRatesRequest implements WireObject {
     }
 
     /**
-     * Сумма в currency_from. Вместе с currency_from и currency_to добавляет в ответ блок modes: обе
-     * цены конвертации (instant/economy) с доступностью каждого режима
+     * The amount in currency_from. Together with currency_from and currency_to it adds a modes
+     * block to the response: both conversion prices (instant/economy) with the availability of each
+     * mode
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -51,8 +52,8 @@ public final class ExchangeRatesRequest implements WireObject {
     }
 
     /**
-     * Код валюты. Если задан — вернётся курс только по нему. Если пусто или тело {} — по всем
-     * валютам
+     * Currency code. If set, only its rate is returned. If empty or the body is {} — rates for all
+     * currencies
      *
      * @return the {@code currency_from} field, or {@code null} when absent
      */
@@ -61,8 +62,8 @@ public final class ExchangeRatesRequest implements WireObject {
     }
 
     /**
-     * Валюта котировки: по умолчанию USDT; любой прайсинговый актив, включая фиаты с прямым фидом
-     * (EUR, RUB, …)
+     * Quote currency: USDT by default; any pricing asset, including fiat currencies with a direct
+     * feed (EUR, RUB, …)
      *
      * @return the {@code currency_to} field, or {@code null} when absent
      */
@@ -71,7 +72,7 @@ public final class ExchangeRatesRequest implements WireObject {
     }
 
     /**
-     * Размер страницы, 1–100; по умолчанию 25
+     * Page size, 1–100; default 25
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -80,7 +81,7 @@ public final class ExchangeRatesRequest implements WireObject {
     }
 
     /**
-     * Смещение от начала списка; по умолчанию 0
+     * Offset from the start of the list; default 0
      *
      * @return the {@code offset} field, or {@code null} when absent
      */
@@ -212,8 +213,9 @@ public final class ExchangeRatesRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в currency_from. Вместе с currency_from и currency_to добавляет в ответ блок
-         * modes: обе цены конвертации (instant/economy) с доступностью каждого режима
+         * <p>The amount in currency_from. Together with currency_from and currency_to it adds a
+         * modes block to the response: both conversion prices (instant/economy) with the
+         * availability of each mode
          *
          * @param amount the value
          * @return this builder
@@ -226,8 +228,9 @@ public final class ExchangeRatesRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в currency_from. Вместе с currency_from и currency_to добавляет в ответ блок
-         * modes: обе цены конвертации (instant/economy) с доступностью каждого режима
+         * <p>The amount in currency_from. Together with currency_from and currency_to it adds a
+         * modes block to the response: both conversion prices (instant/economy) with the
+         * availability of each mode
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -239,8 +242,8 @@ public final class ExchangeRatesRequest implements WireObject {
         /**
          * Sets {@code currency_from}.
          *
-         * <p>Код валюты. Если задан — вернётся курс только по нему. Если пусто или тело {} — по
-         * всем валютам
+         * <p>Currency code. If set, only its rate is returned. If empty or the body is {} — rates
+         * for all currencies
          *
          * @param currencyFrom the value
          * @return this builder
@@ -253,8 +256,8 @@ public final class ExchangeRatesRequest implements WireObject {
         /**
          * Sets {@code currency_to}.
          *
-         * <p>Валюта котировки: по умолчанию USDT; любой прайсинговый актив, включая фиаты с прямым
-         * фидом (EUR, RUB, …)
+         * <p>Quote currency: USDT by default; any pricing asset, including fiat currencies with a
+         * direct feed (EUR, RUB, …)
          *
          * @param currencyTo the value
          * @return this builder
@@ -267,7 +270,7 @@ public final class ExchangeRatesRequest implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Размер страницы, 1–100; по умолчанию 25
+         * <p>Page size, 1–100; default 25
          *
          * @param limit the value
          * @return this builder
@@ -280,7 +283,7 @@ public final class ExchangeRatesRequest implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение от начала списка; по умолчанию 0
+         * <p>Offset from the start of the list; default 0
          *
          * @param offset the value
          * @return this builder

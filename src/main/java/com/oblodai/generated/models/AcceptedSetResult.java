@@ -32,7 +32,7 @@ public final class AcceptedSetResult implements WireObject {
     }
 
     /**
-     * Набор сохранён.
+     * The set has been saved.
      *
      * @return the {@code ok} field
      */
@@ -41,7 +41,7 @@ public final class AcceptedSetResult implements WireObject {
     }
 
     /**
-     * Сохранённые, но неизвестные каталогу пары — оставлены как были; ключа нет, когда таких нет.
+     * Saved pairs that the catalog does not know — kept as they were; no key when there are none.
      *
      * @return the {@code unknown} field, or {@code null} when absent
      */
@@ -148,7 +148,7 @@ public final class AcceptedSetResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Набор сохранён.
+         * <p>The set has been saved.
          *
          * @param ok the value
          * @return this builder
@@ -161,8 +161,8 @@ public final class AcceptedSetResult implements WireObject {
         /**
          * Sets {@code unknown}.
          *
-         * <p>Сохранённые, но неизвестные каталогу пары — оставлены как были; ключа нет, когда таких
-         * нет.
+         * <p>Saved pairs that the catalog does not know — kept as they were; no key when there are
+         * none.
          *
          * @param unknown the value
          * @return this builder

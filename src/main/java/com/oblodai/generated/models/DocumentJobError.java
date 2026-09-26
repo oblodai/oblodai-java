@@ -31,7 +31,7 @@ public final class DocumentJobError implements WireObject {
     }
 
     /**
-     * Машинный код отказа.
+     * The machine code of the rejection.
      *
      * @return the {@code code} field
      */
@@ -40,7 +40,7 @@ public final class DocumentJobError implements WireObject {
     }
 
     /**
-     * Что случилось и что делать.
+     * What happened and what to do.
      *
      * @return the {@code message} field
      */
@@ -146,7 +146,7 @@ public final class DocumentJobError implements WireObject {
         /**
          * Sets {@code code}.
          *
-         * <p>Машинный код отказа.
+         * <p>The machine code of the rejection.
          *
          * @param code the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class DocumentJobError implements WireObject {
         /**
          * Sets {@code message}.
          *
-         * <p>Что случилось и что делать.
+         * <p>What happened and what to do.
          *
          * @param message the value
          * @return this builder

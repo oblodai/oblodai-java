@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Приходит, когда депозит на статический кошелёк зачислен.
+ * Sent when a deposit to a static wallet is credited.
  *
  * <p>Build one with {@link #builder()}; fields the SDK does not know yet are kept in
  * {@link #extra()} and sent back as they came.
@@ -69,7 +69,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Адрес кошелька, на который пришёл платёж.
+     * The wallet address the payment arrived at.
      *
      * @return the {@code address} field
      */
@@ -78,7 +78,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Код валюты зачисления.
+     * Credit currency code.
      *
      * @return the {@code currency} field
      */
@@ -87,7 +87,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Когда событие произошло, UTC с миллисекундами (ISO 8601).
+     * When the event happened, UTC with milliseconds (ISO 8601).
      *
      * @return the {@code event_at} field
      */
@@ -96,7 +96,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * true — статус финальный.
+     * true — the status is final.
      *
      * @return the {@code is_final} field
      */
@@ -105,7 +105,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Сеть блокчейна.
+     * Blockchain network.
      *
      * @return the {@code network} field
      */
@@ -114,7 +114,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Ваш order_id кошелька.
+     * Your order_id for the wallet.
      *
      * @return the {@code order_id} field
      */
@@ -123,7 +123,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Валюта, в которой заплатил плательщик (совпадает с currency).
+     * The currency the payer paid in (matches currency).
      *
      * @return the {@code payer_currency} field
      */
@@ -132,7 +132,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Зачисленная сумма депозита (десятичное число строкой).
+     * The credited deposit amount (a decimal number as a string).
      *
      * @return the {@code payment_amount} field
      */
@@ -141,8 +141,8 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Глобальный номер события: в пределах одного объекта больший номер новее, меньший — опоздавшая
-     * доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+     * The global event number: within one object a higher number is newer, a lower one is a late
+     * delivery and must be discarded. Always 0 on a rehearsal (test: true).
      *
      * @return the {@code sequence} field
      */
@@ -151,7 +151,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Статус в словаре платежа; живой поток шлёт только paid.
+     * A status from the payment vocabulary; the live flow sends only paid.
      *
      * @return the {@code status} field
      */
@@ -160,9 +160,9 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда true —
-     * внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true обработчик
-     * обязан игнорировать, даже если подпись верна.
+     * Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and always true
+     * — inside the signature. A live event never carries this field: your handler must ignore a
+     * body with test: true even if the signature is valid.
      *
      * @return the {@code test} field, or {@code null} when absent
      */
@@ -171,7 +171,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Хеш транзакции депозита.
+     * The deposit transaction hash.
      *
      * @return the {@code txid} field
      */
@@ -180,7 +180,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Вид события: payment | payout | wallet | conversion — какое тело пришло.
+     * Event kind: payment | payout | wallet | conversion — which body arrived.
      *
      * @return the {@code type} field
      */
@@ -189,7 +189,7 @@ public final class WalletWebhook implements WireObject {
     }
 
     /**
-     * Идентификатор статического кошелька.
+     * Static wallet id.
      *
      * @return the {@code uuid} field
      */
@@ -393,7 +393,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес кошелька, на который пришёл платёж.
+         * <p>The wallet address the payment arrived at.
          *
          * @param address the value
          * @return this builder
@@ -406,7 +406,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты зачисления.
+         * <p>Credit currency code.
          *
          * @param currency the value
          * @return this builder
@@ -419,7 +419,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code event_at}.
          *
-         * <p>Когда событие произошло, UTC с миллисекундами (ISO 8601).
+         * <p>When the event happened, UTC with milliseconds (ISO 8601).
          *
          * @param eventAt the value
          * @return this builder
@@ -432,7 +432,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code is_final}.
          *
-         * <p>true — статус финальный.
+         * <p>true — the status is final.
          *
          * @param isFinal the value
          * @return this builder
@@ -445,7 +445,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть блокчейна.
+         * <p>Blockchain network.
          *
          * @param network the value
          * @return this builder
@@ -458,7 +458,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш order_id кошелька.
+         * <p>Your order_id for the wallet.
          *
          * @param orderId the value
          * @return this builder
@@ -471,7 +471,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code payer_currency}.
          *
-         * <p>Валюта, в которой заплатил плательщик (совпадает с currency).
+         * <p>The currency the payer paid in (matches currency).
          *
          * @param payerCurrency the value
          * @return this builder
@@ -484,7 +484,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code payment_amount}.
          *
-         * <p>Зачисленная сумма депозита (десятичное число строкой).
+         * <p>The credited deposit amount (a decimal number as a string).
          *
          * @param paymentAmount the value
          * @return this builder
@@ -497,8 +497,8 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code sequence}.
          *
-         * <p>Глобальный номер события: в пределах одного объекта больший номер новее, меньший —
-         * опоздавшая доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+         * <p>The global event number: within one object a higher number is newer, a lower one is a
+         * late delivery and must be discarded. Always 0 on a rehearsal (test: true).
          *
          * @param sequence the value
          * @return this builder
@@ -511,7 +511,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус в словаре платежа; живой поток шлёт только paid.
+         * <p>A status from the payment vocabulary; the live flow sends only paid.
          *
          * @param status the value
          * @return this builder
@@ -524,9 +524,9 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code test}.
          *
-         * <p>Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда
-         * true — внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true
-         * обработчик обязан игнорировать, даже если подпись верна.
+         * <p>Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and
+         * always true — inside the signature. A live event never carries this field: your handler
+         * must ignore a body with test: true even if the signature is valid.
          *
          * @param test the value
          * @return this builder
@@ -539,7 +539,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Хеш транзакции депозита.
+         * <p>The deposit transaction hash.
          *
          * @param txid the value
          * @return this builder
@@ -552,7 +552,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code type}.
          *
-         * <p>Вид события: payment | payout | wallet | conversion — какое тело пришло.
+         * <p>Event kind: payment | payout | wallet | conversion — which body arrived.
          *
          * @param type the value
          * @return this builder
@@ -565,7 +565,7 @@ public final class WalletWebhook implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор статического кошелька.
+         * <p>Static wallet id.
          *
          * @param uuid the value
          * @return this builder

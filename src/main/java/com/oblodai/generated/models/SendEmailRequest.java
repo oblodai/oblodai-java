@@ -34,7 +34,7 @@ public final class SendEmailRequest implements WireObject {
     }
 
     /**
-     * Кому отправить. По умолчанию — payer_email, заданный у платежа.
+     * Whom to send to. Defaults to the payer_email set on the payment.
      *
      * @return the {@code email} field, or {@code null} when absent
      */
@@ -43,7 +43,7 @@ public final class SendEmailRequest implements WireObject {
     }
 
     /**
-     * Ваша ссылка на заказ.
+     * Your order reference.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -52,7 +52,7 @@ public final class SendEmailRequest implements WireObject {
     }
 
     /**
-     * Идентификатор платежа в Oblodai. Нужен uuid или order_id.
+     * The payment id in Oblodai. Either uuid or order_id is required.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -166,7 +166,7 @@ public final class SendEmailRequest implements WireObject {
         /**
          * Sets {@code email}.
          *
-         * <p>Кому отправить. По умолчанию — payer_email, заданный у платежа.
+         * <p>Whom to send to. Defaults to the payer_email set on the payment.
          *
          * @param email the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class SendEmailRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваша ссылка на заказ.
+         * <p>Your order reference.
          *
          * @param orderId the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class SendEmailRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор платежа в Oblodai. Нужен uuid или order_id.
+         * <p>The payment id in Oblodai. Either uuid or order_id is required.
          *
          * @param uuid the value
          * @return this builder

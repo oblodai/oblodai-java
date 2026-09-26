@@ -16,6 +16,7 @@ public final class ErrorError implements WireObject {
 
     private static final Set<String> FIELDS = Set.of(
             "code",
+            "details",
             "field",
             "message",
             "request_id",
@@ -23,6 +24,7 @@ public final class ErrorError implements WireObject {
             "retryable");
 
     private final String code;
+    private final Map<String, String> details;
     private final String field;
     private final String message;
     private final String requestId;
@@ -33,6 +35,7 @@ public final class ErrorError implements WireObject {
 
     private ErrorError(Builder builder) {
         this.code = builder.code;
+        this.details = builder.details;
         this.field = builder.field;
         this.message = builder.message;
         this.requestId = builder.requestId;
@@ -43,9 +46,9 @@ public final class ErrorError implements WireObject {
     }
 
     /**
-     * Стабильный машинный код {@code <область>.<причина>} — единственное поле, по которому можно
-     * ветвиться. Список известных кодов — ErrorCode; новые коды добавляются без смены версии,
-     * поэтому клиент обязан переживать незнакомый код.
+     * A stable machine code {@code <area>.<reason>} — the only field you may branch on. The list of
+     * known codes is ErrorCode; new codes are added without a version change, so a client must
+     * tolerate an unknown code.
      *
      * @return the {@code code} field
      */
@@ -54,8 +57,19 @@ public final class ErrorError implements WireObject {
     }
 
     /**
-     * Имя поля запроса, к которому относится ошибка, в присланном написании. Отсутствует, если
-     * ошибка не про конкретное поле.
+     * Machine-readable facts about this refusal, with keys documented by its code (e.g.
+     * {@code cli.permission_denied} carries {@code required_role} and {@code role}). Absent when
+     * the code has none.
+     *
+     * @return the {@code details} field, or {@code null} when absent
+     */
+    public Map<String, String> details() {
+        return details;
+    }
+
+    /**
+     * The name of the request field the error refers to, spelled as sent. Absent if the error is
+     * not about a specific field.
      *
      * @return the {@code field} field, or {@code null} when absent
      */
@@ -64,7 +78,7 @@ public final class ErrorError implements WireObject {
     }
 
     /**
-     * Человекочитаемое пояснение. Текст не является контрактом и может меняться.
+     * A human-readable explanation. The text is not part of the contract and may change.
      *
      * @return the {@code message} field, or {@code null} when absent
      */
@@ -73,7 +87,7 @@ public final class ErrorError implements WireObject {
     }
 
     /**
-     * Идентификатор запроса (дублирует X-Request-ID) — приложите его к обращению в поддержку.
+     * The request id (duplicates X-Request-ID) — include it when contacting support.
      *
      * @return the {@code request_id} field, or {@code null} when absent
      */
@@ -82,7 +96,7 @@ public final class ErrorError implements WireObject {
     }
 
     /**
-     * Подсказка, через сколько секунд повторять (дублирует заголовок Retry-After).
+     * A hint of how many seconds to wait before retrying (duplicates the Retry-After header).
      *
      * @return the {@code retry_after} field, or {@code null} when absent
      */
@@ -91,8 +105,8 @@ public final class ErrorError implements WireObject {
     }
 
     /**
-     * true — повтор того же запроса без изменений может пройти, когда условие снимется; false —
-     * повторять бессмысленно без правки запроса.
+     * true — repeating the same request unchanged may succeed once the condition clears; false —
+     * retrying is pointless without changing the request.
      *
      * @return the {@code retryable} field
      */
@@ -114,6 +128,7 @@ public final class ErrorError implements WireObject {
     public Builder toBuilder() {
         Builder builder = new Builder();
         builder.code = this.code;
+        builder.details = this.details;
         builder.field = this.field;
         builder.message = this.message;
         builder.requestId = this.requestId;
@@ -132,6 +147,7 @@ public final class ErrorError implements WireObject {
     public static ErrorError fromMap(Map<String, ?> data) {
         Builder builder = new Builder();
         builder.code = Wire.required(data, "code", Wire::string, "ErrorError");
+        builder.details = Wire.optional(data, "details", Wire.mapOf(Wire::string), "ErrorError");
         builder.field = Wire.optional(data, "field", Wire::string, "ErrorError");
         builder.message = Wire.optional(data, "message", Wire::string, "ErrorError");
         builder.requestId = Wire.optional(data, "request_id", Wire::string, "ErrorError");
@@ -155,6 +171,7 @@ public final class ErrorError implements WireObject {
     public Map<String, Object> toMap() {
         Map<String, Object> out = new LinkedHashMap<>(this.extra);
         Wire.put(out, "code", this.code, this.nulls);
+        Wire.put(out, "details", this.details, this.nulls);
         Wire.put(out, "field", this.field, this.nulls);
         Wire.put(out, "message", this.message, this.nulls);
         Wire.put(out, "request_id", this.requestId, this.nulls);
@@ -172,6 +189,7 @@ public final class ErrorError implements WireObject {
     public boolean equals(Object other) {
         return other instanceof ErrorError that
                 && Objects.equals(this.code, that.code)
+                && Objects.equals(this.details, that.details)
                 && Objects.equals(this.field, that.field)
                 && Objects.equals(this.message, that.message)
                 && Objects.equals(this.requestId, that.requestId)
@@ -185,6 +203,7 @@ public final class ErrorError implements WireObject {
     public int hashCode() {
         return Objects.hash(
                 this.code,
+                this.details,
                 this.field,
                 this.message,
                 this.requestId,
@@ -200,6 +219,8 @@ public final class ErrorError implements WireObject {
                 "ErrorError",
                 "code",
                 this.code,
+                "details",
+                this.details,
                 "field",
                 this.field,
                 "message",
@@ -217,6 +238,7 @@ public final class ErrorError implements WireObject {
     /** Builds a {@link ErrorError}. */
     public static final class Builder {
         private String code;
+        private Map<String, String> details;
         private String field;
         private String message;
         private String requestId;
@@ -230,9 +252,9 @@ public final class ErrorError implements WireObject {
         /**
          * Sets {@code code}.
          *
-         * <p>Стабильный машинный код {@code <область>.<причина>} — единственное поле, по которому
-         * можно ветвиться. Список известных кодов — ErrorCode; новые коды добавляются без смены
-         * версии, поэтому клиент обязан переживать незнакомый код.
+         * <p>A stable machine code {@code <area>.<reason>} — the only field you may branch on. The
+         * list of known codes is ErrorCode; new codes are added without a version change, so a
+         * client must tolerate an unknown code.
          *
          * @param code the value
          * @return this builder
@@ -243,10 +265,25 @@ public final class ErrorError implements WireObject {
         }
 
         /**
+         * Sets {@code details}.
+         *
+         * <p>Machine-readable facts about this refusal, with keys documented by its code (e.g.
+         * {@code cli.permission_denied} carries {@code required_role} and {@code role}). Absent
+         * when the code has none.
+         *
+         * @param details the value
+         * @return this builder
+         */
+        public Builder details(Map<String, String> details) {
+            this.details = Wire.copyMap(details);
+            return this;
+        }
+
+        /**
          * Sets {@code field}.
          *
-         * <p>Имя поля запроса, к которому относится ошибка, в присланном написании. Отсутствует,
-         * если ошибка не про конкретное поле.
+         * <p>The name of the request field the error refers to, spelled as sent. Absent if the
+         * error is not about a specific field.
          *
          * @param field the value
          * @return this builder
@@ -259,7 +296,7 @@ public final class ErrorError implements WireObject {
         /**
          * Sets {@code message}.
          *
-         * <p>Человекочитаемое пояснение. Текст не является контрактом и может меняться.
+         * <p>A human-readable explanation. The text is not part of the contract and may change.
          *
          * @param message the value
          * @return this builder
@@ -272,8 +309,7 @@ public final class ErrorError implements WireObject {
         /**
          * Sets {@code request_id}.
          *
-         * <p>Идентификатор запроса (дублирует X-Request-ID) — приложите его к обращению в
-         * поддержку.
+         * <p>The request id (duplicates X-Request-ID) — include it when contacting support.
          *
          * @param requestId the value
          * @return this builder
@@ -286,7 +322,8 @@ public final class ErrorError implements WireObject {
         /**
          * Sets {@code retry_after}.
          *
-         * <p>Подсказка, через сколько секунд повторять (дублирует заголовок Retry-After).
+         * <p>A hint of how many seconds to wait before retrying (duplicates the Retry-After
+         * header).
          *
          * @param retryAfter the value
          * @return this builder
@@ -299,8 +336,8 @@ public final class ErrorError implements WireObject {
         /**
          * Sets {@code retryable}.
          *
-         * <p>true — повтор того же запроса без изменений может пройти, когда условие снимется;
-         * false — повторять бессмысленно без правки запроса.
+         * <p>true — repeating the same request unchanged may succeed once the condition clears;
+         * false — retrying is pointless without changing the request.
          *
          * @param retryable the value
          * @return this builder

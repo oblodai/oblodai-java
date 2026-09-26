@@ -37,7 +37,7 @@ public final class ResetResult implements WireObject {
     }
 
     /**
-     * Сколько балансов (по активам) обнулено компенсирующей проводкой.
+     * How many balances (per asset) were zeroed by a compensating posting.
      *
      * @return the {@code balances_zeroed} field
      */
@@ -46,7 +46,7 @@ public final class ResetResult implements WireObject {
     }
 
     /**
-     * Сколько открытых счетов отменено.
+     * How many open invoices were cancelled.
      *
      * @return the {@code invoices_cancelled} field
      */
@@ -55,7 +55,7 @@ public final class ResetResult implements WireObject {
     }
 
     /**
-     * Сколько профинансированных выплатных ссылок отменено (резерв вернулся до обнуления).
+     * How many funded payout links were cancelled (the reserve was returned before zeroing).
      *
      * @return the {@code payout_links_cancelled} field
      */
@@ -64,7 +64,7 @@ public final class ResetResult implements WireObject {
     }
 
     /**
-     * Сколько профинансированных ссылок отменить не удалось — их резерв остался.
+     * How many funded links could not be cancelled — their reserve remains.
      *
      * @return the {@code payout_links_left} field
      */
@@ -190,7 +190,7 @@ public final class ResetResult implements WireObject {
         /**
          * Sets {@code balances_zeroed}.
          *
-         * <p>Сколько балансов (по активам) обнулено компенсирующей проводкой.
+         * <p>How many balances (per asset) were zeroed by a compensating posting.
          *
          * @param balancesZeroed the value
          * @return this builder
@@ -203,7 +203,7 @@ public final class ResetResult implements WireObject {
         /**
          * Sets {@code invoices_cancelled}.
          *
-         * <p>Сколько открытых счетов отменено.
+         * <p>How many open invoices were cancelled.
          *
          * @param invoicesCancelled the value
          * @return this builder
@@ -216,7 +216,7 @@ public final class ResetResult implements WireObject {
         /**
          * Sets {@code payout_links_cancelled}.
          *
-         * <p>Сколько профинансированных выплатных ссылок отменено (резерв вернулся до обнуления).
+         * <p>How many funded payout links were cancelled (the reserve was returned before zeroing).
          *
          * @param payoutLinksCancelled the value
          * @return this builder
@@ -229,7 +229,7 @@ public final class ResetResult implements WireObject {
         /**
          * Sets {@code payout_links_left}.
          *
-         * <p>Сколько профинансированных ссылок отменить не удалось — их резерв остался.
+         * <p>How many funded links could not be cancelled — their reserve remains.
          *
          * @param payoutLinksLeft the value
          * @return this builder

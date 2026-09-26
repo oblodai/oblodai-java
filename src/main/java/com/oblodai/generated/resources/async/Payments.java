@@ -30,7 +30,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Приём оплаты: создать счёт, узнать статус, история, QR.
+ * Accepting payments: create an invoice, check its status, history, QR code.
  *
  * <p>The {@code Payments} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -43,53 +43,57 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Создать платёж (счёт на оплату)
+     * Create a payment (invoice)
      *
-     * <p>Создаёт счёт и возвращает адрес + сумму к оплате и ссылку на страницу оплаты.
+     * <p>Creates an invoice and returns the address and amount to pay plus a link to the payment
+     * page.
      *
-     * <p>**Как проще всего:** передайте {@code amount} (сумма), {@code currency} (валюта цены,
-     * напр. {@code USD}), {@code order_id} (ваш номер заказа). Если укажете {@code network} и
-     * {@code to_currency} — сразу зафиксируется конкретная монета/сеть. Если НЕ укажете — получится
-     * валюто-агностичная ссылка: клиент сам выберет валюту и сеть на странице оплаты.
+     * <p>**The simplest way:** pass {@code amount}, {@code currency} (the price currency, e.g.
+     * {@code USD}) and {@code order_id} (your order number). If you set {@code network} and
+     * {@code to_currency}, a specific coin/network is locked in immediately. If you DON'T, you get
+     * a currency-agnostic link: the customer picks the currency and network on the payment page.
      *
-     * <p>**Цена и расчёт — разные вещи.** {@code currency} говорит, сколько счёт СТОИТ: это может
-     * быть фиат ({@code USD}, {@code EUR}, {@code RUB}, {@code GBP}, {@code JPY} и ещё сорок
-     * фиатных валют — полный список в {@code /v1/currencies}) или любая монета. {@code to_currency}
-     * говорит, чем ПЛАТЯТ: **только крипта**. Фиата мы не храним, поэтому баланс, выплаты и
-     * возвраты всегда в монете — счёт на 5000 ₽ выставить можно, а получить за него можно USDT, TRX
-     * и т. д.
+     * <p>**Price and settlement are different things.** {@code currency} says what the invoice
+     * COSTS: it can be fiat ({@code USD}, {@code EUR}, {@code RUB}, {@code GBP}, {@code JPY} and
+     * forty more fiat currencies — the full list is in {@code /v1/currencies}) or any coin.
+     * {@code to_currency} says what the customer PAYS WITH: **crypto only**. We do not hold fiat,
+     * so balances, payouts and refunds are always in a coin — you can issue an invoice for 5000
+     * RUB, but it is paid in USDT, TRX, etc.
      *
-     * <p>Отсюда правило: если цена в фиате, то {@code to_currency} либо задаётся явно, либо не
-     * задаётся вовсе — вместе с {@code network} (тогда монету выберет покупатель). Цена в фиате +
-     * одна лишь {@code network}, без монеты, вернёт {@code payment.to_currency_required}: вывести
-     * монету из рублей неоткуда.
+     * <p>Hence the rule: if the price is in fiat, {@code to_currency} is either set explicitly or
+     * omitted together with {@code network} (then the buyer picks the coin). A fiat price with only
+     * {@code network} and no coin returns {@code payment.to_currency_required}: there is no way to
+     * derive a coin from rubles.
      *
-     * <p>У иены и воны ({@code JPY}, {@code KRW}) **нет копеек** — сумма пишется без дробной части
-     * ({@code "10000"}, не {@code "10000.00"}). Полный список валют цены — в
-     * {@code pricing_currencies} у {@code GET /v1/currencies}.
+     * <p>The yen and the won ({@code JPY}, {@code KRW}) have **no minor units** — write the amount
+     * without a fractional part ({@code "10000"}, not {@code "10000.00"}). The full list of price
+     * currencies is in {@code pricing_currencies} of {@code GET /v1/currencies}.
      *
-     * <p>**Идемпотентность:** повтор с тем же {@code order_id} вернёт тот же счёт (двойного счёта
-     * не будет).
+     * <p>**Idempotency:** a retry with the same {@code order_id} returns the same invoice (no
+     * duplicate invoice is created).
      *
-     * <p>Необязательные удобства: {@code lifetime} (сколько секунд живёт счёт, 300–43200),
-     * {@code url_return}/{@code url_success} (куда вернуть клиента), {@code url_callback} (куда
-     * слать вебхук), {@code additional_data} (ваши приватные данные), {@code payer_email},
-     * {@code accuracy_payment_percent} (допуск недо/переплаты 0–5%), {@code is_refresh} (оживить
-     * просроченный счёт по order_id).
+     * <p>Optional conveniences: {@code lifetime} (invoice lifetime in seconds, 300–43200),
+     * {@code url_return}/{@code url_success} (where to send the customer back),
+     * {@code url_callback} (where to send the webhook), {@code additional_data} (your private
+     * data), {@code payer_email}, {@code accuracy_payment_percent} (underpayment/overpayment
+     * tolerance, 0–5%), {@code is_refresh} (revive an expired invoice by order_id).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment} ({@code createPayment}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
-     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
-     * {@code invoice.address_failed}, {@code invoice.address_taken}, {@code invoice.already_paid},
-     * {@code invoice.bad_price}, {@code invoice.corrupt_pay_asset}, {@code invoice.daily_quota},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code idempotency.bad_key},
+     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code idempotency.unavailable}, {@code internal}, {@code invoice.address_failed},
+     * {@code invoice.address_taken}, {@code invoice.already_paid}, {@code invoice.bad_price},
+     * {@code invoice.corrupt_pay_asset}, {@code invoice.daily_quota},
      * {@code invoice.deposit_pending}, {@code invoice.fiat_pay_asset},
      * {@code invoice.no_pay_asset}, {@code invoice.quote_failed}, {@code invoice.refresh_lease},
      * {@code invoice.refresh_not_expired}, {@code invoice.refresh_paid},
      * {@code invoice.refresh_select}, {@code invoice.surcharge_asset},
      * {@code merchant.acceptance_blocked}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code pay.method_not_accepted},
      * {@code pay.surcharge_unknown}, {@code payment.bad_accuracy}, {@code payment.bad_amount},
@@ -134,16 +138,19 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Узнать статус платежа
+     * Get payment status
      *
-     * <p>Передайте {@code uuid} (наш) ИЛИ {@code order_id} (ваш). Вернёт текущий статус и суммы.
-     * Если оба — приоритет у {@code order_id}.
+     * <p>Pass {@code uuid} (ours) OR {@code order_id} (yours). Returns the current status and
+     * amounts. If both are given, {@code order_id} takes precedence.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/info} ({@code getPaymentInfo}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code payment.bad_uuid},
      * {@code payment.no_lookup}, {@code payment.not_found}, {@code payout.not_found},
@@ -199,16 +206,19 @@ public final class Payments extends Resource {
     }
 
     /**
-     * QR-код адреса счёта
+     * Invoice address QR code
      *
-     * <p>Возвращает QR адреса оплаты (по {@code uuid}/{@code order_id}) как PNG data:-URI —
-     * вставляется прямо в {@code <img src>}.
+     * <p>Returns the QR code of the payment address (by {@code uuid}/{@code order_id}) as a PNG
+     * data: URI — drop it straight into {@code <img src>}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/qr} ({@code getPaymentQr}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code payment.bad_uuid}, {@code payment.no_lookup},
      * {@code payment.not_found}, {@code request.bad_json}, {@code request.body_read},
@@ -262,19 +272,22 @@ public final class Payments extends Resource {
     }
 
     /**
-     * История платежей
+     * Payment history
      *
-     * <p>Список ваших платежей, новые сверху: {@code items} + блок {@code paginate} ({@code total}
-     * — всего записей по фильтру, {@code per_page}, {@code offset}, {@code has_pages}). Тело:
-     * {@code limit} (1–100, по умолчанию 25), {@code offset}, необязательный {@code status} — то же
-     * значение, что в ответах и вебхуках ({@code created}, {@code confirm_check}, {@code paid},
+     * <p>Your payments, newest first: {@code items} plus a {@code paginate} block ({@code total} —
+     * number of records matching the filter, {@code per_page}, {@code offset}, {@code has_pages}).
+     * Body: {@code limit} (1–100, default 25), {@code offset}, optional {@code status} — the same
+     * value as in responses and webhooks ({@code created}, {@code confirm_check}, {@code paid},
      * {@code paid_over}, {@code wrong_amount}, {@code expired}, {@code cancelled}, {@code select}).
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/history} ({@code listPaymentHistory}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppressed_in}, {@code payment.bad_status},
      * {@code payment.not_found}, {@code request.bad_json}, {@code request.body_read},
@@ -328,15 +341,18 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Доступные валюты и сети для приёма
+     * Currencies and networks available for accepting payments
      *
-     * <p>Список валют/сетей, которые можно принимать, с лимитами и комиссиями. Тело запроса —
-     * пустой <code>{}</code>.
+     * <p>The currencies/networks you can accept, with limits and fees. The request body is an empty
+     * <code>{}</code>.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/services} ({@code listPaymentServices}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code rates.deviation}, {@code rates.fiat_pay_asset}, {@code rates.no_pay_asset},
@@ -392,19 +408,22 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Отменить счёт
+     * Cancel an invoice
      *
-     * <p>Отменяет ваш неоплаченный счёт (например, созданный по ошибке) по
-     * {@code uuid}/{@code order_id}. Разрешено, пока по счёту не увиден ни один платёж или депозит
-     * в сети; после этого — 409 ({@code invoice.already_paid} / {@code invoice.deposit_pending}):
-     * такой счёт надо не отменять, а провести или вернуть.
+     * <p>Cancels your unpaid invoice (e.g. one created by mistake) by
+     * {@code uuid}/{@code order_id}. Allowed as long as no payment or on-chain deposit has been
+     * seen for the invoice; after that — 409 ({@code invoice.already_paid} /
+     * {@code invoice.deposit_pending}): such an invoice must be settled or refunded, not cancelled.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/cancel} ({@code cancelPayment}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.already_paid},
-     * {@code invoice.corrupt_pay_asset}, {@code invoice.deposit_pending},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.already_paid}, {@code invoice.corrupt_pay_asset},
+     * {@code invoice.deposit_pending}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code payment.bad_uuid},
      * {@code payment.no_lookup}, {@code payment.not_found}, {@code request.bad_json},
@@ -459,27 +478,29 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Отправить счёт на e-mail
+     * Email the invoice
      *
-     * <p>Шлёт покупателю письмо с кнопкой «Оплатить» для существующего платежа (по
-     * {@code uuid}/{@code order_id}). Адрес — поле {@code email} или {@code payer_email} платежа.
-     * Требует настроенный SMTP (иначе {@code email.disabled}). Отправка ограничена ПО АДРЕСУ
-     * ПОЛУЧАТЕЛЯ: не больше 10 писем на один адрес за час, считая по всем вашим платежам (иначе
-     * {@code email.rate_limited}, 429). Чек об оплате отправляется автоматически на
-     * {@code payer_email}, когда платёж получен.
+     * <p>Sends the buyer an email with a "Pay" button for an existing payment (by
+     * {@code uuid}/{@code order_id}). The address is the {@code email} field or the payment's
+     * {@code payer_email}. Requires SMTP to be configured (otherwise {@code email.disabled}).
+     * Sending is limited PER RECIPIENT ADDRESS: no more than 10 emails to one address per hour,
+     * counted across all your payments (otherwise {@code email.rate_limited}, 429). A payment
+     * receipt is sent automatically to {@code payer_email} once the payment is received.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/send-email} ({@code sendPaymentEmail}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code email.bad_recipient}, {@code email.disabled},
-     * {@code email.no_recipient}, {@code email.rate_limited}, {@code internal},
-     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
-     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
-     * {@code payment.bad_uuid}, {@code payment.no_lookup}, {@code payment.not_found},
-     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
-     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
-     * {@code request.rate_limited}, {@code request.too_deep}.
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code email.bad_recipient},
+     * {@code email.disabled}, {@code email.no_recipient}, {@code email.rate_limited},
+     * {@code internal}, {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code payment.bad_uuid}, {@code payment.no_lookup},
+     * {@code payment.not_found}, {@code request.bad_json}, {@code request.body_read},
+     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep}.
      *
      * @param params the request body
      * @param options per-call options ({@code null} for the defaults)
@@ -529,25 +550,28 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Настройки страницы оплаты
+     * Payment page settings
      *
-     * <p>Куда возвращать покупателя после оплаты ({@code success_url}) и после отказа
-     * ({@code fail_url}), и слать ли ему чек на почту ({@code email_receipts}).
+     * <p>Where to send the buyer after payment ({@code success_url}) and after a failure
+     * ({@code fail_url}), and whether to email them a receipt ({@code email_receipts}).
      *
-     * <p>Редиректы — это ЗНАЧЕНИЯ ПО УМОЛЧАНИЮ: они подставляются только в те счета, где вы не
-     * прислали {@code url_success}/{@code url_return} сами. Присланное в {@code /v1/payment} всегда
-     * сильнее. Чек — не умолчание, а решение: у него нет поля в счёте, и он уходит только если
-     * покупатель оставил почту.
+     * <p>The redirects are DEFAULTS: they apply only to invoices where you did not send
+     * {@code url_success}/{@code url_return} yourself. Values sent in {@code /v1/payment} always
+     * win. The receipt is not a default but a decision: the invoice has no field for it, and it is
+     * sent only if the buyer left an email.
      *
-     * <p>Присылайте только те поля, которые меняете: пропущенное поле сохраняет прежнее значение, а
-     * пустая строка в редиректе — это «никуда не отправлять». Адрес должен быть http(s); проверка
-     * на записи, а не на показе.
+     * <p>Send only the fields you change: an omitted field keeps its previous value, and an empty
+     * string in a redirect means "do not redirect". The URL must be http(s); it is validated on
+     * write, not on display.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/checkout-config/set} ({@code setCheckoutConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
      * {@code auth.ip_not_allowed}, {@code checkoutcfg.bad_url}, {@code checkoutcfg.disabled},
-     * {@code checkoutcfg.url_too_long}, {@code internal}, {@code merchant.bad_signature},
+     * {@code checkoutcfg.url_too_long}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -602,21 +626,24 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Текущие настройки страницы оплаты
+     * Current payment page settings
      *
-     * <p>Возвращает {@code success_url}, {@code fail_url}, {@code email_receipts} проекта.
-     * Ненастроенное поле отдаётся своим ФАКТИЧЕСКИМ поведением: пустой редирект и
+     * <p>Returns the project's {@code success_url}, {@code fail_url}, {@code email_receipts}. An
+     * unconfigured field is returned as its EFFECTIVE behavior: an empty redirect and
      * {@code email_receipts: true}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/checkout-config/get} ({@code getCheckoutConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code checkoutcfg.disabled}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
-     * {@code merchant.unknown_key}, {@code request.body_read}, {@code request.control_char},
-     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
-     * {@code request.rate_limited}, {@code request.too_deep}.
+     * {@code auth.ip_not_allowed}, {@code checkoutcfg.disabled}, {@code cli.permission_denied},
+     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_expired},
+     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
+     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
+     * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
+     * {@code request.nul_byte}, {@code request.overloaded}, {@code request.rate_limited},
+     * {@code request.too_deep}.
      *
      * @param options per-call options ({@code null} for the defaults)
      * @return a future of the result
@@ -641,25 +668,27 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Ссылки на анкету происхождения средств
+     * Source-of-funds questionnaire links
      *
-     * <p>По {@code uuid} или {@code order_id}. Если по платежу ничего не заблокировано — **пустой
-     * массив**; это единственное, по чему различаются случаи, сама причина наружу не уходит. Каждый
-     * элемент: {@code link} (передайте её плательщику), {@code expired_at}, {@code status}
-     * ({@code init|pending|completed|expired}). Содержимое анкеты вам не показывается: это данные
-     * вашего клиента, а не ваши.
+     * <p>By {@code uuid} or {@code order_id}. If nothing is blocked for the payment — an **empty
+     * array**; that is the only thing that distinguishes the cases, the reason itself is not
+     * disclosed. Each item: {@code link} (hand it to the payer), {@code expired_at}, {@code status}
+     * ({@code init|pending|completed|expired}). The questionnaire contents are not shown to you:
+     * they are your customer's data, not yours.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/aml-links} ({@code getPaymentAmlLinks}).
      *
      * <p>Error codes: {@code aml.sof_race}, {@code auth.bad_timestamp},
-     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code internal},
-     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
-     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
-     * {@code payment.bad_uuid}, {@code payment.no_reference}, {@code payment.not_found},
-     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
-     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
-     * {@code request.rate_limited}, {@code request.too_deep}.
+     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code cli.permission_denied},
+     * {@code internal}, {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code payment.bad_uuid}, {@code payment.no_reference},
+     * {@code payment.not_found}, {@code request.bad_json}, {@code request.body_read},
+     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep}.
      *
      * @param params the request body
      * @param options per-call options ({@code null} for the defaults)
@@ -709,28 +738,30 @@ public final class Payments extends Resource {
     }
 
     /**
-     * Разрешить недоплату: принять или вернуть
+     * Resolve an underpayment: accept or refund
      *
-     * <p>Для платежа в статусе {@code wrong_amount} (недоплата, срок вышел) мерчант явно решает
-     * судьбу денег: {@code action:"accept"} — оставить частичную оплату как расчёт (снимает
-     * автовозврат), {@code action:"refund"} — вернуть полученное плательщику сейчас (адрес/сеть по
-     * умолчанию — записанный адрес плательщика). Двигает деньги — подписывается вашим API-ключом,
-     * как и всё остальное: ключ у мерчанта один и он полнодоступный.
+     * <p>For a payment in status {@code wrong_amount} (underpaid, expired) the merchant explicitly
+     * decides what happens to the money: {@code action:"accept"} — keep the partial payment as
+     * settlement (cancels the auto-refund), {@code action:"refund"} — return what was received to
+     * the payer now (address/network default to the recorded payer address). It moves money — it is
+     * signed with your API key like everything else: a merchant has one key and it has full access.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/resolve} ({@code resolvePayment}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code compliance.blocked}, {@code compliance.blocked_address},
-     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
-     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
-     * {@code compliance.sanctions_unavailable}, {@code idempotency.bad_key},
-     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
+     * {@code compliance.no_destination}, {@code compliance.no_network},
+     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
+     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
      * {@code idempotency.unavailable}, {@code internal}, {@code invoice.corrupt_pay_asset},
      * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
      * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code onramp.suppresses}, {@code payment.bad_uuid}, {@code payment.no_lookup},

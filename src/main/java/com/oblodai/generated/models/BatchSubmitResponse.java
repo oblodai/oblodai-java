@@ -37,7 +37,7 @@ public final class BatchSubmitResponse implements WireObject {
     }
 
     /**
-     * Идентификатор батча — с ним идите в POST /v1/batch/info за статусом и результатами.
+     * The batch id — use it with POST /v1/batch/info to get the status and results.
      *
      * @return the {@code batch_id} field
      */
@@ -46,7 +46,7 @@ public final class BatchSubmitResponse implements WireObject {
     }
 
     /**
-     * Сколько элементов принято в обработку.
+     * How many items were accepted for processing.
      *
      * @return the {@code count} field
      */
@@ -55,7 +55,7 @@ public final class BatchSubmitResponse implements WireObject {
     }
 
     /**
-     * Вид батча: payment | refund | payout | transfer.
+     * Batch kind: payment | refund | payout | transfer.
      *
      * @return the {@code kind} field
      */
@@ -64,7 +64,7 @@ public final class BatchSubmitResponse implements WireObject {
     }
 
     /**
-     * Стартовый статус — всегда pending.
+     * The initial status — always pending.
      *
      * @return the {@code status} field
      */
@@ -187,7 +187,7 @@ public final class BatchSubmitResponse implements WireObject {
         /**
          * Sets {@code batch_id}.
          *
-         * <p>Идентификатор батча — с ним идите в POST /v1/batch/info за статусом и результатами.
+         * <p>The batch id — use it with POST /v1/batch/info to get the status and results.
          *
          * @param batchId the value
          * @return this builder
@@ -200,7 +200,7 @@ public final class BatchSubmitResponse implements WireObject {
         /**
          * Sets {@code count}.
          *
-         * <p>Сколько элементов принято в обработку.
+         * <p>How many items were accepted for processing.
          *
          * @param count the value
          * @return this builder
@@ -213,7 +213,7 @@ public final class BatchSubmitResponse implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид батча: payment | refund | payout | transfer.
+         * <p>Batch kind: payment | refund | payout | transfer.
          *
          * @param kind the value
          * @return this builder
@@ -226,7 +226,7 @@ public final class BatchSubmitResponse implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид батча: payment | refund | payout | transfer.
+         * <p>Batch kind: payment | refund | payout | transfer.
          *
          * @param kind the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -238,7 +238,7 @@ public final class BatchSubmitResponse implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Стартовый статус — всегда pending.
+         * <p>The initial status — always pending.
          *
          * @param status the value
          * @return this builder
@@ -251,7 +251,7 @@ public final class BatchSubmitResponse implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Стартовый статус — всегда pending.
+         * <p>The initial status — always pending.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

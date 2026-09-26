@@ -31,7 +31,7 @@ public final class ReplayResult implements WireObject {
     }
 
     /**
-     * Идентификатор доставки, как передан.
+     * The delivery id, as passed.
      *
      * @return the {@code delivery_id} field
      */
@@ -40,7 +40,7 @@ public final class ReplayResult implements WireObject {
     }
 
     /**
-     * Всегда true: доставка поставлена в очередь; иначе — ошибка.
+     * Always true: the delivery has been queued; otherwise — an error.
      *
      * @return the {@code ok} field
      */
@@ -146,7 +146,7 @@ public final class ReplayResult implements WireObject {
         /**
          * Sets {@code delivery_id}.
          *
-         * <p>Идентификатор доставки, как передан.
+         * <p>The delivery id, as passed.
          *
          * @param deliveryId the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class ReplayResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Всегда true: доставка поставлена в очередь; иначе — ошибка.
+         * <p>Always true: the delivery has been queued; otherwise — an error.
          *
          * @param ok the value
          * @return this builder

@@ -44,7 +44,7 @@ public final class ReferralInfoResult implements WireObject {
     }
 
     /**
-     * Реферальный код мерчанта.
+     * The merchant's referral code.
      *
      * @return the {@code code} field
      */
@@ -53,7 +53,7 @@ public final class ReferralInfoResult implements WireObject {
     }
 
     /**
-     * Заработано по активам, десятичными строками.
+     * Earned per asset, as decimal strings.
      *
      * @return the {@code earnings_by_asset} field
      */
@@ -62,7 +62,7 @@ public final class ReferralInfoResult implements WireObject {
     }
 
     /**
-     * Реферальная ссылка (или сам код, если публичный адрес не настроен).
+     * The referral link (or the code itself if the public address is not configured).
      *
      * @return the {@code link} field
      */
@@ -71,7 +71,7 @@ public final class ReferralInfoResult implements WireObject {
     }
 
     /**
-     * Сколько мерчантов приглашено.
+     * How many merchants have been invited.
      *
      * @return the {@code referred_count} field
      */
@@ -80,7 +80,7 @@ public final class ReferralInfoResult implements WireObject {
     }
 
     /**
-     * Доля нашей комиссии по месяцам, в базисных пунктах.
+     * The share of our fee by month, in basis points.
      *
      * @return the {@code tier_bps} field
      */
@@ -89,7 +89,7 @@ public final class ReferralInfoResult implements WireObject {
     }
 
     /**
-     * То же за скользящие 7 дней.
+     * The same over a rolling 7 days.
      *
      * @return the {@code week} field
      */
@@ -230,7 +230,7 @@ public final class ReferralInfoResult implements WireObject {
         /**
          * Sets {@code code}.
          *
-         * <p>Реферальный код мерчанта.
+         * <p>The merchant's referral code.
          *
          * @param code the value
          * @return this builder
@@ -243,7 +243,7 @@ public final class ReferralInfoResult implements WireObject {
         /**
          * Sets {@code earnings_by_asset}.
          *
-         * <p>Заработано по активам, десятичными строками.
+         * <p>Earned per asset, as decimal strings.
          *
          * @param earningsByAsset the value
          * @return this builder
@@ -256,7 +256,7 @@ public final class ReferralInfoResult implements WireObject {
         /**
          * Sets {@code link}.
          *
-         * <p>Реферальная ссылка (или сам код, если публичный адрес не настроен).
+         * <p>The referral link (or the code itself if the public address is not configured).
          *
          * @param link the value
          * @return this builder
@@ -269,7 +269,7 @@ public final class ReferralInfoResult implements WireObject {
         /**
          * Sets {@code referred_count}.
          *
-         * <p>Сколько мерчантов приглашено.
+         * <p>How many merchants have been invited.
          *
          * @param referredCount the value
          * @return this builder
@@ -282,7 +282,7 @@ public final class ReferralInfoResult implements WireObject {
         /**
          * Sets {@code tier_bps}.
          *
-         * <p>Доля нашей комиссии по месяцам, в базисных пунктах.
+         * <p>The share of our fee by month, in basis points.
          *
          * @param tierBps the value
          * @return this builder
@@ -295,7 +295,7 @@ public final class ReferralInfoResult implements WireObject {
         /**
          * Sets {@code week}.
          *
-         * <p>То же за скользящие 7 дней.
+         * <p>The same over a rolling 7 days.
          *
          * @param week the value
          * @return this builder

@@ -30,7 +30,7 @@ public final class DownloadDocumentJobFileQuery implements WireObject {
     }
 
     /**
-     * Идентификатор задачи из ответа POST /v1/documents/jobs.
+     * The job id from the POST /v1/documents/jobs response.
      *
      * @return the {@code job_id} field
      */
@@ -128,7 +128,7 @@ public final class DownloadDocumentJobFileQuery implements WireObject {
         /**
          * Sets {@code job_id}.
          *
-         * <p>Идентификатор задачи из ответа POST /v1/documents/jobs.
+         * <p>The job id from the POST /v1/documents/jobs response.
          *
          * @param jobId the value
          * @return this builder

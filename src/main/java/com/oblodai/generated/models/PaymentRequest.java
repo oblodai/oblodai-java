@@ -74,7 +74,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Допуск недо/переплаты, 0–5 %. Перекрывает настройку мерчанта.
+     * Underpayment/overpayment tolerance, 0–5 %. Overrides the merchant setting.
      *
      * @return the {@code accuracy_payment_percent} field, or {@code null} when absent
      */
@@ -83,7 +83,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Приватные данные мерчанта, эхом в вебхуках (покупателю не видны).
+     * The merchant's private data, echoed in webhooks (not visible to the buyer).
      *
      * @return the {@code additional_data} field, or {@code null} when absent
      */
@@ -92,7 +92,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Сумма к оплате в валюте currency.
+     * The amount to pay in currency.
      *
      * @return the {@code amount} field
      */
@@ -101,8 +101,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Код валюты цены: любой из 23 фиатов (USD, EUR, RUB, …) или любая монета (USDT, BTC, …). У JPY
-     * и KRW ноль знаков после запятой.
+     * The price currency code: any of the 23 fiat currencies (USD, EUR, RUB, …) or any coin (USDT,
+     * BTC, …). JPY and KRW have zero decimal places.
      *
      * @return the {@code currency} field
      */
@@ -111,7 +111,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Разрешить доплату остатка.
+     * Allow paying the remainder.
      *
      * @return the {@code is_payment_multiple} field, or {@code null} when absent
      */
@@ -120,7 +120,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Оживить просроченный счёт по order_id вместо создания нового.
+     * Revive an expired invoice by order_id instead of creating a new one.
      *
      * @return the {@code is_refresh} field, or {@code null} when absent
      */
@@ -129,8 +129,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Время жизни счёта в секундах, 300–43200; по умолчанию 3600. Значения вне диапазона обрезаются
-     * к ближайшей границе.
+     * Invoice lifetime in seconds, 300–43200; default 3600. Out-of-range values are clamped to the
+     * nearest bound.
      *
      * @return the {@code lifetime_seconds} field, or {@code null} when absent
      */
@@ -139,7 +139,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Сеть расчёта (напр. tron, ethereum). Необязательна — см. режимы выбора валюты и сети.
+     * The settlement network (e.g. tron, ethereum). Optional — see the currency and network
+     * selection modes.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -148,7 +149,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Ссылка мерчанта; ключ идемпотентности. Настоятельно рекомендуется.
+     * The merchant reference; the idempotency key. Strongly recommended.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -157,8 +158,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Email плательщика. Если задан — после оплаты на него автоматически уходит чек; он же
-     * получатель по умолчанию у POST /v1/payment/send-email.
+     * The payer's email. If set, a receipt is sent to it automatically after payment; it is also
+     * the default recipient for POST /v1/payment/send-email.
      *
      * @return the {@code payer_email} field, or {@code null} when absent
      */
@@ -167,8 +168,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Устаревшее: % сетевой наценки на плательщика (0–100); payer-facing наценки настраиваются
-     * через discount.
+     * Deprecated: % network surcharge on the payer (0–100); payer-facing surcharges are configured
+     * via discount.
      *
      * @return the {@code subtract} field, or {@code null} when absent
      */
@@ -177,7 +178,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Тема страницы оплаты: dark | light.
+     * Payment page theme: dark | light.
      *
      * @return the {@code theme} field, or {@code null} when absent
      */
@@ -186,8 +187,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Валюта расчёта — крипта, которой платят. По умолчанию = currency (только если currency —
-     * крипта); при цене в фиате задайте явно либо опустите вместе с network.
+     * The settlement currency — the crypto used to pay. Defaults to currency (only if currency is
+     * crypto); for a fiat price set it explicitly or omit it together with network.
      *
      * @return the {@code to_currency} field, or {@code null} when absent
      */
@@ -196,8 +197,8 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Индивидуальный webhook для этого счёта. Требует зарегистрированного эндпоинта (POST
-     * /v1/webhooks): доставка подписывается его секретом.
+     * A per-invoice webhook. Requires a registered endpoint (POST /v1/webhooks): the delivery is
+     * signed with its secret.
      *
      * @return the {@code url_callback} field, or {@code null} when absent
      */
@@ -206,7 +207,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Ссылка «назад в магазин» на странице оплаты.
+     * The "back to store" link on the payment page.
      *
      * @return the {@code url_return} field, or {@code null} when absent
      */
@@ -215,7 +216,7 @@ public final class PaymentRequest implements WireObject {
     }
 
     /**
-     * Редирект после успешной оплаты.
+     * Redirect after a successful payment.
      *
      * @return the {@code url_success} field, or {@code null} when absent
      */
@@ -437,7 +438,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code accuracy_payment_percent}.
          *
-         * <p>Допуск недо/переплаты, 0–5 %. Перекрывает настройку мерчанта.
+         * <p>Underpayment/overpayment tolerance, 0–5 %. Overrides the merchant setting.
          *
          * @param accuracyPaymentPercent the value
          * @return this builder
@@ -450,7 +451,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code additional_data}.
          *
-         * <p>Приватные данные мерчанта, эхом в вебхуках (покупателю не видны).
+         * <p>The merchant's private data, echoed in webhooks (not visible to the buyer).
          *
          * @param additionalData the value
          * @return this builder
@@ -463,7 +464,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма к оплате в валюте currency.
+         * <p>The amount to pay in currency.
          *
          * @param amount the value
          * @return this builder
@@ -476,7 +477,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма к оплате в валюте currency.
+         * <p>The amount to pay in currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -488,8 +489,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты цены: любой из 23 фиатов (USD, EUR, RUB, …) или любая монета (USDT, BTC,
-         * …). У JPY и KRW ноль знаков после запятой.
+         * <p>The price currency code: any of the 23 fiat currencies (USD, EUR, RUB, …) or any coin
+         * (USDT, BTC, …). JPY and KRW have zero decimal places.
          *
          * @param currency the value
          * @return this builder
@@ -502,7 +503,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code is_payment_multiple}.
          *
-         * <p>Разрешить доплату остатка.
+         * <p>Allow paying the remainder.
          *
          * @param isPaymentMultiple the value
          * @return this builder
@@ -516,7 +517,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code is_refresh}.
          *
-         * <p>Оживить просроченный счёт по order_id вместо создания нового.
+         * <p>Revive an expired invoice by order_id instead of creating a new one.
          *
          * @param isRefresh the value
          * @return this builder
@@ -529,8 +530,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code lifetime_seconds}.
          *
-         * <p>Время жизни счёта в секундах, 300–43200; по умолчанию 3600. Значения вне диапазона
-         * обрезаются к ближайшей границе.
+         * <p>Invoice lifetime in seconds, 300–43200; default 3600. Out-of-range values are clamped
+         * to the nearest bound.
          *
          * @param lifetimeSeconds the value
          * @return this builder
@@ -543,7 +544,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть расчёта (напр. tron, ethereum). Необязательна — см. режимы выбора валюты и сети.
+         * <p>The settlement network (e.g. tron, ethereum). Optional — see the currency and network
+         * selection modes.
          *
          * @param network the value
          * @return this builder
@@ -556,7 +558,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ссылка мерчанта; ключ идемпотентности. Настоятельно рекомендуется.
+         * <p>The merchant reference; the idempotency key. Strongly recommended.
          *
          * @param orderId the value
          * @return this builder
@@ -569,8 +571,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code payer_email}.
          *
-         * <p>Email плательщика. Если задан — после оплаты на него автоматически уходит чек; он же
-         * получатель по умолчанию у POST /v1/payment/send-email.
+         * <p>The payer's email. If set, a receipt is sent to it automatically after payment; it is
+         * also the default recipient for POST /v1/payment/send-email.
          *
          * @param payerEmail the value
          * @return this builder
@@ -583,8 +585,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code subtract}.
          *
-         * <p>Устаревшее: % сетевой наценки на плательщика (0–100); payer-facing наценки
-         * настраиваются через discount.
+         * <p>Deprecated: % network surcharge on the payer (0–100); payer-facing surcharges are
+         * configured via discount.
          *
          * @param subtract the value
          * @return this builder
@@ -597,7 +599,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code theme}.
          *
-         * <p>Тема страницы оплаты: dark | light.
+         * <p>Payment page theme: dark | light.
          *
          * @param theme the value
          * @return this builder
@@ -610,8 +612,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code to_currency}.
          *
-         * <p>Валюта расчёта — крипта, которой платят. По умолчанию = currency (только если currency
-         * — крипта); при цене в фиате задайте явно либо опустите вместе с network.
+         * <p>The settlement currency — the crypto used to pay. Defaults to currency (only if
+         * currency is crypto); for a fiat price set it explicitly or omit it together with network.
          *
          * @param toCurrency the value
          * @return this builder
@@ -624,8 +626,8 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code url_callback}.
          *
-         * <p>Индивидуальный webhook для этого счёта. Требует зарегистрированного эндпоинта (POST
-         * /v1/webhooks): доставка подписывается его секретом.
+         * <p>A per-invoice webhook. Requires a registered endpoint (POST /v1/webhooks): the
+         * delivery is signed with its secret.
          *
          * @param urlCallback the value
          * @return this builder
@@ -638,7 +640,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code url_return}.
          *
-         * <p>Ссылка «назад в магазин» на странице оплаты.
+         * <p>The "back to store" link on the payment page.
          *
          * @param urlReturn the value
          * @return this builder
@@ -651,7 +653,7 @@ public final class PaymentRequest implements WireObject {
         /**
          * Sets {@code url_success}.
          *
-         * <p>Редирект после успешной оплаты.
+         * <p>Redirect after a successful payment.
          *
          * @param urlSuccess the value
          * @return this builder

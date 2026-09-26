@@ -45,7 +45,7 @@ public final class PayServiceEntry implements WireObject {
     }
 
     /**
-     * Валюта.
+     * Currency.
      *
      * @return the {@code currency} field
      */
@@ -54,7 +54,7 @@ public final class PayServiceEntry implements WireObject {
     }
 
     /**
-     * Метод работает на этом развёртывании.
+     * The method works on this deployment.
      *
      * @return the {@code is_available} field
      */
@@ -68,7 +68,7 @@ public final class PayServiceEntry implements WireObject {
     }
 
     /**
-     * Сеть.
+     * Network.
      *
      * @return the {@code network} field
      */
@@ -210,7 +210,7 @@ public final class PayServiceEntry implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта.
+         * <p>Currency.
          *
          * @param currency the value
          * @return this builder
@@ -223,7 +223,7 @@ public final class PayServiceEntry implements WireObject {
         /**
          * Sets {@code is_available}.
          *
-         * <p>Метод работает на этом развёртывании.
+         * <p>The method works on this deployment.
          *
          * @param isAvailable the value
          * @return this builder
@@ -247,7 +247,7 @@ public final class PayServiceEntry implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть.
+         * <p>Network.
          *
          * @param network the value
          * @return this builder

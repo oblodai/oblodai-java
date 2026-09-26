@@ -34,7 +34,7 @@ public final class BlockedRefundRequest implements WireObject {
     }
 
     /**
-     * Адрес назначения возврата.
+     * Refund destination address.
      *
      * @return the {@code address} field
      */
@@ -43,8 +43,8 @@ public final class BlockedRefundRequest implements WireObject {
     }
 
     /**
-     * Тег/мемо назначения (XRP destination tag, XLM memo id, TON comment). Обязателен для
-     * классического адреса на tag/memo-сети, если тег не встроен в X-/M-адрес.
+     * Destination tag/memo (XRP destination tag, XLM memo id, TON comment). Required for a classic
+     * address on a tag/memo network unless the tag is embedded in an X-/M-address.
      *
      * @return the {@code memo} field, or {@code null} when absent
      */
@@ -53,7 +53,7 @@ public final class BlockedRefundRequest implements WireObject {
     }
 
     /**
-     * Идентификатор статического кошелька (из ответа /v1/wallet).
+     * The static wallet id (from the /v1/wallet response).
      *
      * @return the {@code uuid} field
      */
@@ -167,7 +167,7 @@ public final class BlockedRefundRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес назначения возврата.
+         * <p>Refund destination address.
          *
          * @param address the value
          * @return this builder
@@ -180,8 +180,8 @@ public final class BlockedRefundRequest implements WireObject {
         /**
          * Sets {@code memo}.
          *
-         * <p>Тег/мемо назначения (XRP destination tag, XLM memo id, TON comment). Обязателен для
-         * классического адреса на tag/memo-сети, если тег не встроен в X-/M-адрес.
+         * <p>Destination tag/memo (XRP destination tag, XLM memo id, TON comment). Required for a
+         * classic address on a tag/memo network unless the tag is embedded in an X-/M-address.
          *
          * @param memo the value
          * @return this builder
@@ -194,7 +194,7 @@ public final class BlockedRefundRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор статического кошелька (из ответа /v1/wallet).
+         * <p>The static wallet id (from the /v1/wallet response).
          *
          * @param uuid the value
          * @return this builder

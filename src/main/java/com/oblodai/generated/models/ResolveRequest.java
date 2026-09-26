@@ -43,7 +43,7 @@ public final class ResolveRequest implements WireObject {
     }
 
     /**
-     * accept — принять частичную оплату, refund — вернуть плательщику.
+     * accept — accept the partial payment, refund — return it to the payer.
      *
      * @return the {@code action} field
      */
@@ -52,8 +52,8 @@ public final class ResolveRequest implements WireObject {
     }
 
     /**
-     * Только для refund: адрес возврата. По умолчанию — записанный payer_address платежа; если он
-     * пуст (Bitcoin/UTXO), адрес обязателен, иначе refund.no_address.
+     * Only for refund: the refund address. Defaults to the payment's recorded payer_address; if
+     * that is empty (Bitcoin/UTXO), the address is required, otherwise refund.no_address.
      *
      * @return the {@code address} field, or {@code null} when absent
      */
@@ -62,7 +62,7 @@ public final class ResolveRequest implements WireObject {
     }
 
     /**
-     * Только для refund: сеть возврата, по умолчанию — сеть платежа.
+     * Only for refund: the refund network, defaults to the payment's network.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -71,7 +71,7 @@ public final class ResolveRequest implements WireObject {
     }
 
     /**
-     * Ваш идентификатор платежа.
+     * Your payment identifier.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -80,7 +80,7 @@ public final class ResolveRequest implements WireObject {
     }
 
     /**
-     * Только для refund: ваш ключ дедупликации возврата.
+     * Only for refund: your refund deduplication key.
      *
      * @return the {@code reference} field, or {@code null} when absent
      */
@@ -89,7 +89,7 @@ public final class ResolveRequest implements WireObject {
     }
 
     /**
-     * UUID платежа. Нужен uuid или order_id.
+     * Payment UUID. Either uuid or order_id is required.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -227,7 +227,7 @@ public final class ResolveRequest implements WireObject {
         /**
          * Sets {@code action}.
          *
-         * <p>accept — принять частичную оплату, refund — вернуть плательщику.
+         * <p>accept — accept the partial payment, refund — return it to the payer.
          *
          * @param action the value
          * @return this builder
@@ -240,8 +240,8 @@ public final class ResolveRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Только для refund: адрес возврата. По умолчанию — записанный payer_address платежа;
-         * если он пуст (Bitcoin/UTXO), адрес обязателен, иначе refund.no_address.
+         * <p>Only for refund: the refund address. Defaults to the payment's recorded payer_address;
+         * if that is empty (Bitcoin/UTXO), the address is required, otherwise refund.no_address.
          *
          * @param address the value
          * @return this builder
@@ -254,7 +254,7 @@ public final class ResolveRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Только для refund: сеть возврата, по умолчанию — сеть платежа.
+         * <p>Only for refund: the refund network, defaults to the payment's network.
          *
          * @param network the value
          * @return this builder
@@ -267,7 +267,7 @@ public final class ResolveRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш идентификатор платежа.
+         * <p>Your payment identifier.
          *
          * @param orderId the value
          * @return this builder
@@ -280,7 +280,7 @@ public final class ResolveRequest implements WireObject {
         /**
          * Sets {@code reference}.
          *
-         * <p>Только для refund: ваш ключ дедупликации возврата.
+         * <p>Only for refund: your refund deduplication key.
          *
          * @param reference the value
          * @return this builder
@@ -293,7 +293,7 @@ public final class ResolveRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>UUID платежа. Нужен uuid или order_id.
+         * <p>Payment UUID. Either uuid or order_id is required.
          *
          * @param uuid the value
          * @return this builder

@@ -31,7 +31,7 @@ public final class RefundFeeResult implements WireObject {
     }
 
     /**
-     * true — проект задал настройку сам; false — действует умолчание шлюза.
+     * true — the project set this setting itself; false — the gateway default applies.
      *
      * @return the {@code configured} field
      */
@@ -40,7 +40,7 @@ public final class RefundFeeResult implements WireObject {
     }
 
     /**
-     * Действующее значение: настройка проекта, а без неё — умолчание шлюза.
+     * The effective value: the project setting, or the gateway default if there is none.
      *
      * @return the {@code fee_on_customer} field
      */
@@ -147,7 +147,7 @@ public final class RefundFeeResult implements WireObject {
         /**
          * Sets {@code configured}.
          *
-         * <p>true — проект задал настройку сам; false — действует умолчание шлюза.
+         * <p>true — the project set this setting itself; false — the gateway default applies.
          *
          * @param configured the value
          * @return this builder
@@ -160,7 +160,7 @@ public final class RefundFeeResult implements WireObject {
         /**
          * Sets {@code fee_on_customer}.
          *
-         * <p>Действующее значение: настройка проекта, а без неё — умолчание шлюза.
+         * <p>The effective value: the project setting, or the gateway default if there is none.
          *
          * @param feeOnCustomer the value
          * @return this builder

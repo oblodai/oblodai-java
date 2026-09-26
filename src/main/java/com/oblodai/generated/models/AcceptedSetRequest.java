@@ -29,8 +29,8 @@ public final class AcceptedSetRequest implements WireObject {
     }
 
     /**
-     * Полный список пар валюта+сеть, которыми разрешено платить; пустой список — принимать всё из
-     * каталога.
+     * The full list of currency+network pairs allowed for payment; an empty list — accept
+     * everything in the catalog.
      *
      * @return the {@code accepted} field
      */
@@ -129,8 +129,8 @@ public final class AcceptedSetRequest implements WireObject {
         /**
          * Sets {@code accepted}.
          *
-         * <p>Полный список пар валюта+сеть, которыми разрешено платить; пустой список — принимать
-         * всё из каталога.
+         * <p>The full list of currency+network pairs allowed for payment; an empty list — accept
+         * everything in the catalog.
          *
          * @param accepted the value
          * @return this builder

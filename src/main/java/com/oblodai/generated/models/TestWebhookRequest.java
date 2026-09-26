@@ -31,7 +31,7 @@ public final class TestWebhookRequest implements WireObject {
     }
 
     /**
-     * Статус в теле. По умолчанию paid
+     * The status in the body. Default paid
      *
      * @return the {@code status} field, or {@code null} when absent
      */
@@ -40,9 +40,9 @@ public final class TestWebhookRequest implements WireObject {
     }
 
     /**
-     * Куда отправить пробное тело. Не передан — доставка уходит на зарегистрированный endpoint
-     * проекта; без endpoint — ошибка webhook.no_endpoint. Подпись — секретом endpoint'а проекта, в
-     * том числе при явном url
+     * Where to send the sample body. If omitted, the delivery goes to the project's registered
+     * endpoint; without an endpoint — the webhook.no_endpoint error. Signed with the project
+     * endpoint's secret, including when url is given explicitly
      *
      * @return the {@code url} field, or {@code null} when absent
      */
@@ -148,7 +148,7 @@ public final class TestWebhookRequest implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус в теле. По умолчанию paid
+         * <p>The status in the body. Default paid
          *
          * @param status the value
          * @return this builder
@@ -161,9 +161,9 @@ public final class TestWebhookRequest implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Куда отправить пробное тело. Не передан — доставка уходит на зарегистрированный
-         * endpoint проекта; без endpoint — ошибка webhook.no_endpoint. Подпись — секретом
-         * endpoint'а проекта, в том числе при явном url
+         * <p>Where to send the sample body. If omitted, the delivery goes to the project's
+         * registered endpoint; without an endpoint — the webhook.no_endpoint error. Signed with the
+         * project endpoint's secret, including when url is given explicitly
          *
          * @param url the value
          * @return this builder

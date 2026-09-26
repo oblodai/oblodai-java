@@ -30,7 +30,7 @@ public final class GetBalanceDocumentQuery implements WireObject {
     }
 
     /**
-     * Язык документа (по умолчанию en); список — document.Languages.
+     * Document language (en by default); the list is document.Languages.
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -128,7 +128,7 @@ public final class GetBalanceDocumentQuery implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа (по умолчанию en); список — document.Languages.
+         * <p>Document language (en by default); the list is document.Languages.
          *
          * @param lang the value
          * @return this builder

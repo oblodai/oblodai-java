@@ -34,7 +34,7 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
     }
 
     /**
-     * Идентификатор доставки.
+     * Delivery id.
      *
      * @return the {@code id} field
      */
@@ -43,8 +43,8 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
     }
 
     /**
-     * true — этот вызов вернул доставку в очередь; false — она уже была в очереди или доставлена
-     * (повтор вызова ничего не меняет).
+     * true — this call re-queued the delivery; false — it was already queued or delivered
+     * (repeating the call changes nothing).
      *
      * @return the {@code ok} field
      */
@@ -53,8 +53,8 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
     }
 
     /**
-     * Статус доставки после вызова: pending — снова в очереди; delivered — уже доставлена,
-     * повторять нечего.
+     * The delivery status after the call: pending — queued again; delivered — already delivered,
+     * nothing to repeat.
      *
      * @return the {@code status} field
      */
@@ -169,7 +169,7 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
         /**
          * Sets {@code id}.
          *
-         * <p>Идентификатор доставки.
+         * <p>Delivery id.
          *
          * @param id the value
          * @return this builder
@@ -182,8 +182,8 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>true — этот вызов вернул доставку в очередь; false — она уже была в очереди или
-         * доставлена (повтор вызова ничего не меняет).
+         * <p>true — this call re-queued the delivery; false — it was already queued or delivered
+         * (repeating the call changes nothing).
          *
          * @param ok the value
          * @return this builder
@@ -196,8 +196,8 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус доставки после вызова: pending — снова в очереди; delivered — уже доставлена,
-         * повторять нечего.
+         * <p>The delivery status after the call: pending — queued again; delivered — already
+         * delivered, nothing to repeat.
          *
          * @param status the value
          * @return this builder
@@ -210,8 +210,8 @@ public final class RequeueWebhookDeliveryResult implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус доставки после вызова: pending — снова в очереди; delivered — уже доставлена,
-         * повторять нечего.
+         * <p>The delivery status after the call: pending — queued again; delivered — already
+         * delivered, nothing to repeat.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

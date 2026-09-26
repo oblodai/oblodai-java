@@ -31,7 +31,7 @@ public final class SetAutoRefundRequest implements WireObject {
     }
 
     /**
-     * Возвращать излишек при переплате (paid_over)
+     * Refund the excess of an overpayment (paid_over)
      *
      * @return the {@code overpay} field
      */
@@ -40,7 +40,7 @@ public final class SetAutoRefundRequest implements WireObject {
     }
 
     /**
-     * Возвращать средства при истёкшей недоплате (wrong_amount)
+     * Refund the funds of an expired underpayment (wrong_amount)
      *
      * @return the {@code underpay} field
      */
@@ -146,7 +146,7 @@ public final class SetAutoRefundRequest implements WireObject {
         /**
          * Sets {@code overpay}.
          *
-         * <p>Возвращать излишек при переплате (paid_over)
+         * <p>Refund the excess of an overpayment (paid_over)
          *
          * @param overpay the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class SetAutoRefundRequest implements WireObject {
         /**
          * Sets {@code underpay}.
          *
-         * <p>Возвращать средства при истёкшей недоплате (wrong_amount)
+         * <p>Refund the funds of an expired underpayment (wrong_amount)
          *
          * @param underpay the value
          * @return this builder

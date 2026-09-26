@@ -28,7 +28,7 @@ public final class AutoWithdrawDeleteRequest implements WireObject {
     }
 
     /**
-     * Актив, автовывод которого выключить.
+     * The asset whose auto-withdrawal to disable.
      *
      * @return the {@code currency} field
      */
@@ -127,7 +127,7 @@ public final class AutoWithdrawDeleteRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив, автовывод которого выключить.
+         * <p>The asset whose auto-withdrawal to disable.
          *
          * @param currency the value
          * @return this builder

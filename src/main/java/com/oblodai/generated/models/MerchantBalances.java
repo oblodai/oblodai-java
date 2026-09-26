@@ -29,7 +29,7 @@ public final class MerchantBalances implements WireObject {
     }
 
     /**
-     * Доступные балансы по активам.
+     * Available balances per asset.
      *
      * @return the {@code merchant} field
      */
@@ -128,7 +128,7 @@ public final class MerchantBalances implements WireObject {
         /**
          * Sets {@code merchant}.
          *
-         * <p>Доступные балансы по активам.
+         * <p>Available balances per asset.
          *
          * @param merchant the value
          * @return this builder

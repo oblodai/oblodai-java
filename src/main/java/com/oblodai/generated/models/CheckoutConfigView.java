@@ -34,7 +34,7 @@ public final class CheckoutConfigView implements WireObject {
     }
 
     /**
-     * Слать ли покупателю чек на почту после оплаты.
+     * Whether to email the buyer a receipt after payment.
      *
      * @return the {@code email_receipts} field
      */
@@ -43,7 +43,7 @@ public final class CheckoutConfigView implements WireObject {
     }
 
     /**
-     * Куда вернуть покупателя, ушедшего с оплаты; пусто — никуда.
+     * Where to send a buyer who left the payment page; empty — nowhere.
      *
      * @return the {@code fail_url} field
      */
@@ -52,7 +52,7 @@ public final class CheckoutConfigView implements WireObject {
     }
 
     /**
-     * Куда вернуть покупателя после оплаты; пусто — никуда.
+     * Where to send the buyer after payment; empty — nowhere.
      *
      * @return the {@code success_url} field
      */
@@ -167,7 +167,7 @@ public final class CheckoutConfigView implements WireObject {
         /**
          * Sets {@code email_receipts}.
          *
-         * <p>Слать ли покупателю чек на почту после оплаты.
+         * <p>Whether to email the buyer a receipt after payment.
          *
          * @param emailReceipts the value
          * @return this builder
@@ -180,7 +180,7 @@ public final class CheckoutConfigView implements WireObject {
         /**
          * Sets {@code fail_url}.
          *
-         * <p>Куда вернуть покупателя, ушедшего с оплаты; пусто — никуда.
+         * <p>Where to send a buyer who left the payment page; empty — nowhere.
          *
          * @param failUrl the value
          * @return this builder
@@ -193,7 +193,7 @@ public final class CheckoutConfigView implements WireObject {
         /**
          * Sets {@code success_url}.
          *
-         * <p>Куда вернуть покупателя после оплаты; пусто — никуда.
+         * <p>Where to send the buyer after payment; empty — nowhere.
          *
          * @param successUrl the value
          * @return this builder

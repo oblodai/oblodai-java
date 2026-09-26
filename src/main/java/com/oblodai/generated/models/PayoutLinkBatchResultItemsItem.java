@@ -46,7 +46,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * Машинный код отказа; есть при ok=false.
+     * The machine code of the rejection; present when ok=false.
      *
      * @return the {@code error_code} field, or {@code null} when absent
      */
@@ -55,7 +55,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * HTTP-статус, которым ответил бы одиночный вызов; есть при ok=false.
+     * The HTTP status a single call would have returned; present when ok=false.
      *
      * @return the {@code http_status} field, or {@code null} when absent
      */
@@ -64,7 +64,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * Номер элемента в запросе.
+     * The item's number in the request.
      *
      * @return the {@code idx} field
      */
@@ -73,7 +73,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * Текст отказа; есть при ok=false.
+     * The rejection text; present when ok=false.
      *
      * @return the {@code message} field, or {@code null} when absent
      */
@@ -82,7 +82,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * Элемент выполнен.
+     * The item was executed.
      *
      * @return the {@code ok} field
      */
@@ -91,7 +91,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * order_id элемента, если он был в запросе.
+     * The item's order_id, if it was in the request.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -100,7 +100,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
     }
 
     /**
-     * Результат одиночного вызова; есть при ok=true.
+     * The result of a single call; present when ok=true.
      *
      * @return the {@code result} field, or {@code null} when absent
      */
@@ -251,7 +251,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code error_code}.
          *
-         * <p>Машинный код отказа; есть при ok=false.
+         * <p>The machine code of the rejection; present when ok=false.
          *
          * @param errorCode the value
          * @return this builder
@@ -264,7 +264,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code http_status}.
          *
-         * <p>HTTP-статус, которым ответил бы одиночный вызов; есть при ok=false.
+         * <p>The HTTP status a single call would have returned; present when ok=false.
          *
          * @param httpStatus the value
          * @return this builder
@@ -277,7 +277,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code idx}.
          *
-         * <p>Номер элемента в запросе.
+         * <p>The item's number in the request.
          *
          * @param idx the value
          * @return this builder
@@ -290,7 +290,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code message}.
          *
-         * <p>Текст отказа; есть при ok=false.
+         * <p>The rejection text; present when ok=false.
          *
          * @param message the value
          * @return this builder
@@ -303,7 +303,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Элемент выполнен.
+         * <p>The item was executed.
          *
          * @param ok the value
          * @return this builder
@@ -316,7 +316,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>order_id элемента, если он был в запросе.
+         * <p>The item's order_id, if it was in the request.
          *
          * @param orderId the value
          * @return this builder
@@ -329,7 +329,7 @@ public final class PayoutLinkBatchResultItemsItem implements WireObject {
         /**
          * Sets {@code result}.
          *
-         * <p>Результат одиночного вызова; есть при ok=true.
+         * <p>The result of a single call; present when ok=true.
          *
          * @param result the value
          * @return this builder

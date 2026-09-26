@@ -58,7 +58,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Когда задача поставлена (UTC).
+     * When the job was queued (UTC).
      *
      * @return the {@code created_at} field
      */
@@ -67,7 +67,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Почему файла нет; есть у задачи в статусе failed или expired.
+     * Why there is no file; present on a job in status failed or expired.
      *
      * @return the {@code error} field, or {@code null} when absent
      */
@@ -76,7 +76,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Готовый файл; есть у задачи в статусе done.
+     * The finished file; present on a job in status done.
      *
      * @return the {@code file} field, or {@code null} when absent
      */
@@ -85,7 +85,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Формат файла: pdf или csv.
+     * File format: pdf or csv.
      *
      * @return the {@code format} field
      */
@@ -94,7 +94,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Идентификатор задачи.
+     * Job id.
      *
      * @return the {@code job_id} field
      */
@@ -103,7 +103,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Вид отчёта.
+     * Report kind.
      *
      * @return the {@code kind} field
      */
@@ -112,7 +112,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Язык документа.
+     * Document language.
      *
      * @return the {@code lang} field
      */
@@ -121,7 +121,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Период отчёта.
+     * Report period.
      *
      * @return the {@code period} field
      */
@@ -130,7 +130,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Срок готовности; есть, пока задача в очереди или в работе.
+     * The readiness deadline; present while the job is queued or in progress.
      *
      * @return the {@code ready_within} field, or {@code null} when absent
      */
@@ -139,7 +139,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Статус задачи: queued, processing, done, failed или expired.
+     * Job status: queued, processing, done, failed or expired.
      *
      * @return the {@code status} field
      */
@@ -148,7 +148,7 @@ public final class DocumentJobView implements WireObject {
     }
 
     /**
-     * Когда задача менялась последний раз (UTC).
+     * When the job last changed (UTC).
      *
      * @return the {@code updated_at} field
      */
@@ -328,7 +328,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда задача поставлена (UTC).
+         * <p>When the job was queued (UTC).
          *
          * @param createdAt the value
          * @return this builder
@@ -341,7 +341,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code error}.
          *
-         * <p>Почему файла нет; есть у задачи в статусе failed или expired.
+         * <p>Why there is no file; present on a job in status failed or expired.
          *
          * @param error the value
          * @return this builder
@@ -354,7 +354,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code file}.
          *
-         * <p>Готовый файл; есть у задачи в статусе done.
+         * <p>The finished file; present on a job in status done.
          *
          * @param file the value
          * @return this builder
@@ -367,7 +367,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code format}.
          *
-         * <p>Формат файла: pdf или csv.
+         * <p>File format: pdf or csv.
          *
          * @param format the value
          * @return this builder
@@ -380,7 +380,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code job_id}.
          *
-         * <p>Идентификатор задачи.
+         * <p>Job id.
          *
          * @param jobId the value
          * @return this builder
@@ -393,7 +393,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид отчёта.
+         * <p>Report kind.
          *
          * @param kind the value
          * @return this builder
@@ -406,7 +406,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид отчёта.
+         * <p>Report kind.
          *
          * @param kind the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -418,7 +418,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа.
+         * <p>Document language.
          *
          * @param lang the value
          * @return this builder
@@ -431,7 +431,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code period}.
          *
-         * <p>Период отчёта.
+         * <p>Report period.
          *
          * @param period the value
          * @return this builder
@@ -444,7 +444,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code ready_within}.
          *
-         * <p>Срок готовности; есть, пока задача в очереди или в работе.
+         * <p>The readiness deadline; present while the job is queued or in progress.
          *
          * @param readyWithin the value
          * @return this builder
@@ -457,7 +457,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус задачи: queued, processing, done, failed или expired.
+         * <p>Job status: queued, processing, done, failed or expired.
          *
          * @param status the value
          * @return this builder
@@ -470,7 +470,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус задачи: queued, processing, done, failed или expired.
+         * <p>Job status: queued, processing, done, failed or expired.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -483,7 +483,7 @@ public final class DocumentJobView implements WireObject {
         /**
          * Sets {@code updated_at}.
          *
-         * <p>Когда задача менялась последний раз (UTC).
+         * <p>When the job last changed (UTC).
          *
          * @param updatedAt the value
          * @return this builder

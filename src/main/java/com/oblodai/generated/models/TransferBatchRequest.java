@@ -32,8 +32,8 @@ public final class TransferBatchRequest implements WireObject {
     }
 
     /**
-     * Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop —
-     * прекратить обработку после первой ошибки.
+     * What to do when an item fails: continue (default) — process the rest; stop — stop processing
+     * after the first error.
      *
      * @return the {@code on_error} field, or {@code null} when absent
      */
@@ -42,8 +42,8 @@ public final class TransferBatchRequest implements WireObject {
     }
 
     /**
-     * Массив от 1 до 5000 элементов — те же поля, что у POST /v1/transfer/to-user; у каждого
-     * элемента обязательны order_id (ключ идемпотентности) и to_user_id (UUID пользователя).
+     * An array of 1 to 5000 items — the same fields as in POST /v1/transfer/to-user; each item
+     * requires order_id (the idempotency key) and to_user_id (the user's UUID).
      *
      * @return the {@code transfers} field
      */
@@ -154,8 +154,8 @@ public final class TransferBatchRequest implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop
-         * — прекратить обработку после первой ошибки.
+         * <p>What to do when an item fails: continue (default) — process the rest; stop — stop
+         * processing after the first error.
          *
          * @param onError the value
          * @return this builder
@@ -168,8 +168,8 @@ public final class TransferBatchRequest implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop
-         * — прекратить обработку после первой ошибки.
+         * <p>What to do when an item fails: continue (default) — process the rest; stop — stop
+         * processing after the first error.
          *
          * @param onError the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -182,8 +182,8 @@ public final class TransferBatchRequest implements WireObject {
         /**
          * Sets {@code transfers}.
          *
-         * <p>Массив от 1 до 5000 элементов — те же поля, что у POST /v1/transfer/to-user; у каждого
-         * элемента обязательны order_id (ключ идемпотентности) и to_user_id (UUID пользователя).
+         * <p>An array of 1 to 5000 items — the same fields as in POST /v1/transfer/to-user; each
+         * item requires order_id (the idempotency key) and to_user_id (the user's UUID).
          *
          * @param transfers the value
          * @return this builder

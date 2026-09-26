@@ -49,9 +49,10 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * Машиночитаемый код ошибки — тот же, что вернул бы одиночный вызов (payment.below_minimum,
-     * payout.address_network_mismatch, …); batch.stopped / batch.key_revoked — элемент не
-     * выполнялся; только при status «error». Пусто у элементов, завершённых до ввода поля.
+     * The machine-readable error code — the same one a single call would return
+     * (payment.below_minimum, payout.address_network_mismatch, …); batch.stopped /
+     * batch.key_revoked — the item was not executed; only with status "error". Empty for items
+     * completed before the field was introduced.
      *
      * @return the {@code error_code} field, or {@code null} when absent
      */
@@ -60,8 +61,8 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * HTTP-статус, которым ответил бы одиночный вызов (400, 409, …); отсутствует, если элемент не
-     * дошёл до обработчика (batch.stopped, batch.key_revoked).
+     * The HTTP status a single call would have returned (400, 409, …); absent if the item never
+     * reached the handler (batch.stopped, batch.key_revoked).
      *
      * @return the {@code http_status} field, or {@code null} when absent
      */
@@ -70,7 +71,7 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * Порядковый номер элемента в исходном массиве (с нуля).
+     * The item's index in the original array (zero-based).
      *
      * @return the {@code idx} field
      */
@@ -79,7 +80,7 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * Человекочитаемое сообщение об ошибке; только при status «error».
+     * A human-readable error message; only with status "error".
      *
      * @return the {@code message} field, or {@code null} when absent
      */
@@ -88,8 +89,8 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * Итог элемента: true при status «done», false при status «error»; отсутствует, пока элемент не
-     * обработан.
+     * The item outcome: true with status "done", false with status "error"; absent until the item
+     * has been processed.
      *
      * @return the {@code ok} field, or {@code null} when absent
      */
@@ -98,7 +99,7 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * order_id элемента, если вы его задавали; присутствует не всегда.
+     * The item's order_id, if you set one; not always present.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -107,8 +108,8 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * Результат успешной операции — тот же объект, что вернул бы одиночный вызов; только при status
-     * «done».
+     * The result of a successful operation — the same object a single call would return; only with
+     * status "done".
      *
      * @return the {@code result} field, or {@code null} when absent
      */
@@ -117,7 +118,7 @@ public final class BatchInfoItem implements WireObject {
     }
 
     /**
-     * Статус элемента: pending | processing | done | error.
+     * Item status: pending | processing | done | error.
      *
      * @return the {@code status} field
      */
@@ -271,10 +272,10 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code error_code}.
          *
-         * <p>Машиночитаемый код ошибки — тот же, что вернул бы одиночный вызов
+         * <p>The machine-readable error code — the same one a single call would return
          * (payment.below_minimum, payout.address_network_mismatch, …); batch.stopped /
-         * batch.key_revoked — элемент не выполнялся; только при status «error». Пусто у элементов,
-         * завершённых до ввода поля.
+         * batch.key_revoked — the item was not executed; only with status "error". Empty for items
+         * completed before the field was introduced.
          *
          * @param errorCode the value
          * @return this builder
@@ -287,8 +288,8 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code http_status}.
          *
-         * <p>HTTP-статус, которым ответил бы одиночный вызов (400, 409, …); отсутствует, если
-         * элемент не дошёл до обработчика (batch.stopped, batch.key_revoked).
+         * <p>The HTTP status a single call would have returned (400, 409, …); absent if the item
+         * never reached the handler (batch.stopped, batch.key_revoked).
          *
          * @param httpStatus the value
          * @return this builder
@@ -301,7 +302,7 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code idx}.
          *
-         * <p>Порядковый номер элемента в исходном массиве (с нуля).
+         * <p>The item's index in the original array (zero-based).
          *
          * @param idx the value
          * @return this builder
@@ -314,7 +315,7 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code message}.
          *
-         * <p>Человекочитаемое сообщение об ошибке; только при status «error».
+         * <p>A human-readable error message; only with status "error".
          *
          * @param message the value
          * @return this builder
@@ -327,8 +328,8 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Итог элемента: true при status «done», false при status «error»; отсутствует, пока
-         * элемент не обработан.
+         * <p>The item outcome: true with status "done", false with status "error"; absent until the
+         * item has been processed.
          *
          * @param ok the value
          * @return this builder
@@ -341,7 +342,7 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>order_id элемента, если вы его задавали; присутствует не всегда.
+         * <p>The item's order_id, if you set one; not always present.
          *
          * @param orderId the value
          * @return this builder
@@ -354,8 +355,8 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code result}.
          *
-         * <p>Результат успешной операции — тот же объект, что вернул бы одиночный вызов; только при
-         * status «done».
+         * <p>The result of a successful operation — the same object a single call would return;
+         * only with status "done".
          *
          * @param result the value
          * @return this builder
@@ -368,7 +369,7 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус элемента: pending | processing | done | error.
+         * <p>Item status: pending | processing | done | error.
          *
          * @param status the value
          * @return this builder
@@ -381,7 +382,7 @@ public final class BatchInfoItem implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус элемента: pending | processing | done | error.
+         * <p>Item status: pending | processing | done | error.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

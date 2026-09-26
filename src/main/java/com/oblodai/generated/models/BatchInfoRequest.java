@@ -34,7 +34,7 @@ public final class BatchInfoRequest implements WireObject {
     }
 
     /**
-     * Идентификатор батча из ответа на submit.
+     * The batch id from the submit response.
      *
      * @return the {@code batch_id} field
      */
@@ -43,7 +43,7 @@ public final class BatchInfoRequest implements WireObject {
     }
 
     /**
-     * Сколько элементов вернуть в items (пагинация).
+     * How many items to return in items (pagination).
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -52,7 +52,7 @@ public final class BatchInfoRequest implements WireObject {
     }
 
     /**
-     * Смещение по элементам.
+     * Offset in items.
      *
      * @return the {@code offset} field, or {@code null} when absent
      */
@@ -166,7 +166,7 @@ public final class BatchInfoRequest implements WireObject {
         /**
          * Sets {@code batch_id}.
          *
-         * <p>Идентификатор батча из ответа на submit.
+         * <p>The batch id from the submit response.
          *
          * @param batchId the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class BatchInfoRequest implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Сколько элементов вернуть в items (пагинация).
+         * <p>How many items to return in items (pagination).
          *
          * @param limit the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class BatchInfoRequest implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение по элементам.
+         * <p>Offset in items.
          *
          * @param offset the value
          * @return this builder

@@ -44,7 +44,7 @@ public final class TransferToPersonalResult implements WireObject {
     }
 
     /**
-     * Сумма перевода.
+     * Transfer amount.
      *
      * @return the {@code amount} field
      */
@@ -53,7 +53,7 @@ public final class TransferToPersonalResult implements WireObject {
     }
 
     /**
-     * Актив перевода.
+     * Transfer asset.
      *
      * @return the {@code currency} field
      */
@@ -62,7 +62,7 @@ public final class TransferToPersonalResult implements WireObject {
     }
 
     /**
-     * Направление: to_personal.
+     * Direction: to_personal.
      *
      * @return the {@code direction} field
      */
@@ -71,7 +71,7 @@ public final class TransferToPersonalResult implements WireObject {
     }
 
     /**
-     * Ссылка на PDF-документ перевода; пусто, если документы выключены.
+     * A link to the transfer PDF document; empty if documents are disabled.
      *
      * @return the {@code document_url} field
      */
@@ -80,7 +80,7 @@ public final class TransferToPersonalResult implements WireObject {
     }
 
     /**
-     * Баланс личного кошелька владельца после перевода.
+     * The balance of the owner's personal wallet after the transfer.
      *
      * @return the {@code personal_balance} field
      */
@@ -89,7 +89,7 @@ public final class TransferToPersonalResult implements WireObject {
     }
 
     /**
-     * Идентификатор проводки перевода.
+     * The transfer posting id.
      *
      * @return the {@code uuid} field
      */
@@ -231,7 +231,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода.
+         * <p>Transfer amount.
          *
          * @param amount the value
          * @return this builder
@@ -244,7 +244,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода.
+         * <p>Transfer amount.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -256,7 +256,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив перевода.
+         * <p>Transfer asset.
          *
          * @param currency the value
          * @return this builder
@@ -269,7 +269,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code direction}.
          *
-         * <p>Направление: to_personal.
+         * <p>Direction: to_personal.
          *
          * @param direction the value
          * @return this builder
@@ -282,7 +282,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Ссылка на PDF-документ перевода; пусто, если документы выключены.
+         * <p>A link to the transfer PDF document; empty if documents are disabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -295,7 +295,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code personal_balance}.
          *
-         * <p>Баланс личного кошелька владельца после перевода.
+         * <p>The balance of the owner's personal wallet after the transfer.
          *
          * @param personalBalance the value
          * @return this builder
@@ -308,7 +308,7 @@ public final class TransferToPersonalResult implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор проводки перевода.
+         * <p>The transfer posting id.
          *
          * @param uuid the value
          * @return this builder

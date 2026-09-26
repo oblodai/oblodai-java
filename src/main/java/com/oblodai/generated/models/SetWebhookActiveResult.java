@@ -28,7 +28,7 @@ public final class SetWebhookActiveResult implements WireObject {
     }
 
     /**
-     * Включена ли теперь доставка.
+     * Whether delivery is now enabled.
      *
      * @return the {@code active} field
      */
@@ -126,7 +126,7 @@ public final class SetWebhookActiveResult implements WireObject {
         /**
          * Sets {@code active}.
          *
-         * <p>Включена ли теперь доставка.
+         * <p>Whether delivery is now enabled.
          *
          * @param active the value
          * @return this builder

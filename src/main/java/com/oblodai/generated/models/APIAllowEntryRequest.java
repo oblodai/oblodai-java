@@ -28,7 +28,7 @@ public final class APIAllowEntryRequest implements WireObject {
     }
 
     /**
-     * IP или подсеть в CIDR (203.0.113.7 или 203.0.113.0/24).
+     * An IP or a CIDR subnet (203.0.113.7 or 203.0.113.0/24).
      *
      * @return the {@code cidr} field
      */
@@ -126,7 +126,7 @@ public final class APIAllowEntryRequest implements WireObject {
         /**
          * Sets {@code cidr}.
          *
-         * <p>IP или подсеть в CIDR (203.0.113.7 или 203.0.113.0/24).
+         * <p>An IP or a CIDR subnet (203.0.113.7 or 203.0.113.0/24).
          *
          * @param cidr the value
          * @return this builder

@@ -31,7 +31,7 @@ public final class SoFSubmitted implements WireObject {
     }
 
     /**
-     * Анкета принята к рассмотрению; это не решение о разблокировке.
+     * The questionnaire has been accepted for review; this is not a decision to unblock.
      *
      * @return the {@code accepted} field
      */
@@ -40,7 +40,7 @@ public final class SoFSubmitted implements WireObject {
     }
 
     /**
-     * Статус анкеты после приёма — completed.
+     * The questionnaire status after acceptance — completed.
      *
      * @return the {@code status} field
      */
@@ -146,7 +146,7 @@ public final class SoFSubmitted implements WireObject {
         /**
          * Sets {@code accepted}.
          *
-         * <p>Анкета принята к рассмотрению; это не решение о разблокировке.
+         * <p>The questionnaire has been accepted for review; this is not a decision to unblock.
          *
          * @param accepted the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class SoFSubmitted implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус анкеты после приёма — completed.
+         * <p>The questionnaire status after acceptance — completed.
          *
          * @param status the value
          * @return this builder
@@ -172,7 +172,7 @@ public final class SoFSubmitted implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус анкеты после приёма — completed.
+         * <p>The questionnaire status after acceptance — completed.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

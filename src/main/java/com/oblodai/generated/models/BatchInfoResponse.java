@@ -56,7 +56,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Идентификатор батча.
+     * Batch id.
      *
      * @return the {@code batch_id} field
      */
@@ -65,7 +65,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Время создания батча (ISO 8601, UTC).
+     * Batch creation time (ISO 8601, UTC).
      *
      * @return the {@code created_at} field
      */
@@ -74,7 +74,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Завершилось ошибкой (при on_error stop сюда попадают и пропущенные элементы).
+     * Failed (with on_error stop, skipped items are counted here too).
      *
      * @return the {@code failed} field
      */
@@ -83,7 +83,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Страница элементов с результатом или ошибкой по каждому.
+     * A page of items with the result or error for each.
      *
      * @return the {@code items} field
      */
@@ -92,7 +92,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Вид батча: payment | refund | payout | transfer.
+     * Batch kind: payment | refund | payout | transfer.
      *
      * @return the {@code kind} field
      */
@@ -101,7 +101,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Режим обработки ошибок, с которым батч был отправлен: continue | stop.
+     * The error handling mode the batch was submitted with: continue | stop.
      *
      * @return the {@code on_error} field
      */
@@ -110,10 +110,11 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Статус батча: pending | processing | completed | stopped. ТЕРМИНАЛЬНЫЕ — completed И stopped
-     * (опрашивайте до одного из них, не только до completed): completed = обработка дошла до конца,
-     * stopped = батч с on_error=stop остановился на первой ошибке (остальные элементы пропущены и
-     * учтены в failed). Ни один не значит «всё успешно» — смотрите succeeded/failed.
+     * Batch status: pending | processing | completed | stopped. TERMINAL ones are completed AND
+     * stopped (poll until either of them, not only completed): completed = processing reached the
+     * end, stopped = a batch with on_error=stop halted at the first error (the remaining items were
+     * skipped and counted in failed). Neither means "everything succeeded" — check
+     * succeeded/failed.
      *
      * @return the {@code status} field
      */
@@ -122,7 +123,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Успешно обработано.
+     * Processed successfully.
      *
      * @return the {@code succeeded} field
      */
@@ -131,7 +132,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Всего элементов в батче; считается по всему батчу и от пагинации не зависит.
+     * Total items in the batch; counted over the whole batch, independent of pagination.
      *
      * @return the {@code total} field
      */
@@ -140,7 +141,7 @@ public final class BatchInfoResponse implements WireObject {
     }
 
     /**
-     * Время последнего изменения (ISO 8601, UTC).
+     * Time of the last change (ISO 8601, UTC).
      *
      * @return the {@code updated_at} field
      */
@@ -312,7 +313,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code batch_id}.
          *
-         * <p>Идентификатор батча.
+         * <p>Batch id.
          *
          * @param batchId the value
          * @return this builder
@@ -325,7 +326,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Время создания батча (ISO 8601, UTC).
+         * <p>Batch creation time (ISO 8601, UTC).
          *
          * @param createdAt the value
          * @return this builder
@@ -338,7 +339,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code failed}.
          *
-         * <p>Завершилось ошибкой (при on_error stop сюда попадают и пропущенные элементы).
+         * <p>Failed (with on_error stop, skipped items are counted here too).
          *
          * @param failed the value
          * @return this builder
@@ -351,7 +352,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Страница элементов с результатом или ошибкой по каждому.
+         * <p>A page of items with the result or error for each.
          *
          * @param items the value
          * @return this builder
@@ -364,7 +365,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид батча: payment | refund | payout | transfer.
+         * <p>Batch kind: payment | refund | payout | transfer.
          *
          * @param kind the value
          * @return this builder
@@ -377,7 +378,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид батча: payment | refund | payout | transfer.
+         * <p>Batch kind: payment | refund | payout | transfer.
          *
          * @param kind the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -389,7 +390,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Режим обработки ошибок, с которым батч был отправлен: continue | stop.
+         * <p>The error handling mode the batch was submitted with: continue | stop.
          *
          * @param onError the value
          * @return this builder
@@ -402,7 +403,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Режим обработки ошибок, с которым батч был отправлен: continue | stop.
+         * <p>The error handling mode the batch was submitted with: continue | stop.
          *
          * @param onError the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -415,11 +416,11 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус батча: pending | processing | completed | stopped. ТЕРМИНАЛЬНЫЕ — completed И
-         * stopped (опрашивайте до одного из них, не только до completed): completed = обработка
-         * дошла до конца, stopped = батч с on_error=stop остановился на первой ошибке (остальные
-         * элементы пропущены и учтены в failed). Ни один не значит «всё успешно» — смотрите
-         * succeeded/failed.
+         * <p>Batch status: pending | processing | completed | stopped. TERMINAL ones are completed
+         * AND stopped (poll until either of them, not only completed): completed = processing
+         * reached the end, stopped = a batch with on_error=stop halted at the first error (the
+         * remaining items were skipped and counted in failed). Neither means "everything succeeded"
+         * — check succeeded/failed.
          *
          * @param status the value
          * @return this builder
@@ -432,11 +433,11 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус батча: pending | processing | completed | stopped. ТЕРМИНАЛЬНЫЕ — completed И
-         * stopped (опрашивайте до одного из них, не только до completed): completed = обработка
-         * дошла до конца, stopped = батч с on_error=stop остановился на первой ошибке (остальные
-         * элементы пропущены и учтены в failed). Ни один не значит «всё успешно» — смотрите
-         * succeeded/failed.
+         * <p>Batch status: pending | processing | completed | stopped. TERMINAL ones are completed
+         * AND stopped (poll until either of them, not only completed): completed = processing
+         * reached the end, stopped = a batch with on_error=stop halted at the first error (the
+         * remaining items were skipped and counted in failed). Neither means "everything succeeded"
+         * — check succeeded/failed.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -449,7 +450,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code succeeded}.
          *
-         * <p>Успешно обработано.
+         * <p>Processed successfully.
          *
          * @param succeeded the value
          * @return this builder
@@ -462,7 +463,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code total}.
          *
-         * <p>Всего элементов в батче; считается по всему батчу и от пагинации не зависит.
+         * <p>Total items in the batch; counted over the whole batch, independent of pagination.
          *
          * @param total the value
          * @return this builder
@@ -475,7 +476,7 @@ public final class BatchInfoResponse implements WireObject {
         /**
          * Sets {@code updated_at}.
          *
-         * <p>Время последнего изменения (ISO 8601, UTC).
+         * <p>Time of the last change (ISO 8601, UTC).
          *
          * @param updatedAt the value
          * @return this builder

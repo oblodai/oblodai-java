@@ -31,7 +31,7 @@ public final class OnboardKey implements WireObject {
     }
 
     /**
-     * Публичная часть ключа.
+     * The public part of the key.
      *
      * @return the {@code public_id} field
      */
@@ -40,7 +40,7 @@ public final class OnboardKey implements WireObject {
     }
 
     /**
-     * Секрет ключа; пусто у повторного ответа песочницы (секрет хэширован).
+     * The key secret; empty in a repeated sandbox response (the secret is hashed).
      *
      * @return the {@code secret} field
      */
@@ -146,7 +146,7 @@ public final class OnboardKey implements WireObject {
         /**
          * Sets {@code public_id}.
          *
-         * <p>Публичная часть ключа.
+         * <p>The public part of the key.
          *
          * @param publicId the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class OnboardKey implements WireObject {
         /**
          * Sets {@code secret}.
          *
-         * <p>Секрет ключа; пусто у повторного ответа песочницы (секрет хэширован).
+         * <p>The key secret; empty in a repeated sandbox response (the secret is hashed).
          *
          * @param secret the value
          * @return this builder

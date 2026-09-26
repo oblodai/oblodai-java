@@ -52,7 +52,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * То же, что deposit_available.
+     * The same as deposit_available.
      *
      * @return the {@code available} field
      */
@@ -61,7 +61,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * Номер EVM-сети (EIP-155); только у EVM-сетей.
+     * The EVM chain id (EIP-155); EVM networks only.
      *
      * @return the {@code chain_id} field, or {@code null} when absent
      */
@@ -70,7 +70,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * Контракт токена; у монеты сети ключа нет.
+     * The token contract; a native coin has no such key.
      *
      * @return the {@code contract} field, or {@code null} when absent
      */
@@ -79,7 +79,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * false — метод показывается на оплате только после явного включения мерчантом.
+     * false — the method is shown at checkout only after the merchant explicitly enables it.
      *
      * @return the {@code default_offer} field
      */
@@ -88,7 +88,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * Приём в этой сети работает на этом развёртывании.
+     * Accepting payments on this network works on this deployment.
      *
      * @return the {@code deposit_available} field
      */
@@ -97,7 +97,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * native — монета сети, token — токен контракта.
+     * native — the network's native coin, token — a contract token.
      *
      * @return the {@code kind} field
      */
@@ -106,7 +106,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * Подтверждений до зачисления.
+     * Confirmations until crediting.
      *
      * @return the {@code min_confirmations} field
      */
@@ -115,7 +115,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * Сеть.
+     * Network.
      *
      * @return the {@code network} field
      */
@@ -124,7 +124,7 @@ public final class CurrencyNetwork implements WireObject {
     }
 
     /**
-     * Выплаты в этой сети работают на этом развёртывании.
+     * Payouts on this network work on this deployment.
      *
      * @return the {@code payout_available} field
      */
@@ -289,7 +289,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code available}.
          *
-         * <p>То же, что deposit_available.
+         * <p>The same as deposit_available.
          *
          * @param available the value
          * @return this builder
@@ -302,7 +302,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code chain_id}.
          *
-         * <p>Номер EVM-сети (EIP-155); только у EVM-сетей.
+         * <p>The EVM chain id (EIP-155); EVM networks only.
          *
          * @param chainId the value
          * @return this builder
@@ -315,7 +315,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code contract}.
          *
-         * <p>Контракт токена; у монеты сети ключа нет.
+         * <p>The token contract; a native coin has no such key.
          *
          * @param contract the value
          * @return this builder
@@ -328,7 +328,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code default_offer}.
          *
-         * <p>false — метод показывается на оплате только после явного включения мерчантом.
+         * <p>false — the method is shown at checkout only after the merchant explicitly enables it.
          *
          * @param defaultOffer the value
          * @return this builder
@@ -341,7 +341,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code deposit_available}.
          *
-         * <p>Приём в этой сети работает на этом развёртывании.
+         * <p>Accepting payments on this network works on this deployment.
          *
          * @param depositAvailable the value
          * @return this builder
@@ -354,7 +354,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>native — монета сети, token — токен контракта.
+         * <p>native — the network's native coin, token — a contract token.
          *
          * @param kind the value
          * @return this builder
@@ -367,7 +367,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>native — монета сети, token — токен контракта.
+         * <p>native — the network's native coin, token — a contract token.
          *
          * @param kind the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -379,7 +379,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code min_confirmations}.
          *
-         * <p>Подтверждений до зачисления.
+         * <p>Confirmations until crediting.
          *
          * @param minConfirmations the value
          * @return this builder
@@ -392,7 +392,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть.
+         * <p>Network.
          *
          * @param network the value
          * @return this builder
@@ -405,7 +405,7 @@ public final class CurrencyNetwork implements WireObject {
         /**
          * Sets {@code payout_available}.
          *
-         * <p>Выплаты в этой сети работают на этом развёртывании.
+         * <p>Payouts on this network work on this deployment.
          *
          * @param payoutAvailable the value
          * @return this builder

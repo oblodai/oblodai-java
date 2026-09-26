@@ -55,7 +55,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Сделано попыток.
+     * Attempts made.
      *
      * @return the {@code attempts} field
      */
@@ -64,7 +64,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Почему доставка cancelled не будет отправлена; пусто у остальных статусов.
+     * Why a cancelled delivery will not be sent; empty for other statuses.
      *
      * @return the {@code cancel_reason} field
      */
@@ -73,7 +73,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Когда поставлена, RFC 3339 UTC.
+     * When queued, RFC 3339 UTC.
      *
      * @return the {@code created_at} field
      */
@@ -82,7 +82,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Событие в теле.
+     * The event in the body.
      *
      * @return the {@code event_type} field
      */
@@ -91,7 +91,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Идентификатор доставки.
+     * Delivery id.
      *
      * @return the {@code id} field
      */
@@ -100,7 +100,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Ошибка последней попытки; пусто, если её не было.
+     * The error of the last attempt; empty if there was none.
      *
      * @return the {@code last_error} field
      */
@@ -109,7 +109,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Глобальный номер события (тот же, что в теле).
+     * The global event number (the same as in the body).
      *
      * @return the {@code sequence} field
      */
@@ -118,7 +118,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Состояние доставки.
+     * Delivery state.
      *
      * @return the {@code status} field
      */
@@ -127,7 +127,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Последнее изменение, RFC 3339 UTC.
+     * Last change, RFC 3339 UTC.
      *
      * @return the {@code updated_at} field
      */
@@ -136,7 +136,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
     }
 
     /**
-     * Куда доставляется.
+     * Where it is delivered.
      *
      * @return the {@code url} field
      */
@@ -312,7 +312,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code attempts}.
          *
-         * <p>Сделано попыток.
+         * <p>Attempts made.
          *
          * @param attempts the value
          * @return this builder
@@ -325,7 +325,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code cancel_reason}.
          *
-         * <p>Почему доставка cancelled не будет отправлена; пусто у остальных статусов.
+         * <p>Why a cancelled delivery will not be sent; empty for other statuses.
          *
          * @param cancelReason the value
          * @return this builder
@@ -338,7 +338,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда поставлена, RFC 3339 UTC.
+         * <p>When queued, RFC 3339 UTC.
          *
          * @param createdAt the value
          * @return this builder
@@ -351,7 +351,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code event_type}.
          *
-         * <p>Событие в теле.
+         * <p>The event in the body.
          *
          * @param eventType the value
          * @return this builder
@@ -364,7 +364,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code id}.
          *
-         * <p>Идентификатор доставки.
+         * <p>Delivery id.
          *
          * @param id the value
          * @return this builder
@@ -377,7 +377,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code last_error}.
          *
-         * <p>Ошибка последней попытки; пусто, если её не было.
+         * <p>The error of the last attempt; empty if there was none.
          *
          * @param lastError the value
          * @return this builder
@@ -390,7 +390,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code sequence}.
          *
-         * <p>Глобальный номер события (тот же, что в теле).
+         * <p>The global event number (the same as in the body).
          *
          * @param sequence the value
          * @return this builder
@@ -403,7 +403,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние доставки.
+         * <p>Delivery state.
          *
          * @param status the value
          * @return this builder
@@ -416,7 +416,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние доставки.
+         * <p>Delivery state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -429,7 +429,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code updated_at}.
          *
-         * <p>Последнее изменение, RFC 3339 UTC.
+         * <p>Last change, RFC 3339 UTC.
          *
          * @param updatedAt the value
          * @return this builder
@@ -442,7 +442,7 @@ public final class WebhookDeliveryLogItem implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Куда доставляется.
+         * <p>Where it is delivered.
          *
          * @param url the value
          * @return this builder

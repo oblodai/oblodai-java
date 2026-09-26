@@ -13,6 +13,7 @@ import com.oblodai.generated.resources.Account;
 import com.oblodai.generated.resources.ApiAllowlist;
 import com.oblodai.generated.resources.Batches;
 import com.oblodai.generated.resources.Checkout;
+import com.oblodai.generated.resources.CliLogin;
 import com.oblodai.generated.resources.Documents;
 import com.oblodai.generated.resources.PaymentLinks;
 import com.oblodai.generated.resources.Payments;
@@ -82,6 +83,7 @@ public final class Oblodai implements AutoCloseable {
     private final Documents documents;
     private final Checkout checkout;
     private final Sandbox sandbox;
+    private final CliLogin cliLogin;
     private final Jobs jobs;
 
     Oblodai(Transport transport, boolean ownsHttpClient) {
@@ -103,6 +105,7 @@ public final class Oblodai implements AutoCloseable {
         this.documents = new Documents(transport);
         this.checkout = new Checkout(transport);
         this.sandbox = new Sandbox(transport);
+        this.cliLogin = new CliLogin(transport);
         this.jobs = new Jobs(transport);
     }
 
@@ -189,6 +192,14 @@ public final class Oblodai implements AutoCloseable {
     /** @return Developer sandbox: fake money, simulated deposits, a webhook inspector. */
     public Sandbox sandbox() {
         return sandbox;
+    }
+
+    /**
+     * @return Browser login of the {@code oblodai} CLI (OAuth 2.0 device authorization, RFC 8628) and
+     *     logout of its key.
+     */
+    public CliLogin cliLogin() {
+        return cliLogin;
     }
 
     /** @return waiters for long-running operations: batches and document jobs */

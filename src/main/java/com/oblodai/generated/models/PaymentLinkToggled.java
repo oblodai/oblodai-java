@@ -31,7 +31,7 @@ public final class PaymentLinkToggled implements WireObject {
     }
 
     /**
-     * Новое состояние: true — принимает оплату.
+     * The new state: true — accepts payments.
      *
      * @return the {@code active} field
      */
@@ -40,7 +40,7 @@ public final class PaymentLinkToggled implements WireObject {
     }
 
     /**
-     * Идентификатор ссылки.
+     * Link id.
      *
      * @return the {@code link_id} field
      */
@@ -146,7 +146,7 @@ public final class PaymentLinkToggled implements WireObject {
         /**
          * Sets {@code active}.
          *
-         * <p>Новое состояние: true — принимает оплату.
+         * <p>The new state: true — accepts payments.
          *
          * @param active the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class PaymentLinkToggled implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор ссылки.
+         * <p>Link id.
          *
          * @param linkId the value
          * @return this builder

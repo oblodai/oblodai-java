@@ -28,7 +28,7 @@ public final class BalanceResult implements WireObject {
     }
 
     /**
-     * Балансы владельца.
+     * The owner's balances.
      *
      * @return the {@code balance} field
      */
@@ -127,7 +127,7 @@ public final class BalanceResult implements WireObject {
         /**
          * Sets {@code balance}.
          *
-         * <p>Балансы владельца.
+         * <p>The owner's balances.
          *
          * @param balance the value
          * @return this builder

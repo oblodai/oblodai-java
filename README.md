@@ -16,7 +16,7 @@ Payments, payouts, payment links, splits, static wallets, webhooks — one API k
 <img src="https://img.shields.io/badge/java-17%2B-007396?style=flat-square" alt="Java 17+">
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-000000?style=flat-square" alt="License: MIT"></a>
 
-[Documentation](https://docs.oblodai.com) · [Dashboard](https://my.oblodai.com) · [Читать по-русски →](README.ru.md)
+[Documentation](https://docs.oblodai.com) · [Dashboard](https://my.oblodai.com) · [Read in Russian →](README.ru.md)
 
 </div>
 
@@ -120,7 +120,7 @@ sent. `Money` adds, subtracts and compares amounts exactly and refuses a `double
 without the optional parts. The table below is generated from the contract by `tools/sdkgen`.
 
 <!-- sdkgen:methods -->
-16 resources, 120 methods.
+17 resources, 123 methods.
 
 | Resource | Methods |
 | --- | --- |
@@ -140,6 +140,7 @@ without the optional parts. The table below is generated from the contract by `t
 | `documents()` | `getSigned` · `getBalance` · `getFees` · `getLedger` · `getSplit` · `getPayoutLinkCheque` · `getStatement` · `getBatch` · `getPaymentLink` · `getWalletStatement` · `getReferrals` · `createJob` · `getJob` · `downloadJobFile` |
 | `checkout()` | `getSourceOfFundsForm` · `submitSourceOfFunds` · `getPublicPaymentLink` · `paymentLink` · `listCurrencies` · `get` · `selectMethod` · `startOnramp` · `getOnramp` · `getQr` |
 | `sandbox()` | `onboardStore` · `faucet` · `simulateDeposit` · `reset` · `listWebhooks` · `replayWebhook` |
+| `cliLogin()` | `start` · `poll` · `logoutCli` |
 <!-- /sdkgen:methods -->
 
 Models keep fields this SDK version does not know yet (`extra()`, sent back as they came), and an

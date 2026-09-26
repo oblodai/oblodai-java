@@ -38,7 +38,7 @@ public final class ConversionInstantQuote implements WireObject {
     }
 
     /**
-     * Доступен ли режим сейчас.
+     * Whether the mode is available right now.
      *
      * @return the {@code available} field
      */
@@ -47,7 +47,7 @@ public final class ConversionInstantQuote implements WireObject {
     }
 
     /**
-     * Сколько придёт, в валюте котировки.
+     * How much will arrive, in the quote currency.
      *
      * @return the {@code estimated_out} field
      */
@@ -56,7 +56,7 @@ public final class ConversionInstantQuote implements WireObject {
     }
 
     /**
-     * Комиссия режима в процентах.
+     * The mode's fee, in percent.
      *
      * @return the {@code fee_percent} field
      */
@@ -65,7 +65,7 @@ public final class ConversionInstantQuote implements WireObject {
     }
 
     /**
-     * Почему недоступен: frozen, position_cap; пусто — доступен.
+     * Why it is unavailable: frozen, position_cap; empty — available.
      *
      * @return the {@code reason} field
      */
@@ -189,7 +189,7 @@ public final class ConversionInstantQuote implements WireObject {
         /**
          * Sets {@code available}.
          *
-         * <p>Доступен ли режим сейчас.
+         * <p>Whether the mode is available right now.
          *
          * @param available the value
          * @return this builder
@@ -202,7 +202,7 @@ public final class ConversionInstantQuote implements WireObject {
         /**
          * Sets {@code estimated_out}.
          *
-         * <p>Сколько придёт, в валюте котировки.
+         * <p>How much will arrive, in the quote currency.
          *
          * @param estimatedOut the value
          * @return this builder
@@ -215,7 +215,7 @@ public final class ConversionInstantQuote implements WireObject {
         /**
          * Sets {@code estimated_out}.
          *
-         * <p>Сколько придёт, в валюте котировки.
+         * <p>How much will arrive, in the quote currency.
          *
          * @param estimatedOut the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -227,7 +227,7 @@ public final class ConversionInstantQuote implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Комиссия режима в процентах.
+         * <p>The mode's fee, in percent.
          *
          * @param feePercent the value
          * @return this builder
@@ -240,7 +240,7 @@ public final class ConversionInstantQuote implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Комиссия режима в процентах.
+         * <p>The mode's fee, in percent.
          *
          * @param feePercent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -252,7 +252,7 @@ public final class ConversionInstantQuote implements WireObject {
         /**
          * Sets {@code reason}.
          *
-         * <p>Почему недоступен: frozen, position_cap; пусто — доступен.
+         * <p>Why it is unavailable: frozen, position_cap; empty — available.
          *
          * @param reason the value
          * @return this builder

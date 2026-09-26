@@ -24,7 +24,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Автоматическое разделение поступлений между получателями.
+ * Automatic splitting of incoming funds between recipients.
  *
  * <p>The {@code Splits} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -37,32 +37,36 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Правило сплита (отчисление партнёру)
+     * Split rule (partner share)
      *
-     * <p>Автоматически отправлять долю КАЖДОГО входящего платежа партнёру. Укажите ровно одного
-     * получателя:
+     * <p>Automatically send a share of EVERY incoming payment to a partner. Specify exactly one
+     * recipient:
      *
-     * <p>• {@code address} + {@code network} — внешний крипто-адрес. Уходит он-чейн выплатой,
-     * **необратимо**.
-     * • {@code merchant_id} — аккаунт на Oblodai. Уходит проводкой по балансу: **обратимо**
-     * (возврат отзовёт долю обратно).
+     * <p>• {@code address} + {@code network} — an external crypto address. Sent as an on-chain
+     * payout, **irreversibly**.
+     * • {@code merchant_id} — an Oblodai account. Sent as a balance posting: **reversible** (a
+     * refund claws the share back).
      *
-     * <p>{@code percent} — доля от платежа (напр. {@code 10} или {@code 2.5}). Сумма всех активных
-     * правил проекта не может превышать 100%.
+     * <p>{@code percent} — the share of the payment (e.g. {@code 10} or {@code 2.5}). The sum of
+     * all active rules of a project cannot exceed 100%.
      *
-     * <p>⚠️ **Возвраты.** Возврат списывается с ВАШЕГО баланса на всю сумму, что прислал
-     * плательщик. Поэтому отправка партнёрам не происходит сразу: она откладывается на
-     * {@code refund_hold_seconds} (см. {@code /v1/split/config/set}), и в момент отправки база
-     * пересчитывается как «оплачено − возвращено». Возврат внутри окна автоматически уменьшает (или
-     * отменяет) отчисление, и вам всегда есть чем вернуть деньги. Возврат ПОСЛЕ отправки: внешнюю
-     * долю вернуть нельзя (пополняйте баланс), долю on-platform партнёра мы отзовём автоматически.
+     * <p>⚠️ **Refunds.** A refund is debited from YOUR balance for the full amount the payer sent.
+     * That is why partner shares are not sent immediately: sending is deferred by
+     * {@code refund_hold_seconds} (see {@code /v1/split/config/set}), and at send time the base is
+     * recalculated as "paid − refunded". A refund within the window automatically reduces (or
+     * cancels) the share, so you always have the funds to refund. A refund AFTER sending: an
+     * external share cannot be recovered (top up your balance); an on-platform partner's share is
+     * clawed back automatically.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/split/rule} ({@code createSplitRule}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
-     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code idempotency.bad_key},
+     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code idempotency.unavailable}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code payout.address_network_mismatch},
      * {@code payout.bad_address}, {@code payout.bad_memo}, {@code payout.memo_conflict},
@@ -103,15 +107,18 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Список правил
+     * List rules
      *
-     * <p>Ваши правила сплита. {@code reversible: true} — партнёр на платформе (долю можно отозвать
-     * при возврате).
+     * <p>Your split rules. {@code reversible: true} — an on-platform partner (the share can be
+     * clawed back on refund).
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/split/rule/list} ({@code listSplitRules}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -165,14 +172,17 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Удалить правило
+     * Delete a rule
      *
-     * <p><code>{rule_id}</code>. На уже отправленные доли не влияет.
+     * <p><code>{rule_id}</code>. Does not affect shares already sent.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/split/rule/delete} ({@code deleteSplitRule}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -207,20 +217,23 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Окно удержания под возвраты
+     * Refund hold window
      *
-     * <p>{@code refund_hold_seconds} — на сколько СЕКУНД откладывается ВСЯ исходящая маршрутизация
-     * платежа (сплиты партнёрам, авто-вывод, авто-конвертация в USDT) после его зачисления.
+     * <p>{@code refund_hold_seconds} — how many SECONDS ALL outgoing routing of a payment (partner
+     * splits, auto-withdrawal, auto-conversion to USDT) is deferred after the payment is credited.
      *
-     * <p>Смысл: пока окно не истекло, деньги лежат на вашем балансе, и любой возврат проходит без
-     * проблем. {@code 0} = отправлять сразу, тогда риск возврата после отправки вы берёте на себя.
-     * Диапазон 0–7776000 (до 90 суток); поле обязательное — пришлите {@code 0} явно, если доли
-     * нужно отправлять сразу.
+     * <p>The point: until the window expires the money stays on your balance, and any refund goes
+     * through without trouble. {@code 0} = send immediately, in which case you bear the risk of a
+     * refund after sending. Range 0–7776000 (up to 90 days); the field is required — send {@code 0}
+     * explicitly if shares should be sent immediately.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/split/config/set} ({@code setSplitConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -276,14 +289,17 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Текущее окно удержания
+     * Current hold window
      *
-     * <p>Возвращает {@code refund_hold_seconds} проекта.
+     * <p>Returns the project's {@code refund_hold_seconds}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/split/config/get} ({@code getSplitConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -313,17 +329,20 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Согласие принимать сплиты
+     * Consent to receive splits
      *
-     * <p><code>{enabled}</code> — разрешить другим мерчантам направлять доли своих платежей на ВАШ
-     * баланс. Пока выключено, никто не может создать внутреннее правило сплита с получателем-вами.
-     * Выключение не отзывает уже созданные правила (деньги по ним продолжают поступать), но
-     * блокирует новые.
+     * <p><code>{enabled}</code> — allow other merchants to route shares of their payments to YOUR
+     * balance. While disabled, nobody can create an internal split rule with you as the recipient.
+     * Disabling does not revoke rules already created (money keeps arriving under them), but blocks
+     * new ones.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/split/recipient/optin} ({@code setSplitRecipientOptIn}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -380,14 +399,17 @@ public final class Splits extends Resource {
     }
 
     /**
-     * Текущее согласие на приём сплитов
+     * Current consent to receive splits
      *
-     * <p>Возвращает {@code enabled} — включён ли приём внутренних сплитов на ваш баланс.
+     * <p>Returns {@code enabled} — whether receiving internal splits to your balance is enabled.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/split/recipient/optin/get} ({@code getSplitRecipientOptIn}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},

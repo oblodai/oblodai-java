@@ -28,8 +28,8 @@ public final class SetRefundFeeRequest implements WireObject {
     }
 
     /**
-     * true — клиент получает net (комиссию платит клиент); false — мерчант платит комиссию, клиент
-     * получает gross
+     * true — the customer receives net (the customer pays the fee); false — the merchant pays the
+     * fee, the customer receives gross
      *
      * @return the {@code fee_on_customer} field
      */
@@ -128,8 +128,8 @@ public final class SetRefundFeeRequest implements WireObject {
         /**
          * Sets {@code fee_on_customer}.
          *
-         * <p>true — клиент получает net (комиссию платит клиент); false — мерчант платит комиссию,
-         * клиент получает gross
+         * <p>true — the customer receives net (the customer pays the fee); false — the merchant
+         * pays the fee, the customer receives gross
          *
          * @param feeOnCustomer the value
          * @return this builder

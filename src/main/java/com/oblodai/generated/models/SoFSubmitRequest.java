@@ -34,7 +34,7 @@ public final class SoFSubmitRequest implements WireObject {
     }
 
     /**
-     * Как связаться для уточнений.
+     * How to get in touch for clarifications.
      *
      * @return the {@code contact} field, or {@code null} when absent
      */
@@ -43,7 +43,7 @@ public final class SoFSubmitRequest implements WireObject {
     }
 
     /**
-     * Чем подтверждается: ссылки на выписки, идентификаторы транзакций.
+     * What supports it: links to statements, transaction ids.
      *
      * @return the {@code evidence} field, or {@code null} when absent
      */
@@ -52,7 +52,7 @@ public final class SoFSubmitRequest implements WireObject {
     }
 
     /**
-     * Откуда средства.
+     * Where the funds come from.
      *
      * @return the {@code origin} field
      */
@@ -166,7 +166,7 @@ public final class SoFSubmitRequest implements WireObject {
         /**
          * Sets {@code contact}.
          *
-         * <p>Как связаться для уточнений.
+         * <p>How to get in touch for clarifications.
          *
          * @param contact the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class SoFSubmitRequest implements WireObject {
         /**
          * Sets {@code evidence}.
          *
-         * <p>Чем подтверждается: ссылки на выписки, идентификаторы транзакций.
+         * <p>What supports it: links to statements, transaction ids.
          *
          * @param evidence the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class SoFSubmitRequest implements WireObject {
         /**
          * Sets {@code origin}.
          *
-         * <p>Откуда средства.
+         * <p>Where the funds come from.
          *
          * @param origin the value
          * @return this builder

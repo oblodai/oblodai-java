@@ -28,7 +28,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Регистрация endpoint'а для коллбэков, тест и переотправка.
+ * Registering the callback endpoint, test deliveries and resends.
  *
  * <p>The {@code Webhooks} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -41,16 +41,19 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Переотправить вебхук по платежу
+     * Resend the payment webhook
      *
-     * <p>Заново поставит в очередь коллбэк по платежу (по {@code uuid}/{@code order_id}). Полезно,
-     * если ваш сервер был недоступен.
+     * <p>Re-queues the payment callback (by {@code uuid}/{@code order_id}). Useful if your server
+     * was unavailable.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/resend} ({@code resendPaymentWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code payment.bad_uuid},
      * {@code payment.no_lookup}, {@code payment.not_found}, {@code request.bad_json},
@@ -105,16 +108,20 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Зарегистрировать endpoint для коллбэков
+     * Register the callback endpoint
      *
-     * <p>Задаёт URL проекта, куда слать вебхуки, и возвращает {@code secret} (показывается один
-     * раз) для проверки подписи {@code X-Webhook-Signature}. Проверив подпись, обработчик ОБЯЗАН
-     * отбросить тело с {@code test: true} — это репетиция с тестовой ручки, а не событие.
+     * <p>Sets the project URL to send webhooks to and returns the {@code secret} (shown once) for
+     * verifying the {@code X-Webhook-Signature}. After verifying the signature, your handler MUST
+     * discard a body with {@code test: true} — it is a rehearsal from the test endpoint, not an
+     * event.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/webhooks} ({@code registerWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -148,17 +155,20 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Журнал доставок вебхуков
+     * Webhook delivery log
      *
-     * <p>Последние доставки: URL, статус, число попыток, последняя ошибка — для отладки. Статусы:
-     * {@code pending} (в очереди или ждёт ретрая), {@code delivered}, {@code dead} (ретраи
-     * исчерпаны), {@code cancelled} (эндпоинт выключили, пока доставка ждала в очереди; причина — в
-     * {@code cancel_reason}).
+     * <p>Recent deliveries: URL, status, attempt count, last error — for debugging. Statuses:
+     * {@code pending} (queued or waiting for a retry), {@code delivered}, {@code dead} (retries
+     * exhausted), {@code cancelled} (the endpoint was disabled while the delivery was waiting in
+     * the queue; the reason is in {@code cancel_reason}).
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/webhooks/deliveries} ({@code listWebhookDeliveries}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -213,20 +223,23 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Переотправить доставку из журнала
+     * Resend a delivery from the log
      *
-     * <p>Возвращает в очередь вашу доставку в статусе {@code dead} (ретраи исчерпаны) или
-     * {@code cancelled} (эндпоинт выключали): новая лестница ретраев, подпись текущим секретом.
-     * Тело доставки то же, что было в журнале, — для отправки ТЕКУЩЕГО состояния платежа есть
-     * {@code POST /v1/payment/resend}. Повтор вызова безопасен: доставка, уже стоящая в очереди или
-     * доставленная, возвращается как есть с {@code ok: false}. Чужая доставка — 404
-     * {@code webhook.delivery_not_found}; выключенный эндпоинт — 409
-     * {@code webhook.endpoint_disabled} (сначала включите его).
+     * <p>Re-queues your delivery in status {@code dead} (retries exhausted) or {@code cancelled}
+     * (the endpoint was disabled): a fresh retry schedule, signed with the current secret. The
+     * delivery body is the same as in the log — to send the CURRENT state of a payment use
+     * {@code POST /v1/payment/resend}. Repeating the call is safe: a delivery already queued or
+     * delivered is returned as is with {@code ok: false}. Someone else's delivery — 404
+     * {@code webhook.delivery_not_found}; a disabled endpoint — 409
+     * {@code webhook.endpoint_disabled} (enable it first).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/webhooks/deliveries/requeue} ({@code requeueWebhookDelivery}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_id}, {@code request.bad_json}, {@code request.body_read},
@@ -261,18 +274,21 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Тестовый вебхук на URL (старый вариант)
+     * Test webhook to a URL (legacy)
      *
-     * <p>Шлёт пробное тело на указанный {@code url} — проверить, что ваш обработчик работает. Тело
-     * репетиции несёт {@code "test": true} (внутри подписи) и заголовок
-     * {@code X-Webhook-Test: true}, а {@code sequence} в нём всегда 0. Боевое событие этих
-     * признаков НЕ несёт никогда: обработчик обязан игнорировать тело с {@code test: true}, даже
-     * если подпись верна.
+     * <p>Sends a sample body to the given {@code url} — to check that your handler works. The
+     * rehearsal body carries {@code "test": true} (inside the signature) and the
+     * {@code X-Webhook-Test: true} header, and its {@code sequence} is always 0. A live event NEVER
+     * carries these markers: your handler must ignore a body with {@code test: true} even if the
+     * signature is valid.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/testing-webhook} ({@code sendLegacyTestWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -328,17 +344,20 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Тестовый вебхук ПЛАТЕЖА
+     * Test PAYMENT webhook
      *
-     * <p>Доставит пробный вебхук типа payment на {@code url_callback}. Тело репетиции несёт
-     * {@code "test": true} (внутри подписи) и заголовок {@code X-Webhook-Test: true}, а
-     * {@code sequence} в нём всегда 0. Боевое событие этих признаков НЕ несёт никогда: обработчик
-     * обязан игнорировать тело с {@code test: true}, даже если подпись верна.
+     * <p>Delivers a sample webhook of type payment to {@code url_callback}. The rehearsal body
+     * carries {@code "test": true} (inside the signature) and the {@code X-Webhook-Test: true}
+     * header, and its {@code sequence} is always 0. A live event NEVER carries these markers: your
+     * handler must ignore a body with {@code test: true} even if the signature is valid.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/test-webhook/payment} ({@code sendTestPaymentWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -374,17 +393,20 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Тестовый вебхук КОШЕЛЬКА
+     * Test WALLET webhook
      *
-     * <p>Доставит пробный вебхук типа wallet (пополнение статик-кошелька). Тело репетиции несёт
-     * {@code "test": true} (внутри подписи) и заголовок {@code X-Webhook-Test: true}, а
-     * {@code sequence} в нём всегда 0. Боевое событие этих признаков НЕ несёт никогда: обработчик
-     * обязан игнорировать тело с {@code test: true}, даже если подпись верна.
+     * <p>Delivers a sample webhook of type wallet (a static wallet deposit). The rehearsal body
+     * carries {@code "test": true} (inside the signature) and the {@code X-Webhook-Test: true}
+     * header, and its {@code sequence} is always 0. A live event NEVER carries these markers: your
+     * handler must ignore a body with {@code test: true} even if the signature is valid.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/test-webhook/wallet} ({@code sendTestWalletWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -420,17 +442,20 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Тестовый вебхук ВЫПЛАТЫ
+     * Test PAYOUT webhook
      *
-     * <p>Доставит пробный вебхук типа payout. Тело репетиции несёт {@code "test": true} (внутри
-     * подписи) и заголовок {@code X-Webhook-Test: true}, а {@code sequence} в нём всегда 0. Боевое
-     * событие этих признаков НЕ несёт никогда: обработчик обязан игнорировать тело с
-     * {@code test: true}, даже если подпись верна.
+     * <p>Delivers a sample webhook of type payout. The rehearsal body carries {@code "test": true}
+     * (inside the signature) and the {@code X-Webhook-Test: true} header, and its {@code sequence}
+     * is always 0. A live event NEVER carries these markers: your handler must ignore a body with
+     * {@code test: true} even if the signature is valid.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/test-webhook/payout} ({@code sendTestPayoutWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -466,19 +491,22 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Тестовый вебхук КОНВЕРТАЦИИ
+     * Test CONVERSION webhook
      *
-     * <p>Доставит пробный вебхук типа conversion (события {@code conversion.completed} /
-     * {@code conversion.refunded} по заявкам режима economy; {@code status} — completed или
-     * refunded, по умолчанию completed). Тело репетиции несёт {@code "test": true} (внутри подписи)
-     * и заголовок {@code X-Webhook-Test: true}, а {@code sequence} в нём всегда 0. Боевое событие
-     * этих признаков НЕ несёт никогда: обработчик обязан игнорировать тело с {@code test: true},
-     * даже если подпись верна.
+     * <p>Delivers a sample webhook of type conversion (the {@code conversion.completed} /
+     * {@code conversion.refunded} events for economy-mode orders; {@code status} — completed or
+     * refunded, default completed). The rehearsal body carries {@code "test": true} (inside the
+     * signature) and the {@code X-Webhook-Test: true} header, and its {@code sequence} is always 0.
+     * A live event NEVER carries these markers: your handler must ignore a body with
+     * {@code test: true} even if the signature is valid.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/test-webhook/conversion} ({@code sendTestConversionWebhook}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -514,17 +542,19 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Перевыпустить секрет подписи вебхуков
+     * Rotate the webhook signing secret
      *
-     * <p>Единственный момент, когда новый секрет показывается. До
-     * {@code previous_secret_valid_until} доставки дополнительно несут
-     * {@code X-Webhook-Signature-Prev} со старым секретом — время докатить замену без потери
-     * проверки.
+     * <p>The only time the new secret is shown. Until {@code previous_secret_valid_until},
+     * deliveries additionally carry {@code X-Webhook-Signature-Prev} signed with the old secret —
+     * time to roll out the change without losing verification.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/webhooks/rotate-secret} ({@code rotateWebhookSecret}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -554,20 +584,24 @@ public final class Webhooks extends Resource {
     }
 
     /**
-     * Включить или выключить доставку вебхуков
+     * Enable or disable webhook delivery
      *
-     * <p>Выключенный эндпоинт перестаёт получать доставки: новые события по этому проекту в очередь
-     * не ставятся, а уже стоящие в очереди отменяются (статус {@code cancelled}) и после включения
-     * сами не уходят. Нужен, когда приёмник выведен из эксплуатации, — иначе каждое событие
-     * ретраилось бы ~3 суток и уходило в dead-letter бессрочно. Секрет и URL сохраняются: включение
-     * возвращает всё как было. Эндпоинт, у которого 3 суток подряд не прошла ни одна попытка,
-     * выключается автоматически — очередь отменяется, владельцу магазина уходит письмо; после
-     * починки приёмника включите его этой ручкой.
+     * <p>A disabled endpoint stops receiving deliveries: new events for this project are not
+     * queued, and those already queued are cancelled (status {@code cancelled}) and are not sent
+     * automatically after re-enabling. Needed when a receiver is decommissioned — otherwise every
+     * event would be retried for ~3 days and end up in the dead-letter queue indefinitely. The
+     * secret and URL are kept: enabling restores everything as it was. An endpoint for which not a
+     * single attempt has succeeded for 3 days in a row is disabled automatically — its queue is
+     * cancelled and the store owner gets an email; after fixing the receiver, enable it with this
+     * endpoint.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/webhooks/active} ({@code setWebhookActive}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},

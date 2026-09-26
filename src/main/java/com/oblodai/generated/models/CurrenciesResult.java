@@ -32,7 +32,7 @@ public final class CurrenciesResult implements WireObject {
     }
 
     /**
-     * Чем счёт можно оплатить: монеты по сетям.
+     * What the invoice can be paid with: coins by network.
      *
      * @return the {@code currencies} field
      */
@@ -41,7 +41,7 @@ public final class CurrenciesResult implements WireObject {
     }
 
     /**
-     * В чём счёт можно выставить: те же монеты и фиат; отсортированы по коду.
+     * What an invoice can be priced in: the same coins plus fiat; sorted by code.
      *
      * @return the {@code pricing_currencies} field
      */
@@ -152,7 +152,7 @@ public final class CurrenciesResult implements WireObject {
         /**
          * Sets {@code currencies}.
          *
-         * <p>Чем счёт можно оплатить: монеты по сетям.
+         * <p>What the invoice can be paid with: coins by network.
          *
          * @param currencies the value
          * @return this builder
@@ -165,7 +165,7 @@ public final class CurrenciesResult implements WireObject {
         /**
          * Sets {@code pricing_currencies}.
          *
-         * <p>В чём счёт можно выставить: те же монеты и фиат; отсортированы по коду.
+         * <p>What an invoice can be priced in: the same coins plus fiat; sorted by code.
          *
          * @param pricingCurrencies the value
          * @return this builder

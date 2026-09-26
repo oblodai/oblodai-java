@@ -18,7 +18,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Асинхронные батчи: платежи, возвраты, выплаты, переводы пачками.
+ * Asynchronous batches of payments, refunds, payouts and transfers.
  *
  * <p>The {@code Batches} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -31,17 +31,19 @@ public final class Batches extends Resource {
     }
 
     /**
-     * Массовое создание платежей
+     * Create payments in bulk
      *
-     * <p>До 5000 платежей за ОДИН запрос (одна отметка rate-limit). Каждый элемент — обычный объект
-     * {@code /v1/payment} (разные валюты/сети допустимы). В ответ сразу приходит {@code batch_id};
-     * обработка идёт в фоне. Статус и результаты (включая {@code uuid} и ссылку оплаты каждого
-     * платежа) — через {@code /v1/batch/info}.
+     * <p>Up to 5000 payments in ONE request (one rate-limit hit). Each item is a regular
+     * {@code /v1/payment} object (different currencies/networks are allowed). The response
+     * immediately returns {@code batch_id}; processing runs in the background. Status and results
+     * (including each payment's {@code uuid} and payment link) — via {@code /v1/batch/info}.
      *
-     * <p>{@code on_error}: {@code continue} (по умолчанию — ошибка одного не мешает остальным) или
-     * {@code stop} (после первой ошибки оставшиеся отменяются); регистр не важен, любое другое
-     * значение — отказ {@code batch.bad_on_error}. Каждый элемент идемпотентен по своему
-     * {@code order_id}; вся пачка — по заголовку {@code Idempotency-Key}.
+     * <p>{@code on_error}: {@code continue} (default — one item's error does not affect the rest)
+     * or {@code stop} (after the first error the remaining items are cancelled); case-insensitive,
+     * any other value is rejected with {@code batch.bad_on_error}. Each item is idempotent on its
+     * own {@code order_id}; the whole batch — on the {@code Idempotency-Key} header.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/batch} ({@code createPaymentBatch}).
      *
@@ -50,8 +52,9 @@ public final class Batches extends Resource {
      * {@code batch.disabled}, {@code batch.duplicate_order_id}, {@code batch.duplicate_reference},
      * {@code batch.empty}, {@code batch.invoice_required}, {@code batch.order_id_required},
      * {@code batch.reference_required}, {@code batch.too_large}, {@code batch.unsupported_kind},
-     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
-     * {@code idempotency.unavailable}, {@code internal}, {@code merchant.bad_signature},
+     * {@code cli.permission_denied}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
+     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -84,14 +87,16 @@ public final class Batches extends Resource {
     }
 
     /**
-     * Массовые возвраты
+     * Bulk refunds
      *
-     * <p>До 5000 возвратов за один запрос. Каждый элемент — обычный объект
-     * {@code /v1/payment/refund}, но {@code reference} ОБЯЗАТЕЛЕН на каждом элементе и уникален
-     * внутри батча: это ключ идемпотентности именно этого возврата (не путать с {@code order_id},
-     * который указывает на счёт). Без него два разных возврата одной суммы одному плательщику молча
-     * схлопнулись бы в один. Возвращает {@code batch_id}; статус по каждому — через
-     * {@code /v1/batch/info}. {@code on_error}: {@code continue}/{@code stop}.
+     * <p>Up to 5000 refunds in one request. Each item is a regular {@code /v1/payment/refund}
+     * object, but {@code reference} is REQUIRED on every item and must be unique within the batch:
+     * it is the idempotency key of that particular refund (not to be confused with
+     * {@code order_id}, which points to the invoice). Without it, two different refunds of the same
+     * amount to the same payer would silently collapse into one. Returns {@code batch_id}; per-item
+     * status via {@code /v1/batch/info}. {@code on_error}: {@code continue}/{@code stop}.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/refund/batch} ({@code createRefundBatch}).
      *
@@ -100,8 +105,9 @@ public final class Batches extends Resource {
      * {@code batch.disabled}, {@code batch.duplicate_order_id}, {@code batch.duplicate_reference},
      * {@code batch.empty}, {@code batch.invoice_required}, {@code batch.order_id_required},
      * {@code batch.reference_required}, {@code batch.too_large}, {@code batch.unsupported_kind},
-     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
-     * {@code idempotency.unavailable}, {@code internal}, {@code merchant.bad_signature},
+     * {@code cli.permission_denied}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
+     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -134,11 +140,13 @@ public final class Batches extends Resource {
     }
 
     /**
-     * Массовые выплаты (async, без лимита 100)
+     * Bulk payouts (async, no 100 limit)
      *
-     * <p>Асинхронный аналог {@code /v1/payout/mass} без ограничения в 100: до 5000 выплат,
-     * обработка в фоне, статус через {@code /v1/batch/info}. Каждый элемент — обычный объект
-     * {@code /v1/payout}, идемпотентен по {@code order_id}.
+     * <p>Asynchronous counterpart of {@code /v1/payout/mass} without the 100-item limit: up to 5000
+     * payouts, processed in the background, status via {@code /v1/batch/info}. Each item is a
+     * regular {@code /v1/payout} object, idempotent on {@code order_id}.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/batch} ({@code createPayoutBatch}).
      *
@@ -147,8 +155,9 @@ public final class Batches extends Resource {
      * {@code batch.disabled}, {@code batch.duplicate_order_id}, {@code batch.duplicate_reference},
      * {@code batch.empty}, {@code batch.invoice_required}, {@code batch.order_id_required},
      * {@code batch.reference_required}, {@code batch.too_large}, {@code batch.unsupported_kind},
-     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
-     * {@code idempotency.unavailable}, {@code internal}, {@code merchant.bad_signature},
+     * {@code cli.permission_denied}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
+     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -181,17 +190,20 @@ public final class Batches extends Resource {
     }
 
     /**
-     * Статус пачки
+     * Batch status
      *
-     * <p>Прогресс пачки ({@code total}/{@code succeeded}/{@code failed}/{@code status}) и
-     * постранично её элементы с результатом или ошибкой по каждому. {@code status}: {@code pending}
-     * → {@code processing} → {@code completed}.
+     * <p>Batch progress ({@code total}/{@code succeeded}/{@code failed}/{@code status}) and its
+     * items, paginated, with the result or error for each. {@code status}: {@code pending} →
+     * {@code processing} → {@code completed}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/batch/info} ({@code getBatchInfo}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
      * {@code auth.ip_not_allowed}, {@code batch.bad_id}, {@code batch.disabled},
-     * {@code batch.not_found}, {@code internal}, {@code merchant.bad_signature},
+     * {@code batch.not_found}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},

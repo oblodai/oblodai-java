@@ -34,7 +34,7 @@ public final class AMLLinkView implements WireObject {
     }
 
     /**
-     * До какого момента ссылка действует (UTC).
+     * Until when the link is valid (UTC).
      *
      * @return the {@code expired_at} field
      */
@@ -43,7 +43,7 @@ public final class AMLLinkView implements WireObject {
     }
 
     /**
-     * Ссылка на анкету — передайте её плательщику.
+     * The questionnaire link — hand it to the payer.
      *
      * @return the {@code link} field
      */
@@ -52,7 +52,7 @@ public final class AMLLinkView implements WireObject {
     }
 
     /**
-     * Статус заполнения анкеты.
+     * Questionnaire completion status.
      *
      * @return the {@code status} field
      */
@@ -166,7 +166,7 @@ public final class AMLLinkView implements WireObject {
         /**
          * Sets {@code expired_at}.
          *
-         * <p>До какого момента ссылка действует (UTC).
+         * <p>Until when the link is valid (UTC).
          *
          * @param expiredAt the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class AMLLinkView implements WireObject {
         /**
          * Sets {@code link}.
          *
-         * <p>Ссылка на анкету — передайте её плательщику.
+         * <p>The questionnaire link — hand it to the payer.
          *
          * @param link the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class AMLLinkView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус заполнения анкеты.
+         * <p>Questionnaire completion status.
          *
          * @param status the value
          * @return this builder
@@ -205,7 +205,7 @@ public final class AMLLinkView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус заполнения анкеты.
+         * <p>Questionnaire completion status.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

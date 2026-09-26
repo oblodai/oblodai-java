@@ -35,7 +35,7 @@ public final class FaucetRequest implements WireObject {
     }
 
     /**
-     * Сумма тестовых денег, строкой; потолок 1000000 за вызов.
+     * The amount of test money, as a string; capped at 1000000 per call.
      *
      * @return the {@code amount} field
      */
@@ -44,7 +44,7 @@ public final class FaucetRequest implements WireObject {
     }
 
     /**
-     * Актив пополнения (USDT, BTC, …).
+     * Deposit asset (USDT, BTC, …).
      *
      * @return the {@code asset} field
      */
@@ -53,7 +53,7 @@ public final class FaucetRequest implements WireObject {
     }
 
     /**
-     * Ключ безопасного повтора; пусто — каждый вызов даёт новое пополнение.
+     * The safe-retry key; empty — every call creates a new top-up.
      *
      * @return the {@code idempotency_key} field, or {@code null} when absent
      */
@@ -168,7 +168,7 @@ public final class FaucetRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма тестовых денег, строкой; потолок 1000000 за вызов.
+         * <p>The amount of test money, as a string; capped at 1000000 per call.
          *
          * @param amount the value
          * @return this builder
@@ -181,7 +181,7 @@ public final class FaucetRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма тестовых денег, строкой; потолок 1000000 за вызов.
+         * <p>The amount of test money, as a string; capped at 1000000 per call.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -193,7 +193,7 @@ public final class FaucetRequest implements WireObject {
         /**
          * Sets {@code asset}.
          *
-         * <p>Актив пополнения (USDT, BTC, …).
+         * <p>Deposit asset (USDT, BTC, …).
          *
          * @param asset the value
          * @return this builder
@@ -206,7 +206,7 @@ public final class FaucetRequest implements WireObject {
         /**
          * Sets {@code idempotency_key}.
          *
-         * <p>Ключ безопасного повтора; пусто — каждый вызов даёт новое пополнение.
+         * <p>The safe-retry key; empty — every call creates a new top-up.
          *
          * @param idempotencyKey the value
          * @return this builder

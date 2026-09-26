@@ -28,7 +28,7 @@ public final class RegisterWebhookRequest implements WireObject {
     }
 
     /**
-     * HTTPS-URL коллбэка. SSRF-проверка: приватные и локальные адреса запрещены.
+     * HTTPS callback URL. SSRF check: private and local addresses are forbidden.
      *
      * @return the {@code url} field
      */
@@ -126,7 +126,7 @@ public final class RegisterWebhookRequest implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>HTTPS-URL коллбэка. SSRF-проверка: приватные и локальные адреса запрещены.
+         * <p>HTTPS callback URL. SSRF check: private and local addresses are forbidden.
          *
          * @param url the value
          * @return this builder

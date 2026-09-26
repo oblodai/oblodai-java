@@ -75,7 +75,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Ссылка принимает оплату.
+     * The link accepts payments.
      *
      * @return the {@code active} field
      */
@@ -84,7 +84,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Сумма для режима fixed.
+     * The amount for fixed mode.
      *
      * @return the {@code amount_fixed} field, or {@code null} when absent
      */
@@ -93,7 +93,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Режим суммы.
+     * Amount mode.
      *
      * @return the {@code amount_mode} field
      */
@@ -102,7 +102,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Когда создана (UTC).
+     * When created (UTC).
      *
      * @return the {@code created_at} field
      */
@@ -111,7 +111,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Валюта цены.
+     * Price currency.
      *
      * @return the {@code currency} field
      */
@@ -120,7 +120,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Описание на странице оплаты.
+     * Description on the payment page.
      *
      * @return the {@code description} field
      */
@@ -129,7 +129,8 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на PDF-плакат с QR оплаты; пусто, когда рендер документов не включён.
+     * A signed link to a PDF poster with the payment QR code; empty when document rendering is not
+     * enabled.
      *
      * @return the {@code document_url} field
      */
@@ -138,7 +139,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Когда ссылка истекает (UTC); нет — бессрочная.
+     * When the link expires (UTC); absent — never expires.
      *
      * @return the {@code expires_at} field, or {@code null} when absent
      */
@@ -147,7 +148,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Идентификатор ссылки.
+     * Link id.
      *
      * @return the {@code link_id} field
      */
@@ -156,7 +157,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Верхняя граница для range.
+     * Upper bound for range.
      *
      * @return the {@code max_amount} field, or {@code null} when absent
      */
@@ -165,7 +166,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Нижняя граница для open/range.
+     * Lower bound for open/range.
      *
      * @return the {@code min_amount} field, or {@code null} when absent
      */
@@ -174,7 +175,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Платежи по ссылке, страница по limit/offset запроса.
+     * Payments through the link, paged by the request's limit/offset.
      *
      * @return the {@code payments} field
      */
@@ -183,7 +184,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Закреплённая валюта оплаты.
+     * The pinned payment currency.
      *
      * @return the {@code pinned_currency} field, or {@code null} when absent
      */
@@ -192,7 +193,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Закреплённая сеть оплаты.
+     * The pinned payment network.
      *
      * @return the {@code pinned_network} field, or {@code null} when absent
      */
@@ -201,7 +202,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Заголовок страницы оплаты.
+     * Payment page title.
      *
      * @return the {@code title} field
      */
@@ -210,7 +211,7 @@ public final class PaymentLinkDetail implements WireObject {
     }
 
     /**
-     * Публичный URL страницы оплаты; пусто, если публичный адрес не настроен.
+     * The public URL of the payment page; empty if the public address is not configured.
      *
      * @return the {@code url} field
      */
@@ -434,7 +435,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code active}.
          *
-         * <p>Ссылка принимает оплату.
+         * <p>The link accepts payments.
          *
          * @param active the value
          * @return this builder
@@ -447,7 +448,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code amount_fixed}.
          *
-         * <p>Сумма для режима fixed.
+         * <p>The amount for fixed mode.
          *
          * @param amountFixed the value
          * @return this builder
@@ -460,7 +461,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code amount_fixed}.
          *
-         * <p>Сумма для режима fixed.
+         * <p>The amount for fixed mode.
          *
          * @param amountFixed the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -472,7 +473,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code amount_mode}.
          *
-         * <p>Режим суммы.
+         * <p>Amount mode.
          *
          * @param amountMode the value
          * @return this builder
@@ -485,7 +486,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code amount_mode}.
          *
-         * <p>Режим суммы.
+         * <p>Amount mode.
          *
          * @param amountMode the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -498,7 +499,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда создана (UTC).
+         * <p>When created (UTC).
          *
          * @param createdAt the value
          * @return this builder
@@ -511,7 +512,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта цены.
+         * <p>Price currency.
          *
          * @param currency the value
          * @return this builder
@@ -524,7 +525,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code description}.
          *
-         * <p>Описание на странице оплаты.
+         * <p>Description on the payment page.
          *
          * @param description the value
          * @return this builder
@@ -537,8 +538,8 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Подписанная ссылка на PDF-плакат с QR оплаты; пусто, когда рендер документов не
-         * включён.
+         * <p>A signed link to a PDF poster with the payment QR code; empty when document rendering
+         * is not enabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -551,7 +552,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code expires_at}.
          *
-         * <p>Когда ссылка истекает (UTC); нет — бессрочная.
+         * <p>When the link expires (UTC); absent — never expires.
          *
          * @param expiresAt the value
          * @return this builder
@@ -564,7 +565,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор ссылки.
+         * <p>Link id.
          *
          * @param linkId the value
          * @return this builder
@@ -577,7 +578,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Верхняя граница для range.
+         * <p>Upper bound for range.
          *
          * @param maxAmount the value
          * @return this builder
@@ -590,7 +591,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Верхняя граница для range.
+         * <p>Upper bound for range.
          *
          * @param maxAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -602,7 +603,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Нижняя граница для open/range.
+         * <p>Lower bound for open/range.
          *
          * @param minAmount the value
          * @return this builder
@@ -615,7 +616,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Нижняя граница для open/range.
+         * <p>Lower bound for open/range.
          *
          * @param minAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -627,7 +628,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code payments}.
          *
-         * <p>Платежи по ссылке, страница по limit/offset запроса.
+         * <p>Payments through the link, paged by the request's limit/offset.
          *
          * @param payments the value
          * @return this builder
@@ -640,7 +641,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code pinned_currency}.
          *
-         * <p>Закреплённая валюта оплаты.
+         * <p>The pinned payment currency.
          *
          * @param pinnedCurrency the value
          * @return this builder
@@ -653,7 +654,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code pinned_network}.
          *
-         * <p>Закреплённая сеть оплаты.
+         * <p>The pinned payment network.
          *
          * @param pinnedNetwork the value
          * @return this builder
@@ -666,7 +667,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок страницы оплаты.
+         * <p>Payment page title.
          *
          * @param title the value
          * @return this builder
@@ -679,7 +680,7 @@ public final class PaymentLinkDetail implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Публичный URL страницы оплаты; пусто, если публичный адрес не настроен.
+         * <p>The public URL of the payment page; empty if the public address is not configured.
          *
          * @param url the value
          * @return this builder

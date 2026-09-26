@@ -37,7 +37,7 @@ public final class DocumentJobFile implements WireObject {
     }
 
     /**
-     * Путь скачивания (GET под ключом мерчанта).
+     * The download path (GET under the merchant key).
      *
      * @return the {@code download_url} field
      */
@@ -46,7 +46,7 @@ public final class DocumentJobFile implements WireObject {
     }
 
     /**
-     * До какого момента файл хранится (UTC).
+     * Until when the file is kept (UTC).
      *
      * @return the {@code expires_at} field, or {@code null} when absent
      */
@@ -55,7 +55,7 @@ public final class DocumentJobFile implements WireObject {
     }
 
     /**
-     * Строк в отчёте.
+     * Rows in the report.
      *
      * @return the {@code rows} field
      */
@@ -64,7 +64,7 @@ public final class DocumentJobFile implements WireObject {
     }
 
     /**
-     * Размер файла в байтах.
+     * File size in bytes.
      *
      * @return the {@code size_bytes} field
      */
@@ -186,7 +186,7 @@ public final class DocumentJobFile implements WireObject {
         /**
          * Sets {@code download_url}.
          *
-         * <p>Путь скачивания (GET под ключом мерчанта).
+         * <p>The download path (GET under the merchant key).
          *
          * @param downloadUrl the value
          * @return this builder
@@ -199,7 +199,7 @@ public final class DocumentJobFile implements WireObject {
         /**
          * Sets {@code expires_at}.
          *
-         * <p>До какого момента файл хранится (UTC).
+         * <p>Until when the file is kept (UTC).
          *
          * @param expiresAt the value
          * @return this builder
@@ -212,7 +212,7 @@ public final class DocumentJobFile implements WireObject {
         /**
          * Sets {@code rows}.
          *
-         * <p>Строк в отчёте.
+         * <p>Rows in the report.
          *
          * @param rows the value
          * @return this builder
@@ -225,7 +225,7 @@ public final class DocumentJobFile implements WireObject {
         /**
          * Sets {@code size_bytes}.
          *
-         * <p>Размер файла в байтах.
+         * <p>File size in bytes.
          *
          * @param sizeBytes the value
          * @return this builder

@@ -35,7 +35,7 @@ public final class ExchangeRatesResult implements WireObject {
     }
 
     /**
-     * Курсы этой страницы.
+     * The rates of this page.
      *
      * @return the {@code items} field
      */
@@ -44,8 +44,8 @@ public final class ExchangeRatesResult implements WireObject {
     }
 
     /**
-     * Квота конвертации в обоих режимах; нет ключа — квоту не просили, она не удалась или пара вне
-     * режимов.
+     * The conversion quota in both modes; no key — no quota was requested, it failed, or the pair
+     * is outside both modes.
      *
      * @return the {@code modes} field, or {@code null} when absent
      */
@@ -54,7 +54,7 @@ public final class ExchangeRatesResult implements WireObject {
     }
 
     /**
-     * Блок пагинации.
+     * Pagination block.
      *
      * @return the {@code paginate} field
      */
@@ -171,7 +171,7 @@ public final class ExchangeRatesResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Курсы этой страницы.
+         * <p>The rates of this page.
          *
          * @param items the value
          * @return this builder
@@ -184,8 +184,8 @@ public final class ExchangeRatesResult implements WireObject {
         /**
          * Sets {@code modes}.
          *
-         * <p>Квота конвертации в обоих режимах; нет ключа — квоту не просили, она не удалась или
-         * пара вне режимов.
+         * <p>The conversion quota in both modes; no key — no quota was requested, it failed, or the
+         * pair is outside both modes.
          *
          * @param modes the value
          * @return this builder
@@ -198,7 +198,7 @@ public final class ExchangeRatesResult implements WireObject {
         /**
          * Sets {@code paginate}.
          *
-         * <p>Блок пагинации.
+         * <p>Pagination block.
          *
          * @param paginate the value
          * @return this builder

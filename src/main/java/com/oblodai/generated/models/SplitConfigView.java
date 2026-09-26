@@ -28,7 +28,7 @@ public final class SplitConfigView implements WireObject {
     }
 
     /**
-     * На сколько секунд откладывается расчёт по сплитам после оплаты; 0 — доли уходят сразу.
+     * How many seconds split settlement is deferred after payment; 0 — shares are sent immediately.
      *
      * @return the {@code refund_hold_seconds} field
      */
@@ -127,7 +127,8 @@ public final class SplitConfigView implements WireObject {
         /**
          * Sets {@code refund_hold_seconds}.
          *
-         * <p>На сколько секунд откладывается расчёт по сплитам после оплаты; 0 — доли уходят сразу.
+         * <p>How many seconds split settlement is deferred after payment; 0 — shares are sent
+         * immediately.
          *
          * @param refundHoldSeconds the value
          * @return this builder

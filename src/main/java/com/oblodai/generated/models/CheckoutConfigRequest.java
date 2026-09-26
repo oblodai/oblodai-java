@@ -34,8 +34,8 @@ public final class CheckoutConfigRequest implements WireObject {
     }
 
     /**
-     * Слать ли покупателю чек на почту после оплаты. Чек уходит только если покупатель оставил
-     * адрес. По умолчанию — да.
+     * Whether to email the buyer a receipt after payment. The receipt is sent only if the buyer
+     * left an address. Defaults to yes.
      *
      * @return the {@code email_receipts} field, or {@code null} when absent
      */
@@ -44,9 +44,9 @@ public final class CheckoutConfigRequest implements WireObject {
     }
 
     /**
-     * Куда вернуть покупателя, если он ушёл с оплаты. Пустая строка — никуда не отправлять. Поле
-     * можно не присылать — тогда прежнее значение сохранится. Подставляется только в те счета, где
-     * url_return не задан.
+     * Where to send the buyer if they left the payment page. An empty string — do not redirect. The
+     * field may be omitted — then the previous value is kept. Applied only to invoices where
+     * url_return is not set.
      *
      * @return the {@code fail_url} field, or {@code null} when absent
      */
@@ -55,9 +55,9 @@ public final class CheckoutConfigRequest implements WireObject {
     }
 
     /**
-     * Куда вернуть покупателя после успешной оплаты. Пустая строка — никуда не отправлять. Поле
-     * можно не присылать — тогда прежнее значение сохранится. Подставляется только в те счета, где
-     * url_success не задан.
+     * Where to send the buyer after a successful payment. An empty string — do not redirect. The
+     * field may be omitted — then the previous value is kept. Applied only to invoices where
+     * url_success is not set.
      *
      * @return the {@code success_url} field, or {@code null} when absent
      */
@@ -173,8 +173,8 @@ public final class CheckoutConfigRequest implements WireObject {
         /**
          * Sets {@code email_receipts}.
          *
-         * <p>Слать ли покупателю чек на почту после оплаты. Чек уходит только если покупатель
-         * оставил адрес. По умолчанию — да.
+         * <p>Whether to email the buyer a receipt after payment. The receipt is sent only if the
+         * buyer left an address. Defaults to yes.
          *
          * @param emailReceipts the value
          * @return this builder
@@ -188,9 +188,9 @@ public final class CheckoutConfigRequest implements WireObject {
         /**
          * Sets {@code fail_url}.
          *
-         * <p>Куда вернуть покупателя, если он ушёл с оплаты. Пустая строка — никуда не отправлять.
-         * Поле можно не присылать — тогда прежнее значение сохранится. Подставляется только в те
-         * счета, где url_return не задан.
+         * <p>Where to send the buyer if they left the payment page. An empty string — do not
+         * redirect. The field may be omitted — then the previous value is kept. Applied only to
+         * invoices where url_return is not set.
          *
          * @param failUrl the value
          * @return this builder
@@ -204,9 +204,9 @@ public final class CheckoutConfigRequest implements WireObject {
         /**
          * Sets {@code success_url}.
          *
-         * <p>Куда вернуть покупателя после успешной оплаты. Пустая строка — никуда не отправлять.
-         * Поле можно не присылать — тогда прежнее значение сохранится. Подставляется только в те
-         * счета, где url_success не задан.
+         * <p>Where to send the buyer after a successful payment. An empty string — do not redirect.
+         * The field may be omitted — then the previous value is kept. Applied only to invoices
+         * where url_success is not set.
          *
          * @param successUrl the value
          * @return this builder
