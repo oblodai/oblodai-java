@@ -175,7 +175,7 @@ for (PaymentView p : oblodai.payments().listHistory()) {            // every ite
     seen++;
 }
 for (Page<PaymentView> page : oblodai.payments().listHistory(
-        HistoryRequest.builder().limit(100L).build()).byPage()) {  // one request per page
+        PaymentHistoryRequest.builder().limit(100L).build()).byPage()) {  // one request per page
     System.out.println(page.items().size() + " of " + page.total());
 }
 ```

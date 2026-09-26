@@ -31,7 +31,8 @@ public final class LookupRequest implements WireObject {
     }
 
     /**
-     * Your order reference.
+     * Your order_id of the object: the payment's for /v1/payment/info, the payout's for
+     * /v1/payout/info.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -40,7 +41,9 @@ public final class LookupRequest implements WireObject {
     }
 
     /**
-     * The invoice id in Oblodai. Either uuid or order_id is required; uuid takes precedence.
+     * The Oblodai id of the object being looked up: the invoice (payment) for /v1/payment/info, the
+     * payout or refund for /v1/payout/info. Either uuid or order_id is required; uuid takes
+     * precedence.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -146,7 +149,8 @@ public final class LookupRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Your order reference.
+         * <p>Your order_id of the object: the payment's for /v1/payment/info, the payout's for
+         * /v1/payout/info.
          *
          * @param orderId the value
          * @return this builder
@@ -159,7 +163,9 @@ public final class LookupRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>The invoice id in Oblodai. Either uuid or order_id is required; uuid takes precedence.
+         * <p>The Oblodai id of the object being looked up: the invoice (payment) for
+         * /v1/payment/info, the payout or refund for /v1/payout/info. Either uuid or order_id is
+         * required; uuid takes precedence.
          *
          * @param uuid the value
          * @return this builder

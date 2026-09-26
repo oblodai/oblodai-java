@@ -15,8 +15,8 @@ import com.oblodai.generated.models.BatchSubmitResponse;
 import com.oblodai.generated.models.DocumentJobAccepted;
 import com.oblodai.generated.models.DocumentJobKind;
 import com.oblodai.generated.models.DocumentJobRequest;
-import com.oblodai.generated.models.HistoryRequest;
 import com.oblodai.generated.models.LookupRequest;
+import com.oblodai.generated.models.PaymentHistoryRequest;
 import com.oblodai.generated.models.PaymentInfoResult;
 import com.oblodai.generated.models.PaymentRequest;
 import com.oblodai.generated.models.PaymentView;
@@ -142,7 +142,7 @@ public final class ReadmeSnippets {
             seen++;
         }
         for (Page<PaymentView> page : oblodai.payments().listHistory(
-                HistoryRequest.builder().limit(100L).build()).byPage()) {  // one request per page
+                PaymentHistoryRequest.builder().limit(100L).build()).byPage()) {  // one request per page
             System.out.println(page.items().size() + " of " + page.total());
         }
         return seen;

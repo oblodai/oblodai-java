@@ -12,51 +12,25 @@ import java.util.Set;
  * Build one with {@link #builder()}; fields the SDK does not know yet are kept in {@link #extra()}
  * and sent back as they came.
  */
-public final class HistoryRequest implements WireObject {
+public final class PaymentHistoryRequest implements WireObject {
 
     private static final Set<String> FIELDS = Set.of(
-            "include_refunds",
-            "kind",
             "limit",
             "offset",
             "status");
 
-    private final Boolean includeRefunds;
-    private final PayoutKind kind;
     private final Long limit;
     private final Long offset;
     private final String status;
     private final Set<String> nulls;
     private final Map<String, Object> extra;
 
-    private HistoryRequest(Builder builder) {
-        this.includeRefunds = builder.includeRefunds;
-        this.kind = builder.kind;
+    private PaymentHistoryRequest(Builder builder) {
         this.limit = builder.limit;
         this.offset = builder.offset;
         this.status = builder.status;
         this.nulls = Set.copyOf(builder.nulls);
         this.extra = Wire.copyMap(builder.extra);
-    }
-
-    /**
-     * true — return refunds together with payouts (the former behavior of the feed without kind).
-     * Default false: refunds are separate, kind=refund.
-     *
-     * @return the {@code include_refunds} field, or {@code null} when absent
-     */
-    public Boolean includeRefunds() {
-        return includeRefunds;
-    }
-
-    /**
-     * payout — regular payouts, refund — refunds; empty — regular payouts (with
-     * include_refunds=true — everything together).
-     *
-     * @return the {@code kind} field, or {@code null} when absent
-     */
-    public PayoutKind kind() {
-        return kind;
     }
 
     /**
@@ -78,8 +52,8 @@ public final class HistoryRequest implements WireObject {
     }
 
     /**
-     * Filter by payout status (an exact value from the payout status vocabulary: pending, approved,
-     * awaiting_cosign, broadcasting, sent, confirmed, failed, cancelled); empty — all.
+     * Filter by payment status (an exact value from the payment status vocabulary: select, created,
+     * confirm_check, paid, paid_over, wrong_amount, expired, cancelled); empty — all.
      *
      * @return the {@code status} field, or {@code null} when absent
      */
@@ -100,8 +74,6 @@ public final class HistoryRequest implements WireObject {
     /** @return a builder holding this object's values */
     public Builder toBuilder() {
         Builder builder = new Builder();
-        builder.includeRefunds = this.includeRefunds;
-        builder.kind = this.kind;
         builder.limit = this.limit;
         builder.offset = this.offset;
         builder.status = this.status;
@@ -115,17 +87,14 @@ public final class HistoryRequest implements WireObject {
      * @return the model
      * @throws IllegalArgumentException when a required field is missing or a value has the wrong type
      */
-    public static HistoryRequest fromMap(Map<String, ?> data) {
+    public static PaymentHistoryRequest fromMap(Map<String, ?> data) {
         Builder builder = new Builder();
-        builder.includeRefunds = Wire.optional(
-                data, "include_refunds", Wire::bool, "HistoryRequest");
-        builder.kind = Wire.optional(data, "kind", PayoutKind::fromJson, "HistoryRequest");
-        builder.limit = Wire.optional(data, "limit", Wire::integer, "HistoryRequest");
-        builder.offset = Wire.optional(data, "offset", Wire::integer, "HistoryRequest");
-        builder.status = Wire.optional(data, "status", Wire::string, "HistoryRequest");
+        builder.limit = Wire.optional(data, "limit", Wire::integer, "PaymentHistoryRequest");
+        builder.offset = Wire.optional(data, "offset", Wire::integer, "PaymentHistoryRequest");
+        builder.status = Wire.optional(data, "status", Wire::string, "PaymentHistoryRequest");
         builder.nulls.addAll(Wire.nulls(data, FIELDS));
         builder.extra.putAll(Wire.extra(data, FIELDS));
-        return new HistoryRequest(builder);
+        return new PaymentHistoryRequest(builder);
     }
 
     /**
@@ -133,15 +102,13 @@ public final class HistoryRequest implements WireObject {
      * @return the model
      * @throws IllegalArgumentException when it is not an object this model can read
      */
-    public static HistoryRequest fromJson(Object data) {
-        return fromMap(Wire.object(data, "HistoryRequest"));
+    public static PaymentHistoryRequest fromJson(Object data) {
+        return fromMap(Wire.object(data, "PaymentHistoryRequest"));
     }
 
     /** @return the JSON object: set fields, explicit nulls and {@link #extra()} */
     public Map<String, Object> toMap() {
         Map<String, Object> out = new LinkedHashMap<>(this.extra);
-        Wire.put(out, "include_refunds", this.includeRefunds, this.nulls);
-        Wire.put(out, "kind", this.kind, this.nulls);
         Wire.put(out, "limit", this.limit, this.nulls);
         Wire.put(out, "offset", this.offset, this.nulls);
         Wire.put(out, "status", this.status, this.nulls);
@@ -155,9 +122,7 @@ public final class HistoryRequest implements WireObject {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof HistoryRequest that
-                && Objects.equals(this.includeRefunds, that.includeRefunds)
-                && Objects.equals(this.kind, that.kind)
+        return other instanceof PaymentHistoryRequest that
                 && Objects.equals(this.limit, that.limit)
                 && Objects.equals(this.offset, that.offset)
                 && Objects.equals(this.status, that.status)
@@ -168,8 +133,6 @@ public final class HistoryRequest implements WireObject {
     @Override
     public int hashCode() {
         return Objects.hash(
-                this.includeRefunds,
-                this.kind,
                 this.limit,
                 this.offset,
                 this.status,
@@ -180,11 +143,7 @@ public final class HistoryRequest implements WireObject {
     @Override
     public String toString() {
         return Wire.describe(
-                "HistoryRequest",
-                "includeRefunds",
-                this.includeRefunds,
-                "kind",
-                this.kind,
+                "PaymentHistoryRequest",
                 "limit",
                 this.limit,
                 "offset",
@@ -195,10 +154,8 @@ public final class HistoryRequest implements WireObject {
                 this.extra);
     }
 
-    /** Builds a {@link HistoryRequest}. */
+    /** Builds a {@link PaymentHistoryRequest}. */
     public static final class Builder {
-        private Boolean includeRefunds;
-        private PayoutKind kind;
         private Long limit;
         private Long offset;
         private String status;
@@ -206,47 +163,6 @@ public final class HistoryRequest implements WireObject {
         private final Map<String, Object> extra = new LinkedHashMap<>();
 
         private Builder() {}
-
-        /**
-         * Sets {@code include_refunds}.
-         *
-         * <p>true — return refunds together with payouts (the former behavior of the feed without
-         * kind). Default false: refunds are separate, kind=refund.
-         *
-         * @param includeRefunds the value
-         * @return this builder
-         */
-        public Builder includeRefunds(Boolean includeRefunds) {
-            this.includeRefunds = includeRefunds;
-            return this;
-        }
-
-        /**
-         * Sets {@code kind}.
-         *
-         * <p>payout — regular payouts, refund — refunds; empty — regular payouts (with
-         * include_refunds=true — everything together).
-         *
-         * @param kind the value
-         * @return this builder
-         */
-        public Builder kind(PayoutKind kind) {
-            this.kind = kind;
-            return this;
-        }
-
-        /**
-         * Sets {@code kind}.
-         *
-         * <p>payout — regular payouts, refund — refunds; empty — regular payouts (with
-         * include_refunds=true — everything together).
-         *
-         * @param kind the value as the API sends it; one this SDK version does not know is accepted
-         * @return this builder
-         */
-        public Builder kind(String kind) {
-            return kind(kind == null ? null : PayoutKind.of(kind));
-        }
 
         /**
          * Sets {@code limit}.
@@ -277,9 +193,8 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Filter by payout status (an exact value from the payout status vocabulary: pending,
-         * approved, awaiting_cosign, broadcasting, sent, confirmed, failed, cancelled); empty —
-         * all.
+         * <p>Filter by payment status (an exact value from the payment status vocabulary: select,
+         * created, confirm_check, paid, paid_over, wrong_amount, expired, cancelled); empty — all.
          *
          * @param status the value
          * @return this builder
@@ -302,10 +217,10 @@ public final class HistoryRequest implements WireObject {
         }
 
         /**
-         * @return the {@link HistoryRequest}
+         * @return the {@link PaymentHistoryRequest}
          */
-        public HistoryRequest build() {
-            return new HistoryRequest(this);
+        public PaymentHistoryRequest build() {
+            return new PaymentHistoryRequest(this);
         }
     }
 }
