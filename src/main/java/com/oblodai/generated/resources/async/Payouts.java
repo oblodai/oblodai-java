@@ -64,7 +64,8 @@ public final class Payouts extends Resource {
      * <p>Also: {@code memo} (tag/memo for TON), {@code url_callback} (your own webhook URL for this
      * payout).
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/payout} ({@code createPayout}).
      *
@@ -140,7 +141,8 @@ public final class Payouts extends Resource {
      * stop the rest, and a result is returned for each. Idempotent on {@code order_id}, like a
      * regular payout.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/payout/mass} ({@code createMassPayout}).
      *
@@ -693,7 +695,8 @@ public final class Payouts extends Resource {
      * (no fee, instant, off-chain). The recipient is addressed by user id; a username is resolved
      * by the dashboard's public endpoint /public/users/{username}.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/transfer/to-user} ({@code transferToUser}).
      *
@@ -753,7 +756,8 @@ public final class Payouts extends Resource {
      * {"transfers":[&lt;as in /v1/transfer/to-user&gt;...], "on_error":"continue"}. Status and
      * per-row results — POST /v1/batch/info.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/transfer/batch} ({@code createTransferBatch}).
      *

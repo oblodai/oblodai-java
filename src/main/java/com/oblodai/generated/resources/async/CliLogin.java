@@ -149,7 +149,7 @@ public final class CliLogin extends Resource {
      *
      * <p>Requires role: Viewer when called with a CLI key.
      *
-     * <p>{@code POST /v1/cli/logout} ({@code logoutCli}).
+     * <p>{@code POST /v1/cli/logout} ({@code logoutCliLogin}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
      * {@code auth.ip_not_allowed}, {@code cli.not_cli_key}, {@code cli.permission_denied},
@@ -164,9 +164,9 @@ public final class CliLogin extends Resource {
      * @param options per-call options ({@code null} for the defaults)
      * @return a future of the result
      */
-    public CompletableFuture<CLILogoutResult> logoutCli(RequestOptions options) {
+    public CompletableFuture<CLILogoutResult> logout(RequestOptions options) {
         return callAsync(
-                Routes.LOGOUT_CLI,
+                Routes.LOGOUT_CLI_LOGIN,
                 null,
                 null,
                 null,
@@ -175,11 +175,11 @@ public final class CliLogin extends Resource {
     }
 
     /**
-     * Same as {@link #logoutCli(RequestOptions)} with the omitted arguments {@code null}.
+     * Same as {@link #logout(RequestOptions)} with the omitted arguments {@code null}.
      *
      * @return a future of the result
      */
-    public CompletableFuture<CLILogoutResult> logoutCli() {
-        return logoutCli(null);
+    public CompletableFuture<CLILogoutResult> logout() {
+        return logout(null);
     }
 }

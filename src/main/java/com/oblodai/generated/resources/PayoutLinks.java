@@ -45,7 +45,8 @@ public final class PayoutLinks extends Resource {
      * lives ONE HOUR, not the maximum — set the lifetime explicitly. Idempotency: {@code reference}
      * (or the {@code Idempotency-Key} header).
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/payout/link} ({@code createPayoutLink}).
      *
@@ -104,7 +105,8 @@ public final class PayoutLinks extends Resource {
      * <p>Up to 500 links per call; each succeeds or fails independently, the response is aligned
      * with the request indices. Retrying with the same {@code reference} values is safe.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/payout/link/batch} ({@code createPayoutLinkBatch}).
      *

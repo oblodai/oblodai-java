@@ -58,8 +58,9 @@ public final class ErrorError implements WireObject {
 
     /**
      * Machine-readable facts about this refusal, with keys documented by its code (e.g.
-     * {@code cli.permission_denied} carries {@code required_role} and {@code role}). Absent when
-     * the code has none.
+     * {@code cli.permission_denied} carries {@code required_role}, {@code role} and, for a
+     * money-out operation, {@code reason}; the keys and values are listed in
+     * {@code x-oblodai-permissions.denied}). Absent when the code has none.
      *
      * @return the {@code details} field, or {@code null} when absent
      */
@@ -268,8 +269,9 @@ public final class ErrorError implements WireObject {
          * Sets {@code details}.
          *
          * <p>Machine-readable facts about this refusal, with keys documented by its code (e.g.
-         * {@code cli.permission_denied} carries {@code required_role} and {@code role}). Absent
-         * when the code has none.
+         * {@code cli.permission_denied} carries {@code required_role}, {@code role} and, for a
+         * money-out operation, {@code reason}; the keys and values are listed in
+         * {@code x-oblodai-permissions.denied}). Absent when the code has none.
          *
          * @param details the value
          * @return this builder

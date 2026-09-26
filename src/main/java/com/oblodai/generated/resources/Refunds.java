@@ -56,7 +56,8 @@ public final class Refunds extends Resource {
      * and partner shares are reversed. You can also send the money as a regular payout, but reports
      * will show it as a payout, not a refund.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/payment/refund} ({@code refundPayment}).
      *
@@ -166,7 +167,8 @@ public final class Refunds extends Resource {
      * the operator has reviewed it. Until then it is not yours yet, and the response will be
      * "nothing to refund".
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
+     * dashboard, where each such operation is confirmed with 2FA.
      *
      * <p>{@code POST /v1/wallet/blocked-address-refund} ({@code refundBlockedWallet}).
      *

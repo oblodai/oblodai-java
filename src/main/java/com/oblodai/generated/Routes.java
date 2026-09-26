@@ -1479,10 +1479,10 @@ public final class Routes {
                     false,
                     null);
 
-    /** {@code POST /v1/cli/logout} ({@code logoutCli}). */
-    public static final RouteSpec LOGOUT_CLI =
+    /** {@code POST /v1/cli/logout} ({@code logoutCliLogin}). */
+    public static final RouteSpec LOGOUT_CLI_LOGIN =
             new RouteSpec(
-                    "logoutCli",
+                    "logoutCliLogin",
                     "POST",
                     "/v1/cli/logout",
                     "key",
@@ -1618,7 +1618,7 @@ public final class Routes {
         routes.put("sandboxReplayWebhook", SANDBOX_REPLAY_WEBHOOK);
         routes.put("startCliLogin", START_CLI_LOGIN);
         routes.put("pollCliLogin", POLL_CLI_LOGIN);
-        routes.put("logoutCli", LOGOUT_CLI);
+        routes.put("logoutCliLogin", LOGOUT_CLI_LOGIN);
         return Collections.unmodifiableMap(routes);
     }
 }

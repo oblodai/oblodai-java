@@ -140,7 +140,7 @@ without the optional parts. The table below is generated from the contract by `t
 | `documents()` | `getSigned` · `getBalance` · `getFees` · `getLedger` · `getSplit` · `getPayoutLinkCheque` · `getStatement` · `getBatch` · `getPaymentLink` · `getWalletStatement` · `getReferrals` · `createJob` · `getJob` · `downloadJobFile` |
 | `checkout()` | `getSourceOfFundsForm` · `submitSourceOfFunds` · `getPublicPaymentLink` · `paymentLink` · `listCurrencies` · `get` · `selectMethod` · `startOnramp` · `getOnramp` · `getQr` |
 | `sandbox()` | `onboardStore` · `faucet` · `simulateDeposit` · `reset` · `listWebhooks` · `replayWebhook` |
-| `cliLogin()` | `start` · `poll` · `logoutCli` |
+| `cliLogin()` | `start` · `poll` · `logout` |
 <!-- /sdkgen:methods -->
 
 Models keep fields this SDK version does not know yet (`extra()`, sent back as they came), and an
