@@ -38,7 +38,7 @@ public final class AutoWithdrawRule implements WireObject {
     }
 
     /**
-     * Адрес назначения.
+     * Destination address.
      *
      * @return the {@code address} field
      */
@@ -47,7 +47,7 @@ public final class AutoWithdrawRule implements WireObject {
     }
 
     /**
-     * Актив.
+     * Asset.
      *
      * @return the {@code currency} field
      */
@@ -56,7 +56,7 @@ public final class AutoWithdrawRule implements WireObject {
     }
 
     /**
-     * Порог срабатывания в единицах актива.
+     * The trigger threshold in asset units.
      *
      * @return the {@code min_amount} field
      */
@@ -65,7 +65,7 @@ public final class AutoWithdrawRule implements WireObject {
     }
 
     /**
-     * Сеть адреса назначения.
+     * The destination address network.
      *
      * @return the {@code network} field
      */
@@ -187,7 +187,7 @@ public final class AutoWithdrawRule implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес назначения.
+         * <p>Destination address.
          *
          * @param address the value
          * @return this builder
@@ -200,7 +200,7 @@ public final class AutoWithdrawRule implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив.
+         * <p>Asset.
          *
          * @param currency the value
          * @return this builder
@@ -213,7 +213,7 @@ public final class AutoWithdrawRule implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Порог срабатывания в единицах актива.
+         * <p>The trigger threshold in asset units.
          *
          * @param minAmount the value
          * @return this builder
@@ -226,7 +226,7 @@ public final class AutoWithdrawRule implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Порог срабатывания в единицах актива.
+         * <p>The trigger threshold in asset units.
          *
          * @param minAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -238,7 +238,7 @@ public final class AutoWithdrawRule implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть адреса назначения.
+         * <p>The destination address network.
          *
          * @param network the value
          * @return this builder

@@ -56,7 +56,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Адрес получателя.
+     * Recipient address.
      *
      * @return the {@code address} field
      */
@@ -65,7 +65,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Сумма ссылки — обещание получателю.
+     * The link amount — a promise to the recipient.
      *
      * @return the {@code amount} field
      */
@@ -74,7 +74,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+     * Network fee; null — cannot be estimated right now (zero would mean the claim is free).
      *
      * @return the {@code commission} field, or {@code null} when absent
      */
@@ -83,7 +83,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Актив выплаты.
+     * Payout asset.
      *
      * @return the {@code currency} field
      */
@@ -92,7 +92,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Кто платит сетевую комиссию.
+     * Who pays the network fee.
      *
      * @return the {@code fee_bearer} field
      */
@@ -101,7 +101,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+     * exact — the fee is fixed; estimated — an estimate based on the current network.
      *
      * @return the {@code fee_type} field
      */
@@ -110,7 +110,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Сеть выплаты.
+     * Payout network.
      *
      * @return the {@code network} field
      */
@@ -119,7 +119,8 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела сумму).
+     * How much will reach the recipient; null — cannot be said (the fee was not estimated or ate
+     * the amount).
      *
      * @return the {@code payer_amount} field, or {@code null} when absent
      */
@@ -128,7 +129,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Выплата получателю.
+     * The payout to the recipient.
      *
      * @return the {@code payout_id} field
      */
@@ -137,7 +138,7 @@ public final class PayoutClaimed implements WireObject {
     }
 
     /**
-     * Состояние ссылки после получения.
+     * The link state after the claim.
      *
      * @return the {@code status} field
      */
@@ -308,7 +309,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес получателя.
+         * <p>Recipient address.
          *
          * @param address the value
          * @return this builder
@@ -321,7 +322,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма ссылки — обещание получателю.
+         * <p>The link amount — a promise to the recipient.
          *
          * @param amount the value
          * @return this builder
@@ -334,7 +335,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма ссылки — обещание получателю.
+         * <p>The link amount — a promise to the recipient.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -346,7 +347,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+         * <p>Network fee; null — cannot be estimated right now (zero would mean the claim is free).
          *
          * @param commission the value
          * @return this builder
@@ -360,7 +361,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+         * <p>Network fee; null — cannot be estimated right now (zero would mean the claim is free).
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -372,7 +373,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив выплаты.
+         * <p>Payout asset.
          *
          * @param currency the value
          * @return this builder
@@ -385,7 +386,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value
          * @return this builder
@@ -398,7 +399,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -411,7 +412,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+         * <p>exact — the fee is fixed; estimated — an estimate based on the current network.
          *
          * @param feeType the value
          * @return this builder
@@ -424,7 +425,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+         * <p>exact — the fee is fixed; estimated — an estimate based on the current network.
          *
          * @param feeType the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -437,7 +438,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть выплаты.
+         * <p>Payout network.
          *
          * @param network the value
          * @return this builder
@@ -450,8 +451,8 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела
-         * сумму).
+         * <p>How much will reach the recipient; null — cannot be said (the fee was not estimated or
+         * ate the amount).
          *
          * @param payerAmount the value
          * @return this builder
@@ -465,8 +466,8 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела
-         * сумму).
+         * <p>How much will reach the recipient; null — cannot be said (the fee was not estimated or
+         * ate the amount).
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -478,7 +479,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code payout_id}.
          *
-         * <p>Выплата получателю.
+         * <p>The payout to the recipient.
          *
          * @param payoutId the value
          * @return this builder
@@ -491,7 +492,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки после получения.
+         * <p>The link state after the claim.
          *
          * @param status the value
          * @return this builder
@@ -504,7 +505,7 @@ public final class PayoutClaimed implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки после получения.
+         * <p>The link state after the claim.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

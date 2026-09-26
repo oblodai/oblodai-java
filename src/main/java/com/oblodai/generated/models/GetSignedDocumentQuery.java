@@ -36,7 +36,7 @@ public final class GetSignedDocumentQuery implements WireObject {
     }
 
     /**
-     * Срок действия ссылки (unix-время) из document_url.
+     * The link expiry (Unix time) from document_url.
      *
      * @return the {@code exp} field
      */
@@ -45,7 +45,7 @@ public final class GetSignedDocumentQuery implements WireObject {
     }
 
     /**
-     * Подпись ссылки из document_url.
+     * The link signature from document_url.
      *
      * @return the {@code sig} field
      */
@@ -54,7 +54,7 @@ public final class GetSignedDocumentQuery implements WireObject {
     }
 
     /**
-     * Язык документа (по умолчанию en); список — document.Languages.
+     * Document language (en by default); the list is document.Languages.
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -168,7 +168,7 @@ public final class GetSignedDocumentQuery implements WireObject {
         /**
          * Sets {@code exp}.
          *
-         * <p>Срок действия ссылки (unix-время) из document_url.
+         * <p>The link expiry (Unix time) from document_url.
          *
          * @param exp the value
          * @return this builder
@@ -181,7 +181,7 @@ public final class GetSignedDocumentQuery implements WireObject {
         /**
          * Sets {@code sig}.
          *
-         * <p>Подпись ссылки из document_url.
+         * <p>The link signature from document_url.
          *
          * @param sig the value
          * @return this builder
@@ -194,7 +194,7 @@ public final class GetSignedDocumentQuery implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа (по умолчанию en); список — document.Languages.
+         * <p>Document language (en by default); the list is document.Languages.
          *
          * @param lang the value
          * @return this builder

@@ -37,7 +37,7 @@ public final class AcceptedConfiguredMethod implements WireObject {
     }
 
     /**
-     * Можно ли платить этим методом здесь.
+     * Whether this method can be used to pay here.
      *
      * @return the {@code available} field
      */
@@ -46,7 +46,7 @@ public final class AcceptedConfiguredMethod implements WireObject {
     }
 
     /**
-     * Код актива.
+     * Asset code.
      *
      * @return the {@code currency} field
      */
@@ -55,7 +55,7 @@ public final class AcceptedConfiguredMethod implements WireObject {
     }
 
     /**
-     * Сеть актива.
+     * The asset's network.
      *
      * @return the {@code network} field
      */
@@ -64,8 +64,8 @@ public final class AcceptedConfiguredMethod implements WireObject {
     }
 
     /**
-     * Почему недоступен: not_served_here — развёртывание не принимает этот метод, unknown_method —
-     * метода нет в каталоге; у доступного ключа нет.
+     * Why it is unavailable: not_served_here — the deployment does not accept this method,
+     * unknown_method — the method is not in the catalog; an available one has no such key.
      *
      * @return the {@code reason} field, or {@code null} when absent
      */
@@ -190,7 +190,7 @@ public final class AcceptedConfiguredMethod implements WireObject {
         /**
          * Sets {@code available}.
          *
-         * <p>Можно ли платить этим методом здесь.
+         * <p>Whether this method can be used to pay here.
          *
          * @param available the value
          * @return this builder
@@ -203,7 +203,7 @@ public final class AcceptedConfiguredMethod implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код актива.
+         * <p>Asset code.
          *
          * @param currency the value
          * @return this builder
@@ -216,7 +216,7 @@ public final class AcceptedConfiguredMethod implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть актива.
+         * <p>The asset's network.
          *
          * @param network the value
          * @return this builder
@@ -229,8 +229,8 @@ public final class AcceptedConfiguredMethod implements WireObject {
         /**
          * Sets {@code reason}.
          *
-         * <p>Почему недоступен: not_served_here — развёртывание не принимает этот метод,
-         * unknown_method — метода нет в каталоге; у доступного ключа нет.
+         * <p>Why it is unavailable: not_served_here — the deployment does not accept this method,
+         * unknown_method — the method is not in the catalog; an available one has no such key.
          *
          * @param reason the value
          * @return this builder
@@ -243,8 +243,8 @@ public final class AcceptedConfiguredMethod implements WireObject {
         /**
          * Sets {@code reason}.
          *
-         * <p>Почему недоступен: not_served_here — развёртывание не принимает этот метод,
-         * unknown_method — метода нет в каталоге; у доступного ключа нет.
+         * <p>Why it is unavailable: not_served_here — the deployment does not accept this method,
+         * unknown_method — the method is not in the catalog; an available one has no such key.
          *
          * @param reason the value as the API sends it; one this SDK version does not know is
          *     accepted

@@ -24,7 +24,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Эндпоинты для страницы оплаты — работают без секрета.
+ * Endpoints for the payment page — they work without the secret.
  *
  * <p>The {@code Checkout} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -37,9 +37,10 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Состояние анкеты (для плательщика)
+     * Questionnaire status (for the payer)
      *
-     * <p>Публично, по токену из ссылки. Возвращает только статус — ни причины, ни классификации.
+     * <p>Public, by the token from the link. Returns only the status — neither the reason nor the
+     * classification.
      *
      * <p><code>GET /v1/aml/{token}</code> ({@code getSourceOfFundsForm}).
      *
@@ -72,10 +73,10 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Плательщик присылает происхождение средств
+     * The payer submits the source of funds
      *
-     * <p>Публично, по токену из ссылки. Приём анкеты **не гарантирует** разблокировку средств: она
-     * даёт основание пересмотреть решение, и только.
+     * <p>Public, by the token from the link. Accepting the questionnaire **does not guarantee**
+     * that the funds are unblocked: it provides grounds to reconsider the decision, nothing more.
      *
      * <p><code>POST /v1/aml/{token}</code> ({@code submitSourceOfFunds}).
      *
@@ -114,9 +115,9 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Конфиг платёжной ссылки (для страницы)
+     * Payment link configuration (for the page)
      *
-     * <p>Публично: заголовок/описание/режим суммы/валюта — чтобы отрисовать страницу доната.
+     * <p>Public: title/description/amount mode/currency — to render the donation page.
      *
      * <p><code>GET /v1/link/{id}</code> ({@code getPublicPaymentLink}).
      *
@@ -149,11 +150,11 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Оплатить по ссылке (создать платёж)
+     * Pay via a link (create a payment)
      *
-     * <p>Публично: клиент вводит сумму (для open/range) и, если валюта не закреплена, выбирает
-     * валюту/сеть. Создаётся свежий инвойс — в ответе обычный объект платежа с {@code uuid} и
-     * {@code url} страницы оплаты.
+     * <p>Public: the customer enters an amount (for open/range) and, if the currency is not pinned,
+     * picks the currency/network. A fresh invoice is created — the response is a regular payment
+     * object with {@code uuid} and the payment page {@code url}.
      *
      * <p><code>POST /v1/link/{id}/checkout</code> ({@code checkoutPaymentLink}).
      *
@@ -218,23 +219,23 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Список валют и сетей
+     * List currencies and networks
      *
-     * <p>Публичный справочник. Возвращает два списка, и путать их не надо:
+     * <p>A public reference. It returns two lists, and they must not be confused:
      *
-     * <p>- {@code currencies} — в чём можно **получать**: монеты и их сети (плюс флаги доступности
-     * приёма и выплаты).
-     * - {@code pricing_currencies} — в чём можно **назначать цену** ({@code currency} при создании
-     * платежа): те же монеты **плюс 45 фиатных валют**
+     * <p>- {@code currencies} — what you can **receive**: coins and their networks (plus flags for
+     * whether accepting and payouts are available).
+     * - {@code pricing_currencies} — what you can **set a price in** ({@code currency} when
+     * creating a payment): the same coins **plus 45 fiat currencies**
      * (<code>{"symbol":"EUR","decimals":2,"fiat":true}</code>) — USD, EUR, GBP, RUB, UAH, PLN, CZK,
      * TRY, CNY, INR, BRL, CAD, AUD, CHF, AED, ZAR, MXN, IDR, THB, VND, NGN, JPY, KRW, SGD, HKD,
      * NZD, SEK, NOK, DKK, ILS, SAR, PHP, MYR, TWD, PKR, LKR, MMK, BDT, ARS, GEL, HUF, BMD, BHD,
-     * KWD, CLP. Число знаков после запятой у каждой в поле {@code decimals} (обычно 2; у
-     * JPY/KRW/VND/CLP — 0, у BHD/KWD — 3) — берите его из ответа, не хардкодьте. У фиата нет сетей
-     * и никогда не будет: в нём можно оценить счёт, но нельзя его получить.
+     * KWD, CLP. The number of decimal places of each is in the {@code decimals} field (usually 2;
+     * JPY/KRW/VND/CLP — 0, BHD/KWD — 3) — take it from the response, do not hardcode it. Fiat has
+     * no networks and never will: you can price an invoice in it, but you cannot receive it.
      *
-     * <p>Тенге, сом и сум пока не поддерживаются — источник курсов не котирует в них крипту
-     * напрямую, а выводить курс перемножением двух других мы не будем.
+     * <p>The tenge, som and sum are not supported yet — the rate source does not quote crypto in
+     * them directly, and we will not derive a rate by multiplying two others.
      *
      * <p>{@code GET /v1/currencies} ({@code listCurrencies}).
      *
@@ -263,10 +264,10 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Публичный статус платежа (страница оплаты)
+     * Public payment status (payment page)
      *
-     * <p>Без секрета — можно опрашивать прямо из браузера. Содержит {@code amount_remaining} для
-     * подсказки «доплатите X».
+     * <p>No secret — can be polled directly from the browser. Contains {@code amount_remaining} for
+     * a "pay X more" hint.
      *
      * <p><code>GET /v1/pay/{id}</code> ({@code getCheckout}).
      *
@@ -304,10 +305,10 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Выбрать валюту и сеть для валюто-агностичной ссылки
+     * Choose the currency and network for a currency-agnostic link
      *
-     * <p>Клиент выбирает {@code currency} + {@code network}; после этого фиксируется курс и
-     * выделяется адрес.
+     * <p>The customer picks {@code currency} + {@code network}; after that the rate is locked in
+     * and an address is allocated.
      *
      * <p><code>POST /v1/pay/{id}/select</code> ({@code selectCheckoutMethod}).
      *
@@ -355,15 +356,16 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Оплатить фиатом: открыть покупку криптовалюты картой
+     * Pay with fiat: open a card purchase of crypto
      *
-     * <p>Покупатель без криптовалюты платит картой стороннему рампу, а тот шлёт монеты прямо на
-     * депозитный адрес этого счёта. Ответ — ПОДПИСАННАЯ ссылка на виджет: подпись покрывает адрес
-     * получения и тег, поэтому переписать их в браузере нельзя. {@code url} пустой, когда покупка
-     * уже идёт (смотрите {@code status}) — второй виджет означал бы второе списание по одному
-     * заказу. {@code fiat_amount} — оценка: у рампов нет режима «зафиксировать сумму получения»,
-     * сумму фиата мы считаем обратным ходом из их котировки и с запасом. Кнопку показывать только
-     * когда <code>GET /v1/pay/{id}</code> вернул {@code fiat_purchase_available: true}.
+     * <p>A buyer without crypto pays by card to a third-party on-ramp, which sends the coins
+     * straight to this invoice's deposit address. The response is a SIGNED widget link: the
+     * signature covers the receiving address and tag, so they cannot be rewritten in the browser.
+     * {@code url} is empty when a purchase is already in progress (see {@code status}) — a second
+     * widget would mean a second charge for one order. {@code fiat_amount} is an estimate: on-ramps
+     * have no "fix the received amount" mode, so we compute the fiat amount backwards from their
+     * quote, with a margin. Show the button only when <code>GET /v1/pay/{id}</code> returned
+     * {@code fiat_purchase_available: true}.
      *
      * <p><code>POST /v1/pay/{id}/onramp</code> ({@code startCheckoutOnramp}).
      *
@@ -409,12 +411,12 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * Статус карточной покупки по счёту
+     * Status of the card purchase for an invoice
      *
-     * <p>Что стало с покупкой: {@code new}, {@code pending}, {@code paid}, {@code completed},
-     * {@code failed}, {@code canceled}, плюс {@code reason} — дословная причина отказа провайдера,
-     * когда она есть. Пустой {@code status} = живой покупки нет. Счёт при этом закрывают ДЕНЬГИ В
-     * ЦЕПОЧКЕ, а не этот статус.
+     * <p>What happened to the purchase: {@code new}, {@code pending}, {@code paid},
+     * {@code completed}, {@code failed}, {@code canceled}, plus {@code reason} — the provider's
+     * verbatim rejection reason, when there is one. An empty {@code status} = no live purchase. The
+     * invoice, however, is closed by the MONEY ON CHAIN, not by this status.
      *
      * <p><code>GET /v1/pay/{id}/onramp</code> ({@code getCheckoutOnramp}).
      *
@@ -447,10 +449,10 @@ public final class Checkout extends Resource {
     }
 
     /**
-     * QR-код адреса оплаты
+     * Payment address QR code
      *
-     * <p>PNG-картинка с QR того адреса (и суммы), которые уже вернул <code>GET /v1/pay/{id}</code>.
-     * Без ключа — её грузит браузер покупателя.
+     * <p>A PNG image with the QR code of the address (and amount) already returned by <code>GET
+     * /v1/pay/{id}</code>. No key — the buyer's browser loads it.
      *
      * <p><code>GET /v1/pay/{id}/qr</code> ({@code getCheckoutQr}).
      *

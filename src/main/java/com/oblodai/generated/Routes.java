@@ -1455,6 +1455,42 @@ public final class Routes {
                     false,
                     null);
 
+    /** {@code POST /v1/cli/device} ({@code startCliLogin}). */
+    public static final RouteSpec START_CLI_LOGIN =
+            new RouteSpec(
+                    "startCliLogin",
+                    "POST",
+                    "/v1/cli/device",
+                    "public",
+                    false,
+                    false,
+                    false,
+                    null);
+
+    /** {@code POST /v1/cli/token} ({@code pollCliLogin}). */
+    public static final RouteSpec POLL_CLI_LOGIN =
+            new RouteSpec(
+                    "pollCliLogin",
+                    "POST",
+                    "/v1/cli/token",
+                    "public",
+                    false,
+                    false,
+                    false,
+                    null);
+
+    /** {@code POST /v1/cli/logout} ({@code logoutCli}). */
+    public static final RouteSpec LOGOUT_CLI =
+            new RouteSpec(
+                    "logoutCli",
+                    "POST",
+                    "/v1/cli/logout",
+                    "key",
+                    false,
+                    false,
+                    false,
+                    null);
+
     /** Every route by its {@code operationId}, in the order of the contract. */
     public static final Map<String, RouteSpec> BY_OPERATION_ID = byOperationId();
 
@@ -1580,6 +1616,9 @@ public final class Routes {
         routes.put("sandboxReset", SANDBOX_RESET);
         routes.put("sandboxListWebhooks", SANDBOX_LIST_WEBHOOKS);
         routes.put("sandboxReplayWebhook", SANDBOX_REPLAY_WEBHOOK);
+        routes.put("startCliLogin", START_CLI_LOGIN);
+        routes.put("pollCliLogin", POLL_CLI_LOGIN);
+        routes.put("logoutCli", LOGOUT_CLI);
         return Collections.unmodifiableMap(routes);
     }
 }

@@ -29,7 +29,7 @@ public final class AutoWithdrawListResult implements WireObject {
     }
 
     /**
-     * Правила автовывода, по одному на актив.
+     * Auto-withdrawal rules, one per asset.
      *
      * @return the {@code items} field
      */
@@ -128,7 +128,7 @@ public final class AutoWithdrawListResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Правила автовывода, по одному на актив.
+         * <p>Auto-withdrawal rules, one per asset.
          *
          * @param items the value
          * @return this builder

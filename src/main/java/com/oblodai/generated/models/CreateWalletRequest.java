@@ -34,7 +34,7 @@ public final class CreateWalletRequest implements WireObject {
     }
 
     /**
-     * Символ валюты приёма (USDT, BTC, ETH, …)
+     * The symbol of the accepted currency (USDT, BTC, ETH, …)
      *
      * @return the {@code currency} field
      */
@@ -43,7 +43,7 @@ public final class CreateWalletRequest implements WireObject {
     }
 
     /**
-     * Сеть приёма (tron, ethereum, bitcoin, …)
+     * The receiving network (tron, ethereum, bitcoin, …)
      *
      * @return the {@code network} field
      */
@@ -52,7 +52,7 @@ public final class CreateWalletRequest implements WireObject {
     }
 
     /**
-     * Ваш идентификатор клиента/заказа. Закрепляет отдельный постоянный адрес за клиентом
+     * Your customer/order identifier. Assigns a dedicated permanent address to the customer
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -166,7 +166,7 @@ public final class CreateWalletRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Символ валюты приёма (USDT, BTC, ETH, …)
+         * <p>The symbol of the accepted currency (USDT, BTC, ETH, …)
          *
          * @param currency the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class CreateWalletRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть приёма (tron, ethereum, bitcoin, …)
+         * <p>The receiving network (tron, ethereum, bitcoin, …)
          *
          * @param network the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class CreateWalletRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш идентификатор клиента/заказа. Закрепляет отдельный постоянный адрес за клиентом
+         * <p>Your customer/order identifier. Assigns a dedicated permanent address to the customer
          *
          * @param orderId the value
          * @return this builder

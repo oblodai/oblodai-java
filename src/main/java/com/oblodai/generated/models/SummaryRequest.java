@@ -31,7 +31,7 @@ public final class SummaryRequest implements WireObject {
     }
 
     /**
-     * Начало окна, включительно (RFC 3339).
+     * Start of the window, inclusive (RFC 3339).
      *
      * @return the {@code from} field
      */
@@ -40,7 +40,7 @@ public final class SummaryRequest implements WireObject {
     }
 
     /**
-     * Конец окна, не включительно (RFC 3339).
+     * End of the window, exclusive (RFC 3339).
      *
      * @return the {@code to} field
      */
@@ -146,7 +146,7 @@ public final class SummaryRequest implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Начало окна, включительно (RFC 3339).
+         * <p>Start of the window, inclusive (RFC 3339).
          *
          * @param from the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class SummaryRequest implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>Конец окна, не включительно (RFC 3339).
+         * <p>End of the window, exclusive (RFC 3339).
          *
          * @param to the value
          * @return this builder

@@ -29,8 +29,8 @@ public final class PayoutLinkBatchRequest implements WireObject {
     }
 
     /**
-     * До 500 ссылок за вызов; каждая проходит или падает независимо, ответ выровнен по индексам
-     * запроса. reference обязателен у каждой.
+     * Up to 500 links per call; each succeeds or fails independently, the response is aligned with
+     * the request indices. reference is required on each.
      *
      * @return the {@code items} field
      */
@@ -132,8 +132,8 @@ public final class PayoutLinkBatchRequest implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>До 500 ссылок за вызов; каждая проходит или падает независимо, ответ выровнен по
-         * индексам запроса. reference обязателен у каждой.
+         * <p>Up to 500 links per call; each succeeds or fails independently, the response is
+         * aligned with the request indices. reference is required on each.
          *
          * @param items the value
          * @return this builder

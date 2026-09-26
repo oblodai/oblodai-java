@@ -6,6 +6,7 @@ import com.oblodai.generated.resources.async.Account;
 import com.oblodai.generated.resources.async.ApiAllowlist;
 import com.oblodai.generated.resources.async.Batches;
 import com.oblodai.generated.resources.async.Checkout;
+import com.oblodai.generated.resources.async.CliLogin;
 import com.oblodai.generated.resources.async.Documents;
 import com.oblodai.generated.resources.async.PaymentLinks;
 import com.oblodai.generated.resources.async.Payments;
@@ -58,6 +59,7 @@ public final class OblodaiAsync implements AutoCloseable {
     private final Documents documents;
     private final Checkout checkout;
     private final Sandbox sandbox;
+    private final CliLogin cliLogin;
     private final AsyncJobs jobs;
 
     OblodaiAsync(Transport transport, boolean ownsHttpClient) {
@@ -79,6 +81,7 @@ public final class OblodaiAsync implements AutoCloseable {
         this.documents = new Documents(transport);
         this.checkout = new Checkout(transport);
         this.sandbox = new Sandbox(transport);
+        this.cliLogin = new CliLogin(transport);
         this.jobs = new AsyncJobs(transport);
     }
 
@@ -160,6 +163,14 @@ public final class OblodaiAsync implements AutoCloseable {
     /** @return Developer sandbox: fake money, simulated deposits, a webhook inspector. */
     public Sandbox sandbox() {
         return sandbox;
+    }
+
+    /**
+     * @return Browser login of the {@code oblodai} CLI (OAuth 2.0 device authorization, RFC 8628) and
+     *     logout of its key.
+     */
+    public CliLogin cliLogin() {
+        return cliLogin;
     }
 
     /** @return waiters for long-running operations: batches and document jobs */

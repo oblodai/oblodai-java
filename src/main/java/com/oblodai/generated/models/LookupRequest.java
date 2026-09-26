@@ -31,7 +31,7 @@ public final class LookupRequest implements WireObject {
     }
 
     /**
-     * Ваша ссылка на заказ.
+     * Your order reference.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -40,7 +40,7 @@ public final class LookupRequest implements WireObject {
     }
 
     /**
-     * Идентификатор счёта в Oblodai. Нужен uuid или order_id; приоритет у uuid.
+     * The invoice id in Oblodai. Either uuid or order_id is required; uuid takes precedence.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -146,7 +146,7 @@ public final class LookupRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваша ссылка на заказ.
+         * <p>Your order reference.
          *
          * @param orderId the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class LookupRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор счёта в Oblodai. Нужен uuid или order_id; приоритет у uuid.
+         * <p>The invoice id in Oblodai. Either uuid or order_id is required; uuid takes precedence.
          *
          * @param uuid the value
          * @return this builder

@@ -34,7 +34,7 @@ public final class SetDiscountRequest implements WireObject {
     }
 
     /**
-     * Валюта. Пусто = глобальный дефолт для всех монет
+     * Currency. Empty = the global default for all coins
      *
      * @return the {@code currency} field, or {@code null} when absent
      */
@@ -43,7 +43,7 @@ public final class SetDiscountRequest implements WireObject {
     }
 
     /**
-     * Процент, от -99 до 99. Плюс — скидка, минус — наценка
+     * Percent, from -99 to 99. Plus — a discount, minus — a surcharge
      *
      * @return the {@code discount_percent} field
      */
@@ -52,7 +52,7 @@ public final class SetDiscountRequest implements WireObject {
     }
 
     /**
-     * Сеть. Пусто = любая сеть данной валюты
+     * Network. Empty = any network of the given currency
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -167,7 +167,7 @@ public final class SetDiscountRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта. Пусто = глобальный дефолт для всех монет
+         * <p>Currency. Empty = the global default for all coins
          *
          * @param currency the value
          * @return this builder
@@ -180,7 +180,7 @@ public final class SetDiscountRequest implements WireObject {
         /**
          * Sets {@code discount_percent}.
          *
-         * <p>Процент, от -99 до 99. Плюс — скидка, минус — наценка
+         * <p>Percent, from -99 to 99. Plus — a discount, minus — a surcharge
          *
          * @param discountPercent the value
          * @return this builder
@@ -193,7 +193,7 @@ public final class SetDiscountRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть. Пусто = любая сеть данной валюты
+         * <p>Network. Empty = any network of the given currency
          *
          * @param network the value
          * @return this builder

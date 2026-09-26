@@ -47,7 +47,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Сколько спишется с баланса; null — неизвестно (комиссию не оценить).
+     * How much will be debited from the balance; null — unknown (the fee cannot be estimated).
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -56,7 +56,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Сетевая комиссия; null — не оценить сейчас.
+     * Network fee; null — cannot be estimated right now.
      *
      * @return the {@code commission} field, or {@code null} when absent
      */
@@ -65,7 +65,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Актив выплаты.
+     * Payout asset.
      *
      * @return the {@code currency} field
      */
@@ -74,7 +74,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Кто платит комиссию: gateway, merchant или recipient.
+     * Who pays the fee: gateway, merchant or recipient.
      *
      * @return the {@code fee_bearer} field
      */
@@ -83,7 +83,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * exact — комиссия договорная (шлюз её берёт на себя); estimated — оценка оракула.
+     * exact — the fee is contractual (the gateway absorbs it); estimated — an oracle estimate.
      *
      * @return the {@code fee_type} field
      */
@@ -92,7 +92,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Сеть — как пришла в запросе.
+     * The network — as it came in the request.
      *
      * @return the {@code network} field
      */
@@ -101,7 +101,7 @@ public final class PayoutCalculation implements WireObject {
     }
 
     /**
-     * Сколько получит адрес; null — неизвестно.
+     * How much the address will receive; null — unknown.
      *
      * @return the {@code payer_amount} field, or {@code null} when absent
      */
@@ -249,7 +249,8 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сколько спишется с баланса; null — неизвестно (комиссию не оценить).
+         * <p>How much will be debited from the balance; null — unknown (the fee cannot be
+         * estimated).
          *
          * @param amount the value
          * @return this builder
@@ -263,7 +264,8 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сколько спишется с баланса; null — неизвестно (комиссию не оценить).
+         * <p>How much will be debited from the balance; null — unknown (the fee cannot be
+         * estimated).
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -275,7 +277,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — не оценить сейчас.
+         * <p>Network fee; null — cannot be estimated right now.
          *
          * @param commission the value
          * @return this builder
@@ -289,7 +291,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — не оценить сейчас.
+         * <p>Network fee; null — cannot be estimated right now.
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -301,7 +303,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив выплаты.
+         * <p>Payout asset.
          *
          * @param currency the value
          * @return this builder
@@ -314,7 +316,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит комиссию: gateway, merchant или recipient.
+         * <p>Who pays the fee: gateway, merchant or recipient.
          *
          * @param feeBearer the value
          * @return this builder
@@ -327,7 +329,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит комиссию: gateway, merchant или recipient.
+         * <p>Who pays the fee: gateway, merchant or recipient.
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -340,7 +342,8 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия договорная (шлюз её берёт на себя); estimated — оценка оракула.
+         * <p>exact — the fee is contractual (the gateway absorbs it); estimated — an oracle
+         * estimate.
          *
          * @param feeType the value
          * @return this builder
@@ -353,7 +356,8 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия договорная (шлюз её берёт на себя); estimated — оценка оракула.
+         * <p>exact — the fee is contractual (the gateway absorbs it); estimated — an oracle
+         * estimate.
          *
          * @param feeType the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -366,7 +370,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть — как пришла в запросе.
+         * <p>The network — as it came in the request.
          *
          * @param network the value
          * @return this builder
@@ -379,7 +383,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько получит адрес; null — неизвестно.
+         * <p>How much the address will receive; null — unknown.
          *
          * @param payerAmount the value
          * @return this builder
@@ -393,7 +397,7 @@ public final class PayoutCalculation implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько получит адрес; null — неизвестно.
+         * <p>How much the address will receive; null — unknown.
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder

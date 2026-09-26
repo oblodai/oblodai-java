@@ -32,8 +32,8 @@ public final class PayoutBatchRequest implements WireObject {
     }
 
     /**
-     * Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop —
-     * прекратить обработку после первой ошибки.
+     * What to do when an item fails: continue (default) — process the rest; stop — stop processing
+     * after the first error.
      *
      * @return the {@code on_error} field, or {@code null} when absent
      */
@@ -42,8 +42,8 @@ public final class PayoutBatchRequest implements WireObject {
     }
 
     /**
-     * Массив от 1 до 5000 элементов — те же поля, что у POST /v1/payout; order_id у каждого
-     * элемента обязателен и служит ключом идемпотентности: повтор вернёт уже созданную выплату.
+     * An array of 1 to 5000 items — the same fields as in POST /v1/payout; order_id is required on
+     * each item and serves as the idempotency key: a retry returns the payout already created.
      *
      * @return the {@code payouts} field
      */
@@ -151,8 +151,8 @@ public final class PayoutBatchRequest implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop
-         * — прекратить обработку после первой ошибки.
+         * <p>What to do when an item fails: continue (default) — process the rest; stop — stop
+         * processing after the first error.
          *
          * @param onError the value
          * @return this builder
@@ -165,8 +165,8 @@ public final class PayoutBatchRequest implements WireObject {
         /**
          * Sets {@code on_error}.
          *
-         * <p>Что делать при ошибке элемента: continue (по умолчанию) — обрабатывать остальные; stop
-         * — прекратить обработку после первой ошибки.
+         * <p>What to do when an item fails: continue (default) — process the rest; stop — stop
+         * processing after the first error.
          *
          * @param onError the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -179,8 +179,9 @@ public final class PayoutBatchRequest implements WireObject {
         /**
          * Sets {@code payouts}.
          *
-         * <p>Массив от 1 до 5000 элементов — те же поля, что у POST /v1/payout; order_id у каждого
-         * элемента обязателен и служит ключом идемпотентности: повтор вернёт уже созданную выплату.
+         * <p>An array of 1 to 5000 items — the same fields as in POST /v1/payout; order_id is
+         * required on each item and serves as the idempotency key: a retry returns the payout
+         * already created.
          *
          * @param payouts the value
          * @return this builder

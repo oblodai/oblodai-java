@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Коды ошибок, которыми отвечают операции этого документа.
+ * Error codes returned by the operations of this document.
  *
  * <p>An open enumeration: a value this SDK version does not know yet parses without an error, keeps
  * its text and reports {@link #isKnown()} as false.
@@ -195,6 +195,36 @@ public final class ErrorCode implements WireObject {
 
     /** {@code "cheque.token_required"}. */
     public static final ErrorCode CHEQUE_TOKEN_REQUIRED = new ErrorCode("cheque.token_required");
+
+    /** {@code "cli.access_denied"}. */
+    public static final ErrorCode CLI_ACCESS_DENIED = new ErrorCode("cli.access_denied");
+
+    /** {@code "cli.authorization_pending"}. */
+    public static final ErrorCode CLI_AUTHORIZATION_PENDING = new ErrorCode("cli.authorization_pending");
+
+    /** {@code "cli.bad_name"}. */
+    public static final ErrorCode CLI_BAD_NAME = new ErrorCode("cli.bad_name");
+
+    /** {@code "cli.expired_token"}. */
+    public static final ErrorCode CLI_EXPIRED_TOKEN = new ErrorCode("cli.expired_token");
+
+    /** {@code "cli.invalid_device_code"}. */
+    public static final ErrorCode CLI_INVALID_DEVICE_CODE = new ErrorCode("cli.invalid_device_code");
+
+    /** {@code "cli.not_cli_key"}. */
+    public static final ErrorCode CLI_NOT_CLI_KEY = new ErrorCode("cli.not_cli_key");
+
+    /** {@code "cli.permission_denied"}. */
+    public static final ErrorCode CLI_PERMISSION_DENIED = new ErrorCode("cli.permission_denied");
+
+    /** {@code "cli.rate_limited"}. */
+    public static final ErrorCode CLI_RATE_LIMITED = new ErrorCode("cli.rate_limited");
+
+    /** {@code "cli.slow_down"}. */
+    public static final ErrorCode CLI_SLOW_DOWN = new ErrorCode("cli.slow_down");
+
+    /** {@code "cli.unavailable"}. */
+    public static final ErrorCode CLI_UNAVAILABLE = new ErrorCode("cli.unavailable");
 
     /** {@code "compliance.blocked"}. */
     public static final ErrorCode COMPLIANCE_BLOCKED = new ErrorCode("compliance.blocked");
@@ -454,8 +484,14 @@ public final class ErrorCode implements WireObject {
     /** {@code "merchant.email_taken"}. */
     public static final ErrorCode MERCHANT_EMAIL_TAKEN = new ErrorCode("merchant.email_taken");
 
+    /** {@code "merchant.key_expired"}. */
+    public static final ErrorCode MERCHANT_KEY_EXPIRED = new ErrorCode("merchant.key_expired");
+
     /** {@code "merchant.key_mode_mismatch"}. */
     public static final ErrorCode MERCHANT_KEY_MODE_MISMATCH = new ErrorCode("merchant.key_mode_mismatch");
+
+    /** {@code "merchant.key_not_found"}. */
+    public static final ErrorCode MERCHANT_KEY_NOT_FOUND = new ErrorCode("merchant.key_not_found");
 
     /** {@code "merchant.no_personal_wallet"}. */
     public static final ErrorCode MERCHANT_NO_PERSONAL_WALLET = new ErrorCode("merchant.no_personal_wallet");
@@ -1427,6 +1463,16 @@ public final class ErrorCode implements WireObject {
             CHECKOUTCFG_DISABLED,
             CHECKOUTCFG_URL_TOO_LONG,
             CHEQUE_TOKEN_REQUIRED,
+            CLI_ACCESS_DENIED,
+            CLI_AUTHORIZATION_PENDING,
+            CLI_BAD_NAME,
+            CLI_EXPIRED_TOKEN,
+            CLI_INVALID_DEVICE_CODE,
+            CLI_NOT_CLI_KEY,
+            CLI_PERMISSION_DENIED,
+            CLI_RATE_LIMITED,
+            CLI_SLOW_DOWN,
+            CLI_UNAVAILABLE,
             COMPLIANCE_BLOCKED,
             COMPLIANCE_BLOCKED_ADDRESS,
             COMPLIANCE_BLOCKLIST_UNAVAILABLE,
@@ -1513,7 +1559,9 @@ public final class ErrorCode implements WireObject {
             MERCHANT_BAD_ID,
             MERCHANT_BAD_SIGNATURE,
             MERCHANT_EMAIL_TAKEN,
+            MERCHANT_KEY_EXPIRED,
             MERCHANT_KEY_MODE_MISMATCH,
+            MERCHANT_KEY_NOT_FOUND,
             MERCHANT_NO_PERSONAL_WALLET,
             MERCHANT_NOT_FOUND,
             MERCHANT_PROJECT_MISMATCH,

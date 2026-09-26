@@ -28,7 +28,7 @@ public final class ApproveRequest implements WireObject {
     }
 
     /**
-     * Идентификатор выплаты.
+     * Payout id.
      *
      * @return the {@code uuid} field
      */
@@ -126,7 +126,7 @@ public final class ApproveRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор выплаты.
+         * <p>Payout id.
          *
          * @param uuid the value
          * @return this builder

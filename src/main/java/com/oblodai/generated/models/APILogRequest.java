@@ -43,7 +43,7 @@ public final class APILogRequest implements WireObject {
     }
 
     /**
-     * Начало периода, YYYY-MM-DD, включительно.
+     * Start of the period, YYYY-MM-DD, inclusive.
      *
      * @return the {@code from} field, or {@code null} when absent
      */
@@ -52,7 +52,7 @@ public final class APILogRequest implements WireObject {
     }
 
     /**
-     * Размер страницы, 1..200; по умолчанию 20.
+     * Page size, 1..200; default 20.
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -61,7 +61,7 @@ public final class APILogRequest implements WireObject {
     }
 
     /**
-     * Страница, с 1.
+     * Page, starting from 1.
      *
      * @return the {@code page} field, or {@code null} when absent
      */
@@ -70,7 +70,7 @@ public final class APILogRequest implements WireObject {
     }
 
     /**
-     * Подстрока по «МЕТОД путь» — то, что человек видит в таблице.
+     * A substring of "METHOD path" — what a person sees in the table.
      *
      * @return the {@code q} field, or {@code null} when absent
      */
@@ -79,7 +79,7 @@ public final class APILogRequest implements WireObject {
     }
 
     /**
-     * Точный код ответа; 0 — все.
+     * The exact response code; 0 — all.
      *
      * @return the {@code status} field, or {@code null} when absent
      */
@@ -88,7 +88,7 @@ public final class APILogRequest implements WireObject {
     }
 
     /**
-     * Конец периода, YYYY-MM-DD, ВКЛЮЧИТЕЛЬНО (день целиком).
+     * End of the period, YYYY-MM-DD, INCLUSIVE (the whole day).
      *
      * @return the {@code to} field, or {@code null} when absent
      */
@@ -226,7 +226,7 @@ public final class APILogRequest implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Начало периода, YYYY-MM-DD, включительно.
+         * <p>Start of the period, YYYY-MM-DD, inclusive.
          *
          * @param from the value
          * @return this builder
@@ -239,7 +239,7 @@ public final class APILogRequest implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Размер страницы, 1..200; по умолчанию 20.
+         * <p>Page size, 1..200; default 20.
          *
          * @param limit the value
          * @return this builder
@@ -252,7 +252,7 @@ public final class APILogRequest implements WireObject {
         /**
          * Sets {@code page}.
          *
-         * <p>Страница, с 1.
+         * <p>Page, starting from 1.
          *
          * @param page the value
          * @return this builder
@@ -265,7 +265,7 @@ public final class APILogRequest implements WireObject {
         /**
          * Sets {@code q}.
          *
-         * <p>Подстрока по «МЕТОД путь» — то, что человек видит в таблице.
+         * <p>A substring of "METHOD path" — what a person sees in the table.
          *
          * @param q the value
          * @return this builder
@@ -278,7 +278,7 @@ public final class APILogRequest implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Точный код ответа; 0 — все.
+         * <p>The exact response code; 0 — all.
          *
          * @param status the value
          * @return this builder
@@ -291,7 +291,7 @@ public final class APILogRequest implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>Конец периода, YYYY-MM-DD, ВКЛЮЧИТЕЛЬНО (день целиком).
+         * <p>End of the period, YYYY-MM-DD, INCLUSIVE (the whole day).
          *
          * @param to the value
          * @return this builder

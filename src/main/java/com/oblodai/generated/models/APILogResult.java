@@ -35,7 +35,7 @@ public final class APILogResult implements WireObject {
     }
 
     /**
-     * Строки этой страницы, новые сверху.
+     * The rows of this page, newest first.
      *
      * @return the {@code items} field
      */
@@ -44,7 +44,7 @@ public final class APILogResult implements WireObject {
     }
 
     /**
-     * Сколько дней лог хранится.
+     * How many days the log is kept.
      *
      * @return the {@code retention_days} field
      */
@@ -53,7 +53,7 @@ public final class APILogResult implements WireObject {
     }
 
     /**
-     * Всего строк по фильтру.
+     * Total rows matching the filter.
      *
      * @return the {@code total} field
      */
@@ -169,7 +169,7 @@ public final class APILogResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Строки этой страницы, новые сверху.
+         * <p>The rows of this page, newest first.
          *
          * @param items the value
          * @return this builder
@@ -182,7 +182,7 @@ public final class APILogResult implements WireObject {
         /**
          * Sets {@code retention_days}.
          *
-         * <p>Сколько дней лог хранится.
+         * <p>How many days the log is kept.
          *
          * @param retentionDays the value
          * @return this builder
@@ -195,7 +195,7 @@ public final class APILogResult implements WireObject {
         /**
          * Sets {@code total}.
          *
-         * <p>Всего строк по фильтру.
+         * <p>Total rows matching the filter.
          *
          * @param total the value
          * @return this builder

@@ -47,7 +47,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Куда возвращено.
+     * Where the refund went.
      *
      * @return the {@code address} field
      */
@@ -56,7 +56,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Сумма возврата в монете платежа.
+     * The refund amount in the payment coin.
      *
      * @return the {@code amount} field
      */
@@ -65,7 +65,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Когда создан (RFC 3339).
+     * When created (RFC 3339).
      *
      * @return the {@code created_at} field
      */
@@ -74,7 +74,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Статус возврата окончательный.
+     * The refund status is final.
      *
      * @return the {@code is_final} field
      */
@@ -83,7 +83,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Статус выплаты-возврата.
+     * The status of the refund payout.
      *
      * @return the {@code status} field
      */
@@ -92,7 +92,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Хэш транзакции возврата; пусто, пока не отправлен.
+     * The refund transaction hash; empty until sent.
      *
      * @return the {@code txid} field
      */
@@ -101,7 +101,7 @@ public final class PaymentRefundLine implements WireObject {
     }
 
     /**
-     * Идентификатор возврата (это выплата).
+     * The refund id (it is a payout).
      *
      * @return the {@code uuid} field
      */
@@ -247,7 +247,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Куда возвращено.
+         * <p>Where the refund went.
          *
          * @param address the value
          * @return this builder
@@ -260,7 +260,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма возврата в монете платежа.
+         * <p>The refund amount in the payment coin.
          *
          * @param amount the value
          * @return this builder
@@ -273,7 +273,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма возврата в монете платежа.
+         * <p>The refund amount in the payment coin.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -285,7 +285,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда создан (RFC 3339).
+         * <p>When created (RFC 3339).
          *
          * @param createdAt the value
          * @return this builder
@@ -298,7 +298,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code is_final}.
          *
-         * <p>Статус возврата окончательный.
+         * <p>The refund status is final.
          *
          * @param isFinal the value
          * @return this builder
@@ -311,7 +311,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус выплаты-возврата.
+         * <p>The status of the refund payout.
          *
          * @param status the value
          * @return this builder
@@ -324,7 +324,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус выплаты-возврата.
+         * <p>The status of the refund payout.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -337,7 +337,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Хэш транзакции возврата; пусто, пока не отправлен.
+         * <p>The refund transaction hash; empty until sent.
          *
          * @param txid the value
          * @return this builder
@@ -350,7 +350,7 @@ public final class PaymentRefundLine implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор возврата (это выплата).
+         * <p>The refund id (it is a payout).
          *
          * @param uuid the value
          * @return this builder

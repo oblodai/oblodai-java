@@ -28,7 +28,7 @@ public final class QrRequest implements WireObject {
     }
 
     /**
-     * Произвольный адрес для рендера в QR-код (PNG как data:-URI).
+     * An arbitrary address to render into a QR code (PNG as a data: URI).
      *
      * @return the {@code address} field
      */
@@ -126,7 +126,7 @@ public final class QrRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Произвольный адрес для рендера в QR-код (PNG как data:-URI).
+         * <p>An arbitrary address to render into a QR code (PNG as a data: URI).
          *
          * @param address the value
          * @return this builder

@@ -56,7 +56,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Сумма для fixed.
+     * Amount for fixed.
      *
      * @return the {@code amount_fixed} field, or {@code null} when absent
      */
@@ -65,7 +65,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * fixed, open или range.
+     * fixed, open or range.
      *
      * @return the {@code amount_mode} field
      */
@@ -74,7 +74,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Валюта цены.
+     * Price currency.
      *
      * @return the {@code currency} field
      */
@@ -83,7 +83,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Описание.
+     * Description.
      *
      * @return the {@code description} field
      */
@@ -92,7 +92,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Идентификатор ссылки.
+     * Link id.
      *
      * @return the {@code link_id} field
      */
@@ -101,7 +101,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Верхняя граница для range.
+     * Upper bound for range.
      *
      * @return the {@code max_amount} field, or {@code null} when absent
      */
@@ -110,7 +110,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Нижняя граница для open/range.
+     * Lower bound for open/range.
      *
      * @return the {@code min_amount} field, or {@code null} when absent
      */
@@ -119,7 +119,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Закреплённая валюта оплаты.
+     * The pinned payment currency.
      *
      * @return the {@code pinned_currency} field, or {@code null} when absent
      */
@@ -128,7 +128,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Закреплённая сеть оплаты.
+     * The pinned payment network.
      *
      * @return the {@code pinned_network} field, or {@code null} when absent
      */
@@ -137,7 +137,7 @@ public final class PaymentLinkPublicView implements WireObject {
     }
 
     /**
-     * Заголовок страницы.
+     * Page title.
      *
      * @return the {@code title} field
      */
@@ -314,7 +314,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code amount_fixed}.
          *
-         * <p>Сумма для fixed.
+         * <p>Amount for fixed.
          *
          * @param amountFixed the value
          * @return this builder
@@ -327,7 +327,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code amount_mode}.
          *
-         * <p>fixed, open или range.
+         * <p>fixed, open or range.
          *
          * @param amountMode the value
          * @return this builder
@@ -340,7 +340,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code amount_mode}.
          *
-         * <p>fixed, open или range.
+         * <p>fixed, open or range.
          *
          * @param amountMode the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -353,7 +353,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта цены.
+         * <p>Price currency.
          *
          * @param currency the value
          * @return this builder
@@ -366,7 +366,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code description}.
          *
-         * <p>Описание.
+         * <p>Description.
          *
          * @param description the value
          * @return this builder
@@ -379,7 +379,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор ссылки.
+         * <p>Link id.
          *
          * @param linkId the value
          * @return this builder
@@ -392,7 +392,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Верхняя граница для range.
+         * <p>Upper bound for range.
          *
          * @param maxAmount the value
          * @return this builder
@@ -405,7 +405,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code max_amount}.
          *
-         * <p>Верхняя граница для range.
+         * <p>Upper bound for range.
          *
          * @param maxAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -417,7 +417,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Нижняя граница для open/range.
+         * <p>Lower bound for open/range.
          *
          * @param minAmount the value
          * @return this builder
@@ -430,7 +430,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Нижняя граница для open/range.
+         * <p>Lower bound for open/range.
          *
          * @param minAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -442,7 +442,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code pinned_currency}.
          *
-         * <p>Закреплённая валюта оплаты.
+         * <p>The pinned payment currency.
          *
          * @param pinnedCurrency the value
          * @return this builder
@@ -455,7 +455,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code pinned_network}.
          *
-         * <p>Закреплённая сеть оплаты.
+         * <p>The pinned payment network.
          *
          * @param pinnedNetwork the value
          * @return this builder
@@ -468,7 +468,7 @@ public final class PaymentLinkPublicView implements WireObject {
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок страницы.
+         * <p>Page title.
          *
          * @param title the value
          * @return this builder

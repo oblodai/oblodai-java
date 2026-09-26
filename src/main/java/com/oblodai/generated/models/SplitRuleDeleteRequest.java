@@ -28,7 +28,7 @@ public final class SplitRuleDeleteRequest implements WireObject {
     }
 
     /**
-     * Идентификатор правила из POST /v1/split/rule или списка.
+     * The rule id from POST /v1/split/rule or the list.
      *
      * @return the {@code rule_id} field
      */
@@ -126,7 +126,7 @@ public final class SplitRuleDeleteRequest implements WireObject {
         /**
          * Sets {@code rule_id}.
          *
-         * <p>Идентификатор правила из POST /v1/split/rule или списка.
+         * <p>The rule id from POST /v1/split/rule or the list.
          *
          * @param ruleId the value
          * @return this builder

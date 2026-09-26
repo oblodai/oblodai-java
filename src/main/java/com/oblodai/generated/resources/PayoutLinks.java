@@ -23,7 +23,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Выплата без адреса: получатель сам вводит адрес по секретной ссылке.
+ * Payouts without an address: the recipient enters their own address via a secret link.
  *
  * <p>The {@code PayoutLinks} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -36,25 +36,28 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Создать выплатную ссылку
+     * Create a payout link
      *
-     * <p>Резервирует сумму с баланса и выпускает ссылку, по которой получатель сам вводит адрес и
-     * забирает деньги. Адрес получателя знать не нужно. {@code email} — отправим письмо со ссылкой;
-     * {@code expires_in_seconds} — окно на получение, 3600–2592000 (час–30 суток). ⚠ Без поля или
-     * при {@code 0} ссылка живёт ОДИН ЧАС, а не максимум — задавайте срок явно. Идемпотентность:
-     * {@code reference} (или заголовок {@code Idempotency-Key}).
+     * <p>Reserves the amount from the balance and issues a link through which the recipient enters
+     * their own address and claims the money. You do not need to know the recipient's address.
+     * {@code email} — we will send an email with the link; {@code expires_in_seconds} — the claim
+     * window, 3600–2592000 (an hour to 30 days). ⚠ If the field is omitted or {@code 0}, the link
+     * lives ONE HOUR, not the maximum — set the lifetime explicitly. Idempotency: {@code reference}
+     * (or the {@code Idempotency-Key} header).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/link} ({@code createPayoutLink}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code email.bad_recipient}, {@code idempotency.bad_key},
-     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code email.bad_recipient},
+     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
      * {@code idempotency.unavailable}, {@code internal}, {@code ledger.account_not_found},
      * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
      * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.freeze_unknown}, {@code payout.frozen}, {@code payout.merchant_frozen},
@@ -96,22 +99,24 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Создать выплатные ссылки пачкой
+     * Create payout links in bulk
      *
-     * <p>До 500 ссылок за вызов; каждая проходит или падает независимо, ответ выровнен по индексам
-     * запроса. Повтор с теми же {@code reference} безопасен.
+     * <p>Up to 500 links per call; each succeeds or fails independently, the response is aligned
+     * with the request indices. Retrying with the same {@code reference} values is safe.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/link/batch} ({@code createPayoutLinkBatch}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code email.bad_recipient}, {@code idempotency.bad_key},
-     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code email.bad_recipient},
+     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
      * {@code idempotency.unavailable}, {@code internal}, {@code ledger.account_not_found},
      * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
      * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.freeze_unknown}, {@code payout.frozen}, {@code payout.merchant_frozen},
@@ -155,12 +160,15 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Список выплатных ссылок
+     * List payout links
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/link/list} ({@code listPayoutLinks}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payoutlink.disabled}, {@code rates.deviation}, {@code rates.no_source},
@@ -212,12 +220,15 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Статус выплатной ссылки
+     * Payout link status
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/link/info} ({@code getPayoutLink}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payoutlink.bad_id}, {@code payoutlink.disabled}, {@code payoutlink.not_found},
@@ -252,19 +263,21 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Отменить выплатную ссылку
+     * Cancel a payout link
      *
-     * <p>Непогашенная ссылка отменяется, резерв возвращается на баланс.
+     * <p>An unclaimed link is cancelled and the reserve is returned to the balance.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/link/cancel} ({@code cancelPayoutLink}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code ledger.account_not_found},
-     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
-     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
+     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.not_found}, {@code payoutlink.bad_id}, {@code payoutlink.disabled},
@@ -299,13 +312,14 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Страница получения: что внутри ссылки (без ключа)
+     * Claim page: what the link holds (no key)
      *
-     * <p>Публичный просмотр для получателя: валюта, сумма, заметка, срок. Токен — секрет из URL. У
-     * ссылки с кодом получения код передаётся заголовком {@code X-Claim-Passcode} (не query —
-     * второй фактор не должен оседать в логах); без кода отдаётся минимум
-     * ({@code passcode_required: true}, статус, срок) — суммы видны только после верного кода;
-     * неверные коды считаются и после 10 запирают ссылку (429 {@code payoutlink.passcode_locked}).
+     * <p>A public view for the recipient: currency, amount, note, expiry. The token is the secret
+     * from the URL. For a link with a claim passcode, the passcode is sent in the
+     * {@code X-Claim-Passcode} header (not the query — a second factor must not end up in logs);
+     * without the passcode only a minimum is returned ({@code passcode_required: true}, status,
+     * expiry) — amounts are visible only after a correct passcode; wrong passcodes are counted and
+     * after 10 the link is locked (429 {@code payoutlink.passcode_locked}).
      *
      * <p><code>GET /v1/claim/{token}</code> ({@code getPayoutClaim}).
      *
@@ -340,13 +354,13 @@ public final class PayoutLinks extends Resource {
     }
 
     /**
-     * Получить выплату по ссылке (без ключа)
+     * Claim a payout via a link (no key)
      *
-     * <p>Получатель вводит свой {@code address} (и {@code memo}, если сеть требует) — из резерва
-     * рождается обычная выплата. Ссылка с кодом получения требует {@code passcode}: без него — 403
-     * {@code payoutlink.passcode_required}, неверный — 403 {@code payoutlink.passcode_wrong}, после
-     * 10 неверных — 429 {@code payoutlink.passcode_locked} (мерчант отменяет ссылку и выпускает
-     * новую).
+     * <p>The recipient enters their {@code address} (and {@code memo}, if the network requires one)
+     * — a regular payout is created from the reserve. A link with a claim passcode requires
+     * {@code passcode}: without it — 403 {@code payoutlink.passcode_required}, a wrong one — 403
+     * {@code payoutlink.passcode_wrong}, after 10 wrong ones — 429
+     * {@code payoutlink.passcode_locked} (the merchant cancels the link and issues a new one).
      *
      * <p><code>POST /v1/claim/{token}</code> ({@code claimPayout}).
      *

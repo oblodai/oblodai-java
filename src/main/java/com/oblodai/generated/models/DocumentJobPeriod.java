@@ -31,7 +31,7 @@ public final class DocumentJobPeriod implements WireObject {
     }
 
     /**
-     * Начало периода, YYYY-MM-DD.
+     * Start of the period, YYYY-MM-DD.
      *
      * @return the {@code from} field
      */
@@ -40,7 +40,7 @@ public final class DocumentJobPeriod implements WireObject {
     }
 
     /**
-     * Конец периода включительно, YYYY-MM-DD.
+     * End of the period, inclusive, YYYY-MM-DD.
      *
      * @return the {@code to} field
      */
@@ -146,7 +146,7 @@ public final class DocumentJobPeriod implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Начало периода, YYYY-MM-DD.
+         * <p>Start of the period, YYYY-MM-DD.
          *
          * @param from the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class DocumentJobPeriod implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>Конец периода включительно, YYYY-MM-DD.
+         * <p>End of the period, inclusive, YYYY-MM-DD.
          *
          * @param to the value
          * @return this builder

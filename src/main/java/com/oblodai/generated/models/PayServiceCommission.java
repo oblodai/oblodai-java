@@ -38,7 +38,7 @@ public final class PayServiceCommission implements WireObject {
     }
 
     /**
-     * Единица fee_amount: USD у приёма, валюта выплаты у выплаты.
+     * The unit of fee_amount: USD for accepting payments, the payout currency for payouts.
      *
      * @return the {@code currency} field, or {@code null} when absent
      */
@@ -47,7 +47,7 @@ public final class PayServiceCommission implements WireObject {
     }
 
     /**
-     * Фиксированная часть комиссии в валюте currency; null — не определилась.
+     * The fixed part of the fee in currency; null — could not be determined.
      *
      * @return the {@code fee_amount} field, or {@code null} when absent
      */
@@ -56,7 +56,7 @@ public final class PayServiceCommission implements WireObject {
     }
 
     /**
-     * exact — договорная ставка; estimated — оценка по сетевой комиссии.
+     * exact — a contractual rate; estimated — an estimate based on the network fee.
      *
      * @return the {@code fee_type} field
      */
@@ -65,7 +65,7 @@ public final class PayServiceCommission implements WireObject {
     }
 
     /**
-     * Процент комиссии; null — не определился.
+     * The fee percentage; null — could not be determined.
      *
      * @return the {@code percent} field, or {@code null} when absent
      */
@@ -189,7 +189,7 @@ public final class PayServiceCommission implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Единица fee_amount: USD у приёма, валюта выплаты у выплаты.
+         * <p>The unit of fee_amount: USD for accepting payments, the payout currency for payouts.
          *
          * @param currency the value
          * @return this builder
@@ -202,7 +202,7 @@ public final class PayServiceCommission implements WireObject {
         /**
          * Sets {@code fee_amount}.
          *
-         * <p>Фиксированная часть комиссии в валюте currency; null — не определилась.
+         * <p>The fixed part of the fee in currency; null — could not be determined.
          *
          * @param feeAmount the value
          * @return this builder
@@ -216,7 +216,7 @@ public final class PayServiceCommission implements WireObject {
         /**
          * Sets {@code fee_amount}.
          *
-         * <p>Фиксированная часть комиссии в валюте currency; null — не определилась.
+         * <p>The fixed part of the fee in currency; null — could not be determined.
          *
          * @param feeAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -228,7 +228,7 @@ public final class PayServiceCommission implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — договорная ставка; estimated — оценка по сетевой комиссии.
+         * <p>exact — a contractual rate; estimated — an estimate based on the network fee.
          *
          * @param feeType the value
          * @return this builder
@@ -241,7 +241,7 @@ public final class PayServiceCommission implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — договорная ставка; estimated — оценка по сетевой комиссии.
+         * <p>exact — a contractual rate; estimated — an estimate based on the network fee.
          *
          * @param feeType the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -254,7 +254,7 @@ public final class PayServiceCommission implements WireObject {
         /**
          * Sets {@code percent}.
          *
-         * <p>Процент комиссии; null — не определился.
+         * <p>The fee percentage; null — could not be determined.
          *
          * @param percent the value
          * @return this builder

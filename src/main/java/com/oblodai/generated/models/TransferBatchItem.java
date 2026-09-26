@@ -38,7 +38,7 @@ public final class TransferBatchItem implements WireObject {
     }
 
     /**
-     * Сумма перевода в currency.
+     * The transfer amount in currency.
      *
      * @return the {@code amount} field
      */
@@ -47,7 +47,7 @@ public final class TransferBatchItem implements WireObject {
     }
 
     /**
-     * Код валюты (криптовалюта).
+     * Currency code (cryptocurrency).
      *
      * @return the {@code currency} field
      */
@@ -56,7 +56,7 @@ public final class TransferBatchItem implements WireObject {
     }
 
     /**
-     * Ключ идемпотентности: повтор с тем же order_id — no-op; в батче переводов обязателен.
+     * Idempotency key: a retry with the same order_id is a no-op; required in a transfer batch.
      *
      * @return the {@code order_id} field
      */
@@ -65,8 +65,8 @@ public final class TransferBatchItem implements WireObject {
     }
 
     /**
-     * Платформенный user id получателя (UUID, не username); username резолвится в id через
-     * публичный профиль кабинета /public/users/{username}.
+     * The recipient's platform user id (a UUID, not a username); a username is resolved to an id
+     * via the dashboard's public profile /public/users/{username}.
      *
      * @return the {@code to_user_id} field
      */
@@ -188,7 +188,7 @@ public final class TransferBatchItem implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода в currency.
+         * <p>The transfer amount in currency.
          *
          * @param amount the value
          * @return this builder
@@ -201,7 +201,7 @@ public final class TransferBatchItem implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода в currency.
+         * <p>The transfer amount in currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -213,7 +213,7 @@ public final class TransferBatchItem implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты (криптовалюта).
+         * <p>Currency code (cryptocurrency).
          *
          * @param currency the value
          * @return this builder
@@ -226,7 +226,8 @@ public final class TransferBatchItem implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ключ идемпотентности: повтор с тем же order_id — no-op; в батче переводов обязателен.
+         * <p>Idempotency key: a retry with the same order_id is a no-op; required in a transfer
+         * batch.
          *
          * @param orderId the value
          * @return this builder
@@ -239,8 +240,8 @@ public final class TransferBatchItem implements WireObject {
         /**
          * Sets {@code to_user_id}.
          *
-         * <p>Платформенный user id получателя (UUID, не username); username резолвится в id через
-         * публичный профиль кабинета /public/users/{username}.
+         * <p>The recipient's platform user id (a UUID, not a username); a username is resolved to
+         * an id via the dashboard's public profile /public/users/{username}.
          *
          * @param toUserId the value
          * @return this builder

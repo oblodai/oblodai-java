@@ -10,9 +10,9 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Приходит на каждом переходе выплаты. Тело — тот же объект, что отвечают ручки выплат. Возврат
- * платежа — это выплата с is_refund = true: его события тоже payout.*, сверять с платежом по
- * refund_for и payment_order_id.
+ * Sent on every payout transition. The body is the same object the payout endpoints return. A
+ * payment refund is a payout with is_refund = true: its events are payout.* as well; match it to
+ * the payment by refund_for and payment_order_id.
  *
  * <p>Build one with {@link #builder()}; fields the SDK does not know yet are kept in
  * {@link #extra()} and sent back as they came.
@@ -105,7 +105,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Адрес получателя.
+     * Recipient address.
      *
      * @return the {@code address} field
      */
@@ -114,7 +114,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Сумма выплаты в валюте currency, списанная с вашего баланса.
+     * The payout amount in currency, debited from your balance.
      *
      * @return the {@code amount} field
      */
@@ -123,7 +123,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * true — выплата ждёт подтверждения (внутренние сценарии; по API-ключу всегда false).
+     * true — the payout is awaiting approval (internal scenarios; always false with an API key).
      *
      * @return the {@code approval_required} field
      */
@@ -132,7 +132,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Удержанная сетевая комиссия, в валюте выплаты. 0 — комиссию поглотил шлюз.
+     * The withheld network fee, in the payout currency. 0 — the gateway absorbed the fee.
      *
      * @return the {@code commission} field
      */
@@ -141,7 +141,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Время создания (ISO 8601).
+     * Creation time (ISO 8601).
      *
      * @return the {@code created_at} field
      */
@@ -150,7 +150,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Код валюты выплаты.
+     * Payout currency code.
      *
      * @return the {@code currency} field
      */
@@ -159,8 +159,8 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на PDF-чек этой операции — открывается без API-ключа, можно вложить в
-     * письмо или отдать получателю. Пусто, если генерация документов не включена.
+     * A signed link to the PDF receipt of this operation — opens without an API key, can be
+     * attached to an email or given to the recipient. Empty if document generation is not enabled.
      *
      * @return the {@code document_url} field
      */
@@ -169,7 +169,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Когда событие произошло, UTC с миллисекундами (ISO 8601).
+     * When the event happened, UTC with milliseconds (ISO 8601).
      *
      * @return the {@code event_at} field
      */
@@ -178,10 +178,10 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Кто заплатил сетевую комиссию: gateway — шлюз поглотил её (commission = 0); merchant — сумма
-     * списания увеличена на комиссию, получатель получает запрошенное целиком (is_subtract=true,
-     * выплатная ссылка с fee_bearer=merchant); recipient — комиссия удержана из выплаты, получателю
-     * приходит меньше запрошенного.
+     * Who paid the network fee: gateway — the gateway absorbed it (commission = 0); merchant — the
+     * debit amount was increased by the fee, the recipient gets the full requested amount
+     * (is_subtract=true, a payout link with fee_bearer=merchant); recipient — the fee was withheld
+     * from the payout, the recipient gets less than requested.
      *
      * @return the {@code fee_bearer} field
      */
@@ -190,7 +190,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * true — статус финальный (confirmed / failed / cancelled).
+     * true — the status is final (confirmed / failed / cancelled).
      *
      * @return the {@code is_final} field
      */
@@ -199,7 +199,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * true — это возврат платежа, а не обычная выплата.
+     * true — this is a payment refund, not a regular payout.
      *
      * @return the {@code is_refund} field
      */
@@ -208,7 +208,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Тег/мемо назначения, переданный при создании (TON Jetton, memo-биржи). Пусто — без мемо.
+     * The destination tag/memo passed at creation (TON Jetton, exchange memos). Empty — no memo.
      *
      * @return the {@code memo} field
      */
@@ -217,7 +217,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Сеть блокчейна.
+     * Blockchain network.
      *
      * @return the {@code network} field
      */
@@ -226,7 +226,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Ваш номер (reference) выплаты. У возврата — null: возврат не имеет вашего идентификатора, см.
+     * Your payout number (reference). null for a refund: a refund has no identifier of yours, see
      * payment_order_id.
      *
      * @return the {@code order_id} field, or {@code null} when absent
@@ -236,7 +236,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Сколько реально уходит получателю на адрес: amount − commission.
+     * How much actually goes to the recipient's address: amount − commission.
      *
      * @return the {@code payer_amount} field
      */
@@ -245,9 +245,8 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Ваш order_id платежа, по которому сделан возврат (null у обычной выплаты). У возврата
-     * собственного order_id нет — он приходит null, а сверять возврат с заказом нужно по этому
-     * полю.
+     * Your order_id of the payment that was refunded (null for a regular payout). A refund has no
+     * order_id of its own — it comes as null, so match a refund to an order by this field.
      *
      * @return the {@code payment_order_id} field, or {@code null} when absent
      */
@@ -256,7 +255,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Идентификатор возвращаемого платежа (null, если это не возврат).
+     * The id of the payment being refunded (null if this is not a refund).
      *
      * @return the {@code refund_for} field, or {@code null} when absent
      */
@@ -265,8 +264,8 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Глобальный номер события: в пределах одного объекта больший номер новее, меньший — опоздавшая
-     * доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+     * The global event number: within one object a higher number is newer, a lower one is a late
+     * delivery and must be discarded. Always 0 on a rehearsal (test: true).
      *
      * @return the {@code sequence} field
      */
@@ -275,7 +274,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * api (через интеграцию) | manual (из кабинета).
+     * api (via the integration) | manual (from the dashboard).
      *
      * @return the {@code source} field
      */
@@ -284,10 +283,10 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Статус выплаты: pending (создана, ждёт) | approved (одобрена) | awaiting_cosign (ждёт второй
-     * подписи) | broadcasting (отправляется) | sent (отправлена, ждёт подтверждений) | confirmed
-     * (подтверждена — готово) | failed | cancelled. Значение можно передать обратно в фильтр
-     * истории как есть.
+     * Payout status: pending (created, waiting) | approved (approved) | awaiting_cosign (waiting
+     * for the second signature) | broadcasting (being broadcast) | sent (sent, awaiting
+     * confirmations) | confirmed (confirmed — done) | failed | cancelled. The value can be passed
+     * back to the history filter as is.
      *
      * @return the {@code status} field
      */
@@ -296,9 +295,9 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда true —
-     * внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true обработчик
-     * обязан игнорировать, даже если подпись верна.
+     * Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and always true
+     * — inside the signature. A live event never carries this field: your handler must ignore a
+     * body with test: true even if the signature is valid.
      *
      * @return the {@code test} field, or {@code null} when absent
      */
@@ -307,7 +306,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Хеш транзакции в блокчейне (появляется после отправки).
+     * The blockchain transaction hash (appears after sending).
      *
      * @return the {@code txid} field
      */
@@ -316,7 +315,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Вид события: payment | payout | wallet | conversion — какое тело пришло.
+     * Event kind: payment | payout | wallet | conversion — which body arrived.
      *
      * @return the {@code type} field
      */
@@ -325,7 +324,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Время последнего изменения (ISO 8601).
+     * Time of the last change (ISO 8601).
      *
      * @return the {@code updated_at} field
      */
@@ -334,7 +333,7 @@ public final class PayoutWebhook implements WireObject {
     }
 
     /**
-     * Идентификатор выплаты.
+     * Payout id.
      *
      * @return the {@code uuid} field
      */
@@ -627,7 +626,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес получателя.
+         * <p>Recipient address.
          *
          * @param address the value
          * @return this builder
@@ -640,7 +639,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма выплаты в валюте currency, списанная с вашего баланса.
+         * <p>The payout amount in currency, debited from your balance.
          *
          * @param amount the value
          * @return this builder
@@ -653,7 +652,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма выплаты в валюте currency, списанная с вашего баланса.
+         * <p>The payout amount in currency, debited from your balance.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -665,7 +664,8 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code approval_required}.
          *
-         * <p>true — выплата ждёт подтверждения (внутренние сценарии; по API-ключу всегда false).
+         * <p>true — the payout is awaiting approval (internal scenarios; always false with an API
+         * key).
          *
          * @param approvalRequired the value
          * @return this builder
@@ -678,7 +678,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Удержанная сетевая комиссия, в валюте выплаты. 0 — комиссию поглотил шлюз.
+         * <p>The withheld network fee, in the payout currency. 0 — the gateway absorbed the fee.
          *
          * @param commission the value
          * @return this builder
@@ -691,7 +691,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Удержанная сетевая комиссия, в валюте выплаты. 0 — комиссию поглотил шлюз.
+         * <p>The withheld network fee, in the payout currency. 0 — the gateway absorbed the fee.
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -703,7 +703,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Время создания (ISO 8601).
+         * <p>Creation time (ISO 8601).
          *
          * @param createdAt the value
          * @return this builder
@@ -716,7 +716,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты выплаты.
+         * <p>Payout currency code.
          *
          * @param currency the value
          * @return this builder
@@ -729,8 +729,9 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Подписанная ссылка на PDF-чек этой операции — открывается без API-ключа, можно вложить
-         * в письмо или отдать получателю. Пусто, если генерация документов не включена.
+         * <p>A signed link to the PDF receipt of this operation — opens without an API key, can be
+         * attached to an email or given to the recipient. Empty if document generation is not
+         * enabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -743,7 +744,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code event_at}.
          *
-         * <p>Когда событие произошло, UTC с миллисекундами (ISO 8601).
+         * <p>When the event happened, UTC with milliseconds (ISO 8601).
          *
          * @param eventAt the value
          * @return this builder
@@ -756,10 +757,10 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто заплатил сетевую комиссию: gateway — шлюз поглотил её (commission = 0); merchant —
-         * сумма списания увеличена на комиссию, получатель получает запрошенное целиком
-         * (is_subtract=true, выплатная ссылка с fee_bearer=merchant); recipient — комиссия удержана
-         * из выплаты, получателю приходит меньше запрошенного.
+         * <p>Who paid the network fee: gateway — the gateway absorbed it (commission = 0); merchant
+         * — the debit amount was increased by the fee, the recipient gets the full requested amount
+         * (is_subtract=true, a payout link with fee_bearer=merchant); recipient — the fee was
+         * withheld from the payout, the recipient gets less than requested.
          *
          * @param feeBearer the value
          * @return this builder
@@ -772,10 +773,10 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто заплатил сетевую комиссию: gateway — шлюз поглотил её (commission = 0); merchant —
-         * сумма списания увеличена на комиссию, получатель получает запрошенное целиком
-         * (is_subtract=true, выплатная ссылка с fee_bearer=merchant); recipient — комиссия удержана
-         * из выплаты, получателю приходит меньше запрошенного.
+         * <p>Who paid the network fee: gateway — the gateway absorbed it (commission = 0); merchant
+         * — the debit amount was increased by the fee, the recipient gets the full requested amount
+         * (is_subtract=true, a payout link with fee_bearer=merchant); recipient — the fee was
+         * withheld from the payout, the recipient gets less than requested.
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -788,7 +789,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code is_final}.
          *
-         * <p>true — статус финальный (confirmed / failed / cancelled).
+         * <p>true — the status is final (confirmed / failed / cancelled).
          *
          * @param isFinal the value
          * @return this builder
@@ -801,7 +802,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code is_refund}.
          *
-         * <p>true — это возврат платежа, а не обычная выплата.
+         * <p>true — this is a payment refund, not a regular payout.
          *
          * @param isRefund the value
          * @return this builder
@@ -814,8 +815,8 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code memo}.
          *
-         * <p>Тег/мемо назначения, переданный при создании (TON Jetton, memo-биржи). Пусто — без
-         * мемо.
+         * <p>The destination tag/memo passed at creation (TON Jetton, exchange memos). Empty — no
+         * memo.
          *
          * @param memo the value
          * @return this builder
@@ -828,7 +829,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть блокчейна.
+         * <p>Blockchain network.
          *
          * @param network the value
          * @return this builder
@@ -841,8 +842,8 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш номер (reference) выплаты. У возврата — null: возврат не имеет вашего
-         * идентификатора, см. payment_order_id.
+         * <p>Your payout number (reference). null for a refund: a refund has no identifier of
+         * yours, see payment_order_id.
          *
          * @param orderId the value
          * @return this builder
@@ -856,7 +857,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько реально уходит получателю на адрес: amount − commission.
+         * <p>How much actually goes to the recipient's address: amount − commission.
          *
          * @param payerAmount the value
          * @return this builder
@@ -869,7 +870,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько реально уходит получателю на адрес: amount − commission.
+         * <p>How much actually goes to the recipient's address: amount − commission.
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -881,9 +882,9 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code payment_order_id}.
          *
-         * <p>Ваш order_id платежа, по которому сделан возврат (null у обычной выплаты). У возврата
-         * собственного order_id нет — он приходит null, а сверять возврат с заказом нужно по этому
-         * полю.
+         * <p>Your order_id of the payment that was refunded (null for a regular payout). A refund
+         * has no order_id of its own — it comes as null, so match a refund to an order by this
+         * field.
          *
          * @param paymentOrderId the value
          * @return this builder
@@ -897,7 +898,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code refund_for}.
          *
-         * <p>Идентификатор возвращаемого платежа (null, если это не возврат).
+         * <p>The id of the payment being refunded (null if this is not a refund).
          *
          * @param refundFor the value
          * @return this builder
@@ -911,8 +912,8 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code sequence}.
          *
-         * <p>Глобальный номер события: в пределах одного объекта больший номер новее, меньший —
-         * опоздавшая доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+         * <p>The global event number: within one object a higher number is newer, a lower one is a
+         * late delivery and must be discarded. Always 0 on a rehearsal (test: true).
          *
          * @param sequence the value
          * @return this builder
@@ -925,7 +926,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code source}.
          *
-         * <p>api (через интеграцию) | manual (из кабинета).
+         * <p>api (via the integration) | manual (from the dashboard).
          *
          * @param source the value
          * @return this builder
@@ -938,7 +939,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code source}.
          *
-         * <p>api (через интеграцию) | manual (из кабинета).
+         * <p>api (via the integration) | manual (from the dashboard).
          *
          * @param source the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -951,10 +952,10 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус выплаты: pending (создана, ждёт) | approved (одобрена) | awaiting_cosign (ждёт
-         * второй подписи) | broadcasting (отправляется) | sent (отправлена, ждёт подтверждений) |
-         * confirmed (подтверждена — готово) | failed | cancelled. Значение можно передать обратно в
-         * фильтр истории как есть.
+         * <p>Payout status: pending (created, waiting) | approved (approved) | awaiting_cosign
+         * (waiting for the second signature) | broadcasting (being broadcast) | sent (sent,
+         * awaiting confirmations) | confirmed (confirmed — done) | failed | cancelled. The value
+         * can be passed back to the history filter as is.
          *
          * @param status the value
          * @return this builder
@@ -967,10 +968,10 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус выплаты: pending (создана, ждёт) | approved (одобрена) | awaiting_cosign (ждёт
-         * второй подписи) | broadcasting (отправляется) | sent (отправлена, ждёт подтверждений) |
-         * confirmed (подтверждена — готово) | failed | cancelled. Значение можно передать обратно в
-         * фильтр истории как есть.
+         * <p>Payout status: pending (created, waiting) | approved (approved) | awaiting_cosign
+         * (waiting for the second signature) | broadcasting (being broadcast) | sent (sent,
+         * awaiting confirmations) | confirmed (confirmed — done) | failed | cancelled. The value
+         * can be passed back to the history filter as is.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -983,9 +984,9 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code test}.
          *
-         * <p>Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда
-         * true — внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true
-         * обработчик обязан игнорировать, даже если подпись верна.
+         * <p>Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and
+         * always true — inside the signature. A live event never carries this field: your handler
+         * must ignore a body with test: true even if the signature is valid.
          *
          * @param test the value
          * @return this builder
@@ -998,7 +999,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Хеш транзакции в блокчейне (появляется после отправки).
+         * <p>The blockchain transaction hash (appears after sending).
          *
          * @param txid the value
          * @return this builder
@@ -1011,7 +1012,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code type}.
          *
-         * <p>Вид события: payment | payout | wallet | conversion — какое тело пришло.
+         * <p>Event kind: payment | payout | wallet | conversion — which body arrived.
          *
          * @param type the value
          * @return this builder
@@ -1024,7 +1025,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code updated_at}.
          *
-         * <p>Время последнего изменения (ISO 8601).
+         * <p>Time of the last change (ISO 8601).
          *
          * @param updatedAt the value
          * @return this builder
@@ -1037,7 +1038,7 @@ public final class PayoutWebhook implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор выплаты.
+         * <p>Payout id.
          *
          * @param uuid the value
          * @return this builder

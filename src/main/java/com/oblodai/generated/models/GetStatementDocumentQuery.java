@@ -39,7 +39,7 @@ public final class GetStatementDocumentQuery implements WireObject {
     }
 
     /**
-     * Начало периода, YYYY-MM-DD (по умолчанию — первое число текущего месяца).
+     * Start of the period, YYYY-MM-DD (defaults to the first day of the current month).
      *
      * @return the {@code from} field, or {@code null} when absent
      */
@@ -48,7 +48,7 @@ public final class GetStatementDocumentQuery implements WireObject {
     }
 
     /**
-     * Конец периода включительно, YYYY-MM-DD (по умолчанию — сегодня); период — до года.
+     * End of the period, inclusive, YYYY-MM-DD (defaults to today); the period is up to one year.
      *
      * @return the {@code to} field, or {@code null} when absent
      */
@@ -57,7 +57,7 @@ public final class GetStatementDocumentQuery implements WireObject {
     }
 
     /**
-     * Язык документа (по умолчанию en); список — document.Languages.
+     * Document language (en by default); the list is document.Languages.
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -66,7 +66,7 @@ public final class GetStatementDocumentQuery implements WireObject {
     }
 
     /**
-     * Формат файла: pdf (по умолчанию) или csv.
+     * File format: pdf (default) or csv.
      *
      * @return the {@code format} field, or {@code null} when absent
      */
@@ -188,7 +188,7 @@ public final class GetStatementDocumentQuery implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Начало периода, YYYY-MM-DD (по умолчанию — первое число текущего месяца).
+         * <p>Start of the period, YYYY-MM-DD (defaults to the first day of the current month).
          *
          * @param from the value
          * @return this builder
@@ -201,7 +201,8 @@ public final class GetStatementDocumentQuery implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>Конец периода включительно, YYYY-MM-DD (по умолчанию — сегодня); период — до года.
+         * <p>End of the period, inclusive, YYYY-MM-DD (defaults to today); the period is up to one
+         * year.
          *
          * @param to the value
          * @return this builder
@@ -214,7 +215,7 @@ public final class GetStatementDocumentQuery implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа (по умолчанию en); список — document.Languages.
+         * <p>Document language (en by default); the list is document.Languages.
          *
          * @param lang the value
          * @return this builder
@@ -227,7 +228,7 @@ public final class GetStatementDocumentQuery implements WireObject {
         /**
          * Sets {@code format}.
          *
-         * <p>Формат файла: pdf (по умолчанию) или csv.
+         * <p>File format: pdf (default) or csv.
          *
          * @param format the value
          * @return this builder

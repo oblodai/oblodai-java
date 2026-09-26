@@ -29,7 +29,7 @@ public final class AMLLinksResult implements WireObject {
     }
 
     /**
-     * По ссылке на каждый заблокированный депозит платежа; пусто — блокировать нечего.
+     * One link per blocked deposit of the payment; empty — nothing is blocked.
      *
      * @return the {@code items} field
      */
@@ -128,7 +128,7 @@ public final class AMLLinksResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>По ссылке на каждый заблокированный депозит платежа; пусто — блокировать нечего.
+         * <p>One link per blocked deposit of the payment; empty — nothing is blocked.
          *
          * @param items the value
          * @return this builder

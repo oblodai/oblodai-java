@@ -34,8 +34,8 @@ public final class PaymentLinkResponse implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на PDF-плакат с QR оплаты (печать на кассу). Пусто, если генерация
-     * документов не включена.
+     * A signed link to a PDF poster with the payment QR code (for printing at the till). Empty if
+     * document generation is not enabled.
      *
      * @return the {@code document_url} field
      */
@@ -44,7 +44,7 @@ public final class PaymentLinkResponse implements WireObject {
     }
 
     /**
-     * Идентификатор ссылки
+     * Link id
      *
      * @return the {@code link_id} field
      */
@@ -53,7 +53,8 @@ public final class PaymentLinkResponse implements WireObject {
     }
 
     /**
-     * Публичный URL страницы оплаты — его вы даёте покупателю: кнопкой, в письме, QR-кодом
+     * The public URL of the payment page — the one you give to the buyer: as a button, in an email,
+     * as a QR code
      *
      * @return the {@code url} field
      */
@@ -168,8 +169,8 @@ public final class PaymentLinkResponse implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Подписанная ссылка на PDF-плакат с QR оплаты (печать на кассу). Пусто, если генерация
-         * документов не включена.
+         * <p>A signed link to a PDF poster with the payment QR code (for printing at the till).
+         * Empty if document generation is not enabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -182,7 +183,7 @@ public final class PaymentLinkResponse implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор ссылки
+         * <p>Link id
          *
          * @param linkId the value
          * @return this builder
@@ -195,7 +196,8 @@ public final class PaymentLinkResponse implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Публичный URL страницы оплаты — его вы даёте покупателю: кнопкой, в письме, QR-кодом
+         * <p>The public URL of the payment page — the one you give to the buyer: as a button, in an
+         * email, as a QR code
          *
          * @param url the value
          * @return this builder

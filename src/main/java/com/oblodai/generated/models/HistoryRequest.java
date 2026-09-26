@@ -40,8 +40,8 @@ public final class HistoryRequest implements WireObject {
     }
 
     /**
-     * Только для /v1/payout/history: true — вместе с выплатами вернуть и возвраты (прежнее
-     * поведение ленты без kind). По умолчанию false: возвраты — отдельно, kind=refund.
+     * Only for /v1/payout/history: true — return refunds together with payouts (the former behavior
+     * of the feed without kind). Default false: refunds are separate, kind=refund.
      *
      * @return the {@code include_refunds} field, or {@code null} when absent
      */
@@ -50,8 +50,8 @@ public final class HistoryRequest implements WireObject {
     }
 
     /**
-     * Только для /v1/payout/history: payout — обычные выплаты, refund — возвраты; пусто — обычные
-     * выплаты (с include_refunds=true — всё вместе).
+     * Only for /v1/payout/history: payout — regular payouts, refund — refunds; empty — regular
+     * payouts (with include_refunds=true — everything together).
      *
      * @return the {@code kind} field, or {@code null} when absent
      */
@@ -60,7 +60,7 @@ public final class HistoryRequest implements WireObject {
     }
 
     /**
-     * Размер страницы, 1–100; вне диапазона — 25.
+     * Page size, 1–100; out of range — 25.
      *
      * @return the {@code limit} field, or {@code null} when absent
      */
@@ -69,7 +69,7 @@ public final class HistoryRequest implements WireObject {
     }
 
     /**
-     * Смещение от начала списка (новые сверху).
+     * Offset from the start of the list (newest first).
      *
      * @return the {@code offset} field, or {@code null} when absent
      */
@@ -78,7 +78,7 @@ public final class HistoryRequest implements WireObject {
     }
 
     /**
-     * Фильтр по статусу (точное значение из словаря статусов); пусто — все.
+     * Filter by status (an exact value from the status vocabulary); empty — all.
      *
      * @return the {@code status} field, or {@code null} when absent
      */
@@ -209,8 +209,8 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code include_refunds}.
          *
-         * <p>Только для /v1/payout/history: true — вместе с выплатами вернуть и возвраты (прежнее
-         * поведение ленты без kind). По умолчанию false: возвраты — отдельно, kind=refund.
+         * <p>Only for /v1/payout/history: true — return refunds together with payouts (the former
+         * behavior of the feed without kind). Default false: refunds are separate, kind=refund.
          *
          * @param includeRefunds the value
          * @return this builder
@@ -223,8 +223,8 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Только для /v1/payout/history: payout — обычные выплаты, refund — возвраты; пусто —
-         * обычные выплаты (с include_refunds=true — всё вместе).
+         * <p>Only for /v1/payout/history: payout — regular payouts, refund — refunds; empty —
+         * regular payouts (with include_refunds=true — everything together).
          *
          * @param kind the value
          * @return this builder
@@ -237,8 +237,8 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Только для /v1/payout/history: payout — обычные выплаты, refund — возвраты; пусто —
-         * обычные выплаты (с include_refunds=true — всё вместе).
+         * <p>Only for /v1/payout/history: payout — regular payouts, refund — refunds; empty —
+         * regular payouts (with include_refunds=true — everything together).
          *
          * @param kind the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -250,7 +250,7 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code limit}.
          *
-         * <p>Размер страницы, 1–100; вне диапазона — 25.
+         * <p>Page size, 1–100; out of range — 25.
          *
          * @param limit the value
          * @return this builder
@@ -263,7 +263,7 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code offset}.
          *
-         * <p>Смещение от начала списка (новые сверху).
+         * <p>Offset from the start of the list (newest first).
          *
          * @param offset the value
          * @return this builder
@@ -276,7 +276,7 @@ public final class HistoryRequest implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Фильтр по статусу (точное значение из словаря статусов); пусто — все.
+         * <p>Filter by status (an exact value from the status vocabulary); empty — all.
          *
          * @param status the value
          * @return this builder

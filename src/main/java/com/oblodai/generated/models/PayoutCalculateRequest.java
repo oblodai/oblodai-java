@@ -38,7 +38,7 @@ public final class PayoutCalculateRequest implements WireObject {
     }
 
     /**
-     * Сумма выплаты, строкой.
+     * The payout amount, as a string.
      *
      * @return the {@code amount} field
      */
@@ -47,7 +47,7 @@ public final class PayoutCalculateRequest implements WireObject {
     }
 
     /**
-     * Актив выплаты (USDT, BTC, …).
+     * Payout asset (USDT, BTC, …).
      *
      * @return the {@code currency} field
      */
@@ -56,8 +56,8 @@ public final class PayoutCalculateRequest implements WireObject {
     }
 
     /**
-     * true — комиссия списывается с баланса поверх суммы (получатель получит ровно amount); false —
-     * из суммы выплаты.
+     * true — the fee is debited from the balance on top of the amount (the recipient gets exactly
+     * amount); false — from the payout amount.
      *
      * @return the {@code is_subtract} field, or {@code null} when absent
      */
@@ -66,7 +66,7 @@ public final class PayoutCalculateRequest implements WireObject {
     }
 
     /**
-     * Сеть выплаты; обязательна, если актив живёт в нескольких сетях.
+     * Payout network; required if the asset lives on several networks.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -189,7 +189,7 @@ public final class PayoutCalculateRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма выплаты, строкой.
+         * <p>The payout amount, as a string.
          *
          * @param amount the value
          * @return this builder
@@ -202,7 +202,7 @@ public final class PayoutCalculateRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма выплаты, строкой.
+         * <p>The payout amount, as a string.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -214,7 +214,7 @@ public final class PayoutCalculateRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив выплаты (USDT, BTC, …).
+         * <p>Payout asset (USDT, BTC, …).
          *
          * @param currency the value
          * @return this builder
@@ -227,8 +227,8 @@ public final class PayoutCalculateRequest implements WireObject {
         /**
          * Sets {@code is_subtract}.
          *
-         * <p>true — комиссия списывается с баланса поверх суммы (получатель получит ровно amount);
-         * false — из суммы выплаты.
+         * <p>true — the fee is debited from the balance on top of the amount (the recipient gets
+         * exactly amount); false — from the payout amount.
          *
          * @param isSubtract the value
          * @return this builder
@@ -242,7 +242,7 @@ public final class PayoutCalculateRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть выплаты; обязательна, если актив живёт в нескольких сетях.
+         * <p>Payout network; required if the asset lives on several networks.
          *
          * @param network the value
          * @return this builder

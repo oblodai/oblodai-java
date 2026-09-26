@@ -28,9 +28,8 @@ public final class SplitRecipientOptInRequest implements WireObject {
     }
 
     /**
-     * Разрешить другим мерчантам направлять доли сплитов на ваш баланс. true — включить приём,
-     * false — выключить (новые правила на вас перестанут создаваться; уже созданные продолжают
-     * исполняться).
+     * Allow other merchants to route split shares to your balance. true — enable receiving, false —
+     * disable (new rules targeting you can no longer be created; existing ones keep executing).
      *
      * @return the {@code enabled} field, or {@code null} when absent
      */
@@ -128,9 +127,9 @@ public final class SplitRecipientOptInRequest implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Разрешить другим мерчантам направлять доли сплитов на ваш баланс. true — включить
-         * приём, false — выключить (новые правила на вас перестанут создаваться; уже созданные
-         * продолжают исполняться).
+         * <p>Allow other merchants to route split shares to your balance. true — enable receiving,
+         * false — disable (new rules targeting you can no longer be created; existing ones keep
+         * executing).
          *
          * @param enabled the value
          * @return this builder

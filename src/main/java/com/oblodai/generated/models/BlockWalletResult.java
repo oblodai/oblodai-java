@@ -34,7 +34,7 @@ public final class BlockWalletResult implements WireObject {
     }
 
     /**
-     * Адрес кошелька.
+     * Wallet address.
      *
      * @return the {@code address} field
      */
@@ -43,7 +43,7 @@ public final class BlockWalletResult implements WireObject {
     }
 
     /**
-     * Заблокирован ли кошелёк после вызова.
+     * Whether the wallet is blocked after the call.
      *
      * @return the {@code blocked} field
      */
@@ -52,7 +52,7 @@ public final class BlockWalletResult implements WireObject {
     }
 
     /**
-     * Идентификатор статического кошелька.
+     * Static wallet id.
      *
      * @return the {@code uuid} field
      */
@@ -166,7 +166,7 @@ public final class BlockWalletResult implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес кошелька.
+         * <p>Wallet address.
          *
          * @param address the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class BlockWalletResult implements WireObject {
         /**
          * Sets {@code blocked}.
          *
-         * <p>Заблокирован ли кошелёк после вызова.
+         * <p>Whether the wallet is blocked after the call.
          *
          * @param blocked the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class BlockWalletResult implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор статического кошелька.
+         * <p>Static wallet id.
          *
          * @param uuid the value
          * @return this builder

@@ -34,7 +34,7 @@ public final class PaymentDiscountRule implements WireObject {
     }
 
     /**
-     * Монета правила. Пусто — правило по умолчанию для всех монет, у которых нет своего.
+     * The rule's coin. Empty — the default rule for all coins that have no rule of their own.
      *
      * @return the {@code currency} field
      */
@@ -43,7 +43,8 @@ public final class PaymentDiscountRule implements WireObject {
     }
 
     /**
-     * Процент, от -99 до 99. Плюс — скидка плательщику за оплату этой монетой, минус — наценка.
+     * Percent, from -99 to 99. Plus — a discount to the payer for paying with this coin, minus — a
+     * surcharge.
      *
      * @return the {@code discount_percent} field
      */
@@ -52,7 +53,7 @@ public final class PaymentDiscountRule implements WireObject {
     }
 
     /**
-     * Сеть. Пусто — любая сеть этой монеты.
+     * Network. Empty — any network of this coin.
      *
      * @return the {@code network} field
      */
@@ -167,7 +168,8 @@ public final class PaymentDiscountRule implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Монета правила. Пусто — правило по умолчанию для всех монет, у которых нет своего.
+         * <p>The rule's coin. Empty — the default rule for all coins that have no rule of their
+         * own.
          *
          * @param currency the value
          * @return this builder
@@ -180,8 +182,8 @@ public final class PaymentDiscountRule implements WireObject {
         /**
          * Sets {@code discount_percent}.
          *
-         * <p>Процент, от -99 до 99. Плюс — скидка плательщику за оплату этой монетой, минус —
-         * наценка.
+         * <p>Percent, from -99 to 99. Plus — a discount to the payer for paying with this coin,
+         * minus — a surcharge.
          *
          * @param discountPercent the value
          * @return this builder
@@ -194,7 +196,7 @@ public final class PaymentDiscountRule implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть. Пусто — любая сеть этой монеты.
+         * <p>Network. Empty — any network of this coin.
          *
          * @param network the value
          * @return this builder

@@ -92,7 +92,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Сумма ссылки — обещание получателю.
+     * The link amount — a promise to the recipient.
      *
      * @return the {@code amount} field
      */
@@ -101,7 +101,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Пачка, в которой создана ссылка.
+     * The batch in which the link was created.
      *
      * @return the {@code batch_id} field, or {@code null} when absent
      */
@@ -110,7 +110,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Адрес, который указал получатель.
+     * The address the recipient specified.
      *
      * @return the {@code claim_address} field, or {@code null} when absent
      */
@@ -119,7 +119,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Секрет ссылки получения; выдаётся один раз и хранится только хешем.
+     * The claim link secret; issued once and stored only as a hash.
      *
      * @return the {@code claim_token} field
      */
@@ -128,7 +128,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Страница получения; пусто, если публичный адрес не настроен.
+     * The claim page; empty if the public address is not configured.
      *
      * @return the {@code claim_url} field
      */
@@ -137,7 +137,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+     * Network fee; null — cannot be estimated right now (zero would mean the claim is free).
      *
      * @return the {@code commission} field, or {@code null} when absent
      */
@@ -146,7 +146,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Когда создана (UTC).
+     * When created (UTC).
      *
      * @return the {@code created_at} field
      */
@@ -155,7 +155,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Актив выплаты.
+     * Payout asset.
      *
      * @return the {@code currency} field
      */
@@ -164,7 +164,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Адрес, на который ушло письмо получателю.
+     * The address the email to the recipient was sent to.
      *
      * @return the {@code email} field, or {@code null} when absent
      */
@@ -173,7 +173,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * До какого момента ссылку можно получить (UTC).
+     * Until when the link can be claimed (UTC).
      *
      * @return the {@code expires_at} field
      */
@@ -182,7 +182,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Кто платит сетевую комиссию.
+     * Who pays the network fee.
      *
      * @return the {@code fee_bearer} field
      */
@@ -191,7 +191,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+     * exact — the fee is fixed; estimated — an estimate based on the current network.
      *
      * @return the {@code fee_type} field
      */
@@ -200,7 +200,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Идентификатор ссылки.
+     * Link id.
      *
      * @return the {@code link_id} field
      */
@@ -209,7 +209,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Сеть выплаты.
+     * Payout network.
      *
      * @return the {@code network} field
      */
@@ -218,7 +218,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Сообщение получателю.
+     * Message to the recipient.
      *
      * @return the {@code note} field
      */
@@ -227,7 +227,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Сгенерированный код получения (passcode=auto); выдаётся один раз.
+     * The generated claim passcode (passcode=auto); issued once.
      *
      * @return the {@code passcode} field, or {@code null} when absent
      */
@@ -236,7 +236,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Получение требует кода.
+     * Claiming requires a passcode.
      *
      * @return the {@code passcode_protected} field
      */
@@ -245,7 +245,8 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела сумму).
+     * How much will reach the recipient; null — cannot be said (the fee was not estimated or ate
+     * the amount).
      *
      * @return the {@code payer_amount} field, or {@code null} when absent
      */
@@ -254,7 +255,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Выплата, порождённая получением; есть у полученной ссылки.
+     * The payout created by the claim; present on a claimed link.
      *
      * @return the {@code payout_id} field, or {@code null} when absent
      */
@@ -263,7 +264,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Ваш ключ дедупликации.
+     * Your deduplication key.
      *
      * @return the {@code reference} field, or {@code null} when absent
      */
@@ -272,7 +273,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Состояние ссылки.
+     * Link state.
      *
      * @return the {@code status} field
      */
@@ -281,7 +282,7 @@ public final class PayoutLinkCreated implements WireObject {
     }
 
     /**
-     * Заголовок, видный получателю.
+     * Title visible to the recipient.
      *
      * @return the {@code title} field
      */
@@ -552,7 +553,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма ссылки — обещание получателю.
+         * <p>The link amount — a promise to the recipient.
          *
          * @param amount the value
          * @return this builder
@@ -565,7 +566,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма ссылки — обещание получателю.
+         * <p>The link amount — a promise to the recipient.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -577,7 +578,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code batch_id}.
          *
-         * <p>Пачка, в которой создана ссылка.
+         * <p>The batch in which the link was created.
          *
          * @param batchId the value
          * @return this builder
@@ -590,7 +591,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code claim_address}.
          *
-         * <p>Адрес, который указал получатель.
+         * <p>The address the recipient specified.
          *
          * @param claimAddress the value
          * @return this builder
@@ -603,7 +604,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code claim_token}.
          *
-         * <p>Секрет ссылки получения; выдаётся один раз и хранится только хешем.
+         * <p>The claim link secret; issued once and stored only as a hash.
          *
          * @param claimToken the value
          * @return this builder
@@ -616,7 +617,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code claim_url}.
          *
-         * <p>Страница получения; пусто, если публичный адрес не настроен.
+         * <p>The claim page; empty if the public address is not configured.
          *
          * @param claimUrl the value
          * @return this builder
@@ -629,7 +630,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+         * <p>Network fee; null — cannot be estimated right now (zero would mean the claim is free).
          *
          * @param commission the value
          * @return this builder
@@ -643,7 +644,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Сетевая комиссия; null — оценить сейчас нельзя (ноль означал бы бесплатное получение).
+         * <p>Network fee; null — cannot be estimated right now (zero would mean the claim is free).
          *
          * @param commission the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -655,7 +656,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда создана (UTC).
+         * <p>When created (UTC).
          *
          * @param createdAt the value
          * @return this builder
@@ -668,7 +669,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив выплаты.
+         * <p>Payout asset.
          *
          * @param currency the value
          * @return this builder
@@ -681,7 +682,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code email}.
          *
-         * <p>Адрес, на который ушло письмо получателю.
+         * <p>The address the email to the recipient was sent to.
          *
          * @param email the value
          * @return this builder
@@ -694,7 +695,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code expires_at}.
          *
-         * <p>До какого момента ссылку можно получить (UTC).
+         * <p>Until when the link can be claimed (UTC).
          *
          * @param expiresAt the value
          * @return this builder
@@ -707,7 +708,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value
          * @return this builder
@@ -720,7 +721,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию.
+         * <p>Who pays the network fee.
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -733,7 +734,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+         * <p>exact — the fee is fixed; estimated — an estimate based on the current network.
          *
          * @param feeType the value
          * @return this builder
@@ -746,7 +747,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code fee_type}.
          *
-         * <p>exact — комиссия зафиксирована; estimated — оценка по текущей сети.
+         * <p>exact — the fee is fixed; estimated — an estimate based on the current network.
          *
          * @param feeType the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -759,7 +760,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор ссылки.
+         * <p>Link id.
          *
          * @param linkId the value
          * @return this builder
@@ -772,7 +773,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть выплаты.
+         * <p>Payout network.
          *
          * @param network the value
          * @return this builder
@@ -785,7 +786,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code note}.
          *
-         * <p>Сообщение получателю.
+         * <p>Message to the recipient.
          *
          * @param note the value
          * @return this builder
@@ -798,7 +799,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code passcode}.
          *
-         * <p>Сгенерированный код получения (passcode=auto); выдаётся один раз.
+         * <p>The generated claim passcode (passcode=auto); issued once.
          *
          * @param passcode the value
          * @return this builder
@@ -811,7 +812,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code passcode_protected}.
          *
-         * <p>Получение требует кода.
+         * <p>Claiming requires a passcode.
          *
          * @param passcodeProtected the value
          * @return this builder
@@ -824,8 +825,8 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела
-         * сумму).
+         * <p>How much will reach the recipient; null — cannot be said (the fee was not estimated or
+         * ate the amount).
          *
          * @param payerAmount the value
          * @return this builder
@@ -839,8 +840,8 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько дойдёт получателю; null — сказать нельзя (комиссия не оценена или съела
-         * сумму).
+         * <p>How much will reach the recipient; null — cannot be said (the fee was not estimated or
+         * ate the amount).
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -852,7 +853,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code payout_id}.
          *
-         * <p>Выплата, порождённая получением; есть у полученной ссылки.
+         * <p>The payout created by the claim; present on a claimed link.
          *
          * @param payoutId the value
          * @return this builder
@@ -865,7 +866,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code reference}.
          *
-         * <p>Ваш ключ дедупликации.
+         * <p>Your deduplication key.
          *
          * @param reference the value
          * @return this builder
@@ -878,7 +879,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки.
+         * <p>Link state.
          *
          * @param status the value
          * @return this builder
@@ -891,7 +892,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние ссылки.
+         * <p>Link state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -904,7 +905,7 @@ public final class PayoutLinkCreated implements WireObject {
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок, видный получателю.
+         * <p>Title visible to the recipient.
          *
          * @param title the value
          * @return this builder

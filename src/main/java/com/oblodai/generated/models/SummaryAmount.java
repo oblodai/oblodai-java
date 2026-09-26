@@ -32,7 +32,7 @@ public final class SummaryAmount implements WireObject {
     }
 
     /**
-     * Сумма в единицах монеты.
+     * The amount in coin units.
      *
      * @return the {@code amount} field
      */
@@ -41,7 +41,7 @@ public final class SummaryAmount implements WireObject {
     }
 
     /**
-     * Монета оплаты.
+     * Payment coin.
      *
      * @return the {@code asset} field
      */
@@ -147,7 +147,7 @@ public final class SummaryAmount implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в единицах монеты.
+         * <p>The amount in coin units.
          *
          * @param amount the value
          * @return this builder
@@ -160,7 +160,7 @@ public final class SummaryAmount implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в единицах монеты.
+         * <p>The amount in coin units.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -172,7 +172,7 @@ public final class SummaryAmount implements WireObject {
         /**
          * Sets {@code asset}.
          *
-         * <p>Монета оплаты.
+         * <p>Payment coin.
          *
          * @param asset the value
          * @return this builder

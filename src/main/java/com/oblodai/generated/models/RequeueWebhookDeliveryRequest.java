@@ -28,7 +28,7 @@ public final class RequeueWebhookDeliveryRequest implements WireObject {
     }
 
     /**
-     * Идентификатор доставки из журнала (POST /v1/webhooks/deliveries).
+     * The delivery id from the log (POST /v1/webhooks/deliveries).
      *
      * @return the {@code id} field
      */
@@ -126,7 +126,7 @@ public final class RequeueWebhookDeliveryRequest implements WireObject {
         /**
          * Sets {@code id}.
          *
-         * <p>Идентификатор доставки из журнала (POST /v1/webhooks/deliveries).
+         * <p>The delivery id from the log (POST /v1/webhooks/deliveries).
          *
          * @param id the value
          * @return this builder

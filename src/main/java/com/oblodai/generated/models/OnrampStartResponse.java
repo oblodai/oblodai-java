@@ -49,7 +49,7 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Срок жизни сессии, RFC3339 (UTC).
+     * Session lifetime, RFC3339 (UTC).
      *
      * @return the {@code expires_at} field
      */
@@ -58,8 +58,8 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Сколько спишется с карты, в целых единицах фиата; пусто, если провайдер суммы не назвал.
-     * Оценка: курс и комиссия провайдера двигаются.
+     * How much will be charged to the card, in whole fiat units; empty if the provider did not name
+     * an amount. An estimate: the provider's rate and fee move.
      *
      * @return the {@code fiat_amount} field
      */
@@ -68,7 +68,7 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Валюта списания.
+     * Debit currency.
      *
      * @return the {@code fiat_currency} field
      */
@@ -77,7 +77,7 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Какой рамп дал лучшую котировку на момент открытия.
+     * Which on-ramp gave the best quote at the time of opening.
      *
      * @return the {@code provider} field, or {@code null} when absent
      */
@@ -86,7 +86,7 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Причина отказа провайдера, дословно, когда она есть.
+     * The provider's rejection reason, verbatim, when there is one.
      *
      * @return the {@code reason} field, or {@code null} when absent
      */
@@ -95,7 +95,7 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Идентификатор он-рамп-сессии.
+     * On-ramp session id.
      *
      * @return the {@code session_id} field
      */
@@ -104,7 +104,7 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Состояние сессии.
+     * Session state.
      *
      * @return the {@code status} field
      */
@@ -113,7 +113,8 @@ public final class OnrampStartResponse implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на виджет покупки. Пустая, если покупка уже идёт: тогда смотрите status.
+     * A signed link to the purchase widget. Empty if a purchase is already in progress: then check
+     * status.
      *
      * @return the {@code url} field
      */
@@ -270,7 +271,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code expires_at}.
          *
-         * <p>Срок жизни сессии, RFC3339 (UTC).
+         * <p>Session lifetime, RFC3339 (UTC).
          *
          * @param expiresAt the value
          * @return this builder
@@ -283,8 +284,8 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code fiat_amount}.
          *
-         * <p>Сколько спишется с карты, в целых единицах фиата; пусто, если провайдер суммы не
-         * назвал. Оценка: курс и комиссия провайдера двигаются.
+         * <p>How much will be charged to the card, in whole fiat units; empty if the provider did
+         * not name an amount. An estimate: the provider's rate and fee move.
          *
          * @param fiatAmount the value
          * @return this builder
@@ -297,7 +298,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code fiat_currency}.
          *
-         * <p>Валюта списания.
+         * <p>Debit currency.
          *
          * @param fiatCurrency the value
          * @return this builder
@@ -310,7 +311,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code provider}.
          *
-         * <p>Какой рамп дал лучшую котировку на момент открытия.
+         * <p>Which on-ramp gave the best quote at the time of opening.
          *
          * @param provider the value
          * @return this builder
@@ -323,7 +324,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code reason}.
          *
-         * <p>Причина отказа провайдера, дословно, когда она есть.
+         * <p>The provider's rejection reason, verbatim, when there is one.
          *
          * @param reason the value
          * @return this builder
@@ -336,7 +337,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code session_id}.
          *
-         * <p>Идентификатор он-рамп-сессии.
+         * <p>On-ramp session id.
          *
          * @param sessionId the value
          * @return this builder
@@ -349,7 +350,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние сессии.
+         * <p>Session state.
          *
          * @param status the value
          * @return this builder
@@ -362,7 +363,7 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние сессии.
+         * <p>Session state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -375,8 +376,8 @@ public final class OnrampStartResponse implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Подписанная ссылка на виджет покупки. Пустая, если покупка уже идёт: тогда смотрите
-         * status.
+         * <p>A signed link to the purchase widget. Empty if a purchase is already in progress: then
+         * check status.
          *
          * @param url the value
          * @return this builder

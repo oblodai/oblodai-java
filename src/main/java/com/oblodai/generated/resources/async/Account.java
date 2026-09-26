@@ -19,7 +19,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Балансы мерчанта и курсы обмена.
+ * Merchant balances and exchange rates.
  *
  * <p>The {@code Account} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -32,14 +32,17 @@ public final class Account extends Resource {
     }
 
     /**
-     * Баланс мерчанта
+     * Merchant balance
      *
-     * <p>Ваши доступные балансы по каждой валюте. Тело — пустой <code>{}</code>.
+     * <p>Your available balances per currency. The body is an empty <code>{}</code>.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/balance} ({@code getBalance}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -69,17 +72,20 @@ public final class Account extends Resource {
     }
 
     /**
-     * Итоги за период
+     * Period totals
      *
-     * <p>Оборот окна {@code [from, to)} по монете оплаты (оплаченное по счетам в
-     * {@code paid}/{@code paid_over}, созданным в окне) и число выплат в работе прямо сейчас (без
-     * возвратов). Считается по всем записям, а не по странице истории.
+     * <p>Turnover for the {@code [from, to)} window per payment coin (amounts paid on invoices in
+     * {@code paid}/{@code paid_over} created within the window) and the number of payouts in
+     * progress right now (excluding refunds). Computed over all records, not over a history page.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/summary} ({@code getSummary}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -113,9 +119,9 @@ public final class Account extends Resource {
     }
 
     /**
-     * Курсы обмена к USDT
+     * Exchange rates to USDT
      *
-     * <p>Список курсов. Необязательный {@code currency_from} фильтрует по исходной валюте.
+     * <p>List of rates. The optional {@code currency_from} filters by source currency.
      *
      * <p>{@code POST /v1/exchange-rate/list} ({@code listExchangeRates}).
      *

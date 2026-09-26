@@ -31,7 +31,7 @@ public final class AcceptedMethod implements WireObject {
     }
 
     /**
-     * Код актива.
+     * Asset code.
      *
      * @return the {@code currency} field
      */
@@ -40,7 +40,7 @@ public final class AcceptedMethod implements WireObject {
     }
 
     /**
-     * Сеть актива.
+     * The asset's network.
      *
      * @return the {@code network} field
      */
@@ -146,7 +146,7 @@ public final class AcceptedMethod implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код актива.
+         * <p>Asset code.
          *
          * @param currency the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class AcceptedMethod implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть актива.
+         * <p>The asset's network.
          *
          * @param network the value
          * @return this builder

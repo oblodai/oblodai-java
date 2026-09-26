@@ -52,7 +52,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Сделано попыток.
+     * Attempts made.
      *
      * @return the {@code attempts} field
      */
@@ -61,7 +61,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Когда поставлена, RFC 3339 UTC.
+     * When queued, RFC 3339 UTC.
      *
      * @return the {@code created_at} field
      */
@@ -70,7 +70,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Событие в теле.
+     * The event in the body.
      *
      * @return the {@code event_type} field
      */
@@ -79,7 +79,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Идентификатор доставки (для replay).
+     * Delivery id (for replay).
      *
      * @return the {@code id} field
      */
@@ -88,7 +88,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Ошибка последней попытки; пусто, если её не было.
+     * The error of the last attempt; empty if there was none.
      *
      * @return the {@code last_error} field
      */
@@ -97,7 +97,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Тело вебхука ровно так, как оно подписано и отправлено.
+     * The webhook body exactly as it was signed and sent.
      *
      * @return the {@code payload} field
      */
@@ -106,7 +106,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Состояние доставки.
+     * Delivery state.
      *
      * @return the {@code status} field
      */
@@ -115,7 +115,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Последнее изменение, RFC 3339 UTC.
+     * Last change, RFC 3339 UTC.
      *
      * @return the {@code updated_at} field
      */
@@ -124,7 +124,7 @@ public final class SandboxDelivery implements WireObject {
     }
 
     /**
-     * Куда доставляется.
+     * Where it is delivered.
      *
      * @return the {@code url} field
      */
@@ -287,7 +287,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code attempts}.
          *
-         * <p>Сделано попыток.
+         * <p>Attempts made.
          *
          * @param attempts the value
          * @return this builder
@@ -300,7 +300,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда поставлена, RFC 3339 UTC.
+         * <p>When queued, RFC 3339 UTC.
          *
          * @param createdAt the value
          * @return this builder
@@ -313,7 +313,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code event_type}.
          *
-         * <p>Событие в теле.
+         * <p>The event in the body.
          *
          * @param eventType the value
          * @return this builder
@@ -326,7 +326,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code id}.
          *
-         * <p>Идентификатор доставки (для replay).
+         * <p>Delivery id (for replay).
          *
          * @param id the value
          * @return this builder
@@ -339,7 +339,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code last_error}.
          *
-         * <p>Ошибка последней попытки; пусто, если её не было.
+         * <p>The error of the last attempt; empty if there was none.
          *
          * @param lastError the value
          * @return this builder
@@ -352,7 +352,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code payload}.
          *
-         * <p>Тело вебхука ровно так, как оно подписано и отправлено.
+         * <p>The webhook body exactly as it was signed and sent.
          *
          * @param payload the value
          * @return this builder
@@ -365,7 +365,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние доставки.
+         * <p>Delivery state.
          *
          * @param status the value
          * @return this builder
@@ -378,7 +378,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние доставки.
+         * <p>Delivery state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -391,7 +391,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code updated_at}.
          *
-         * <p>Последнее изменение, RFC 3339 UTC.
+         * <p>Last change, RFC 3339 UTC.
          *
          * @param updatedAt the value
          * @return this builder
@@ -404,7 +404,7 @@ public final class SandboxDelivery implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Куда доставляется.
+         * <p>Where it is delivered.
          *
          * @param url the value
          * @return this builder

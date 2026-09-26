@@ -31,8 +31,8 @@ public final class PayoutLinkChequeRequest implements WireObject {
     }
 
     /**
-     * Секрет получения из ответа создания выплатной ссылки. Хранится только хешем и повторно не
-     * выдаётся — чек можно напечатать, лишь пока токен у вас.
+     * The claim secret from the payout link creation response. Stored only as a hash and not issued
+     * again — the cheque can be printed only while you still have the token.
      *
      * @return the {@code claim_token} field
      */
@@ -41,8 +41,8 @@ public final class PayoutLinkChequeRequest implements WireObject {
     }
 
     /**
-     * Язык документа — один из 41 поддерживаемого кода (en по умолчанию); полный список — в ошибке
-     * document.unknown_lang.
+     * Document language — one of the 41 supported codes (en by default); the full list is in the
+     * document.unknown_lang error.
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -149,8 +149,8 @@ public final class PayoutLinkChequeRequest implements WireObject {
         /**
          * Sets {@code claim_token}.
          *
-         * <p>Секрет получения из ответа создания выплатной ссылки. Хранится только хешем и повторно
-         * не выдаётся — чек можно напечатать, лишь пока токен у вас.
+         * <p>The claim secret from the payout link creation response. Stored only as a hash and not
+         * issued again — the cheque can be printed only while you still have the token.
          *
          * @param claimToken the value
          * @return this builder
@@ -163,8 +163,8 @@ public final class PayoutLinkChequeRequest implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа — один из 41 поддерживаемого кода (en по умолчанию); полный список — в
-         * ошибке document.unknown_lang.
+         * <p>Document language — one of the 41 supported codes (en by default); the full list is in
+         * the document.unknown_lang error.
          *
          * @param lang the value
          * @return this builder

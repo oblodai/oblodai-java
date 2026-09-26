@@ -41,7 +41,7 @@ public final class TransferResult implements WireObject {
     }
 
     /**
-     * Сумма перевода.
+     * Transfer amount.
      *
      * @return the {@code amount} field
      */
@@ -50,7 +50,7 @@ public final class TransferResult implements WireObject {
     }
 
     /**
-     * Актив перевода.
+     * Transfer asset.
      *
      * @return the {@code currency} field
      */
@@ -59,7 +59,7 @@ public final class TransferResult implements WireObject {
     }
 
     /**
-     * Ссылка на PDF-документ перевода; пусто, если документы выключены.
+     * A link to the transfer PDF document; empty if documents are disabled.
      *
      * @return the {@code document_url} field
      */
@@ -68,7 +68,7 @@ public final class TransferResult implements WireObject {
     }
 
     /**
-     * Получатель — пользователь личного кошелька.
+     * The recipient is a personal wallet user.
      *
      * @return the {@code to_user_id} field
      */
@@ -77,7 +77,7 @@ public final class TransferResult implements WireObject {
     }
 
     /**
-     * Идентификатор проводки перевода.
+     * The transfer posting id.
      *
      * @return the {@code uuid} field
      */
@@ -207,7 +207,7 @@ public final class TransferResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода.
+         * <p>Transfer amount.
          *
          * @param amount the value
          * @return this builder
@@ -220,7 +220,7 @@ public final class TransferResult implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода.
+         * <p>Transfer amount.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -232,7 +232,7 @@ public final class TransferResult implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив перевода.
+         * <p>Transfer asset.
          *
          * @param currency the value
          * @return this builder
@@ -245,7 +245,7 @@ public final class TransferResult implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Ссылка на PDF-документ перевода; пусто, если документы выключены.
+         * <p>A link to the transfer PDF document; empty if documents are disabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -258,7 +258,7 @@ public final class TransferResult implements WireObject {
         /**
          * Sets {@code to_user_id}.
          *
-         * <p>Получатель — пользователь личного кошелька.
+         * <p>The recipient is a personal wallet user.
          *
          * @param toUserId the value
          * @return this builder
@@ -271,7 +271,7 @@ public final class TransferResult implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор проводки перевода.
+         * <p>The transfer posting id.
          *
          * @param uuid the value
          * @return this builder

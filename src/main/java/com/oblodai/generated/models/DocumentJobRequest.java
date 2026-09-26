@@ -40,8 +40,8 @@ public final class DocumentJobRequest implements WireObject {
     }
 
     /**
-     * Формат файла: pdf (по умолчанию) или csv. CSV собирается без вёрстки — для тяжёлых выписок
-     * дешевле и грузится в Excel/1С.
+     * File format: pdf (default) or csv. CSV is built without layout — cheaper for heavy statements
+     * and imports into Excel/1C.
      *
      * @return the {@code format} field, or {@code null} when absent
      */
@@ -50,7 +50,7 @@ public final class DocumentJobRequest implements WireObject {
     }
 
     /**
-     * Начало периода, YYYY-MM-DD (по умолчанию — первое число текущего месяца).
+     * Start of the period, YYYY-MM-DD (defaults to the first day of the current month).
      *
      * @return the {@code from} field, or {@code null} when absent
      */
@@ -59,7 +59,7 @@ public final class DocumentJobRequest implements WireObject {
     }
 
     /**
-     * Вид отчёта: statement (операции), fees (комиссии) или ledger (движения баланса).
+     * Report kind: statement (operations), fees (fees) or ledger (balance movements).
      *
      * @return the {@code kind} field
      */
@@ -68,7 +68,7 @@ public final class DocumentJobRequest implements WireObject {
     }
 
     /**
-     * Язык документа (по умолчанию en).
+     * Document language (en by default).
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -77,7 +77,7 @@ public final class DocumentJobRequest implements WireObject {
     }
 
     /**
-     * Конец периода включительно, YYYY-MM-DD (по умолчанию — сегодня). Период — до двух лет.
+     * End of the period, inclusive, YYYY-MM-DD (defaults to today). The period is up to two years.
      *
      * @return the {@code to} field, or {@code null} when absent
      */
@@ -207,8 +207,8 @@ public final class DocumentJobRequest implements WireObject {
         /**
          * Sets {@code format}.
          *
-         * <p>Формат файла: pdf (по умолчанию) или csv. CSV собирается без вёрстки — для тяжёлых
-         * выписок дешевле и грузится в Excel/1С.
+         * <p>File format: pdf (default) or csv. CSV is built without layout — cheaper for heavy
+         * statements and imports into Excel/1C.
          *
          * @param format the value
          * @return this builder
@@ -221,7 +221,7 @@ public final class DocumentJobRequest implements WireObject {
         /**
          * Sets {@code from}.
          *
-         * <p>Начало периода, YYYY-MM-DD (по умолчанию — первое число текущего месяца).
+         * <p>Start of the period, YYYY-MM-DD (defaults to the first day of the current month).
          *
          * @param from the value
          * @return this builder
@@ -234,7 +234,7 @@ public final class DocumentJobRequest implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид отчёта: statement (операции), fees (комиссии) или ledger (движения баланса).
+         * <p>Report kind: statement (operations), fees (fees) or ledger (balance movements).
          *
          * @param kind the value
          * @return this builder
@@ -247,7 +247,7 @@ public final class DocumentJobRequest implements WireObject {
         /**
          * Sets {@code kind}.
          *
-         * <p>Вид отчёта: statement (операции), fees (комиссии) или ledger (движения баланса).
+         * <p>Report kind: statement (operations), fees (fees) or ledger (balance movements).
          *
          * @param kind the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -259,7 +259,7 @@ public final class DocumentJobRequest implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа (по умолчанию en).
+         * <p>Document language (en by default).
          *
          * @param lang the value
          * @return this builder
@@ -272,7 +272,8 @@ public final class DocumentJobRequest implements WireObject {
         /**
          * Sets {@code to}.
          *
-         * <p>Конец периода включительно, YYYY-MM-DD (по умолчанию — сегодня). Период — до двух лет.
+         * <p>End of the period, inclusive, YYYY-MM-DD (defaults to today). The period is up to two
+         * years.
          *
          * @param to the value
          * @return this builder

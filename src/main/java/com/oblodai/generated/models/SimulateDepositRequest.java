@@ -37,8 +37,8 @@ public final class SimulateDepositRequest implements WireObject {
     }
 
     /**
-     * Сумма в валюте счёта; пусто — оплатить ровно сколько нужно, иное — способ получить
-     * недо/переплату.
+     * The amount in the invoice currency; empty — pay exactly the amount due, anything else — a way
+     * to produce an under/overpayment.
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -47,8 +47,9 @@ public final class SimulateDepositRequest implements WireObject {
     }
 
     /**
-     * С каким числом подтверждений пришёл депозит; 0 — полностью подтверждён; меньше требуемого —
-     * способ проверить переход pending→confirmed (повторите тот же txid с большим числом).
+     * The number of confirmations the deposit arrived with; 0 — fully confirmed; fewer than
+     * required — a way to test the pending→confirmed transition (repeat the same txid with a higher
+     * number).
      *
      * @return the {@code confirmations} field, or {@code null} when absent
      */
@@ -57,7 +58,7 @@ public final class SimulateDepositRequest implements WireObject {
     }
 
     /**
-     * UUID тестового счёта, который «оплачивается».
+     * The UUID of the test invoice being "paid".
      *
      * @return the {@code invoice_id} field
      */
@@ -66,7 +67,7 @@ public final class SimulateDepositRequest implements WireObject {
     }
 
     /**
-     * Повтор того же txid проверяет вашу идемпотентность; пусто — новый txid.
+     * Repeating the same txid tests your idempotency; empty — a new txid.
      *
      * @return the {@code txid} field, or {@code null} when absent
      */
@@ -190,8 +191,8 @@ public final class SimulateDepositRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в валюте счёта; пусто — оплатить ровно сколько нужно, иное — способ получить
-         * недо/переплату.
+         * <p>The amount in the invoice currency; empty — pay exactly the amount due, anything else
+         * — a way to produce an under/overpayment.
          *
          * @param amount the value
          * @return this builder
@@ -204,9 +205,9 @@ public final class SimulateDepositRequest implements WireObject {
         /**
          * Sets {@code confirmations}.
          *
-         * <p>С каким числом подтверждений пришёл депозит; 0 — полностью подтверждён; меньше
-         * требуемого — способ проверить переход pending→confirmed (повторите тот же txid с большим
-         * числом).
+         * <p>The number of confirmations the deposit arrived with; 0 — fully confirmed; fewer than
+         * required — a way to test the pending→confirmed transition (repeat the same txid with a
+         * higher number).
          *
          * @param confirmations the value
          * @return this builder
@@ -219,7 +220,7 @@ public final class SimulateDepositRequest implements WireObject {
         /**
          * Sets {@code invoice_id}.
          *
-         * <p>UUID тестового счёта, который «оплачивается».
+         * <p>The UUID of the test invoice being "paid".
          *
          * @param invoiceId the value
          * @return this builder
@@ -232,7 +233,7 @@ public final class SimulateDepositRequest implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Повтор того же txid проверяет вашу идемпотентность; пусто — новый txid.
+         * <p>Repeating the same txid tests your idempotency; empty — a new txid.
          *
          * @param txid the value
          * @return this builder

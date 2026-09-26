@@ -35,7 +35,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Отправить деньги на адрес (списание с вашего баланса).
+ * Send money to an address (debited from your balance).
  *
  * <p>The {@code Payouts} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -48,35 +48,37 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Создать выплату
+     * Create a payout
      *
-     * <p>Отправить деньги на адрес. Идемпотентно по {@code order_id}. Выплата уходит сразу: ключ
-     * мерчанта несёт полную выплатную полномочность, белого списка адресов нет, ручного
-     * подтверждения тоже ({@code approval_required} в ответе всегда {@code false}). Ограничивают её
-     * суточный лимит, заморозка аккаунта и комплаенс-проверка адреса.
+     * <p>Send money to an address. Idempotent on {@code order_id}. The payout goes out immediately:
+     * the merchant key carries full payout authority, there is no address whitelist and no manual
+     * approval ({@code approval_required} in the response is always {@code false}). It is limited
+     * by the daily limit, account freeze and the address compliance check.
      *
-     * <p>**Конвертация ({@code from_currency}):** укажите {@code from_currency: "USDT"}, чтобы
-     * оплатить выплату в {@code currency}, списав ваш баланс USDT — мы сконвертируем USDT →
-     * {@code currency} (только те валюты, что казначейство может добыть он-чейн). В ответе появится
-     * объект {@code convert} с {@code from_amount} (сколько USDT списано) и {@code rate}.
+     * <p>**Conversion ({@code from_currency}):** set {@code from_currency: "USDT"} to fund a payout
+     * in {@code currency} by debiting your USDT balance — we convert USDT → {@code currency} (only
+     * currencies the treasury can source on-chain). The response then contains a {@code convert}
+     * object with {@code from_amount} (how much USDT was debited) and {@code rate}.
      *
-     * <p>Ещё: {@code memo} (тег/мемо для TON), {@code url_callback} (свой адрес вебхука для этой
-     * выплаты).
+     * <p>Also: {@code memo} (tag/memo for TON), {@code url_callback} (your own webhook URL for this
+     * payout).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout} ({@code createPayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code compliance.blocked}, {@code compliance.blocked_address},
-     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
-     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
-     * {@code compliance.sanctions_unavailable}, {@code idempotency.bad_key},
-     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
+     * {@code compliance.no_destination}, {@code compliance.no_network},
+     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
+     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
      * {@code idempotency.unavailable}, {@code internal}, {@code ledger.account_not_found},
      * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
      * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.above_limit}, {@code payout.address_network_mismatch},
@@ -131,26 +133,29 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Массовая выплата
+     * Mass payout
      *
-     * <p>Много выплат за один запрос (до 100). Каждая независима: ошибка по одной не останавливает
-     * остальные, по каждой возвращается результат. Идемпотентно по {@code order_id}, как обычная
-     * выплата.
+     * <p>Many payouts in one request (up to 100). Each one is independent: an error in one does not
+     * stop the rest, and a result is returned for each. Idempotent on {@code order_id}, like a
+     * regular payout.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/mass} ({@code createMassPayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code batch.duplicate_order_id}, {@code compliance.blocked},
-     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
-     * {@code compliance.no_destination}, {@code compliance.no_network},
-     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
-     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code auth.ip_not_allowed}, {@code batch.duplicate_order_id}, {@code cli.permission_denied},
+     * {@code compliance.blocked}, {@code compliance.blocked_address},
+     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
+     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
+     * {@code compliance.sanctions_unavailable}, {@code idempotency.bad_key},
+     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
      * {@code idempotency.unavailable}, {@code internal}, {@code ledger.account_not_found},
      * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
      * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.above_limit}, {@code payout.address_network_mismatch},
@@ -206,19 +211,22 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Узнать статус выплаты
+     * Get payout status
      *
-     * <p>По {@code uuid}/{@code order_id}.
+     * <p>By {@code uuid}/{@code order_id}.
      *
-     * <p>Дополнительно к общему объекту выплаты этот ответ несёт {@code error} и
-     * {@code error_code}: последняя записанная причина, почему выплата упала или застряла (текст и,
-     * когда он есть, машинный код вида {@code payout.insufficient_funds}). Оба ключа присутствуют
-     * всегда; {@code null} — ошибок не записано.
+     * <p>In addition to the common payout object this response carries {@code error} and
+     * {@code error_code}: the last recorded reason why the payout failed or got stuck (the text
+     * and, when present, a machine code like {@code payout.insufficient_funds}). Both keys are
+     * always present; {@code null} — no errors recorded.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/info} ({@code getPayoutInfo}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.bad_uuid}, {@code payout.no_lookup}, {@code payout.not_found},
@@ -273,19 +281,22 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * История выплат
+     * Payout history
      *
-     * <p>Список ваших выплат, новые сверху: {@code items} + блок {@code paginate} ({@code total},
-     * {@code per_page}, {@code offset}, {@code has_pages}). Тело: {@code limit}, {@code offset},
-     * необязательные {@code status}, {@code kind} ({@code refund} | {@code payout} | пусто —
-     * выплаты без возвратов) и {@code include_refunds}: по умолчанию возвраты в историю выплат не
-     * входят, {@code true} без {@code kind} возвращает выплаты и возвраты одной лентой; только
-     * возвраты — {@code kind: refund}.
+     * <p>Your payouts, newest first: {@code items} plus a {@code paginate} block ({@code total},
+     * {@code per_page}, {@code offset}, {@code has_pages}). Body: {@code limit}, {@code offset},
+     * optional {@code status}, {@code kind} ({@code refund} | {@code payout} | empty — payouts
+     * without refunds) and {@code include_refunds}: by default refunds are not included in the
+     * payout history; {@code true} without {@code kind} returns payouts and refunds as one feed;
+     * refunds only — {@code kind: refund}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/history} ({@code listPayoutHistory}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.bad_kind}, {@code payout.bad_status}, {@code payout.not_found},
@@ -340,15 +351,18 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Рассчитать сумму и комиссию выплаты
+     * Calculate payout amount and fee
      *
-     * <p>Предварительный расчёт: сколько спишется, сколько комиссия, сколько получит адрес — без
-     * создания выплаты.
+     * <p>A preliminary calculation: how much will be debited, the fee, and how much the address
+     * will receive — without creating a payout.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/calculate} ({@code calculatePayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.amount_below_fee}, {@code payout.bad_amount}, {@code payout.network_required},
@@ -384,21 +398,24 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Проверить выплату без создания (dry-run)
+     * Validate a payout without creating it (dry run)
      *
-     * <p>Прогоняет все проверки создания выплаты — валюта, сумма, сеть, адрес, memo, скрининг
-     * адреса, комиссия, заморозка/суточный лимит и достаточность баланса — но ничего не резервирует
-     * и не отправляет. Ответ {@code valid: true} с суммами ({@code amount}, {@code commission},
-     * {@code payer_amount}, {@code fee_bearer}), либо та же ошибка, что вернуло бы создание. Тело —
-     * как у POST /v1/payout (order_id необязателен для проверки).
+     * <p>Runs all payout-creation checks — currency, amount, network, address, memo, address
+     * screening, fee, freeze/daily limit and balance sufficiency — but reserves and sends nothing.
+     * The response is {@code valid: true} with the amounts ({@code amount}, {@code commission},
+     * {@code payer_amount}, {@code fee_bearer}), or the same error that creation would return. The
+     * body is the same as for POST /v1/payout (order_id is optional for validation).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/validate} ({@code validatePayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code compliance.blocked}, {@code compliance.blocked_address},
-     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
-     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
-     * {@code compliance.sanctions_unavailable}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
+     * {@code compliance.no_destination}, {@code compliance.no_network},
+     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
+     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.above_limit}, {@code payout.address_network_mismatch},
@@ -443,22 +460,24 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Отменить неотправленную выплату
+     * Cancel an unsent payout
      *
-     * <p>Отменяет выплату и освобождает зарезервированные средства, пока она не отправлена в сеть
-     * (статусы pending / approved / awaiting_cosign); после отправки — 409. Возврат тоже является
-     * выплатой, поэтому этим же методом отклоняется ещё не отправленный возврат. Только своя
-     * выплата.
+     * <p>Cancels a payout and releases the reserved funds as long as it has not been broadcast to
+     * the network (statuses pending / approved / awaiting_cosign); after broadcast — 409. A refund
+     * is also a payout, so this same method rejects a refund that has not been sent yet. Only your
+     * own payout.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/cancel} ({@code cancelPayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code ledger.account_not_found},
-     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
-     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
+     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.already_broadcast}, {@code payout.bad_state}, {@code payout.bad_uuid},
@@ -493,15 +512,18 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Подтвердить выплату
+     * Approve a payout
      *
-     * <p>Подтверждает выплату, ожидающую подтверждения. Выплаты по API-ключу подтверждаются
-     * автоматически — этот метод нужен только внутренним/кабинетным сценариям.
+     * <p>Approves a payout awaiting approval. Payouts made with an API key are approved
+     * automatically — this method is only needed for internal/dashboard scenarios.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/approve} ({@code approvePayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.approver_is_creator}, {@code payout.bad_uuid}, {@code payout.freeze_unknown},
@@ -536,14 +558,17 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Доступные валюты и сети для выплат
+     * Currencies and networks available for payouts
      *
-     * <p>Список с лимитами и комиссиями. Тело — пустой <code>{}</code>.
+     * <p>The list with limits and fees. The body is an empty <code>{}</code>.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/services} ({@code listPayoutServices}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code rates.deviation}, {@code rates.no_source}, {@code rates.non_positive},
@@ -598,21 +623,24 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Перевод на личный кошелёк
+     * Transfer to the personal wallet
      *
-     * <p>Перевести средства с бизнес-кошелька мерчанта на личный кошелёк владельца аккаунта.
-     * Требует привязки мерчанта к пользователю.
+     * <p>Transfer funds from the merchant's business wallet to the account owner's personal wallet.
+     * Requires the merchant to be linked to a user.
+     *
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/transfer/to-personal} ({@code transferToPersonal}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
-     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
-     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
-     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code idempotency.bad_key},
+     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code idempotency.unavailable}, {@code internal}, {@code ledger.account_not_found},
+     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
+     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.no_personal_wallet},
      * {@code merchant.not_found}, {@code merchant.rate_limited}, {@code merchant.secret_decrypt},
      * {@code merchant.suspended}, {@code merchant.unknown_key}, {@code payout.above_limit},
@@ -653,22 +681,25 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Внутренний перевод пользователю платформы
+     * Internal transfer to a platform user
      *
-     * <p>Перевести средства с бизнес-кошелька на личный кошелёк ДРУГОГО пользователя платформы (без
-     * комиссии, мгновенно, без сети). Получатель адресуется по user id; юзернейм резолвится
-     * публичным эндпоинтом кабинета /public/users/{username}.
+     * <p>Transfer funds from the business wallet to the personal wallet of ANOTHER platform user
+     * (no fee, instant, off-chain). The recipient is addressed by user id; a username is resolved
+     * by the dashboard's public endpoint /public/users/{username}.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/transfer/to-user} ({@code transferToUser}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
-     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
-     * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
-     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code idempotency.bad_key},
+     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code idempotency.unavailable}, {@code internal}, {@code ledger.account_not_found},
+     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
+     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.above_limit}, {@code payout.cap_unpriceable}, {@code payout.daily_cap},
@@ -709,11 +740,13 @@ public final class Payouts extends Resource {
     }
 
     /**
-     * Массовые внутренние переводы (ведомость)
+     * Bulk internal transfers (payroll)
      *
-     * <p>Асинхронная пачка внутренних переводов:
-     * {"transfers":[&lt;как /v1/transfer/to-user&gt;...], "on_error":"continue"}. Статус и
-     * результаты по строкам — POST /v1/batch/info.
+     * <p>An asynchronous batch of internal transfers:
+     * {"transfers":[&lt;as in /v1/transfer/to-user&gt;...], "on_error":"continue"}. Status and
+     * per-row results — POST /v1/batch/info.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/transfer/batch} ({@code createTransferBatch}).
      *
@@ -722,8 +755,9 @@ public final class Payouts extends Resource {
      * {@code batch.disabled}, {@code batch.duplicate_order_id}, {@code batch.duplicate_reference},
      * {@code batch.empty}, {@code batch.invoice_required}, {@code batch.order_id_required},
      * {@code batch.reference_required}, {@code batch.too_large}, {@code batch.unsupported_kind},
-     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
-     * {@code idempotency.unavailable}, {@code internal}, {@code merchant.bad_signature},
+     * {@code cli.permission_denied}, {@code idempotency.bad_key}, {@code idempotency.in_progress},
+     * {@code idempotency.key_reused}, {@code idempotency.unavailable}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},

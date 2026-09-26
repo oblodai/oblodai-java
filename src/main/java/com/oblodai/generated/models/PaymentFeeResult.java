@@ -44,7 +44,7 @@ public final class PaymentFeeResult implements WireObject {
     }
 
     /**
-     * Разрешён ли мерчанту перенос комиссии на покупателя (решение оператора).
+     * Whether the merchant is allowed to pass the fee on to the buyer (an operator decision).
      *
      * @return the {@code enabled} field
      */
@@ -53,7 +53,7 @@ public final class PaymentFeeResult implements WireObject {
     }
 
     /**
-     * Фиксированная часть комиссии на платёж, USD десятичной строкой.
+     * The fixed part of the fee per payment, USD as a decimal string.
      *
      * @return the {@code fee_fixed_usd} field, or {@code null} when absent
      */
@@ -62,7 +62,7 @@ public final class PaymentFeeResult implements WireObject {
     }
 
     /**
-     * Устарело: та же фиксированная часть целыми центами США числом — читайте fee_fixed_usd.
+     * Deprecated: the same fixed part in whole US cents as a number — read fee_fixed_usd.
      *
      * @return the {@code fee_fixed_usd_cents} field, or {@code null} when absent
      */
@@ -71,7 +71,7 @@ public final class PaymentFeeResult implements WireObject {
     }
 
     /**
-     * true — персональный тариф; false — умолчание платформы.
+     * true — a personal rate; false — the platform default.
      *
      * @return the {@code fee_individual} field, or {@code null} when absent
      */
@@ -80,7 +80,7 @@ public final class PaymentFeeResult implements WireObject {
     }
 
     /**
-     * Процент комиссии мерчанта.
+     * The merchant fee percentage.
      *
      * @return the {@code fee_percent} field, or {@code null} when absent
      */
@@ -89,7 +89,7 @@ public final class PaymentFeeResult implements WireObject {
     }
 
     /**
-     * Доля, которую применит следующий счёт; 0, если оператор выключил перенос комиссии.
+     * The share the next invoice will apply; 0 if the operator has disabled fee pass-through.
      *
      * @return the {@code payer_pays_percent} field
      */
@@ -231,7 +231,8 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Разрешён ли мерчанту перенос комиссии на покупателя (решение оператора).
+         * <p>Whether the merchant is allowed to pass the fee on to the buyer (an operator
+         * decision).
          *
          * @param enabled the value
          * @return this builder
@@ -244,7 +245,7 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code fee_fixed_usd}.
          *
-         * <p>Фиксированная часть комиссии на платёж, USD десятичной строкой.
+         * <p>The fixed part of the fee per payment, USD as a decimal string.
          *
          * @param feeFixedUsd the value
          * @return this builder
@@ -257,7 +258,7 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code fee_fixed_usd}.
          *
-         * <p>Фиксированная часть комиссии на платёж, USD десятичной строкой.
+         * <p>The fixed part of the fee per payment, USD as a decimal string.
          *
          * @param feeFixedUsd the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -269,7 +270,7 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code fee_fixed_usd_cents}.
          *
-         * <p>Устарело: та же фиксированная часть целыми центами США числом — читайте fee_fixed_usd.
+         * <p>Deprecated: the same fixed part in whole US cents as a number — read fee_fixed_usd.
          *
          * @param feeFixedUsdCents the value
          * @return this builder
@@ -282,7 +283,7 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code fee_individual}.
          *
-         * <p>true — персональный тариф; false — умолчание платформы.
+         * <p>true — a personal rate; false — the platform default.
          *
          * @param feeIndividual the value
          * @return this builder
@@ -295,7 +296,7 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Процент комиссии мерчанта.
+         * <p>The merchant fee percentage.
          *
          * @param feePercent the value
          * @return this builder
@@ -308,7 +309,7 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Процент комиссии мерчанта.
+         * <p>The merchant fee percentage.
          *
          * @param feePercent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -320,7 +321,8 @@ public final class PaymentFeeResult implements WireObject {
         /**
          * Sets {@code payer_pays_percent}.
          *
-         * <p>Доля, которую применит следующий счёт; 0, если оператор выключил перенос комиссии.
+         * <p>The share the next invoice will apply; 0 if the operator has disabled fee
+         * pass-through.
          *
          * @param payerPaysPercent the value
          * @return this builder

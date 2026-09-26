@@ -28,7 +28,8 @@ public final class SetPayoutFeeRequest implements WireObject {
     }
 
     /**
-     * true — сетевую комиссию платит получатель (получает меньше); false — комиссию несёт мерчант
+     * true — the network fee is paid by the recipient (who receives less); false — the merchant
+     * bears the fee
      *
      * @return the {@code fee_on_recipient} field
      */
@@ -127,8 +128,8 @@ public final class SetPayoutFeeRequest implements WireObject {
         /**
          * Sets {@code fee_on_recipient}.
          *
-         * <p>true — сетевую комиссию платит получатель (получает меньше); false — комиссию несёт
-         * мерчант
+         * <p>true — the network fee is paid by the recipient (who receives less); false — the
+         * merchant bears the fee
          *
          * @param feeOnRecipient the value
          * @return this builder

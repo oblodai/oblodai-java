@@ -28,7 +28,7 @@ public final class OnrampIdle implements WireObject, OnrampStatusResult {
     }
 
     /**
-     * Пустая строка: живой он-рамп-сессии по счёту нет.
+     * An empty string: there is no live on-ramp session for the invoice.
      *
      * @return the {@code status} field
      */
@@ -126,7 +126,7 @@ public final class OnrampIdle implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code status}.
          *
-         * <p>Пустая строка: живой он-рамп-сессии по счёту нет.
+         * <p>An empty string: there is no live on-ramp session for the invoice.
          *
          * @param status the value
          * @return this builder
@@ -139,7 +139,7 @@ public final class OnrampIdle implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code status}.
          *
-         * <p>Пустая строка: живой он-рамп-сессии по счёту нет.
+         * <p>An empty string: there is no live on-ramp session for the invoice.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

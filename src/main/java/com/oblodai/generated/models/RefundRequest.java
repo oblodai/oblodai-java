@@ -47,7 +47,7 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Адрес назначения возврата. По умолчанию — payer_address платежа; обязателен только для
+     * Refund destination address. Defaults to the payment's payer_address; required only for
      * Bitcoin/UTXO.
      *
      * @return the {@code address} field, or {@code null} when absent
@@ -57,7 +57,7 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Частичная сумма. По умолчанию — вся полученная.
+     * A partial amount. Defaults to the full received amount.
      *
      * @return the {@code amount} field, or {@code null} when absent
      */
@@ -66,8 +66,8 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Профинансировать возврат конвертацией баланса: только USDT → валюта платежа. Нужен, когда
-     * монета платежа уже сведена автообменом.
+     * Fund the refund by converting balance: USDT → the payment currency only. Needed when the
+     * payment coin has already been converted by auto-exchange.
      *
      * @return the {@code from_currency} field, or {@code null} when absent
      */
@@ -76,7 +76,7 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Сеть.
+     * Network.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -85,7 +85,7 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Ваша ссылка на заказ платежа. Нужен uuid или order_id.
+     * Your order reference of the payment. Either uuid or order_id is required.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -94,8 +94,9 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Необязательный ключ идемпотентности возврата: различает два разных возврата с одинаковыми
-     * (платёж, адрес, сумма); повтор с тем же значением дедуплицируется. Это не order_id.
+     * An optional refund idempotency key: distinguishes two different refunds with the same
+     * (payment, address, amount); a retry with the same value is deduplicated. This is not
+     * order_id.
      *
      * @return the {@code reference} field, or {@code null} when absent
      */
@@ -104,7 +105,7 @@ public final class RefundRequest implements WireObject {
     }
 
     /**
-     * Идентификатор платежа. Нужен uuid или order_id.
+     * Payment id. Either uuid or order_id is required.
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -250,7 +251,7 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес назначения возврата. По умолчанию — payer_address платежа; обязателен только для
+         * <p>Refund destination address. Defaults to the payment's payer_address; required only for
          * Bitcoin/UTXO.
          *
          * @param address the value
@@ -264,7 +265,7 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Частичная сумма. По умолчанию — вся полученная.
+         * <p>A partial amount. Defaults to the full received amount.
          *
          * @param amount the value
          * @return this builder
@@ -277,7 +278,7 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Частичная сумма. По умолчанию — вся полученная.
+         * <p>A partial amount. Defaults to the full received amount.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -289,8 +290,8 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code from_currency}.
          *
-         * <p>Профинансировать возврат конвертацией баланса: только USDT → валюта платежа. Нужен,
-         * когда монета платежа уже сведена автообменом.
+         * <p>Fund the refund by converting balance: USDT → the payment currency only. Needed when
+         * the payment coin has already been converted by auto-exchange.
          *
          * @param fromCurrency the value
          * @return this builder
@@ -303,7 +304,7 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть.
+         * <p>Network.
          *
          * @param network the value
          * @return this builder
@@ -316,7 +317,7 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваша ссылка на заказ платежа. Нужен uuid или order_id.
+         * <p>Your order reference of the payment. Either uuid or order_id is required.
          *
          * @param orderId the value
          * @return this builder
@@ -329,8 +330,8 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code reference}.
          *
-         * <p>Необязательный ключ идемпотентности возврата: различает два разных возврата с
-         * одинаковыми (платёж, адрес, сумма); повтор с тем же значением дедуплицируется. Это не
+         * <p>An optional refund idempotency key: distinguishes two different refunds with the same
+         * (payment, address, amount); a retry with the same value is deduplicated. This is not
          * order_id.
          *
          * @param reference the value
@@ -344,7 +345,7 @@ public final class RefundRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор платежа. Нужен uuid или order_id.
+         * <p>Payment id. Either uuid or order_id is required.
          *
          * @param uuid the value
          * @return this builder

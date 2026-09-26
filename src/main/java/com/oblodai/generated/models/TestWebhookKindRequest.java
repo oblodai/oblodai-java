@@ -43,7 +43,7 @@ public final class TestWebhookKindRequest implements WireObject {
     }
 
     /**
-     * Валюта в теле
+     * Currency in the body
      *
      * @return the {@code currency} field, or {@code null} when absent
      */
@@ -52,7 +52,7 @@ public final class TestWebhookKindRequest implements WireObject {
     }
 
     /**
-     * Сеть в теле
+     * Network in the body
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -61,7 +61,7 @@ public final class TestWebhookKindRequest implements WireObject {
     }
 
     /**
-     * Ваш order_id, который попадёт в пробное тело события
+     * Your order_id placed in the sample event body
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -70,9 +70,9 @@ public final class TestWebhookKindRequest implements WireObject {
     }
 
     /**
-     * Статус в теле — только те, с которыми боевой вебхук этого вида действительно приходит
-     * (кошелёк — только paid); иначе 400 webhook.bad_status. По умолчанию paid (для выплаты —
-     * confirmed, для конвертации — completed)
+     * The status in the body — only those with which a live webhook of this kind actually arrives
+     * (wallet — paid only); otherwise 400 webhook.bad_status. Default paid (for a payout —
+     * confirmed, for a conversion — completed)
      *
      * @return the {@code status} field, or {@code null} when absent
      */
@@ -81,7 +81,7 @@ public final class TestWebhookKindRequest implements WireObject {
     }
 
     /**
-     * Куда отправить пробное тело
+     * Where to send the sample body
      *
      * @return the {@code url_callback} field
      */
@@ -90,7 +90,7 @@ public final class TestWebhookKindRequest implements WireObject {
     }
 
     /**
-     * UUID объекта (платежа, кошелька или выплаты), который попадёт в пробное тело события
+     * The UUID of the object (payment, wallet or payout) placed in the sample event body
      *
      * @return the {@code uuid} field, or {@code null} when absent
      */
@@ -229,7 +229,7 @@ public final class TestWebhookKindRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта в теле
+         * <p>Currency in the body
          *
          * @param currency the value
          * @return this builder
@@ -242,7 +242,7 @@ public final class TestWebhookKindRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть в теле
+         * <p>Network in the body
          *
          * @param network the value
          * @return this builder
@@ -255,7 +255,7 @@ public final class TestWebhookKindRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш order_id, который попадёт в пробное тело события
+         * <p>Your order_id placed in the sample event body
          *
          * @param orderId the value
          * @return this builder
@@ -268,9 +268,9 @@ public final class TestWebhookKindRequest implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус в теле — только те, с которыми боевой вебхук этого вида действительно приходит
-         * (кошелёк — только paid); иначе 400 webhook.bad_status. По умолчанию paid (для выплаты —
-         * confirmed, для конвертации — completed)
+         * <p>The status in the body — only those with which a live webhook of this kind actually
+         * arrives (wallet — paid only); otherwise 400 webhook.bad_status. Default paid (for a
+         * payout — confirmed, for a conversion — completed)
          *
          * @param status the value
          * @return this builder
@@ -283,7 +283,7 @@ public final class TestWebhookKindRequest implements WireObject {
         /**
          * Sets {@code url_callback}.
          *
-         * <p>Куда отправить пробное тело
+         * <p>Where to send the sample body
          *
          * @param urlCallback the value
          * @return this builder
@@ -296,7 +296,7 @@ public final class TestWebhookKindRequest implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>UUID объекта (платежа, кошелька или выплаты), который попадёт в пробное тело события
+         * <p>The UUID of the object (payment, wallet or payout) placed in the sample event body
          *
          * @param uuid the value
          * @return this builder

@@ -41,7 +41,7 @@ public final class PaymentTx implements WireObject {
     }
 
     /**
-     * Сумма перевода в валюте оплаты.
+     * The transfer amount in the payment currency.
      *
      * @return the {@code amount} field
      */
@@ -50,7 +50,7 @@ public final class PaymentTx implements WireObject {
     }
 
     /**
-     * Когда перевод зачислен (ISO 8601).
+     * When the transfer was credited (ISO 8601).
      *
      * @return the {@code created_at} field
      */
@@ -59,7 +59,7 @@ public final class PaymentTx implements WireObject {
     }
 
     /**
-     * Высота блока, в котором перевод подтверждён.
+     * The height of the block in which the transfer was confirmed.
      *
      * @return the {@code height} field
      */
@@ -68,8 +68,8 @@ public final class PaymentTx implements WireObject {
     }
 
     /**
-     * Сеть, в которой пришёл перевод. На EVM может отличаться от network счёта: депозит
-     * зачитывается и на другой цепочке с тем же адресом.
+     * The network the transfer arrived on. On EVM it may differ from the invoice's network: a
+     * deposit is also credited on another chain with the same address.
      *
      * @return the {@code network} field
      */
@@ -78,7 +78,7 @@ public final class PaymentTx implements WireObject {
     }
 
     /**
-     * Хеш транзакции.
+     * Transaction hash.
      *
      * @return the {@code txid} field
      */
@@ -208,7 +208,7 @@ public final class PaymentTx implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода в валюте оплаты.
+         * <p>The transfer amount in the payment currency.
          *
          * @param amount the value
          * @return this builder
@@ -221,7 +221,7 @@ public final class PaymentTx implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода в валюте оплаты.
+         * <p>The transfer amount in the payment currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -233,7 +233,7 @@ public final class PaymentTx implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Когда перевод зачислен (ISO 8601).
+         * <p>When the transfer was credited (ISO 8601).
          *
          * @param createdAt the value
          * @return this builder
@@ -246,7 +246,7 @@ public final class PaymentTx implements WireObject {
         /**
          * Sets {@code height}.
          *
-         * <p>Высота блока, в котором перевод подтверждён.
+         * <p>The height of the block in which the transfer was confirmed.
          *
          * @param height the value
          * @return this builder
@@ -259,8 +259,8 @@ public final class PaymentTx implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть, в которой пришёл перевод. На EVM может отличаться от network счёта: депозит
-         * зачитывается и на другой цепочке с тем же адресом.
+         * <p>The network the transfer arrived on. On EVM it may differ from the invoice's network:
+         * a deposit is also credited on another chain with the same address.
          *
          * @param network the value
          * @return this builder
@@ -273,7 +273,7 @@ public final class PaymentTx implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Хеш транзакции.
+         * <p>Transaction hash.
          *
          * @param txid the value
          * @return this builder

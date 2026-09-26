@@ -28,8 +28,8 @@ public final class SetPaymentFeeRequest implements WireObject {
     }
 
     /**
-     * Доля НАШЕЙ комиссии, которую платит покупатель: 0 — платит мерчант (как сейчас), 100 — платит
-     * покупатель, счёт выставляется с наценкой. Действует на счета, созданные ПОСЛЕ изменения.
+     * The share of OUR fee paid by the buyer: 0 — the merchant pays (as now), 100 — the buyer pays,
+     * the invoice is issued with a markup. Applies to invoices created AFTER the change.
      *
      * @return the {@code payer_pays_percent} field
      */
@@ -128,9 +128,9 @@ public final class SetPaymentFeeRequest implements WireObject {
         /**
          * Sets {@code payer_pays_percent}.
          *
-         * <p>Доля НАШЕЙ комиссии, которую платит покупатель: 0 — платит мерчант (как сейчас), 100 —
-         * платит покупатель, счёт выставляется с наценкой. Действует на счета, созданные ПОСЛЕ
-         * изменения.
+         * <p>The share of OUR fee paid by the buyer: 0 — the merchant pays (as now), 100 — the
+         * buyer pays, the invoice is issued with a markup. Applies to invoices created AFTER the
+         * change.
          *
          * @param payerPaysPercent the value
          * @return this builder

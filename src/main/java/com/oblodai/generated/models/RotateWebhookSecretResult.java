@@ -37,7 +37,7 @@ public final class RotateWebhookSecretResult implements WireObject {
     }
 
     /**
-     * Идентификатор эндпоинта.
+     * Endpoint id.
      *
      * @return the {@code endpoint_id} field
      */
@@ -46,7 +46,7 @@ public final class RotateWebhookSecretResult implements WireObject {
     }
 
     /**
-     * До этого момента доставки дополнительно подписываются старым секретом
+     * Until this moment deliveries are additionally signed with the old secret
      * (X-Webhook-Signature-Prev), RFC 3339 UTC.
      *
      * @return the {@code previous_secret_valid_until} field
@@ -56,7 +56,7 @@ public final class RotateWebhookSecretResult implements WireObject {
     }
 
     /**
-     * Новый секрет подписи — показывается только здесь.
+     * The new signing secret — shown only here.
      *
      * @return the {@code secret} field
      */
@@ -65,7 +65,7 @@ public final class RotateWebhookSecretResult implements WireObject {
     }
 
     /**
-     * URL коллбэка.
+     * Callback URL.
      *
      * @return the {@code url} field
      */
@@ -189,7 +189,7 @@ public final class RotateWebhookSecretResult implements WireObject {
         /**
          * Sets {@code endpoint_id}.
          *
-         * <p>Идентификатор эндпоинта.
+         * <p>Endpoint id.
          *
          * @param endpointId the value
          * @return this builder
@@ -202,7 +202,7 @@ public final class RotateWebhookSecretResult implements WireObject {
         /**
          * Sets {@code previous_secret_valid_until}.
          *
-         * <p>До этого момента доставки дополнительно подписываются старым секретом
+         * <p>Until this moment deliveries are additionally signed with the old secret
          * (X-Webhook-Signature-Prev), RFC 3339 UTC.
          *
          * @param previousSecretValidUntil the value
@@ -216,7 +216,7 @@ public final class RotateWebhookSecretResult implements WireObject {
         /**
          * Sets {@code secret}.
          *
-         * <p>Новый секрет подписи — показывается только здесь.
+         * <p>The new signing secret — shown only here.
          *
          * @param secret the value
          * @return this builder
@@ -229,7 +229,7 @@ public final class RotateWebhookSecretResult implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>URL коллбэка.
+         * <p>Callback URL.
          *
          * @param url the value
          * @return this builder

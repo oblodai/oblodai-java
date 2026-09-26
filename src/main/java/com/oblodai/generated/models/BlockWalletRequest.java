@@ -31,7 +31,7 @@ public final class BlockWalletRequest implements WireObject {
     }
 
     /**
-     * Адрес статического кошелька
+     * Static wallet address
      *
      * @return the {@code address} field
      */
@@ -40,7 +40,7 @@ public final class BlockWalletRequest implements WireObject {
     }
 
     /**
-     * true — заблокировать (значение по умолчанию, если поле опущено); false — снять блокировку
+     * true — block (the default if the field is omitted); false — lift the block
      *
      * @return the {@code is_force_block} field, or {@code null} when absent
      */
@@ -147,7 +147,7 @@ public final class BlockWalletRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес статического кошелька
+         * <p>Static wallet address
          *
          * @param address the value
          * @return this builder
@@ -160,8 +160,7 @@ public final class BlockWalletRequest implements WireObject {
         /**
          * Sets {@code is_force_block}.
          *
-         * <p>true — заблокировать (значение по умолчанию, если поле опущено); false — снять
-         * блокировку
+         * <p>true — block (the default if the field is omitted); false — lift the block
          *
          * @param isForceBlock the value
          * @return this builder

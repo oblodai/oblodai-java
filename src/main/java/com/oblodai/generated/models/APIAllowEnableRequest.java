@@ -28,8 +28,8 @@ public final class APIAllowEnableRequest implements WireObject {
     }
 
     /**
-     * true — принимать API-вызовы только с адресов из списка; false — список хранится, но не
-     * применяется.
+     * true — accept API calls only from addresses on the list; false — the list is kept but not
+     * enforced.
      *
      * @return the {@code enabled} field
      */
@@ -127,8 +127,8 @@ public final class APIAllowEnableRequest implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>true — принимать API-вызовы только с адресов из списка; false — список хранится, но не
-         * применяется.
+         * <p>true — accept API calls only from addresses on the list; false — the list is kept but
+         * not enforced.
          *
          * @param enabled the value
          * @return this builder

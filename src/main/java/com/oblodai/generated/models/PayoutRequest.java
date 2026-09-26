@@ -56,7 +56,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Адрес получателя.
+     * Recipient address.
      *
      * @return the {@code address} field
      */
@@ -65,7 +65,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Сумма выплаты в валюте currency.
+     * The payout amount in currency.
      *
      * @return the {@code amount} field
      */
@@ -74,7 +74,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Код валюты (например USDT).
+     * Currency code (e.g. USDT).
      *
      * @return the {@code currency} field
      */
@@ -83,7 +83,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Профинансировать выплату конвертацией баланса. Только USDT → currency.
+     * Fund the payout by converting balance. USDT → currency only.
      *
      * @return the {@code from_currency} field, or {@code null} when absent
      */
@@ -92,8 +92,8 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Кто платит сетевую комиссию: true — с баланса списывается amount+fee, получатель получает
-     * amount; false — получатель получает amount-fee; не передано — fee-config проекта.
+     * Who pays the network fee: true — amount+fee is debited from the balance, the recipient gets
+     * amount; false — the recipient gets amount-fee; omitted — the project's fee-config.
      *
      * @return the {@code is_subtract} field, or {@code null} when absent
      */
@@ -102,7 +102,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Тег/мемо назначения (TON Jetton). Максимум 120 символов.
+     * Destination tag/memo (TON Jetton). At most 120 characters.
      *
      * @return the {@code memo} field, or {@code null} when absent
      */
@@ -111,7 +111,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Сеть (tron, ethereum, …). Обязательна для монет с несколькими сетями.
+     * Network (tron, ethereum, …). Required for coins with several networks.
      *
      * @return the {@code network} field, or {@code null} when absent
      */
@@ -120,7 +120,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Ваш номер выплаты; ключ идемпотентности.
+     * Your payout number; the idempotency key.
      *
      * @return the {@code order_id} field
      */
@@ -129,7 +129,7 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Метка происхождения: api (по умолчанию) или manual.
+     * The origin label: api (default) or manual.
      *
      * @return the {@code source} field, or {@code null} when absent
      */
@@ -138,8 +138,8 @@ public final class PayoutRequest implements WireObject {
     }
 
     /**
-     * Свой URL вебхука для этой выплаты (проходит SSRF-проверку). Требует зарегистрированного
-     * эндпоинта (POST /v1/webhooks): доставка подписывается его секретом.
+     * Your own webhook URL for this payout (passes the SSRF check). Requires a registered endpoint
+     * (POST /v1/webhooks): the delivery is signed with its secret.
      *
      * @return the {@code url_callback} field, or {@code null} when absent
      */
@@ -309,7 +309,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес получателя.
+         * <p>Recipient address.
          *
          * @param address the value
          * @return this builder
@@ -322,7 +322,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма выплаты в валюте currency.
+         * <p>The payout amount in currency.
          *
          * @param amount the value
          * @return this builder
@@ -335,7 +335,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма выплаты в валюте currency.
+         * <p>The payout amount in currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -347,7 +347,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты (например USDT).
+         * <p>Currency code (e.g. USDT).
          *
          * @param currency the value
          * @return this builder
@@ -360,7 +360,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code from_currency}.
          *
-         * <p>Профинансировать выплату конвертацией баланса. Только USDT → currency.
+         * <p>Fund the payout by converting balance. USDT → currency only.
          *
          * @param fromCurrency the value
          * @return this builder
@@ -373,9 +373,8 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code is_subtract}.
          *
-         * <p>Кто платит сетевую комиссию: true — с баланса списывается amount+fee, получатель
-         * получает amount; false — получатель получает amount-fee; не передано — fee-config
-         * проекта.
+         * <p>Who pays the network fee: true — amount+fee is debited from the balance, the recipient
+         * gets amount; false — the recipient gets amount-fee; omitted — the project's fee-config.
          *
          * @param isSubtract the value
          * @return this builder
@@ -389,7 +388,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code memo}.
          *
-         * <p>Тег/мемо назначения (TON Jetton). Максимум 120 символов.
+         * <p>Destination tag/memo (TON Jetton). At most 120 characters.
          *
          * @param memo the value
          * @return this builder
@@ -402,7 +401,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть (tron, ethereum, …). Обязательна для монет с несколькими сетями.
+         * <p>Network (tron, ethereum, …). Required for coins with several networks.
          *
          * @param network the value
          * @return this builder
@@ -415,7 +414,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш номер выплаты; ключ идемпотентности.
+         * <p>Your payout number; the idempotency key.
          *
          * @param orderId the value
          * @return this builder
@@ -428,7 +427,7 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code source}.
          *
-         * <p>Метка происхождения: api (по умолчанию) или manual.
+         * <p>The origin label: api (default) or manual.
          *
          * @param source the value
          * @return this builder
@@ -441,8 +440,8 @@ public final class PayoutRequest implements WireObject {
         /**
          * Sets {@code url_callback}.
          *
-         * <p>Свой URL вебхука для этой выплаты (проходит SSRF-проверку). Требует
-         * зарегистрированного эндпоинта (POST /v1/webhooks): доставка подписывается его секретом.
+         * <p>Your own webhook URL for this payout (passes the SSRF check). Requires a registered
+         * endpoint (POST /v1/webhooks): the delivery is signed with its secret.
          *
          * @param urlCallback the value
          * @return this builder

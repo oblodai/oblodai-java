@@ -37,7 +37,7 @@ public final class SandboxOnboardResult implements WireObject {
     }
 
     /**
-     * Ключ API мерчанта.
+     * The merchant's API key.
      *
      * @return the {@code api_key} field
      */
@@ -46,7 +46,8 @@ public final class SandboxOnboardResult implements WireObject {
     }
 
     /**
-     * true — dev store создан сейчас; false — уже был, секрет ключа пуст.
+     * true — the dev store was created just now; false — it already existed, the key secret is
+     * empty.
      *
      * @return the {@code created} field
      */
@@ -55,7 +56,7 @@ public final class SandboxOnboardResult implements WireObject {
     }
 
     /**
-     * Мерчант.
+     * Merchant.
      *
      * @return the {@code merchant_id} field
      */
@@ -64,7 +65,7 @@ public final class SandboxOnboardResult implements WireObject {
     }
 
     /**
-     * Первый проект мерчанта.
+     * The merchant's first project.
      *
      * @return the {@code project_id} field
      */
@@ -188,7 +189,7 @@ public final class SandboxOnboardResult implements WireObject {
         /**
          * Sets {@code api_key}.
          *
-         * <p>Ключ API мерчанта.
+         * <p>The merchant's API key.
          *
          * @param apiKey the value
          * @return this builder
@@ -201,7 +202,8 @@ public final class SandboxOnboardResult implements WireObject {
         /**
          * Sets {@code created}.
          *
-         * <p>true — dev store создан сейчас; false — уже был, секрет ключа пуст.
+         * <p>true — the dev store was created just now; false — it already existed, the key secret
+         * is empty.
          *
          * @param created the value
          * @return this builder
@@ -214,7 +216,7 @@ public final class SandboxOnboardResult implements WireObject {
         /**
          * Sets {@code merchant_id}.
          *
-         * <p>Мерчант.
+         * <p>Merchant.
          *
          * @param merchantId the value
          * @return this builder
@@ -227,7 +229,7 @@ public final class SandboxOnboardResult implements WireObject {
         /**
          * Sets {@code project_id}.
          *
-         * <p>Первый проект мерчанта.
+         * <p>The merchant's first project.
          *
          * @param projectId the value
          * @return this builder

@@ -32,7 +32,8 @@ public final class APIAllowListResult implements WireObject {
     }
 
     /**
-     * Применяется ли список: true — вызовы с адресов вне списка получают 403 auth.ip_not_allowed.
+     * Whether the list is enforced: true — calls from addresses outside the list get 403
+     * auth.ip_not_allowed.
      *
      * @return the {@code enabled} field
      */
@@ -41,7 +42,7 @@ public final class APIAllowListResult implements WireObject {
     }
 
     /**
-     * Разрешённые IP и подсети в CIDR.
+     * Allowed IPs and CIDR subnets.
      *
      * @return the {@code items} field
      */
@@ -148,7 +149,7 @@ public final class APIAllowListResult implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Применяется ли список: true — вызовы с адресов вне списка получают 403
+         * <p>Whether the list is enforced: true — calls from addresses outside the list get 403
          * auth.ip_not_allowed.
          *
          * @param enabled the value
@@ -162,7 +163,7 @@ public final class APIAllowListResult implements WireObject {
         /**
          * Sets {@code items}.
          *
-         * <p>Разрешённые IP и подсети в CIDR.
+         * <p>Allowed IPs and CIDR subnets.
          *
          * @param items the value
          * @return this builder

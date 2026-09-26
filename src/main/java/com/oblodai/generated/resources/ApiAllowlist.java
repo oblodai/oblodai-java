@@ -15,7 +15,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Ротация ключей и IP-allowlist API.
+ * Key rotation and the API IP allowlist.
  *
  * <p>The {@code ApiAllowlist} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -28,12 +28,15 @@ public final class ApiAllowlist extends Resource {
     }
 
     /**
-     * Список разрешённых IP
+     * List allowed IPs
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/api-allowlist/list} ({@code listApiAllowlist}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -63,13 +66,16 @@ public final class ApiAllowlist extends Resource {
     }
 
     /**
-     * Добавить IP в allowlist
+     * Add an IP to the allowlist
+     *
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/api-allowlist/add} ({@code addApiAllowlistEntry}).
      *
      * <p>Error codes: {@code apiallow.bad_cidr}, {@code apiallow.too_many},
      * {@code auth.bad_timestamp}, {@code auth.body_too_large}, {@code auth.ip_not_allowed},
-     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code cli.permission_denied}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -101,18 +107,20 @@ public final class ApiAllowlist extends Resource {
     }
 
     /**
-     * Удалить IP из allowlist
+     * Remove an IP from the allowlist
+     *
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/api-allowlist/remove} ({@code removeApiAllowlistEntry}).
      *
      * <p>Error codes: {@code apiallow.last_entry}, {@code auth.bad_timestamp},
-     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
-     * {@code merchant.unknown_key}, {@code postgres.lock_pool_busy}, {@code request.bad_json},
-     * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
-     * {@code request.nul_byte}, {@code request.overloaded}, {@code request.rate_limited},
-     * {@code request.too_deep}.
+     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code cli.permission_denied},
+     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_expired},
+     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
+     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
+     * {@code postgres.lock_pool_busy}, {@code request.bad_json}, {@code request.body_read},
+     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep}.
      *
      * @param params the request body
      * @param options per-call options ({@code null} for the defaults)
@@ -140,15 +148,18 @@ public final class ApiAllowlist extends Resource {
     }
 
     /**
-     * Вкл/выкл IP-allowlist
+     * Enable/disable the IP allowlist
      *
-     * <p>Когда включён — запросы с IP не из списка отклоняются.
+     * <p>When enabled, requests from IPs not on the list are rejected.
+     *
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/api-allowlist/enable} ({@code setApiAllowlistEnabled}).
      *
      * <p>Error codes: {@code apiallow.empty}, {@code apiallow.platform_unidentifiable},
      * {@code auth.bad_timestamp}, {@code auth.body_too_large}, {@code auth.ip_not_allowed},
-     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code cli.permission_denied}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code postgres.lock_pool_busy}, {@code request.bad_json},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},

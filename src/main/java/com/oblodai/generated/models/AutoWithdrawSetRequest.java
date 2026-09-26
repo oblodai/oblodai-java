@@ -37,7 +37,7 @@ public final class AutoWithdrawSetRequest implements WireObject {
     }
 
     /**
-     * Адрес назначения (внешний кошелёк мерчанта).
+     * Destination address (the merchant's external wallet).
      *
      * @return the {@code address} field
      */
@@ -46,7 +46,7 @@ public final class AutoWithdrawSetRequest implements WireObject {
     }
 
     /**
-     * Актив, который выводить автоматически.
+     * The asset to withdraw automatically.
      *
      * @return the {@code currency} field
      */
@@ -55,8 +55,8 @@ public final class AutoWithdrawSetRequest implements WireObject {
     }
 
     /**
-     * Порог: вывод срабатывает, когда доступный баланс актива не меньше этой суммы; пусто — сетевой
-     * минимум.
+     * Threshold: the withdrawal triggers when the asset's available balance is at least this
+     * amount; empty — the network minimum.
      *
      * @return the {@code min_amount} field, or {@code null} when absent
      */
@@ -65,7 +65,7 @@ public final class AutoWithdrawSetRequest implements WireObject {
     }
 
     /**
-     * Сеть адреса назначения.
+     * The destination address network.
      *
      * @return the {@code network} field
      */
@@ -188,7 +188,7 @@ public final class AutoWithdrawSetRequest implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес назначения (внешний кошелёк мерчанта).
+         * <p>Destination address (the merchant's external wallet).
          *
          * @param address the value
          * @return this builder
@@ -201,7 +201,7 @@ public final class AutoWithdrawSetRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Актив, который выводить автоматически.
+         * <p>The asset to withdraw automatically.
          *
          * @param currency the value
          * @return this builder
@@ -214,8 +214,8 @@ public final class AutoWithdrawSetRequest implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Порог: вывод срабатывает, когда доступный баланс актива не меньше этой суммы; пусто —
-         * сетевой минимум.
+         * <p>Threshold: the withdrawal triggers when the asset's available balance is at least this
+         * amount; empty — the network minimum.
          *
          * @param minAmount the value
          * @return this builder
@@ -228,7 +228,7 @@ public final class AutoWithdrawSetRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть адреса назначения.
+         * <p>The destination address network.
          *
          * @param network the value
          * @return this builder

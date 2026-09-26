@@ -31,7 +31,7 @@ public final class PaySelectRequest implements WireObject {
     }
 
     /**
-     * Выбранная валюта оплаты.
+     * The chosen payment currency.
      *
      * @return the {@code currency} field
      */
@@ -40,7 +40,7 @@ public final class PaySelectRequest implements WireObject {
     }
 
     /**
-     * Выбранная сеть.
+     * The chosen network.
      *
      * @return the {@code network} field
      */
@@ -146,7 +146,7 @@ public final class PaySelectRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Выбранная валюта оплаты.
+         * <p>The chosen payment currency.
          *
          * @param currency the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class PaySelectRequest implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Выбранная сеть.
+         * <p>The chosen network.
          *
          * @param network the value
          * @return this builder

@@ -34,7 +34,7 @@ public final class SendEmailResult implements WireObject {
     }
 
     /**
-     * Кому ушло письмо.
+     * Who the email was sent to.
      *
      * @return the {@code email} field
      */
@@ -43,7 +43,7 @@ public final class SendEmailResult implements WireObject {
     }
 
     /**
-     * Письмо поставлено в очередь отправки; неудача отвечает ошибкой.
+     * The email has been queued for sending; a failure responds with an error.
      *
      * @return the {@code ok} field
      */
@@ -52,7 +52,7 @@ public final class SendEmailResult implements WireObject {
     }
 
     /**
-     * Идентификатор платежа.
+     * Payment id.
      *
      * @return the {@code uuid} field
      */
@@ -166,7 +166,7 @@ public final class SendEmailResult implements WireObject {
         /**
          * Sets {@code email}.
          *
-         * <p>Кому ушло письмо.
+         * <p>Who the email was sent to.
          *
          * @param email the value
          * @return this builder
@@ -179,7 +179,7 @@ public final class SendEmailResult implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Письмо поставлено в очередь отправки; неудача отвечает ошибкой.
+         * <p>The email has been queued for sending; a failure responds with an error.
          *
          * @param ok the value
          * @return this builder
@@ -192,7 +192,7 @@ public final class SendEmailResult implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор платежа.
+         * <p>Payment id.
          *
          * @param uuid the value
          * @return this builder

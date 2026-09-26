@@ -159,7 +159,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Ваши приватные данные, которые вернутся в ответе и в вебхуке.
+     * Your private data, returned in the response and in the webhook.
      *
      * @return the {@code additional_data} field
      */
@@ -168,8 +168,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Адрес, на который клиент отправляет деньги. На XRP это классический r-адрес ОБЩЕГО кошелька —
-     * платёж обязан нести destination_tag, иначе сеть его отклонит.
+     * The address the customer sends money to. On XRP this is the classic r-address of a SHARED
+     * wallet — the payment must carry destination_tag, otherwise the network rejects it.
      *
      * @return the {@code address} field
      */
@@ -178,8 +178,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Только XLM: те же реквизиты одной строкой — muxed-адрес M… (SEP-23), адрес и memo вместе; его
-     * же кодирует QR. Пусто на остальных сетях.
+     * XLM only: the same payment details in one string — a muxed M… address (SEP-23), address and
+     * memo together; the QR code encodes it as well. Empty on other networks.
      *
      * @return the {@code address_muxed} field
      */
@@ -188,8 +188,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * QR-код адреса как PNG data:-URI — можно сразу в &lt;img src&gt;. На XRP кодирует X-address
-     * (адрес+тег одной строкой).
+     * The address QR code as a PNG data: URI — can go straight into &lt;img src&gt;. On XRP it
+     * encodes the X-address (address + tag in one string).
      *
      * @return the {@code address_qr_code} field
      */
@@ -198,8 +198,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Только XRP: те же реквизиты одной строкой в формате X-address (XLS-5) — адрес и тег вместе;
-     * его же кодирует QR. Пусто на остальных сетях.
+     * XRP only: the same payment details in one string in X-address format (XLS-5) — address and
+     * tag together; the QR code encodes it as well. Empty on other networks.
      *
      * @return the {@code address_xaddress} field
      */
@@ -208,7 +208,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сумма к оплате в валюте цены (например, в USD).
+     * The amount to pay in the price currency (e.g. USD).
      *
      * @return the {@code amount} field
      */
@@ -217,8 +217,9 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сколько уже подтверждённо оплачено, в крипте оплаты; всегда строка (0, если ничего не
-     * пришло). Пусто, пока валюта оплаты не выбрана (счёт без валюты).
+     * How much has already been paid and confirmed, in the payment crypto; always a string (0 if
+     * nothing has arrived). Empty until the payment currency is chosen (an invoice without a
+     * currency).
      *
      * @return the {@code amount_paid} field
      */
@@ -227,8 +228,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сколько ещё осталось доплатить (к оплате − оплачено); 0, если хватает. Пусто, пока валюта
-     * оплаты не выбрана (счёт без валюты).
+     * How much is still left to pay (due − paid); 0 if enough has been paid. Empty until the
+     * payment currency is chosen (an invoice without a currency).
      *
      * @return the {@code amount_remaining} field
      */
@@ -237,11 +238,11 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Наша комиссия с этого платежа — УДЕРЖАННАЯ величина, в валюте оплаты (payer_currency). Ставка
-     * счёта уже включает амортизированный фиксированный сбор — второй раз он не берётся. ПУСТО,
-     * пока по счёту ничего не зачислено (и у валюто-агностичного счёта до выбора монеты): нуля
-     * здесь не бывает у неоплаченного счёта — «0» читалось бы как «комиссию не берут». У
-     * оплаченного счёта с нулевым тарифом 0 — настоящий.
+     * Our fee on this payment — the WITHHELD amount, in the payment currency (payer_currency). The
+     * invoice rate already includes the amortized fixed fee — it is not charged a second time.
+     * EMPTY until anything has been credited on the invoice (and, for a currency-agnostic invoice,
+     * until a coin is chosen): an unpaid invoice never shows zero here — "0" would read as "no fee
+     * is charged". For a paid invoice with a zero rate, 0 is genuine.
      *
      * @return the {@code commission} field
      */
@@ -250,7 +251,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Текущее число подтверждений входящего платежа.
+     * The current number of confirmations of the incoming payment.
      *
      * @return the {@code confirmations} field
      */
@@ -259,7 +260,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Время создания (ISO 8601).
+     * Creation time (ISO 8601).
      *
      * @return the {@code created_at} field
      */
@@ -268,8 +269,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Валюта цены: фиат (USD, EUR, RUB, JPY… — см. pricing_currencies) или монета. Говорит, сколько
-     * счёт СТОИТ, а не чем за него платят (это payer_currency).
+     * The price currency: fiat (USD, EUR, RUB, JPY… — see pricing_currencies) or a coin. It says
+     * how much the invoice COSTS, not what it is paid with (that is payer_currency).
      *
      * @return the {@code currency} field
      */
@@ -278,8 +279,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Только XRP: числовой destination tag, который клиент ОБЯЗАН указать в переводе (поле
-     * «тег/memo получателя» на бирже или в кошельке). Пусто на остальных сетях.
+     * XRP only: the numeric destination tag the customer MUST specify in the transfer (the
+     * "recipient tag/memo" field at the exchange or in the wallet). Empty on other networks.
      *
      * @return the {@code destination_tag} field
      */
@@ -288,8 +289,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Подписанная ссылка на PDF-чек этой операции — открывается без API-ключа, можно вложить в
-     * письмо или отдать клиенту. Пусто, если генерация документов не включена.
+     * A signed link to the PDF receipt of this operation — opens without an API key, can be
+     * attached to an email or given to the customer. Empty if document generation is not enabled.
      *
      * @return the {@code document_url} field
      */
@@ -298,8 +299,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Курс, зафиксированный этим счётом (сколько валюты оплаты за 1 единицу валюты цены) — по нему
-     * рассчитан payer_amount. Пусто, пока валюта не выбрана.
+     * The rate locked in by this invoice (how much of the payment currency per 1 unit of the price
+     * currency) — payer_amount is calculated from it. Empty until the currency is chosen.
      *
      * @return the {@code exchange_rate} field
      */
@@ -308,7 +309,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Когда истекает счёт (ISO 8601, как и все временные поля).
+     * When the invoice expires (ISO 8601, like all time fields).
      *
      * @return the {@code expired_at} field
      */
@@ -317,9 +318,9 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Ставка комиссии этого счёта в процентах — та, что зафиксирована в момент создания (смена
-     * тарифа не меняет уже созданные счета). Уже включает амортизированный фиксированный сбор. В
-     * отличие от commission известна с первой секунды и присутствует всегда.
+     * The fee rate of this invoice in percent — the one locked in at creation (a pricing change
+     * does not affect invoices already created). Already includes the amortized fixed fee. Unlike
+     * commission, it is known from the first second and is always present.
      *
      * @return the {@code fee_percent} field
      */
@@ -328,7 +329,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * true — статус финальный, больше не изменится.
+     * true — the status is final and will not change again.
      *
      * @return the {@code is_final} field
      */
@@ -337,7 +338,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * true — это валюто-агностичная ссылка, клиент ещё не выбрал валюту/сеть.
+     * true — this is a currency-agnostic link; the customer has not chosen the currency/network
+     * yet.
      *
      * @return the {@code is_multi} field
      */
@@ -346,7 +348,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * true — счёт песочницы (dev-магазина): деньги ненастоящие, в живую сверку не включайте.
+     * true — a sandbox (dev store) invoice: the money is not real, do not include it in live
+     * reconciliation.
      *
      * @return the {@code is_test} field
      */
@@ -355,8 +358,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Только XLM (Stellar): числовой memo (тип ID), который клиент ОБЯЗАН указать в переводе — поле
-     * «memo» на бирже или в кошельке. Пусто на остальных сетях.
+     * XLM (Stellar) only: the numeric memo (ID type) the customer MUST specify in the transfer —
+     * the "memo" field at the exchange or in the wallet. Empty on other networks.
      *
      * @return the {@code memo} field
      */
@@ -365,9 +368,10 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сколько зачислено (или будет зачислено) вам: amount_paid − network_surcharge − commission.
-     * Сетевые расходы на сбор депозита оплачивает плательщик отдельной строкой (network_surcharge)
-     * — из вашей суммы они НЕ вычитаются. Пусто, пока валюта оплаты не выбрана (счёт без валюты).
+     * How much has been (or will be) credited to you: amount_paid − network_surcharge − commission.
+     * The network costs of sweeping the deposit are paid by the payer as a separate line
+     * (network_surcharge) — they are NOT deducted from your amount. Empty until the payment
+     * currency is chosen (an invoice without a currency).
      *
      * @return the {@code merchant_amount} field
      */
@@ -376,9 +380,10 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Ваша скидка или наценка для ВЫБРАННОГО способа оплаты, в валюте оплаты: на столько сдвинулась
-     * сумма плательщика из-за настройки по этой монете и сети. Положительное — плательщик платит
-     * МЕНЬШЕ (скидка), отрицательное — больше (наценка). Пусто, если настройки для метода нет.
+     * Your discount or surcharge for the CHOSEN payment method, in the payment currency: how much
+     * the payer's amount shifted because of the setting for this coin and network. Positive — the
+     * payer pays LESS (discount), negative — more (surcharge). Empty if there is no setting for the
+     * method.
      *
      * @return the {@code method_adjustment} field
      */
@@ -387,8 +392,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Та же скидка/наценка в базисных пунктах (так она переживает переоценку курса). Знак тот же,
-     * что в настройке скидок: ПЛЮС — скидка, МИНУС — наценка.
+     * The same discount/surcharge in basis points (this way it survives a rate re-quote). The sign
+     * is the same as in the discount setting: PLUS — a discount, MINUS — a surcharge.
      *
      * @return the {@code method_adjustment_bps} field
      */
@@ -397,7 +402,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сеть блокчейна (например, tron).
+     * Blockchain network (e.g. tron).
      *
      * @return the {@code network} field
      */
@@ -406,9 +411,10 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сетевая надбавка плательщика в валюте оплаты: стоимость сбора депозита в выбранной сети
-     * (активация адреса, если адрес новый, плюс энергия/газ с запасом), зафиксированная при выборе
-     * сети. Пусто до выбора сети; 0, если надбавка выключена.
+     * The payer's network surcharge in the payment currency: the cost of sweeping the deposit on
+     * the chosen network (address activation, if the address is new, plus energy/gas with a
+     * margin), locked in when the network is chosen. Empty until the network is chosen; 0 if the
+     * surcharge is disabled.
      *
      * @return the {@code network_surcharge} field
      */
@@ -417,7 +423,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Та же надбавка в базисных пунктах от суммы к оплате (так она переживает переоценку курса).
+     * The same surcharge in basis points of the amount due (this way it survives a rate re-quote).
      *
      * @return the {@code network_surcharge_bps} field
      */
@@ -426,7 +432,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Ваш номер заказа, который вы передали при создании.
+     * Your order number that you passed at creation.
      *
      * @return the {@code order_id} field
      */
@@ -435,8 +441,9 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Момент фактической оплаты — зачисление последнего подтверждённого перевода (ISO 8601). null,
-     * пока оплата не пришла. Отличайте от updated_at: тот сдвигается любым изменением счёта.
+     * The moment of actual payment — the crediting of the last confirmed transfer (ISO 8601). null
+     * until the payment arrives. Not to be confused with updated_at, which moves on any change to
+     * the invoice.
      *
      * @return the {@code paid_at} field, or {@code null} when absent
      */
@@ -445,10 +452,11 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Адрес, С КОТОРОГО пришёл первый подтверждённый депозит — на аккаунт-сетях
-     * (EVM/Tron/Solana/TON); пусто на UTXO. ⚠ Это НЕ обязательно адрес для возврата: отправителем
-     * может быть биржа, сдача UTXO-транзакции или горячий омнибус крипто-он-рампа, если покупатель
-     * платил картой. Прежде чем возвращать деньги сюда, смотрите payer_address_is_refundable.
+     * The address the first confirmed deposit came FROM — on account-based networks
+     * (EVM/Tron/Solana/TON); empty on UTXO. ⚠ This is NOT necessarily a refund address: the sender
+     * may be an exchange, the change of a UTXO transaction, or the omnibus hot wallet of a crypto
+     * on-ramp if the buyer paid by card. Before refunding money here, check
+     * payer_address_is_refundable.
      *
      * @return the {@code payer_address} field
      */
@@ -457,10 +465,10 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * true — payer_address принадлежит плательщику, и в /v1/payment/refund можно опустить address
-     * (вернём на него). false — адрес возврата неизвестен (UTXO/XRP, оплата картой через он-рамп,
-     * адрес не записан): спросите адрес у покупателя и передайте address явно, иначе запрос будет
-     * отклонён с refund.no_address.
+     * true — payer_address belongs to the payer, and address may be omitted in /v1/payment/refund
+     * (we refund to it). false — the refund address is unknown (UTXO/XRP, card payment via an
+     * on-ramp, address not recorded): ask the buyer for an address and pass address explicitly,
+     * otherwise the request is rejected with refund.no_address.
      *
      * @return the {@code payer_address_is_refundable} field
      */
@@ -469,8 +477,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сколько нужно отправить в крипте оплаты. Пусто, пока валюта оплаты не выбрана (счёт без
-     * валюты).
+     * How much must be sent in the payment crypto. Empty until the payment currency is chosen (an
+     * invoice without a currency).
      *
      * @return the {@code payer_amount} field
      */
@@ -479,8 +487,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Валюта, в которой платит клиент (например, USDT). Пусто у валюто-агностичного счёта
-     * (is_multi), пока клиент не выбрал монету — валюты расчёта у него ещё нет.
+     * The currency the customer pays in (e.g. USDT). Empty for a currency-agnostic invoice
+     * (is_multi) until the customer picks a coin — it has no settlement currency yet.
      *
      * @return the {@code payer_currency} field
      */
@@ -489,7 +497,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * E-mail плательщика, если вы его передали.
+     * The payer's email, if you provided it.
      *
      * @return the {@code payer_email} field
      */
@@ -498,9 +506,10 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * До какого момента действует зафиксированный payer_amount (ISO 8601; окно ~5 мин, после него
-     * страница оплаты перекотирует счёт). Пусто, когда перекотировки уже не будет: валюта не
-     * выбрана, депозит замечен, счёт вышел из created или истёк — сумма зафиксирована навсегда.
+     * Until when the locked payer_amount is valid (ISO 8601; a ~5 min window, after which the
+     * payment page re-quotes the invoice). Empty when there will be no more re-quotes: the currency
+     * has not been chosen, a deposit has been seen, the invoice has left created or expired — the
+     * amount is locked for good.
      *
      * @return the {@code rate_expires_at} field
      */
@@ -509,7 +518,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Сколько подтверждений нужно для зачисления (зависит от суммы и сети).
+     * How many confirmations are required for crediting (depends on the amount and the network).
      *
      * @return the {@code required_confirmations} field
      */
@@ -518,11 +527,11 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Статус: select (клиент выбирает валюту) | created (ждём оплату) | confirm_check (видим
-     * оплату, ждём подтверждений; при amount_remaining &gt; 0 — частичная, ждём остаток) | paid
-     * (оплачено) | paid_over (переплата) | wrong_amount (недоплата, срок вышел) | expired
-     * (просрочен) | cancelled (отменён) | under_review (поступление задержано на проверке,
-     * разбирает оператор).
+     * Status: select (the customer is choosing a currency) | created (awaiting payment) |
+     * confirm_check (payment seen, awaiting confirmations; with amount_remaining &gt; 0 — partial,
+     * awaiting the remainder) | paid (paid) | paid_over (overpaid) | wrong_amount (underpaid,
+     * expired) | expired (expired) | cancelled (cancelled) | under_review (the deposit is held for
+     * review, an operator is handling it).
      *
      * @return the {@code status} field
      */
@@ -531,8 +540,8 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Все подтверждённые переводы, которыми оплачен счёт. Частичная оплата несколькими переводами —
-     * штатный сценарий wrong_amount; один txid наверху — лишь последний замеченный.
+     * All confirmed transfers that paid the invoice. Partial payment by several transfers is a
+     * regular wrong_amount scenario; the single txid above is only the last one seen.
      *
      * @return the {@code tx_list} field
      */
@@ -541,7 +550,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Хеш входящей транзакции (когда замечена).
+     * The hash of the incoming transaction (once seen).
      *
      * @return the {@code txid} field
      */
@@ -550,7 +559,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Время последнего изменения (ISO 8601).
+     * Time of the last change (ISO 8601).
      *
      * @return the {@code updated_at} field
      */
@@ -559,7 +568,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Ссылка на готовую страницу оплаты.
+     * A link to the ready-made payment page.
      *
      * @return the {@code url} field
      */
@@ -568,7 +577,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Ссылка «вернуться в магазин» до оплаты.
+     * The "back to store" link before payment.
      *
      * @return the {@code url_return} field
      */
@@ -577,7 +586,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Куда перенаправить после успешной оплаты.
+     * Where to redirect after a successful payment.
      *
      * @return the {@code url_success} field
      */
@@ -586,7 +595,7 @@ public final class PaymentView implements WireObject {
     }
 
     /**
-     * Наш идентификатор платежа (используйте его в info/refund).
+     * Our payment identifier (use it in info/refund).
      *
      * @return the {@code uuid} field
      */
@@ -1040,7 +1049,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code additional_data}.
          *
-         * <p>Ваши приватные данные, которые вернутся в ответе и в вебхуке.
+         * <p>Your private data, returned in the response and in the webhook.
          *
          * @param additionalData the value
          * @return this builder
@@ -1053,8 +1062,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Адрес, на который клиент отправляет деньги. На XRP это классический r-адрес ОБЩЕГО
-         * кошелька — платёж обязан нести destination_tag, иначе сеть его отклонит.
+         * <p>The address the customer sends money to. On XRP this is the classic r-address of a
+         * SHARED wallet — the payment must carry destination_tag, otherwise the network rejects it.
          *
          * @param address the value
          * @return this builder
@@ -1067,8 +1076,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code address_muxed}.
          *
-         * <p>Только XLM: те же реквизиты одной строкой — muxed-адрес M… (SEP-23), адрес и memo
-         * вместе; его же кодирует QR. Пусто на остальных сетях.
+         * <p>XLM only: the same payment details in one string — a muxed M… address (SEP-23),
+         * address and memo together; the QR code encodes it as well. Empty on other networks.
          *
          * @param addressMuxed the value
          * @return this builder
@@ -1081,8 +1090,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code address_qr_code}.
          *
-         * <p>QR-код адреса как PNG data:-URI — можно сразу в &lt;img src&gt;. На XRP кодирует
-         * X-address (адрес+тег одной строкой).
+         * <p>The address QR code as a PNG data: URI — can go straight into &lt;img src&gt;. On XRP
+         * it encodes the X-address (address + tag in one string).
          *
          * @param addressQrCode the value
          * @return this builder
@@ -1095,8 +1104,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code address_xaddress}.
          *
-         * <p>Только XRP: те же реквизиты одной строкой в формате X-address (XLS-5) — адрес и тег
-         * вместе; его же кодирует QR. Пусто на остальных сетях.
+         * <p>XRP only: the same payment details in one string in X-address format (XLS-5) — address
+         * and tag together; the QR code encodes it as well. Empty on other networks.
          *
          * @param addressXaddress the value
          * @return this builder
@@ -1109,7 +1118,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма к оплате в валюте цены (например, в USD).
+         * <p>The amount to pay in the price currency (e.g. USD).
          *
          * @param amount the value
          * @return this builder
@@ -1122,7 +1131,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма к оплате в валюте цены (например, в USD).
+         * <p>The amount to pay in the price currency (e.g. USD).
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -1134,8 +1143,9 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code amount_paid}.
          *
-         * <p>Сколько уже подтверждённо оплачено, в крипте оплаты; всегда строка (0, если ничего не
-         * пришло). Пусто, пока валюта оплаты не выбрана (счёт без валюты).
+         * <p>How much has already been paid and confirmed, in the payment crypto; always a string
+         * (0 if nothing has arrived). Empty until the payment currency is chosen (an invoice
+         * without a currency).
          *
          * @param amountPaid the value
          * @return this builder
@@ -1148,8 +1158,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code amount_remaining}.
          *
-         * <p>Сколько ещё осталось доплатить (к оплате − оплачено); 0, если хватает. Пусто, пока
-         * валюта оплаты не выбрана (счёт без валюты).
+         * <p>How much is still left to pay (due − paid); 0 if enough has been paid. Empty until the
+         * payment currency is chosen (an invoice without a currency).
          *
          * @param amountRemaining the value
          * @return this builder
@@ -1162,11 +1172,12 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code commission}.
          *
-         * <p>Наша комиссия с этого платежа — УДЕРЖАННАЯ величина, в валюте оплаты (payer_currency).
-         * Ставка счёта уже включает амортизированный фиксированный сбор — второй раз он не берётся.
-         * ПУСТО, пока по счёту ничего не зачислено (и у валюто-агностичного счёта до выбора
-         * монеты): нуля здесь не бывает у неоплаченного счёта — «0» читалось бы как «комиссию не
-         * берут». У оплаченного счёта с нулевым тарифом 0 — настоящий.
+         * <p>Our fee on this payment — the WITHHELD amount, in the payment currency
+         * (payer_currency). The invoice rate already includes the amortized fixed fee — it is not
+         * charged a second time. EMPTY until anything has been credited on the invoice (and, for a
+         * currency-agnostic invoice, until a coin is chosen): an unpaid invoice never shows zero
+         * here — "0" would read as "no fee is charged". For a paid invoice with a zero rate, 0 is
+         * genuine.
          *
          * @param commission the value
          * @return this builder
@@ -1179,7 +1190,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code confirmations}.
          *
-         * <p>Текущее число подтверждений входящего платежа.
+         * <p>The current number of confirmations of the incoming payment.
          *
          * @param confirmations the value
          * @return this builder
@@ -1192,7 +1203,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code created_at}.
          *
-         * <p>Время создания (ISO 8601).
+         * <p>Creation time (ISO 8601).
          *
          * @param createdAt the value
          * @return this builder
@@ -1205,8 +1216,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта цены: фиат (USD, EUR, RUB, JPY… — см. pricing_currencies) или монета. Говорит,
-         * сколько счёт СТОИТ, а не чем за него платят (это payer_currency).
+         * <p>The price currency: fiat (USD, EUR, RUB, JPY… — see pricing_currencies) or a coin. It
+         * says how much the invoice COSTS, not what it is paid with (that is payer_currency).
          *
          * @param currency the value
          * @return this builder
@@ -1219,8 +1230,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code destination_tag}.
          *
-         * <p>Только XRP: числовой destination tag, который клиент ОБЯЗАН указать в переводе (поле
-         * «тег/memo получателя» на бирже или в кошельке). Пусто на остальных сетях.
+         * <p>XRP only: the numeric destination tag the customer MUST specify in the transfer (the
+         * "recipient tag/memo" field at the exchange or in the wallet). Empty on other networks.
          *
          * @param destinationTag the value
          * @return this builder
@@ -1233,8 +1244,9 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code document_url}.
          *
-         * <p>Подписанная ссылка на PDF-чек этой операции — открывается без API-ключа, можно вложить
-         * в письмо или отдать клиенту. Пусто, если генерация документов не включена.
+         * <p>A signed link to the PDF receipt of this operation — opens without an API key, can be
+         * attached to an email or given to the customer. Empty if document generation is not
+         * enabled.
          *
          * @param documentUrl the value
          * @return this builder
@@ -1247,8 +1259,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code exchange_rate}.
          *
-         * <p>Курс, зафиксированный этим счётом (сколько валюты оплаты за 1 единицу валюты цены) —
-         * по нему рассчитан payer_amount. Пусто, пока валюта не выбрана.
+         * <p>The rate locked in by this invoice (how much of the payment currency per 1 unit of the
+         * price currency) — payer_amount is calculated from it. Empty until the currency is chosen.
          *
          * @param exchangeRate the value
          * @return this builder
@@ -1261,7 +1273,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code expired_at}.
          *
-         * <p>Когда истекает счёт (ISO 8601, как и все временные поля).
+         * <p>When the invoice expires (ISO 8601, like all time fields).
          *
          * @param expiredAt the value
          * @return this builder
@@ -1274,9 +1286,9 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Ставка комиссии этого счёта в процентах — та, что зафиксирована в момент создания
-         * (смена тарифа не меняет уже созданные счета). Уже включает амортизированный фиксированный
-         * сбор. В отличие от commission известна с первой секунды и присутствует всегда.
+         * <p>The fee rate of this invoice in percent — the one locked in at creation (a pricing
+         * change does not affect invoices already created). Already includes the amortized fixed
+         * fee. Unlike commission, it is known from the first second and is always present.
          *
          * @param feePercent the value
          * @return this builder
@@ -1289,9 +1301,9 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code fee_percent}.
          *
-         * <p>Ставка комиссии этого счёта в процентах — та, что зафиксирована в момент создания
-         * (смена тарифа не меняет уже созданные счета). Уже включает амортизированный фиксированный
-         * сбор. В отличие от commission известна с первой секунды и присутствует всегда.
+         * <p>The fee rate of this invoice in percent — the one locked in at creation (a pricing
+         * change does not affect invoices already created). Already includes the amortized fixed
+         * fee. Unlike commission, it is known from the first second and is always present.
          *
          * @param feePercent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -1303,7 +1315,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code is_final}.
          *
-         * <p>true — статус финальный, больше не изменится.
+         * <p>true — the status is final and will not change again.
          *
          * @param isFinal the value
          * @return this builder
@@ -1316,7 +1328,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code is_multi}.
          *
-         * <p>true — это валюто-агностичная ссылка, клиент ещё не выбрал валюту/сеть.
+         * <p>true — this is a currency-agnostic link; the customer has not chosen the
+         * currency/network yet.
          *
          * @param isMulti the value
          * @return this builder
@@ -1329,7 +1342,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code is_test}.
          *
-         * <p>true — счёт песочницы (dev-магазина): деньги ненастоящие, в живую сверку не включайте.
+         * <p>true — a sandbox (dev store) invoice: the money is not real, do not include it in live
+         * reconciliation.
          *
          * @param isTest the value
          * @return this builder
@@ -1342,8 +1356,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code memo}.
          *
-         * <p>Только XLM (Stellar): числовой memo (тип ID), который клиент ОБЯЗАН указать в переводе
-         * — поле «memo» на бирже или в кошельке. Пусто на остальных сетях.
+         * <p>XLM (Stellar) only: the numeric memo (ID type) the customer MUST specify in the
+         * transfer — the "memo" field at the exchange or in the wallet. Empty on other networks.
          *
          * @param memo the value
          * @return this builder
@@ -1356,10 +1370,10 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code merchant_amount}.
          *
-         * <p>Сколько зачислено (или будет зачислено) вам: amount_paid − network_surcharge −
-         * commission. Сетевые расходы на сбор депозита оплачивает плательщик отдельной строкой
-         * (network_surcharge) — из вашей суммы они НЕ вычитаются. Пусто, пока валюта оплаты не
-         * выбрана (счёт без валюты).
+         * <p>How much has been (or will be) credited to you: amount_paid − network_surcharge −
+         * commission. The network costs of sweeping the deposit are paid by the payer as a separate
+         * line (network_surcharge) — they are NOT deducted from your amount. Empty until the
+         * payment currency is chosen (an invoice without a currency).
          *
          * @param merchantAmount the value
          * @return this builder
@@ -1372,10 +1386,10 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code method_adjustment}.
          *
-         * <p>Ваша скидка или наценка для ВЫБРАННОГО способа оплаты, в валюте оплаты: на столько
-         * сдвинулась сумма плательщика из-за настройки по этой монете и сети. Положительное —
-         * плательщик платит МЕНЬШЕ (скидка), отрицательное — больше (наценка). Пусто, если
-         * настройки для метода нет.
+         * <p>Your discount or surcharge for the CHOSEN payment method, in the payment currency: how
+         * much the payer's amount shifted because of the setting for this coin and network.
+         * Positive — the payer pays LESS (discount), negative — more (surcharge). Empty if there is
+         * no setting for the method.
          *
          * @param methodAdjustment the value
          * @return this builder
@@ -1388,8 +1402,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code method_adjustment_bps}.
          *
-         * <p>Та же скидка/наценка в базисных пунктах (так она переживает переоценку курса). Знак
-         * тот же, что в настройке скидок: ПЛЮС — скидка, МИНУС — наценка.
+         * <p>The same discount/surcharge in basis points (this way it survives a rate re-quote).
+         * The sign is the same as in the discount setting: PLUS — a discount, MINUS — a surcharge.
          *
          * @param methodAdjustmentBps the value
          * @return this builder
@@ -1402,7 +1416,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть блокчейна (например, tron).
+         * <p>Blockchain network (e.g. tron).
          *
          * @param network the value
          * @return this builder
@@ -1415,9 +1429,10 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code network_surcharge}.
          *
-         * <p>Сетевая надбавка плательщика в валюте оплаты: стоимость сбора депозита в выбранной
-         * сети (активация адреса, если адрес новый, плюс энергия/газ с запасом), зафиксированная
-         * при выборе сети. Пусто до выбора сети; 0, если надбавка выключена.
+         * <p>The payer's network surcharge in the payment currency: the cost of sweeping the
+         * deposit on the chosen network (address activation, if the address is new, plus energy/gas
+         * with a margin), locked in when the network is chosen. Empty until the network is chosen;
+         * 0 if the surcharge is disabled.
          *
          * @param networkSurcharge the value
          * @return this builder
@@ -1430,8 +1445,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code network_surcharge_bps}.
          *
-         * <p>Та же надбавка в базисных пунктах от суммы к оплате (так она переживает переоценку
-         * курса).
+         * <p>The same surcharge in basis points of the amount due (this way it survives a rate
+         * re-quote).
          *
          * @param networkSurchargeBps the value
          * @return this builder
@@ -1444,7 +1459,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш номер заказа, который вы передали при создании.
+         * <p>Your order number that you passed at creation.
          *
          * @param orderId the value
          * @return this builder
@@ -1457,9 +1472,9 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code paid_at}.
          *
-         * <p>Момент фактической оплаты — зачисление последнего подтверждённого перевода (ISO 8601).
-         * null, пока оплата не пришла. Отличайте от updated_at: тот сдвигается любым изменением
-         * счёта.
+         * <p>The moment of actual payment — the crediting of the last confirmed transfer (ISO
+         * 8601). null until the payment arrives. Not to be confused with updated_at, which moves on
+         * any change to the invoice.
          *
          * @param paidAt the value
          * @return this builder
@@ -1473,10 +1488,10 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code payer_address}.
          *
-         * <p>Адрес, С КОТОРОГО пришёл первый подтверждённый депозит — на аккаунт-сетях
-         * (EVM/Tron/Solana/TON); пусто на UTXO. ⚠ Это НЕ обязательно адрес для возврата:
-         * отправителем может быть биржа, сдача UTXO-транзакции или горячий омнибус крипто-он-рампа,
-         * если покупатель платил картой. Прежде чем возвращать деньги сюда, смотрите
+         * <p>The address the first confirmed deposit came FROM — on account-based networks
+         * (EVM/Tron/Solana/TON); empty on UTXO. ⚠ This is NOT necessarily a refund address: the
+         * sender may be an exchange, the change of a UTXO transaction, or the omnibus hot wallet of
+         * a crypto on-ramp if the buyer paid by card. Before refunding money here, check
          * payer_address_is_refundable.
          *
          * @param payerAddress the value
@@ -1490,10 +1505,10 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code payer_address_is_refundable}.
          *
-         * <p>true — payer_address принадлежит плательщику, и в /v1/payment/refund можно опустить
-         * address (вернём на него). false — адрес возврата неизвестен (UTXO/XRP, оплата картой
-         * через он-рамп, адрес не записан): спросите адрес у покупателя и передайте address явно,
-         * иначе запрос будет отклонён с refund.no_address.
+         * <p>true — payer_address belongs to the payer, and address may be omitted in
+         * /v1/payment/refund (we refund to it). false — the refund address is unknown (UTXO/XRP,
+         * card payment via an on-ramp, address not recorded): ask the buyer for an address and pass
+         * address explicitly, otherwise the request is rejected with refund.no_address.
          *
          * @param payerAddressIsRefundable the value
          * @return this builder
@@ -1506,8 +1521,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько нужно отправить в крипте оплаты. Пусто, пока валюта оплаты не выбрана (счёт
-         * без валюты).
+         * <p>How much must be sent in the payment crypto. Empty until the payment currency is
+         * chosen (an invoice without a currency).
          *
          * @param payerAmount the value
          * @return this builder
@@ -1520,8 +1535,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code payer_currency}.
          *
-         * <p>Валюта, в которой платит клиент (например, USDT). Пусто у валюто-агностичного счёта
-         * (is_multi), пока клиент не выбрал монету — валюты расчёта у него ещё нет.
+         * <p>The currency the customer pays in (e.g. USDT). Empty for a currency-agnostic invoice
+         * (is_multi) until the customer picks a coin — it has no settlement currency yet.
          *
          * @param payerCurrency the value
          * @return this builder
@@ -1534,7 +1549,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code payer_email}.
          *
-         * <p>E-mail плательщика, если вы его передали.
+         * <p>The payer's email, if you provided it.
          *
          * @param payerEmail the value
          * @return this builder
@@ -1547,10 +1562,10 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code rate_expires_at}.
          *
-         * <p>До какого момента действует зафиксированный payer_amount (ISO 8601; окно ~5 мин, после
-         * него страница оплаты перекотирует счёт). Пусто, когда перекотировки уже не будет: валюта
-         * не выбрана, депозит замечен, счёт вышел из created или истёк — сумма зафиксирована
-         * навсегда.
+         * <p>Until when the locked payer_amount is valid (ISO 8601; a ~5 min window, after which
+         * the payment page re-quotes the invoice). Empty when there will be no more re-quotes: the
+         * currency has not been chosen, a deposit has been seen, the invoice has left created or
+         * expired — the amount is locked for good.
          *
          * @param rateExpiresAt the value
          * @return this builder
@@ -1563,7 +1578,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code required_confirmations}.
          *
-         * <p>Сколько подтверждений нужно для зачисления (зависит от суммы и сети).
+         * <p>How many confirmations are required for crediting (depends on the amount and the
+         * network).
          *
          * @param requiredConfirmations the value
          * @return this builder
@@ -1576,11 +1592,11 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус: select (клиент выбирает валюту) | created (ждём оплату) | confirm_check (видим
-         * оплату, ждём подтверждений; при amount_remaining &gt; 0 — частичная, ждём остаток) | paid
-         * (оплачено) | paid_over (переплата) | wrong_amount (недоплата, срок вышел) | expired
-         * (просрочен) | cancelled (отменён) | under_review (поступление задержано на проверке,
-         * разбирает оператор).
+         * <p>Status: select (the customer is choosing a currency) | created (awaiting payment) |
+         * confirm_check (payment seen, awaiting confirmations; with amount_remaining &gt; 0 —
+         * partial, awaiting the remainder) | paid (paid) | paid_over (overpaid) | wrong_amount
+         * (underpaid, expired) | expired (expired) | cancelled (cancelled) | under_review (the
+         * deposit is held for review, an operator is handling it).
          *
          * @param status the value
          * @return this builder
@@ -1593,11 +1609,11 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус: select (клиент выбирает валюту) | created (ждём оплату) | confirm_check (видим
-         * оплату, ждём подтверждений; при amount_remaining &gt; 0 — частичная, ждём остаток) | paid
-         * (оплачено) | paid_over (переплата) | wrong_amount (недоплата, срок вышел) | expired
-         * (просрочен) | cancelled (отменён) | under_review (поступление задержано на проверке,
-         * разбирает оператор).
+         * <p>Status: select (the customer is choosing a currency) | created (awaiting payment) |
+         * confirm_check (payment seen, awaiting confirmations; with amount_remaining &gt; 0 —
+         * partial, awaiting the remainder) | paid (paid) | paid_over (overpaid) | wrong_amount
+         * (underpaid, expired) | expired (expired) | cancelled (cancelled) | under_review (the
+         * deposit is held for review, an operator is handling it).
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -1610,9 +1626,8 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code tx_list}.
          *
-         * <p>Все подтверждённые переводы, которыми оплачен счёт. Частичная оплата несколькими
-         * переводами — штатный сценарий wrong_amount; один txid наверху — лишь последний
-         * замеченный.
+         * <p>All confirmed transfers that paid the invoice. Partial payment by several transfers is
+         * a regular wrong_amount scenario; the single txid above is only the last one seen.
          *
          * @param txList the value
          * @return this builder
@@ -1625,7 +1640,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Хеш входящей транзакции (когда замечена).
+         * <p>The hash of the incoming transaction (once seen).
          *
          * @param txid the value
          * @return this builder
@@ -1638,7 +1653,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code updated_at}.
          *
-         * <p>Время последнего изменения (ISO 8601).
+         * <p>Time of the last change (ISO 8601).
          *
          * @param updatedAt the value
          * @return this builder
@@ -1651,7 +1666,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code url}.
          *
-         * <p>Ссылка на готовую страницу оплаты.
+         * <p>A link to the ready-made payment page.
          *
          * @param url the value
          * @return this builder
@@ -1664,7 +1679,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code url_return}.
          *
-         * <p>Ссылка «вернуться в магазин» до оплаты.
+         * <p>The "back to store" link before payment.
          *
          * @param urlReturn the value
          * @return this builder
@@ -1677,7 +1692,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code url_success}.
          *
-         * <p>Куда перенаправить после успешной оплаты.
+         * <p>Where to redirect after a successful payment.
          *
          * @param urlSuccess the value
          * @return this builder
@@ -1690,7 +1705,7 @@ public final class PaymentView implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Наш идентификатор платежа (используйте его в info/refund).
+         * <p>Our payment identifier (use it in info/refund).
          *
          * @param uuid the value
          * @return this builder

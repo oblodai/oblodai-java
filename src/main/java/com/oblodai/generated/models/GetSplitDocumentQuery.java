@@ -33,7 +33,7 @@ public final class GetSplitDocumentQuery implements WireObject {
     }
 
     /**
-     * UUID платежа.
+     * The payment UUID.
      *
      * @return the {@code uuid} field
      */
@@ -42,7 +42,7 @@ public final class GetSplitDocumentQuery implements WireObject {
     }
 
     /**
-     * Язык документа (по умолчанию en); список — document.Languages.
+     * Document language (en by default); the list is document.Languages.
      *
      * @return the {@code lang} field, or {@code null} when absent
      */
@@ -148,7 +148,7 @@ public final class GetSplitDocumentQuery implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>UUID платежа.
+         * <p>The payment UUID.
          *
          * @param uuid the value
          * @return this builder
@@ -161,7 +161,7 @@ public final class GetSplitDocumentQuery implements WireObject {
         /**
          * Sets {@code lang}.
          *
-         * <p>Язык документа (по умолчанию en); список — document.Languages.
+         * <p>Document language (en by default); the list is document.Languages.
          *
          * @param lang the value
          * @return this builder

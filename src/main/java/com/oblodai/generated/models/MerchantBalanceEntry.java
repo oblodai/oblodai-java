@@ -35,7 +35,7 @@ public final class MerchantBalanceEntry implements WireObject {
     }
 
     /**
-     * Доступно к выводу, десятичной строкой.
+     * Available to withdraw, as a decimal string.
      *
      * @return the {@code balance} field
      */
@@ -44,8 +44,8 @@ public final class MerchantBalanceEntry implements WireObject {
     }
 
     /**
-     * Сколько этой монеты сейчас едет через очередь автоконверта (economy); нет ключа — очереди
-     * нет.
+     * How much of this coin is currently in transit through the auto-conversion queue (economy); no
+     * key — no queue.
      *
      * @return the {@code converting} field, or {@code null} when absent
      */
@@ -54,7 +54,7 @@ public final class MerchantBalanceEntry implements WireObject {
     }
 
     /**
-     * Символ актива.
+     * Asset symbol.
      *
      * @return the {@code currency} field
      */
@@ -169,7 +169,7 @@ public final class MerchantBalanceEntry implements WireObject {
         /**
          * Sets {@code balance}.
          *
-         * <p>Доступно к выводу, десятичной строкой.
+         * <p>Available to withdraw, as a decimal string.
          *
          * @param balance the value
          * @return this builder
@@ -182,8 +182,8 @@ public final class MerchantBalanceEntry implements WireObject {
         /**
          * Sets {@code converting}.
          *
-         * <p>Сколько этой монеты сейчас едет через очередь автоконверта (economy); нет ключа —
-         * очереди нет.
+         * <p>How much of this coin is currently in transit through the auto-conversion queue
+         * (economy); no key — no queue.
          *
          * @param converting the value
          * @return this builder
@@ -196,8 +196,8 @@ public final class MerchantBalanceEntry implements WireObject {
         /**
          * Sets {@code converting}.
          *
-         * <p>Сколько этой монеты сейчас едет через очередь автоконверта (economy); нет ключа —
-         * очереди нет.
+         * <p>How much of this coin is currently in transit through the auto-conversion queue
+         * (economy); no key — no queue.
          *
          * @param converting the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -209,7 +209,7 @@ public final class MerchantBalanceEntry implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Символ актива.
+         * <p>Asset symbol.
          *
          * @param currency the value
          * @return this builder

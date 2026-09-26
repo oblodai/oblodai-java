@@ -10,10 +10,10 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Приходит, когда платёж переходит в paid, paid_over, wrong_amount, expired или under_review, и
- * когда откатывается из них (реорганизация сети). Текущий статус — любой из словаря — можно
- * запросить заново: POST /v1/payment/resend. Сверять с заказом по order_id/uuid, с блокчейном — по
- * txid и network.
+ * Sent when a payment moves to paid, paid_over, wrong_amount, expired or under_review, and when it
+ * rolls back from them (a chain reorganization). The current status — any value from the vocabulary
+ * — can be requested again: POST /v1/payment/resend. Match it to the order by order_id/uuid and to
+ * the blockchain by txid and network.
  *
  * <p>Build one with {@link #builder()}; fields the SDK does not know yet are kept in
  * {@link #extra()} and sent back as they came.
@@ -85,7 +85,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Ваши данные, переданные при создании платежа, как есть.
+     * Your data passed when creating the payment, as is.
      *
      * @return the {@code additional_data} field
      */
@@ -94,7 +94,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Сумма счёта в валюте currency.
+     * The invoice amount in currency.
      *
      * @return the {@code amount} field
      */
@@ -103,7 +103,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Валюта счёта.
+     * Invoice currency.
      *
      * @return the {@code currency} field
      */
@@ -112,7 +112,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Когда событие произошло, UTC с миллисекундами (ISO 8601).
+     * When the event happened, UTC with milliseconds (ISO 8601).
      *
      * @return the {@code event_at} field
      */
@@ -121,7 +121,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * true — статус финальный, дальше платёж не изменится.
+     * true — the status is final, the payment will not change any further.
      *
      * @return the {@code is_final} field
      */
@@ -130,7 +130,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Сеть, в которой пришли деньги.
+     * The network the money arrived on.
      *
      * @return the {@code network} field
      */
@@ -139,7 +139,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Ваш order_id платежа.
+     * Your order_id for the payment.
      *
      * @return the {@code order_id} field
      */
@@ -148,7 +148,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Адрес, с которого пришёл платёж (пусто, если неизвестен). Возвращать на него можно только при
+     * The address the payment came from (empty if unknown). Refunding to it is allowed only when
      * payer_address_is_refundable = true.
      *
      * @return the {@code payer_address} field
@@ -158,8 +158,8 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * true — payer_address принадлежит плательщику и годится как адрес возврата; false — это адрес
-     * биржи, провайдера карты или сдачи, возвращать на него нельзя.
+     * true — payer_address belongs to the payer and is usable as a refund address; false — it is an
+     * exchange, card provider or change address, refunding to it is not allowed.
      *
      * @return the {@code payer_address_is_refundable} field
      */
@@ -168,7 +168,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Сколько плательщик должен был заплатить в валюте payer_currency.
+     * How much the payer was supposed to pay, in payer_currency.
      *
      * @return the {@code payer_amount} field
      */
@@ -177,7 +177,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Валюта, в которой платит плательщик.
+     * The currency the payer pays in.
      *
      * @return the {@code payer_currency} field
      */
@@ -186,7 +186,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Сколько фактически получено (подтверждено), в валюте payer_currency.
+     * How much was actually received (confirmed), in payer_currency.
      *
      * @return the {@code payment_amount} field
      */
@@ -195,8 +195,8 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Глобальный номер события: в пределах одного объекта больший номер новее, меньший — опоздавшая
-     * доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+     * The global event number: within one object a higher number is newer, a lower one is a late
+     * delivery and must be discarded. Always 0 on a rehearsal (test: true).
      *
      * @return the {@code sequence} field
      */
@@ -205,7 +205,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Статус платежа — тот же литерал, что в /v1/payment/info и фильтре истории.
+     * The payment status — the same literal as in /v1/payment/info and the history filter.
      *
      * @return the {@code status} field
      */
@@ -214,9 +214,9 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда true —
-     * внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true обработчик
-     * обязан игнорировать, даже если подпись верна.
+     * Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and always true
+     * — inside the signature. A live event never carries this field: your handler must ignore a
+     * body with test: true even if the signature is valid.
      *
      * @return the {@code test} field, or {@code null} when absent
      */
@@ -225,7 +225,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Хеш транзакции, которой пришёл платёж (пусто, пока платежа нет).
+     * The hash of the transaction the payment arrived with (empty until there is a payment).
      *
      * @return the {@code txid} field
      */
@@ -234,7 +234,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Вид события: payment | payout | wallet | conversion — какое тело пришло.
+     * Event kind: payment | payout | wallet | conversion — which body arrived.
      *
      * @return the {@code type} field
      */
@@ -243,7 +243,7 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
-     * Идентификатор платежа.
+     * Payment id.
      *
      * @return the {@code uuid} field
      */
@@ -481,7 +481,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code additional_data}.
          *
-         * <p>Ваши данные, переданные при создании платежа, как есть.
+         * <p>Your data passed when creating the payment, as is.
          *
          * @param additionalData the value
          * @return this builder
@@ -494,7 +494,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма счёта в валюте currency.
+         * <p>The invoice amount in currency.
          *
          * @param amount the value
          * @return this builder
@@ -507,7 +507,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма счёта в валюте currency.
+         * <p>The invoice amount in currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -519,7 +519,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Валюта счёта.
+         * <p>Invoice currency.
          *
          * @param currency the value
          * @return this builder
@@ -532,7 +532,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code event_at}.
          *
-         * <p>Когда событие произошло, UTC с миллисекундами (ISO 8601).
+         * <p>When the event happened, UTC with milliseconds (ISO 8601).
          *
          * @param eventAt the value
          * @return this builder
@@ -545,7 +545,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code is_final}.
          *
-         * <p>true — статус финальный, дальше платёж не изменится.
+         * <p>true — the status is final, the payment will not change any further.
          *
          * @param isFinal the value
          * @return this builder
@@ -558,7 +558,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть, в которой пришли деньги.
+         * <p>The network the money arrived on.
          *
          * @param network the value
          * @return this builder
@@ -571,7 +571,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ваш order_id платежа.
+         * <p>Your order_id for the payment.
          *
          * @param orderId the value
          * @return this builder
@@ -584,8 +584,8 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payer_address}.
          *
-         * <p>Адрес, с которого пришёл платёж (пусто, если неизвестен). Возвращать на него можно
-         * только при payer_address_is_refundable = true.
+         * <p>The address the payment came from (empty if unknown). Refunding to it is allowed only
+         * when payer_address_is_refundable = true.
          *
          * @param payerAddress the value
          * @return this builder
@@ -598,8 +598,8 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payer_address_is_refundable}.
          *
-         * <p>true — payer_address принадлежит плательщику и годится как адрес возврата; false — это
-         * адрес биржи, провайдера карты или сдачи, возвращать на него нельзя.
+         * <p>true — payer_address belongs to the payer and is usable as a refund address; false —
+         * it is an exchange, card provider or change address, refunding to it is not allowed.
          *
          * @param payerAddressIsRefundable the value
          * @return this builder
@@ -612,7 +612,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько плательщик должен был заплатить в валюте payer_currency.
+         * <p>How much the payer was supposed to pay, in payer_currency.
          *
          * @param payerAmount the value
          * @return this builder
@@ -625,7 +625,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payer_amount}.
          *
-         * <p>Сколько плательщик должен был заплатить в валюте payer_currency.
+         * <p>How much the payer was supposed to pay, in payer_currency.
          *
          * @param payerAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -637,7 +637,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payer_currency}.
          *
-         * <p>Валюта, в которой платит плательщик.
+         * <p>The currency the payer pays in.
          *
          * @param payerCurrency the value
          * @return this builder
@@ -650,7 +650,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payment_amount}.
          *
-         * <p>Сколько фактически получено (подтверждено), в валюте payer_currency.
+         * <p>How much was actually received (confirmed), in payer_currency.
          *
          * @param paymentAmount the value
          * @return this builder
@@ -663,7 +663,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code payment_amount}.
          *
-         * <p>Сколько фактически получено (подтверждено), в валюте payer_currency.
+         * <p>How much was actually received (confirmed), in payer_currency.
          *
          * @param paymentAmount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -675,8 +675,8 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code sequence}.
          *
-         * <p>Глобальный номер события: в пределах одного объекта больший номер новее, меньший —
-         * опоздавшая доставка, её нужно отбросить. У репетиции (test: true) всегда 0.
+         * <p>The global event number: within one object a higher number is newer, a lower one is a
+         * late delivery and must be discarded. Always 0 on a rehearsal (test: true).
          *
          * @param sequence the value
          * @return this builder
@@ -689,7 +689,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус платежа — тот же литерал, что в /v1/payment/info и фильтре истории.
+         * <p>The payment status — the same literal as in /v1/payment/info and the history filter.
          *
          * @param status the value
          * @return this builder
@@ -702,7 +702,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус платежа — тот же литерал, что в /v1/payment/info и фильтре истории.
+         * <p>The payment status — the same literal as in /v1/payment/info and the history filter.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -715,9 +715,9 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code test}.
          *
-         * <p>Есть только у репетиции (/v1/test-webhook/*, /v1/payment/testing-webhook) и всегда
-         * true — внутри подписи. Боевое событие этого поля не несёт никогда: тело с test: true
-         * обработчик обязан игнорировать, даже если подпись верна.
+         * <p>Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and
+         * always true — inside the signature. A live event never carries this field: your handler
+         * must ignore a body with test: true even if the signature is valid.
          *
          * @param test the value
          * @return this builder
@@ -730,7 +730,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code txid}.
          *
-         * <p>Хеш транзакции, которой пришёл платёж (пусто, пока платежа нет).
+         * <p>The hash of the transaction the payment arrived with (empty until there is a payment).
          *
          * @param txid the value
          * @return this builder
@@ -743,7 +743,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code type}.
          *
-         * <p>Вид события: payment | payout | wallet | conversion — какое тело пришло.
+         * <p>Event kind: payment | payout | wallet | conversion — which body arrived.
          *
          * @param type the value
          * @return this builder
@@ -756,7 +756,7 @@ public final class PaymentWebhook implements WireObject {
         /**
          * Sets {@code uuid}.
          *
-         * <p>Идентификатор платежа.
+         * <p>Payment id.
          *
          * @param uuid the value
          * @return this builder

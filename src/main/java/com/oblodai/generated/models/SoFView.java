@@ -31,7 +31,7 @@ public final class SoFView implements WireObject {
     }
 
     /**
-     * Срок ссылки вышел — анкету уже не принять.
+     * The link has expired — the questionnaire can no longer be accepted.
      *
      * @return the {@code expired} field
      */
@@ -40,7 +40,7 @@ public final class SoFView implements WireObject {
     }
 
     /**
-     * Статус анкеты.
+     * Questionnaire status.
      *
      * @return the {@code status} field
      */
@@ -146,7 +146,7 @@ public final class SoFView implements WireObject {
         /**
          * Sets {@code expired}.
          *
-         * <p>Срок ссылки вышел — анкету уже не принять.
+         * <p>The link has expired — the questionnaire can no longer be accepted.
          *
          * @param expired the value
          * @return this builder
@@ -159,7 +159,7 @@ public final class SoFView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус анкеты.
+         * <p>Questionnaire status.
          *
          * @param status the value
          * @return this builder
@@ -172,7 +172,7 @@ public final class SoFView implements WireObject {
         /**
          * Sets {@code status}.
          *
-         * <p>Статус анкеты.
+         * <p>Questionnaire status.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

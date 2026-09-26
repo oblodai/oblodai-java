@@ -37,7 +37,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
     }
 
     /**
-     * Срок жизни сессии (UTC).
+     * Session lifetime (UTC).
      *
      * @return the {@code expires_at} field
      */
@@ -46,7 +46,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
     }
 
     /**
-     * Причина отказа провайдера дословно; пусто, если её нет.
+     * The provider's rejection reason, verbatim; empty if there is none.
      *
      * @return the {@code reason} field
      */
@@ -55,7 +55,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
     }
 
     /**
-     * Идентификатор он-рамп-сессии.
+     * On-ramp session id.
      *
      * @return the {@code session_id} field
      */
@@ -64,7 +64,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
     }
 
     /**
-     * Состояние сессии.
+     * Session state.
      *
      * @return the {@code status} field
      */
@@ -186,7 +186,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code expires_at}.
          *
-         * <p>Срок жизни сессии (UTC).
+         * <p>Session lifetime (UTC).
          *
          * @param expiresAt the value
          * @return this builder
@@ -199,7 +199,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code reason}.
          *
-         * <p>Причина отказа провайдера дословно; пусто, если её нет.
+         * <p>The provider's rejection reason, verbatim; empty if there is none.
          *
          * @param reason the value
          * @return this builder
@@ -212,7 +212,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code session_id}.
          *
-         * <p>Идентификатор он-рамп-сессии.
+         * <p>On-ramp session id.
          *
          * @param sessionId the value
          * @return this builder
@@ -225,7 +225,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние сессии.
+         * <p>Session state.
          *
          * @param status the value
          * @return this builder
@@ -238,7 +238,7 @@ public final class OnrampSessionView implements WireObject, OnrampStatusResult {
         /**
          * Sets {@code status}.
          *
-         * <p>Состояние сессии.
+         * <p>Session state.
          *
          * @param status the value as the API sends it; one this SDK version does not know is
          *     accepted

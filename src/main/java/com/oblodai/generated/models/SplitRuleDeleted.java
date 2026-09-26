@@ -28,7 +28,7 @@ public final class SplitRuleDeleted implements WireObject {
     }
 
     /**
-     * Правило удалено; неудача отвечает ошибкой.
+     * The rule has been deleted; a failure responds with an error.
      *
      * @return the {@code ok} field
      */
@@ -126,7 +126,7 @@ public final class SplitRuleDeleted implements WireObject {
         /**
          * Sets {@code ok}.
          *
-         * <p>Правило удалено; неудача отвечает ошибкой.
+         * <p>The rule has been deleted; a failure responds with an error.
          *
          * @param ok the value
          * @return this builder

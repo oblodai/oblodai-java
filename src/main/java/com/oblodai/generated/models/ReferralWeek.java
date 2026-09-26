@@ -31,7 +31,7 @@ public final class ReferralWeek implements WireObject {
     }
 
     /**
-     * Заработано за 7 дней по активам, десятичными строками.
+     * Earned over 7 days per asset, as decimal strings.
      *
      * @return the {@code earnings_by_asset} field
      */
@@ -40,7 +40,7 @@ public final class ReferralWeek implements WireObject {
     }
 
     /**
-     * Приглашено за 7 дней.
+     * Invited over 7 days.
      *
      * @return the {@code referred_count} field
      */
@@ -148,7 +148,7 @@ public final class ReferralWeek implements WireObject {
         /**
          * Sets {@code earnings_by_asset}.
          *
-         * <p>Заработано за 7 дней по активам, десятичными строками.
+         * <p>Earned over 7 days per asset, as decimal strings.
          *
          * @param earningsByAsset the value
          * @return this builder
@@ -161,7 +161,7 @@ public final class ReferralWeek implements WireObject {
         /**
          * Sets {@code referred_count}.
          *
-         * <p>Приглашено за 7 дней.
+         * <p>Invited over 7 days.
          *
          * @param referredCount the value
          * @return this builder

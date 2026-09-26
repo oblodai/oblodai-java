@@ -41,7 +41,7 @@ public final class SetAutoConvertRequest implements WireObject {
     }
 
     /**
-     * Выключатель приказа целиком. Не передан — считается включённым.
+     * The master switch for the whole order. If omitted, it is considered enabled.
      *
      * @return the {@code enabled} field, or {@code null} when absent
      */
@@ -50,8 +50,8 @@ public final class SetAutoConvertRequest implements WireObject {
     }
 
     /**
-     * Пол одной конвертации в долларах, десятичной строкой; пусто — умолчание процесса ($10). Ниже
-     * него спред съедает больше, чем сводит.
+     * The floor for a single conversion in dollars, as a decimal string; empty — the process
+     * default ($10). Below it the spread eats more than the conversion is worth.
      *
      * @return the {@code min_amount} field, or {@code null} when absent
      */
@@ -60,10 +60,10 @@ public final class SetAutoConvertRequest implements WireObject {
     }
 
     /**
-     * Режим зачисления: "economy" — заявка в партию казначейской ликвидации, зачисляется факт
-     * исполнения (комиссия минимальная); "instant" — мгновенно по спред-курсу. Не передан —
-     * instant: автообмен включают ради мгновенного зачисления, а ждать партию — осознанный выбор.
-     * Иное значение — 400 request.invalid_mode.
+     * The crediting mode: "economy" — an order in a treasury liquidation batch, the actual
+     * execution is credited (minimal fee); "instant" — immediately at the spread rate. Omitted —
+     * instant: auto-exchange is enabled for instant crediting, and waiting for a batch is a
+     * deliberate choice. Any other value — 400 request.invalid_mode.
      *
      * @return the {@code mode} field, or {@code null} when absent
      */
@@ -72,7 +72,7 @@ public final class SetAutoConvertRequest implements WireObject {
     }
 
     /**
-     * Монеты, которые сводить. Пусто — приказ есть, но не включён ни для чего.
+     * The coins to convert. Empty — the order exists but is not enabled for anything.
      *
      * @return the {@code sources} field, or {@code null} when absent
      */
@@ -81,8 +81,7 @@ public final class SetAutoConvertRequest implements WireObject {
     }
 
     /**
-     * Монета, в которую сводится выручка (стейбл). Проверяется на возможность ликвидации при
-     * сохранении.
+     * The coin revenue is converted into (a stablecoin). Checked for liquidity on save.
      *
      * @return the {@code target} field
      */
@@ -215,7 +214,7 @@ public final class SetAutoConvertRequest implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Выключатель приказа целиком. Не передан — считается включённым.
+         * <p>The master switch for the whole order. If omitted, it is considered enabled.
          *
          * @param enabled the value
          * @return this builder
@@ -229,8 +228,8 @@ public final class SetAutoConvertRequest implements WireObject {
         /**
          * Sets {@code min_amount}.
          *
-         * <p>Пол одной конвертации в долларах, десятичной строкой; пусто — умолчание процесса
-         * ($10). Ниже него спред съедает больше, чем сводит.
+         * <p>The floor for a single conversion in dollars, as a decimal string; empty — the process
+         * default ($10). Below it the spread eats more than the conversion is worth.
          *
          * @param minAmount the value
          * @return this builder
@@ -243,10 +242,10 @@ public final class SetAutoConvertRequest implements WireObject {
         /**
          * Sets {@code mode}.
          *
-         * <p>Режим зачисления: "economy" — заявка в партию казначейской ликвидации, зачисляется
-         * факт исполнения (комиссия минимальная); "instant" — мгновенно по спред-курсу. Не передан
-         * — instant: автообмен включают ради мгновенного зачисления, а ждать партию — осознанный
-         * выбор. Иное значение — 400 request.invalid_mode.
+         * <p>The crediting mode: "economy" — an order in a treasury liquidation batch, the actual
+         * execution is credited (minimal fee); "instant" — immediately at the spread rate. Omitted
+         * — instant: auto-exchange is enabled for instant crediting, and waiting for a batch is a
+         * deliberate choice. Any other value — 400 request.invalid_mode.
          *
          * @param mode the value
          * @return this builder
@@ -260,10 +259,10 @@ public final class SetAutoConvertRequest implements WireObject {
         /**
          * Sets {@code mode}.
          *
-         * <p>Режим зачисления: "economy" — заявка в партию казначейской ликвидации, зачисляется
-         * факт исполнения (комиссия минимальная); "instant" — мгновенно по спред-курсу. Не передан
-         * — instant: автообмен включают ради мгновенного зачисления, а ждать партию — осознанный
-         * выбор. Иное значение — 400 request.invalid_mode.
+         * <p>The crediting mode: "economy" — an order in a treasury liquidation batch, the actual
+         * execution is credited (minimal fee); "instant" — immediately at the spread rate. Omitted
+         * — instant: auto-exchange is enabled for instant crediting, and waiting for a batch is a
+         * deliberate choice. Any other value — 400 request.invalid_mode.
          *
          * @param mode the value as the API sends it; one this SDK version does not know is accepted
          * @return this builder
@@ -275,7 +274,7 @@ public final class SetAutoConvertRequest implements WireObject {
         /**
          * Sets {@code sources}.
          *
-         * <p>Монеты, которые сводить. Пусто — приказ есть, но не включён ни для чего.
+         * <p>The coins to convert. Empty — the order exists but is not enabled for anything.
          *
          * @param sources the value
          * @return this builder
@@ -288,8 +287,7 @@ public final class SetAutoConvertRequest implements WireObject {
         /**
          * Sets {@code target}.
          *
-         * <p>Монета, в которую сводится выручка (стейбл). Проверяется на возможность ликвидации при
-         * сохранении.
+         * <p>The coin revenue is converted into (a stablecoin). Checked for liquidity on save.
          *
          * @param target the value
          * @return this builder

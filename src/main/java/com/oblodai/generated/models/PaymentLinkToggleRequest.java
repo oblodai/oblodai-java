@@ -31,7 +31,8 @@ public final class PaymentLinkToggleRequest implements WireObject {
     }
 
     /**
-     * true — ссылка принимает оплату; false — выключена (страница покажет, что ссылка неактивна).
+     * true — the link accepts payments; false — disabled (the page will show that the link is
+     * inactive).
      *
      * @return the {@code active} field
      */
@@ -40,7 +41,7 @@ public final class PaymentLinkToggleRequest implements WireObject {
     }
 
     /**
-     * Идентификатор платёжной ссылки.
+     * Payment link id.
      *
      * @return the {@code link_id} field
      */
@@ -146,8 +147,8 @@ public final class PaymentLinkToggleRequest implements WireObject {
         /**
          * Sets {@code active}.
          *
-         * <p>true — ссылка принимает оплату; false — выключена (страница покажет, что ссылка
-         * неактивна).
+         * <p>true — the link accepts payments; false — disabled (the page will show that the link
+         * is inactive).
          *
          * @param active the value
          * @return this builder
@@ -160,7 +161,7 @@ public final class PaymentLinkToggleRequest implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор платёжной ссылки.
+         * <p>Payment link id.
          *
          * @param linkId the value
          * @return this builder

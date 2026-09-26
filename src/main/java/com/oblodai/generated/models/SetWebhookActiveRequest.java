@@ -28,8 +28,7 @@ public final class SetWebhookActiveRequest implements WireObject {
     }
 
     /**
-     * true — доставка возобновляется, false — прекращается (очередь по этому проекту больше не
-     * наполняется).
+     * true — delivery resumes, false — it stops (the queue for this project is no longer filled).
      *
      * @return the {@code active} field, or {@code null} when absent
      */
@@ -127,8 +126,8 @@ public final class SetWebhookActiveRequest implements WireObject {
         /**
          * Sets {@code active}.
          *
-         * <p>true — доставка возобновляется, false — прекращается (очередь по этому проекту больше
-         * не наполняется).
+         * <p>true — delivery resumes, false — it stops (the queue for this project is no longer
+         * filled).
          *
          * @param active the value
          * @return this builder

@@ -32,7 +32,7 @@ public final class SplitRuleCreated implements WireObject {
     }
 
     /**
-     * Сохранённая доля в процентах, два знака после точки.
+     * The saved share in percent, two digits after the point.
      *
      * @return the {@code percent} field
      */
@@ -41,7 +41,7 @@ public final class SplitRuleCreated implements WireObject {
     }
 
     /**
-     * Идентификатор правила.
+     * Rule id.
      *
      * @return the {@code rule_id} field
      */
@@ -147,7 +147,7 @@ public final class SplitRuleCreated implements WireObject {
         /**
          * Sets {@code percent}.
          *
-         * <p>Сохранённая доля в процентах, два знака после точки.
+         * <p>The saved share in percent, two digits after the point.
          *
          * @param percent the value
          * @return this builder
@@ -160,7 +160,7 @@ public final class SplitRuleCreated implements WireObject {
         /**
          * Sets {@code percent}.
          *
-         * <p>Сохранённая доля в процентах, два знака после точки.
+         * <p>The saved share in percent, two digits after the point.
          *
          * @param percent the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -172,7 +172,7 @@ public final class SplitRuleCreated implements WireObject {
         /**
          * Sets {@code rule_id}.
          *
-         * <p>Идентификатор правила.
+         * <p>Rule id.
          *
          * @param ruleId the value
          * @return this builder

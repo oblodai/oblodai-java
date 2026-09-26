@@ -17,7 +17,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Вернуть деньги плательщику (списание с вашего баланса).
+ * Return money to the payer (debited from your balance).
  *
  * <p>The {@code Refunds} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -30,47 +30,49 @@ public final class Refunds extends Resource {
     }
 
     /**
-     * Вернуть платёж
+     * Refund a payment
      *
-     * <p>Возврат — это списание с вашего баланса.
+     * <p>A refund is debited from your balance.
      *
-     * <p>{@code address} (куда вернуть) можно опустить ТОЛЬКО если в платеже
-     * {@code payer_address_is_refundable} = true: тогда вернём на записанный адрес плательщика
-     * ({@code payer_address}). Если там false — адрес плательщика нам известен, но он не является
-     * адресом возврата (Bitcoin/UTXO: первый вход мог быть биржей или сдачей; XRP: общий адрес
-     * биржи с тегом назначения; оплата КАРТОЙ через крипто-он-рамп: отправитель — омнибусный
-     * горячий кошелёк провайдера, а не покупатель). Возврат туда уходит безвозвратно тому, кто
-     * денег не платил, поэтому запрос без {@code address} будет отклонён
-     * ({@code refund.no_address}): спросите адрес у покупателя и передайте его явно. Нужен
-     * {@code uuid}/{@code order_id} платежа. По умолчанию вернём всю полученную сумму; можно
-     * указать частичную {@code amount}.
+     * <p>{@code address} (where to refund) may be omitted ONLY if the payment has
+     * {@code payer_address_is_refundable} = true: then we refund to the recorded payer address
+     * ({@code payer_address}). If it is false, we know the payer's address but it is not a refund
+     * address (Bitcoin/UTXO: the first input may belong to an exchange or be change; XRP: a shared
+     * exchange address with a destination tag; CARD payment via a crypto on-ramp: the sender is the
+     * provider's omnibus hot wallet, not the buyer). A refund sent there is irrecoverably lost to
+     * someone who never paid, so a request without {@code address} is rejected
+     * ({@code refund.no_address}): ask the buyer for an address and pass it explicitly. The
+     * payment's {@code uuid}/{@code order_id} is required. By default the full received amount is
+     * refunded; you may specify a partial {@code amount}.
      *
-     * <p>Идемпотентно по {@code (платёж, адрес, сумма)}; суммарно нельзя вернуть больше, чем
-     * оплачено. Возврат подтверждается автоматически на любой адрес. Единственное исключение —
-     * платёж картой через он-рамп: возврат НА ЗАПИСАННЫЙ АДРЕС ПЛАТЕЛЬЩИКА такого счёта отклоняется
-     * ({@code refund.omnibus_destination}), потому что этот адрес принадлежит провайдеру, а не
-     * покупателю — пришлите адрес покупателя явно.
+     * <p>Idempotent on {@code (payment, address, amount)}; in total you cannot refund more than was
+     * paid. Refunds to any address are approved automatically. The only exception is a card payment
+     * via an on-ramp: a refund TO THE RECORDED PAYER ADDRESS of such an invoice is rejected
+     * ({@code refund.omnibus_destination}), because that address belongs to the provider, not the
+     * buyer — send the buyer's address explicitly.
      *
-     * <p>Возврат платится ТОЙ ЖЕ монетой, которой заплатил покупатель. Если она уже сведена в
-     * стейбл автообменом, передайте {@code from_currency: "USDT"} — возврат профинансируется
-     * конвертацией вашего баланса USDT и останется ВОЗВРАТОМ: счёт пометится возвращённым, доли
-     * партнёрам отзовутся. Отправить деньги обычной выплатой тоже можно, но в отчётах это будет
-     * выплата, а не возврат.
+     * <p>A refund is paid in THE SAME coin the buyer paid with. If it has already been converted
+     * into a stablecoin by auto-conversion, pass {@code from_currency: "USDT"} — the refund is
+     * funded by converting your USDT balance and remains a REFUND: the invoice is marked refunded
+     * and partner shares are reversed. You can also send the money as a regular payout, but reports
+     * will show it as a payout, not a refund.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/refund} ({@code refundPayment}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code compliance.blocked}, {@code compliance.blocked_address},
-     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
-     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
-     * {@code compliance.sanctions_unavailable}, {@code idempotency.bad_key},
-     * {@code idempotency.in_progress}, {@code idempotency.key_reused},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
+     * {@code compliance.no_destination}, {@code compliance.no_network},
+     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
+     * {@code idempotency.bad_key}, {@code idempotency.in_progress}, {@code idempotency.key_reused},
      * {@code idempotency.unavailable}, {@code internal}, {@code invoice.corrupt_pay_asset},
      * {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
      * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code onramp.suppresses}, {@code payment.bad_uuid}, {@code payment.no_lookup},
@@ -151,31 +153,34 @@ public final class Refunds extends Resource {
     }
 
     /**
-     * Вернуть средства со статик-кошелька
+     * Refund funds from a static wallet
      *
-     * <p>Возвращает на {@code address} ЧИСТУЮ сумму, полученную на (заблокированном)
-     * статик-кошельке: из полученного вычитается уже возвращённое. Пока возврат жив (создан,
-     * отправлен, подтверждён), повторный вызов возвращает его же. Если возврат не состоялся
-     * (failed/cancelled), вызов можно повторить — в том числе на другой адрес. Отменённые reorg'ом
-     * депозиты не считаются.
+     * <p>Refunds to {@code address} the NET amount received on a (blocked) static wallet: the
+     * amount already refunded is subtracted from what was received. While a refund is alive
+     * (created, sent, confirmed), a repeated call returns that same refund. If the refund did not
+     * go through (failed/cancelled), the call can be repeated — including to a different address.
+     * Deposits reverted by a reorg are not counted.
      *
-     * <p>Блокировка смотрит ВПЕРЁД: она останавливает следующий приход, а не пересматривает уже
-     * зачисленные. Деньги, пришедшие ПОСЛЕ блокировки, на баланс не попадают — они уходят в
-     * карантин и ждут решения оператора; вернуть их этой ручкой можно после того, как он их
-     * разобрал. Пока не разобраны — они ещё не ваши, и ответ будет «возвращать нечего».
+     * <p>Blocking looks FORWARD: it stops the next incoming deposit, it does not revisit ones
+     * already credited. Money that arrives AFTER the block does not reach the balance — it goes to
+     * quarantine and waits for an operator's decision; you can refund it with this endpoint once
+     * the operator has reviewed it. Until then it is not yours yet, and the response will be
+     * "nothing to refund".
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/wallet/blocked-address-refund} ({@code refundBlockedWallet}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code compliance.blocked}, {@code compliance.blocked_address},
-     * {@code compliance.blocklist_unavailable}, {@code compliance.no_destination},
-     * {@code compliance.no_network}, {@code compliance.sanctioned_address},
-     * {@code compliance.sanctions_unavailable}, {@code internal}, {@code ledger.account_not_found},
-     * {@code ledger.asset_mismatch}, {@code ledger.bad_direction},
-     * {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
+     * {@code compliance.no_destination}, {@code compliance.no_network},
+     * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
+     * {@code internal}, {@code ledger.account_not_found}, {@code ledger.asset_mismatch},
+     * {@code ledger.bad_direction}, {@code ledger.duplicate_posting}, {@code ledger.fiat_asset},
      * {@code ledger.idempotency_conflict}, {@code ledger.missing_idempotency_key},
      * {@code ledger.no_lines}, {@code ledger.non_positive_amount}, {@code ledger.sandbox_live_mix},
-     * {@code ledger.unbalanced}, {@code merchant.bad_signature},
+     * {@code ledger.unbalanced}, {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.above_limit}, {@code payout.address_network_mismatch},

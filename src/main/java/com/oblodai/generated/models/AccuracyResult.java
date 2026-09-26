@@ -31,7 +31,7 @@ public final class AccuracyResult implements WireObject {
     }
 
     /**
-     * Допуск в процентах, 1–5; 0 — допуск выключен (нужна точная сумма).
+     * Tolerance in percent, 1–5; 0 — tolerance disabled (the exact amount is required).
      *
      * @return the {@code accuracy_percent} field
      */
@@ -40,7 +40,7 @@ public final class AccuracyResult implements WireObject {
     }
 
     /**
-     * Включён ли допуск.
+     * Whether the tolerance is enabled.
      *
      * @return the {@code enabled} field
      */
@@ -147,7 +147,7 @@ public final class AccuracyResult implements WireObject {
         /**
          * Sets {@code accuracy_percent}.
          *
-         * <p>Допуск в процентах, 1–5; 0 — допуск выключен (нужна точная сумма).
+         * <p>Tolerance in percent, 1–5; 0 — tolerance disabled (the exact amount is required).
          *
          * @param accuracyPercent the value
          * @return this builder
@@ -160,7 +160,7 @@ public final class AccuracyResult implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>Включён ли допуск.
+         * <p>Whether the tolerance is enabled.
          *
          * @param enabled the value
          * @return this builder

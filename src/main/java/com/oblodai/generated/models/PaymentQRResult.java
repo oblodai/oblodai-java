@@ -37,7 +37,7 @@ public final class PaymentQRResult implements WireObject {
     }
 
     /**
-     * Депозитный адрес; пусто, пока его нет.
+     * The deposit address; empty until there is one.
      *
      * @return the {@code address} field
      */
@@ -46,8 +46,8 @@ public final class PaymentQRResult implements WireObject {
     }
 
     /**
-     * PNG QR-кода как data:-URI; "" — адреса ещё нет (монета не выбрана) или он не платёжный
-     * (песочница).
+     * The QR code PNG as a data: URI; "" — there is no address yet (the coin has not been chosen)
+     * or it is not a payment address (sandbox).
      *
      * @return the {@code image} field
      */
@@ -56,8 +56,8 @@ public final class PaymentQRResult implements WireObject {
     }
 
     /**
-     * true — в QR платёжный запрос с суммой (кошелёк подставит её сам); false — только адрес, сумму
-     * плательщик вводит.
+     * true — the QR code holds a payment request with the amount (the wallet fills it in); false —
+     * address only, the payer enters the amount.
      *
      * @return the {@code is_uri} field
      */
@@ -66,7 +66,7 @@ public final class PaymentQRResult implements WireObject {
     }
 
     /**
-     * Что закодировано в QR: платёжный URI сети с суммой или голый адрес.
+     * What the QR code encodes: the network's payment URI with the amount, or the bare address.
      *
      * @return the {@code payload} field
      */
@@ -188,7 +188,7 @@ public final class PaymentQRResult implements WireObject {
         /**
          * Sets {@code address}.
          *
-         * <p>Депозитный адрес; пусто, пока его нет.
+         * <p>The deposit address; empty until there is one.
          *
          * @param address the value
          * @return this builder
@@ -201,8 +201,8 @@ public final class PaymentQRResult implements WireObject {
         /**
          * Sets {@code image}.
          *
-         * <p>PNG QR-кода как data:-URI; "" — адреса ещё нет (монета не выбрана) или он не платёжный
-         * (песочница).
+         * <p>The QR code PNG as a data: URI; "" — there is no address yet (the coin has not been
+         * chosen) or it is not a payment address (sandbox).
          *
          * @param image the value
          * @return this builder
@@ -215,8 +215,8 @@ public final class PaymentQRResult implements WireObject {
         /**
          * Sets {@code is_uri}.
          *
-         * <p>true — в QR платёжный запрос с суммой (кошелёк подставит её сам); false — только
-         * адрес, сумму плательщик вводит.
+         * <p>true — the QR code holds a payment request with the amount (the wallet fills it in);
+         * false — address only, the payer enters the amount.
          *
          * @param isUri the value
          * @return this builder
@@ -229,7 +229,8 @@ public final class PaymentQRResult implements WireObject {
         /**
          * Sets {@code payload}.
          *
-         * <p>Что закодировано в QR: платёжный URI сети с суммой или голый адрес.
+         * <p>What the QR code encodes: the network's payment URI with the amount, or the bare
+         * address.
          *
          * @param payload the value
          * @return this builder

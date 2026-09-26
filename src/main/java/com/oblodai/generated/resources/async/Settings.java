@@ -39,7 +39,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * Настройки магазина: допуск сумм, скидки, автовозвраты, валюты, авто-вывод.
+ * Store settings: amount tolerance, discounts, auto-refunds, currencies, auto-withdrawal.
  *
  * <p>The {@code Settings} resource, non-blocking: one method per API operation. Every method takes
  * per-call {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -52,20 +52,23 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Настроить допуск недо/переплаты
+     * Configure underpayment/overpayment tolerance
      *
-     * <p>«Точность платежей»: {@code enabled} + {@code accuracy_percent} 1–5. В пределах допуска
-     * платёж считается оплаченным. Выключено — нужна точная сумма.
+     * <p>"Payment accuracy": {@code enabled} + {@code accuracy_percent} 1–5. Within the tolerance a
+     * payment counts as paid. Disabled — the exact amount is required.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/accuracy/set} ({@code setAccuracy}).
      *
      * <p>Error codes: {@code accuracy.out_of_range}, {@code auth.bad_timestamp},
-     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
-     * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
-     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
-     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep}.
+     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code cli.permission_denied},
+     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_expired},
+     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
+     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
+     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
+     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
+     * {@code request.rate_limited}, {@code request.too_deep}.
      *
      * @param params the request body
      * @param options per-call options ({@code null} for the defaults)
@@ -94,12 +97,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Прочитать допуск сумм
+     * Read the amount tolerance
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/accuracy/get} ({@code getAccuracy}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -129,16 +135,19 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Настроить автовозвраты
+     * Configure auto-refunds
      *
-     * <p>{@code overpay} — авто-возврат излишка переплаты; {@code underpay} — авто-возврат при
-     * истёкшей недоплате. Оба по умолчанию ВКЛ. Возврат идёт на адрес плательщика
-     * (EVM/Tron/TON/Solana; на Bitcoin/UTXO — вручную).
+     * <p>{@code overpay} — auto-refund of the overpaid excess; {@code underpay} — auto-refund of an
+     * expired underpayment. Both are ON by default. The refund goes to the payer's address
+     * (EVM/Tron/TON/Solana; on Bitcoin/UTXO — manually).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/autorefund/set} ({@code setAutoRefund}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -172,12 +181,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Прочитать настройку автовозвратов
+     * Read the auto-refund settings
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/autorefund/get} ({@code getAutoRefund}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -207,19 +219,22 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Скидка/наценка на способ оплаты
+     * Discount/surcharge for a payment method
      *
-     * <p>Положительный {@code discount_percent} — скидка плательщику за оплату этой монетой;
-     * отрицательный — наценка. Пустая {@code currency} задаёт правило по умолчанию для всех монет,
-     * пустая {@code network} — для любой сети выбранной монеты. В ответе — сохранённое правило в
-     * КАНОНИЧЕСКОМ виде (символ монеты в верхнем регистре, сеть в нижнем).
+     * <p>A positive {@code discount_percent} is a discount to the payer for paying with this coin;
+     * a negative one is a surcharge. An empty {@code currency} sets the default rule for all coins,
+     * an empty {@code network} — for any network of the chosen coin. The response contains the
+     * saved rule in CANONICAL form (coin symbol uppercase, network lowercase).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/discount/set} ({@code setDiscount}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code discount.network_required},
-     * {@code discount.out_of_range}, {@code discount.unsupported_network}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied},
+     * {@code discount.network_required}, {@code discount.out_of_range},
+     * {@code discount.unsupported_network}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -253,16 +268,19 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Список скидок/наценок
+     * List discounts/surcharges
      *
-     * <p>Настроенные правила: {@code items} (по одному на пару «монета+сеть») + блок
-     * {@code paginate} ({@code total}, {@code per_page}, {@code offset}, {@code has_pages}). Поля
-     * правила — те же, что отдаёт {@code /v1/payment/discount/set}.
+     * <p>Configured rules: {@code items} (one per coin+network pair) plus a {@code paginate} block
+     * ({@code total}, {@code per_page}, {@code offset}, {@code has_pages}). Rule fields are the
+     * same as returned by {@code /v1/payment/discount/set}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/discount/list} ({@code listDiscounts}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -317,23 +335,26 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Лог запросов вашего ключа
+     * Request log for your key
      *
-     * <p>Дата, метод с путём, код ответа, длительность и IP — по вашему мерчанту и только по нему.
-     * Строки живут 90 дней ({@code retention_days} в ответе). Строка запроса (query) НЕ хранится: в
-     * ней ездят идентификаторы того, что фильтровали, а вторая копия чужих платёжных
-     * идентификаторов — это обязательство, а не удобство. {@code to} включает день целиком.
+     * <p>Date, method with path, response code, duration and IP — for your merchant and only for
+     * it. Rows are kept for 90 days ({@code retention_days} in the response). The query string is
+     * NOT stored: it carries identifiers of what was filtered, and a second copy of someone else's
+     * payment identifiers is a liability, not a convenience. {@code to} includes the whole day.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/api-log} ({@code listApiLog}).
      *
      * <p>Error codes: {@code apilog.bad_date}, {@code apilog.bad_status}, {@code apilog.count},
      * {@code apilog.disabled}, {@code apilog.list}, {@code auth.bad_timestamp},
-     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
-     * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
-     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
-     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep}.
+     * {@code auth.body_too_large}, {@code auth.ip_not_allowed}, {@code cli.permission_denied},
+     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_expired},
+     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
+     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
+     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
+     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
+     * {@code request.rate_limited}, {@code request.too_deep}.
      *
      * @param params the request body
      * @param options per-call options ({@code null} for the defaults)
@@ -383,16 +404,20 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Авто-конвертация выручки: текущий приказ
+     * Revenue auto-conversion: current order
      *
-     * <p>{@code configured:false} — приказа нет, остальные поля тогда пустые/умолчания.
-     * {@code min_usd_cents} — пол одной конвертации: ниже него спред стоит дороже, чем сводить.
+     * <p>{@code configured:false} — there is no order; the other fields are then empty/defaults.
+     * {@code min_usd_cents} — the floor for a single conversion: below it the spread costs more
+     * than the conversion is worth.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/autoconvert/get} ({@code getAutoConvert}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
      * {@code auth.ip_not_allowed}, {@code autoconvert.disabled}, {@code autoconvert.scan},
-     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code cli.permission_denied}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.body_read}, {@code request.control_char},
      * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
@@ -421,15 +446,18 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Авто-конвертация выручки: задать приказ
+     * Revenue auto-conversion: set the order
      *
-     * <p>Сводит перечисленные монеты в {@code target} фоновым сводом, не в момент зачисления
-     * депозита. ⚠ ИСТОЧНИКИ — ПО МОНЕТЕ, А НЕ ПО ПАРЕ «МОНЕТА+СЕТЬ»: обязательства мерчанта ведутся
-     * по активу, и у принимающего USDT в Tron и в BSC баланс USDT ОДИН — включить свод для одной
-     * пары и не включить для второй нечего. Целевая монета проверяется на возможность ликвидации
-     * ЗДЕСЬ, при сохранении: отказ в момент выбора можно исправить, отказ через неделю в фоне — это
-     * выручка, которая молча не сводилась. В ответе — СОХРАНЁННЫЙ приказ: монеты, которые свод не
-     * примет (сама цель, дубли), из него убраны.
+     * <p>Converts the listed coins into {@code target} in a background sweep, not at the moment a
+     * deposit is credited. ⚠ SOURCES ARE PER COIN, NOT PER COIN+NETWORK PAIR: merchant liabilities
+     * are tracked per asset, and a merchant accepting USDT on Tron and on BSC has ONE USDT balance
+     * — there is nothing to enable the sweep for one pair and not the other. The target coin is
+     * checked for liquidity HERE, on save: a rejection at selection time can be fixed, a rejection
+     * a week later in the background is revenue that silently was not converted. The response
+     * contains the SAVED order: coins the sweep will not accept (the target itself, duplicates) are
+     * removed from it.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/autoconvert/set} ({@code setAutoConvert}).
      *
@@ -437,13 +465,14 @@ public final class Settings extends Resource {
      * {@code auth.ip_not_allowed}, {@code autoconvert.bad_floor}, {@code autoconvert.disabled},
      * {@code autoconvert.no_target}, {@code autoconvert.scan},
      * {@code autoconvert.source_unsupported}, {@code autoconvert.target_unsupported},
-     * {@code autoconvert.upsert}, {@code autoconvert.vanished}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
-     * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
-     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.invalid_mode},
-     * {@code request.nul_byte}, {@code request.overloaded}, {@code request.rate_limited},
-     * {@code request.too_deep}, {@code request.unknown_currency}, {@code treasury.no_ccy_map}.
+     * {@code autoconvert.upsert}, {@code autoconvert.vanished}, {@code cli.permission_denied},
+     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_expired},
+     * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
+     * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
+     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
+     * {@code request.duplicate_field}, {@code request.invalid_mode}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep},
+     * {@code request.unknown_currency}, {@code treasury.no_ccy_map}.
      *
      * @param params the request body
      * @param options per-call options ({@code null} for the defaults)
@@ -472,15 +501,18 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Настроить принимаемые валюты магазина
+     * Configure the store's accepted currencies
      *
-     * <p>Задаёт, какие валюты/сети магазин принимает.
+     * <p>Sets which currencies/networks the store accepts.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/accepted/set} ({@code setAcceptedCurrencies}).
      *
      * <p>Error codes: {@code accepted.no_network}, {@code accepted.unknown_method},
      * {@code auth.bad_timestamp}, {@code auth.body_too_large}, {@code auth.ip_not_allowed},
-     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code cli.permission_denied}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -514,12 +546,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Список принимаемых валют
+     * List accepted currencies
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/accepted/list} ({@code listAcceptedCurrencies}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -574,15 +609,18 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Кто платит сетевую комиссию выплаты
+     * Who pays the payout network fee
      *
-     * <p>{@code fee_on_recipient: true} — комиссию сети платит получатель (ему приходит сумма минус
-     * комиссия).
+     * <p>{@code fee_on_recipient: true} — the network fee is paid by the recipient (they receive
+     * the amount minus the fee).
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/fee-config/set} ({@code setPayoutFeeConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -616,12 +654,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Прочитать настройку комиссии выплат
+     * Read the payout fee setting
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/fee-config/get} ({@code getPayoutFeeConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -651,15 +692,18 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Кто платит нашу комиссию при возврате
+     * Who pays our fee on a refund
      *
-     * <p>{@code fee_on_customer: true} — при возврате нашу комиссию несёт клиент (возврат за
-     * вычетом комиссии); false — несёт мерчант.
+     * <p>{@code fee_on_customer: true} — on a refund our fee is borne by the customer (refund minus
+     * the fee); false — borne by the merchant.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/refund-fee-config/set} ({@code setRefundFeeConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -693,12 +737,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Прочитать настройку комиссии возврата
+     * Read the refund fee setting
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/refund-fee-config/get} ({@code getRefundFeeConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -728,18 +775,21 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Кто платит нашу комиссию при приёме платежа
+     * Who pays our fee when accepting a payment
      *
-     * <p>{@code payer_pays_percent: 0} — комиссию платит мерчант (по умолчанию); {@code 100} —
-     * платит покупатель: счёт выставляется с наценкой, и мерчант получает ровно ту сумму, которую
-     * назвал. Промежуточные значения делят комиссию. Действует на счета, созданные ПОСЛЕ изменения;
-     * параметр {@code subtract} в самом счёте перекрывает эту настройку.
+     * <p>{@code payer_pays_percent: 0} — the fee is paid by the merchant (default); {@code 100} —
+     * paid by the buyer: the invoice is issued with a markup, and the merchant receives exactly the
+     * amount they specified. Intermediate values split the fee. Applies to invoices created AFTER
+     * the change; the {@code subtract} parameter of an invoice overrides this setting.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/fee-config/set} ({@code setPaymentFeeConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_fee_bearer},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_fee_bearer}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.bad_json}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -773,18 +823,21 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Прочитать, кто платит комиссию за приём
+     * Read who pays the acceptance fee
      *
-     * <p>Также возвращает ваш тариф: {@code fee_percent} — ставка, которую зафиксирует СЛЕДУЮЩИЙ
-     * созданный счёт; {@code fee_fixed_usd} — фиксированный сбор с платежа, USD строкой ("0.30";
-     * прежнее {@code fee_fixed_usd_cents} — то же в центах числом, устарело);
-     * {@code fee_individual: true} — тариф назначен вам индивидуально, false — действует тариф
-     * платформы.
+     * <p>Also returns your pricing: {@code fee_percent} — the rate the NEXT created invoice will
+     * lock in; {@code fee_fixed_usd} — the fixed per-payment fee, USD as a string ("0.30"; the
+     * former {@code fee_fixed_usd_cents} is the same in cents as a number, deprecated);
+     * {@code fee_individual: true} — the pricing is assigned to you individually, false — the
+     * platform pricing applies.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payment/fee-config/get} ({@code getPaymentFeeConfig}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code request.body_read}, {@code request.control_char},
@@ -814,16 +867,19 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Настроить авто-вывод
+     * Configure auto-withdrawal
      *
-     * <p>Автоматически выводить поступления на заданный адрес.
+     * <p>Automatically withdraw incoming funds to a given address.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/auto-withdraw/set} ({@code setAutoWithdrawRule}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
      * {@code auth.ip_not_allowed}, {@code autowithdraw.bad_min}, {@code autowithdraw.missing},
      * {@code autowithdraw.network_required}, {@code autowithdraw.unsupported_network},
-     * {@code internal}, {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
+     * {@code cli.permission_denied}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code payout.address_network_mismatch},
      * {@code payout.bad_address}, {@code payout.bad_memo}, {@code payout.memo_conflict},
@@ -860,12 +916,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Список правил авто-вывода
+     * List auto-withdrawal rules
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/auto-withdraw/list} ({@code listAutoWithdrawRules}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
@@ -896,12 +955,15 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Удалить правило авто-вывода
+     * Delete an auto-withdrawal rule
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/auto-withdraw/delete} ({@code deleteAutoWithdrawRule}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
@@ -936,14 +998,17 @@ public final class Settings extends Resource {
     }
 
     /**
-     * Авто-конверт волатильных монет в USDT (VRCS)
+     * Auto-convert volatile coins to USDT (VRCS)
      *
-     * <p>Включает автоматическую конвертацию поступающих волатильных монет в стейбл USDT.
+     * <p>Enables automatic conversion of incoming volatile coins into the USDT stablecoin.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/vrcs} ({@code configureVrcs}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},

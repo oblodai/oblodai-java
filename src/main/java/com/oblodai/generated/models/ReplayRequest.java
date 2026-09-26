@@ -28,7 +28,7 @@ public final class ReplayRequest implements WireObject {
     }
 
     /**
-     * Идентификатор доставки из GET /v1/sandbox/webhooks.
+     * The delivery id from GET /v1/sandbox/webhooks.
      *
      * @return the {@code delivery_id} field
      */
@@ -126,7 +126,7 @@ public final class ReplayRequest implements WireObject {
         /**
          * Sets {@code delivery_id}.
          *
-         * <p>Идентификатор доставки из GET /v1/sandbox/webhooks.
+         * <p>The delivery id from GET /v1/sandbox/webhooks.
          *
          * @param deliveryId the value
          * @return this builder

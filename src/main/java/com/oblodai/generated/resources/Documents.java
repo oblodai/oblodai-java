@@ -29,7 +29,7 @@ import com.oblodai.core.Transport;
 // --- end of runtime imports ---
 
 /**
- * PDF-документы операций: чеки, счета, отчёты за период.
+ * PDF documents for operations: receipts, invoices, period reports.
  *
  * <p>The {@code Documents} resource: one method per API operation. Every method takes per-call
  * {@code RequestOptions} as its last argument; the overloads without it use the defaults.
@@ -42,20 +42,21 @@ public final class Documents extends Resource {
     }
 
     /**
-     * PDF-документ операции (по подписанной ссылке)
+     * Operation PDF document (via a signed link)
      *
-     * <p>Отдаёт фирменный PDF: чек платежа ({@code kind=payment}), чек выплаты или возврата
-     * ({@code kind=payout}), счёт ({@code kind=invoice}), плакат ссылки ({@code kind=paylink}),
-     * справку о реквизитах ({@code kind=wallet}), сплит-расчёт ({@code kind=split}), чек перевода
-     * ({@code kind=transfer}), чек конвертации ({@code kind=conversion}). Ссылку НЕ нужно строить
-     * самим: готовая приходит в {@code document_url} соответствующих ответов — подпись в
-     * {@code sig} и есть доступ, API-ключ не нужен. ⚠ Ссылка ЖИВЁТ ОГРАНИЧЕННО ({@code exp} в
-     * query, по умолчанию 30 суток): скачанный PDF-файл — документ навсегда, а просроченная ссылка
-     * отвечает 403 {@code document.link_expired} — возьмите свежую из любого свежего ответа
-     * info/history той же операции. {@code ?lang=} — один из 41 языка (en по умолчанию; полный
-     * список — в ошибке {@code document.unknown_lang}). Ответ — {@code application/pdf}; документ
-     * отражает текущий статус операции. На самом PDF ссылок нет — документы не раскрывают путь к
-     * себе при пересылке.
+     * <p>Returns a branded PDF: payment receipt ({@code kind=payment}), payout or refund receipt
+     * ({@code kind=payout}), invoice ({@code kind=invoice}), link poster ({@code kind=paylink}),
+     * payment details certificate ({@code kind=wallet}), split settlement ({@code kind=split}),
+     * transfer receipt ({@code kind=transfer}), conversion receipt ({@code kind=conversion}). You
+     * do NOT need to build the link yourself: a ready one comes in {@code document_url} of the
+     * corresponding responses — the signature in {@code sig} is the access grant, no API key
+     * needed. ⚠ The link has A LIMITED LIFETIME ({@code exp} in the query, 30 days by default): a
+     * downloaded PDF file is a document forever, while an expired link responds 403
+     * {@code document.link_expired} — take a fresh one from any fresh info/history response for the
+     * same operation. {@code ?lang=} — one of 41 languages (en by default; the full list is in the
+     * {@code document.unknown_lang} error). The response is {@code application/pdf}; the document
+     * reflects the current status of the operation. The PDF itself contains no links — documents do
+     * not reveal their own URL when forwarded.
      *
      * <p><code>GET /v1/documents/{kind}/{id}</code> ({@code getSignedDocument}).
      *
@@ -100,20 +101,23 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Справка о балансе (PDF)
+     * Balance certificate (PDF)
      *
-     * <p>Фирменная PDF-справка: available-балансы мерчанта по валютам на момент формирования, со
-     * штампом. Для контрагентов и бухгалтерии. {@code ?lang=} — 41 язык (en по умолчанию). Ответ —
-     * {@code application/pdf}.
+     * <p>A branded PDF certificate: the merchant's available balances per currency at the time of
+     * generation, with a stamp. For counterparties and accounting. {@code ?lang=} — 41 languages
+     * (en by default). The response is {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/balance} ({@code getBalanceDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.balance_unavailable}, {@code document.disabled},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied},
+     * {@code document.balance_unavailable}, {@code document.disabled},
      * {@code document.encode_failed}, {@code document.render_failed},
      * {@code document.render_rejected}, {@code document.render_unavailable},
      * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code report.too_large}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -165,28 +169,31 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Отчёт о комиссиях за период (PDF)
+     * Fee report for a period (PDF)
      *
-     * <p>Сколько удержано за период: комиссия сервиса с каждого зачтённого платежа и сетевые
-     * комиссии выплат/возвратов, с итогами по валютам. {@code ?from=YYYY-MM-DD&to=YYYY-MM-DD}
-     * (включительно, максимум год; по умолчанию — текущий месяц), {@code ?lang=} — 41 язык (en по
-     * умолчанию). Ответ — {@code application/pdf}.
+     * <p>How much was withheld over the period: the service fee on each credited payment and the
+     * network fees of payouts/refunds, with totals per currency.
+     * {@code ?from=YYYY-MM-DD&to=YYYY-MM-DD} (inclusive, at most one year; defaults to the current
+     * month), {@code ?lang=} — 41 languages (en by default). The response is
+     * {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/fees} ({@code getFeesDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.disabled}, {@code document.encode_failed},
-     * {@code document.fees_unavailable}, {@code document.render_failed},
-     * {@code document.render_rejected}, {@code document.render_unavailable},
-     * {@code document.unknown_lang}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.not_found}, {@code merchant.rate_limited}, {@code merchant.secret_decrypt},
-     * {@code merchant.suspended}, {@code merchant.unknown_key}, {@code payment.not_found},
-     * {@code payout.not_found}, {@code report.too_large}, {@code request.body_read},
-     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
-     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep},
-     * {@code statement.bad_from}, {@code statement.bad_range}, {@code statement.bad_to},
-     * {@code statement.range_too_long}.
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.disabled},
+     * {@code document.encode_failed}, {@code document.fees_unavailable},
+     * {@code document.render_failed}, {@code document.render_rejected},
+     * {@code document.render_unavailable}, {@code document.unknown_lang}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code payment.not_found}, {@code payout.not_found},
+     * {@code report.too_large}, {@code request.body_read}, {@code request.control_char},
+     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
+     * {@code request.rate_limited}, {@code request.too_deep}, {@code statement.bad_from},
+     * {@code statement.bad_range}, {@code statement.bad_to}, {@code statement.range_too_long}.
      *
      * @param query query parameters
      * @param options per-call options ({@code null} for the defaults)
@@ -234,22 +241,27 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Выписка по счёту (PDF)
+     * Account statement (PDF)
      *
-     * <p>ВСЕ движения available-баланса за период — включая комиссии, доли сплитов и внутренние
-     * переводы, которых нет в отчёте по операциям. Приход/расход помечены, итоги по валютам. Нужен
-     * АКТ СВЕРКИ (с сальдо на начало и конец периода)? Закажите тот же отчёт фоном —
-     * {@code POST /v1/documents/jobs} с {@code kind=ledger}: сальдо требует агрегата по всей
-     * истории и потому считается только в фоновой задаче, не в синхронной ручке. {@code ?from&to}
-     * как у отчёта, {@code ?lang=} — 41 язык (en по умолчанию). Ответ — {@code application/pdf}.
+     * <p>ALL movements of the available balance over the period — including fees, split shares and
+     * internal transfers that are not in the operations report. Credits/debits are marked, with
+     * totals per currency. Need a RECONCILIATION STATEMENT (with opening and closing balances for
+     * the period)? Order the same report in the background — {@code POST /v1/documents/jobs} with
+     * {@code kind=ledger}: the balances require an aggregate over the whole history and are
+     * therefore computed only in a background job, not in a synchronous endpoint. {@code ?from&to}
+     * as in the report, {@code ?lang=} — 41 languages (en by default). The response is
+     * {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/ledger} ({@code getLedgerDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.disabled}, {@code document.encode_failed},
-     * {@code document.ledger_unavailable}, {@code document.render_failed},
-     * {@code document.render_rejected}, {@code document.render_unavailable},
-     * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.disabled},
+     * {@code document.encode_failed}, {@code document.ledger_unavailable},
+     * {@code document.render_failed}, {@code document.render_rejected},
+     * {@code document.render_unavailable}, {@code document.unknown_lang}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code report.too_large}, {@code request.body_read},
@@ -304,26 +316,29 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Справка о сплит-расчёте платежа (PDF)
+     * Payment split settlement certificate (PDF)
      *
-     * <p>Как распределился конкретный платёж между получателями: доли, суммы, статусы.
-     * {@code ?uuid=<UUID платежа>}, {@code ?lang=} — 41 язык (en по умолчанию). На самом документе
-     * напечатана подписанная публичная ссылка — её можно переслать партнёру. 404
-     * {@code document.no_split}, если платёж ничего не разводил.
+     * <p>How a specific payment was distributed between recipients: shares, amounts, statuses.
+     * {@code ?uuid=<payment UUID>}, {@code ?lang=} — 41 languages (en by default). A signed public
+     * link is printed on the document itself — it can be forwarded to a partner. 404
+     * {@code document.no_split} if the payment was not split.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/split} ({@code getSplitDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.bad_id}, {@code document.disabled},
-     * {@code document.encode_failed}, {@code document.no_split}, {@code document.render_failed},
-     * {@code document.render_rejected}, {@code document.render_unavailable},
-     * {@code document.unknown_lang}, {@code internal}, {@code invoice.corrupt_pay_asset},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.not_found}, {@code merchant.rate_limited}, {@code merchant.secret_decrypt},
-     * {@code merchant.suspended}, {@code merchant.unknown_key}, {@code payment.not_found},
-     * {@code payout.not_found}, {@code report.too_large}, {@code request.body_read},
-     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
-     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep}.
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.bad_id},
+     * {@code document.disabled}, {@code document.encode_failed}, {@code document.no_split},
+     * {@code document.render_failed}, {@code document.render_rejected},
+     * {@code document.render_unavailable}, {@code document.unknown_lang}, {@code internal},
+     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code payment.not_found}, {@code payout.not_found},
+     * {@code report.too_large}, {@code request.body_read}, {@code request.control_char},
+     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
+     * {@code request.rate_limited}, {@code request.too_deep}.
      *
      * @param query query parameters
      * @param options per-call options ({@code null} for the defaults)
@@ -350,21 +365,24 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Крипточек (PDF, на предъявителя)
+     * Crypto cheque (PDF, bearer)
      *
-     * <p>Печатный чек выплатной ссылки: сумма, срок и QR получения. Передайте {@code claim_token}
-     * из ответа создания ссылки — он хранится только хешем и повторно НЕ выдаётся, поэтому чек
-     * можно напечатать только пока токен у вас. ⚠ Документ — деньги: любой, у кого он есть, может
-     * получить средства. Ответ — {@code application/pdf}.
+     * <p>A printable cheque for a payout link: the amount, the expiry and the claim QR code. Pass
+     * the {@code claim_token} from the link creation response — it is stored only as a hash and is
+     * NOT issued again, so the cheque can only be printed while you still have the token. ⚠ The
+     * document is money: anyone who has it can claim the funds. The response is
+     * {@code application/pdf}.
+     *
+     * <p>Requires role: Finance when called with a CLI key.
      *
      * <p>{@code POST /v1/payout/link/cheque} ({@code getPayoutLinkCheque}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code cheque.token_required}, {@code document.disabled},
-     * {@code document.encode_failed}, {@code document.render_failed},
+     * {@code auth.ip_not_allowed}, {@code cheque.token_required}, {@code cli.permission_denied},
+     * {@code document.disabled}, {@code document.encode_failed}, {@code document.render_failed},
      * {@code document.render_rejected}, {@code document.render_unavailable},
      * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code payoutlink.disabled}, {@code payoutlink.not_found},
      * {@code report.too_large}, {@code request.bad_json}, {@code request.body_read},
@@ -396,19 +414,23 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Отчёт по операциям за период (PDF)
+     * Operations report for a period (PDF)
      *
-     * <p>Фирменный PDF-отчёт: платежи, выплаты и возвраты мерчанта за период, с итогами по валютам.
-     * {@code ?from=YYYY-MM-DD&to=YYYY-MM-DD} (включительно, максимум год; по умолчанию — текущий
-     * месяц), {@code ?lang=} — 41 язык (en по умолчанию). Ответ — {@code application/pdf}.
+     * <p>A branded PDF report: the merchant's payments, payouts and refunds for the period, with
+     * totals per currency. {@code ?from=YYYY-MM-DD&to=YYYY-MM-DD} (inclusive, at most one year;
+     * defaults to the current month), {@code ?lang=} — 41 languages (en by default). The response
+     * is {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/statement} ({@code getStatementDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.disabled}, {@code document.encode_failed},
-     * {@code document.render_failed}, {@code document.render_rejected},
-     * {@code document.render_unavailable}, {@code document.unknown_lang}, {@code internal},
-     * {@code invoice.corrupt_pay_asset}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.disabled},
+     * {@code document.encode_failed}, {@code document.render_failed},
+     * {@code document.render_rejected}, {@code document.render_unavailable},
+     * {@code document.unknown_lang}, {@code internal}, {@code invoice.corrupt_pay_asset},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code payment.not_found}, {@code payout.not_found},
@@ -464,22 +486,25 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Ведомость массовой операции (PDF)
+     * Batch operation register (PDF)
      *
-     * <p>Итоги батча (<code>/v1/*&#47;batch</code>) одним документом: сколько строк, сколько прошло
-     * и упало, каждая строка с получателем, суммой, статусом и машинным кодом причины отказа — тем
-     * же, что вернул бы одиночный вызов. {@code ?uuid=<UUID батча>}, {@code ?lang=} — 41 язык.
-     * Ответ — {@code application/pdf}.
+     * <p>The results of a batch (<code>/v1/*&#47;batch</code>) in one document: how many rows, how
+     * many succeeded and failed, each row with the recipient, amount, status and the machine code
+     * of the rejection reason — the same one a single call would return.
+     * {@code ?uuid=<batch UUID>}, {@code ?lang=} — 41 languages. The response is
+     * {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/batch} ({@code getBatchDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
      * {@code auth.ip_not_allowed}, {@code batch.disabled}, {@code batch.not_found},
-     * {@code document.bad_id}, {@code document.batch_unavailable}, {@code document.disabled},
-     * {@code document.encode_failed}, {@code document.render_failed},
+     * {@code cli.permission_denied}, {@code document.bad_id}, {@code document.batch_unavailable},
+     * {@code document.disabled}, {@code document.encode_failed}, {@code document.render_failed},
      * {@code document.render_rejected}, {@code document.render_unavailable},
      * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code report.too_large}, {@code request.body_read},
      * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
@@ -510,21 +535,23 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Отчёт о сборах платёжной ссылки (PDF)
+     * Payment link collections report (PDF)
      *
-     * <p>Сколько собрала конкретная платёжная ссылка: каждый порождённый платёж строкой, итог по
-     * валютам (только зачтённые). Для донатов и сборов. {@code ?uuid=<UUID ссылки>},
-     * {@code ?from&to} (включительно, максимум год; по умолчанию — текущий месяц), {@code ?lang=}.
-     * Ответ — {@code application/pdf}.
+     * <p>How much a specific payment link has collected: each resulting payment as a row, totals
+     * per currency (credited only). For donations and fundraising. {@code ?uuid=<link UUID>},
+     * {@code ?from&to} (inclusive, at most one year; defaults to the current month),
+     * {@code ?lang=}. The response is {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/link} ({@code getPaymentLinkDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.bad_id}, {@code document.disabled},
-     * {@code document.encode_failed}, {@code document.render_failed},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.bad_id},
+     * {@code document.disabled}, {@code document.encode_failed}, {@code document.render_failed},
      * {@code document.render_rejected}, {@code document.render_unavailable},
      * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
-     * {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code paylink.disabled}, {@code paylink.not_found},
      * {@code report.too_large}, {@code request.body_read}, {@code request.control_char},
@@ -557,26 +584,29 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Выписка по статическому кошельку (PDF)
+     * Static wallet statement (PDF)
      *
-     * <p>Движения, порождённые конкретным статик-кошельком (депозиты клиента на постоянный адрес),
-     * с реквизитами кошелька в шапке и итогами по валютам. {@code ?uuid=<UUID кошелька>},
-     * {@code ?from&to}, {@code ?lang=}. Ответ — {@code application/pdf}.
+     * <p>Movements produced by a specific static wallet (customer deposits to a permanent address),
+     * with the wallet details in the header and totals per currency. {@code ?uuid=<wallet UUID>},
+     * {@code ?from&to}, {@code ?lang=}. The response is {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/wallet/statement} ({@code getWalletStatementDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.bad_id}, {@code document.disabled},
-     * {@code document.encode_failed}, {@code document.ledger_unavailable},
-     * {@code document.render_failed}, {@code document.render_rejected},
-     * {@code document.render_unavailable}, {@code document.unknown_lang}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.not_found}, {@code merchant.rate_limited}, {@code merchant.secret_decrypt},
-     * {@code merchant.suspended}, {@code merchant.unknown_key}, {@code report.too_large},
-     * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
-     * {@code request.nul_byte}, {@code request.overloaded}, {@code request.rate_limited},
-     * {@code request.too_deep}, {@code statement.bad_from}, {@code statement.bad_range},
-     * {@code statement.bad_to}, {@code statement.range_too_long}, {@code wallet.static_disabled},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.bad_id},
+     * {@code document.disabled}, {@code document.encode_failed},
+     * {@code document.ledger_unavailable}, {@code document.render_failed},
+     * {@code document.render_rejected}, {@code document.render_unavailable},
+     * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code report.too_large}, {@code request.body_read},
+     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
+     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.too_deep},
+     * {@code statement.bad_from}, {@code statement.bad_range}, {@code statement.bad_to},
+     * {@code statement.range_too_long}, {@code wallet.static_disabled},
      * {@code wallet.static_not_found}.
      *
      * @param query query parameters
@@ -605,24 +635,28 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Отчёт о реферальных начислениях (PDF)
+     * Referral earnings report (PDF)
      *
-     * <p>Начисления реферальной программы за период: каждая награда строкой (когда, за кого,
-     * сколько), итог по валютам. {@code ?from&to}, {@code ?lang=}. Ответ — {@code application/pdf}.
+     * <p>Referral program earnings for the period: each reward as a row (when, for whom, how much),
+     * totals per currency. {@code ?from&to}, {@code ?lang=}. The response is
+     * {@code application/pdf}.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/referrals} ({@code getReferralsDocument}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.disabled}, {@code document.encode_failed},
-     * {@code document.render_failed}, {@code document.render_rejected},
-     * {@code document.render_unavailable}, {@code document.unknown_lang}, {@code internal},
-     * {@code merchant.bad_signature}, {@code merchant.key_mode_mismatch},
-     * {@code merchant.not_found}, {@code merchant.rate_limited}, {@code merchant.secret_decrypt},
-     * {@code merchant.suspended}, {@code merchant.unknown_key}, {@code referral.disabled},
-     * {@code report.too_large}, {@code request.body_read}, {@code request.control_char},
-     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
-     * {@code request.rate_limited}, {@code request.too_deep}, {@code statement.bad_from},
-     * {@code statement.bad_range}, {@code statement.bad_to}, {@code statement.range_too_long}.
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.disabled},
+     * {@code document.encode_failed}, {@code document.render_failed},
+     * {@code document.render_rejected}, {@code document.render_unavailable},
+     * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
+     * {@code merchant.key_expired}, {@code merchant.key_mode_mismatch}, {@code merchant.not_found},
+     * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
+     * {@code merchant.unknown_key}, {@code referral.disabled}, {@code report.too_large},
+     * {@code request.body_read}, {@code request.control_char}, {@code request.duplicate_field},
+     * {@code request.nul_byte}, {@code request.overloaded}, {@code request.rate_limited},
+     * {@code request.too_deep}, {@code statement.bad_from}, {@code statement.bad_range},
+     * {@code statement.bad_to}, {@code statement.range_too_long}.
      *
      * @param query query parameters
      * @param options per-call options ({@code null} for the defaults)
@@ -670,24 +704,27 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Заказать тяжёлый отчёт (фоновая генерация)
+     * Order a heavy report (background generation)
      *
-     * <p>Синхронные отчётные ручки ограничены по объёму; отчёт за большой период закажите фоном:
-     * {@code kind} — {@code statement}/{@code fees}/{@code ledger}, период — до двух лет. Задача
-     * попадает в очередь и собирается в течение суток (обычно — минуты); статус —
-     * {@code POST /v1/documents/jobs/info}, готовый файл — {@code GET /v1/documents/jobs/file}.
-     * Повторный заказ с теми же параметрами при живой задаче возвращает её же. {@code format} —
-     * {@code pdf} (по умолчанию) или {@code csv}: CSV собирается БЕЗ вёрстки (для тяжёлой
-     * квартальной выписки — ноль нагрузки на рендер, грузится в Excel/1С). Квоты: не больше 3 задач
-     * в работе и 20 за сутки. Готовый отчёт хранится 7 суток, затем удаляется — скачайте и храните
-     * файл у себя.
+     * <p>Synchronous report endpoints are limited in volume; order a report for a long period in
+     * the background: {@code kind} — {@code statement}/{@code fees}/{@code ledger}, period — up to
+     * two years. The job is queued and built within a day (usually minutes); status —
+     * {@code POST /v1/documents/jobs/info}, the finished file —
+     * {@code GET /v1/documents/jobs/file}. Ordering again with the same parameters while a job is
+     * alive returns that job. {@code format} — {@code pdf} (default) or {@code csv}: CSV is built
+     * WITHOUT layout (for a heavy quarterly statement — zero rendering load, imports into
+     * Excel/1C). Quotas: at most 3 jobs in progress and 20 per day. A finished report is kept for 7
+     * days and then deleted — download it and keep the file yourself.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/documents/jobs} ({@code createDocumentJob}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.bad_format}, {@code document.bad_kind},
-     * {@code document.daily_quota}, {@code document.jobs_disabled}, {@code document.too_many_jobs},
-     * {@code document.unknown_lang}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.bad_format},
+     * {@code document.bad_kind}, {@code document.daily_quota}, {@code document.jobs_disabled},
+     * {@code document.too_many_jobs}, {@code document.unknown_lang}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code report.crashed}, {@code report.expired}, {@code report.too_large},
@@ -722,18 +759,22 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Статус фонового отчёта
+     * Background report status
      *
-     * <p>Статусы: {@code queued} → {@code processing} → {@code done} (в {@code file} — ссылка
-     * скачивания, размер, число строк и срок хранения) или {@code failed} (в {@code error} —
-     * машинный {@code code} и человекочитаемый {@code message}; например {@code report.too_large} —
-     * период надо разбить). {@code expired} — срок хранения вышел, закажите отчёт заново.
+     * <p>Statuses: {@code queued} → {@code processing} → {@code done} ({@code file} contains the
+     * download link, size, row count and retention period) or {@code failed} ({@code error}
+     * contains a machine {@code code} and a human-readable {@code message}; e.g.
+     * {@code report.too_large} — the period must be split). {@code expired} — the retention period
+     * is over, order the report again.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code POST /v1/documents/jobs/info} ({@code getDocumentJob}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.bad_job_id}, {@code document.job_not_found},
-     * {@code document.jobs_disabled}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.bad_job_id},
+     * {@code document.job_not_found}, {@code document.jobs_disabled}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code report.crashed}, {@code report.expired}, {@code report.too_large},
@@ -767,18 +808,21 @@ public final class Documents extends Resource {
     }
 
     /**
-     * Скачать готовый фоновый отчёт (PDF)
+     * Download a finished background report (PDF)
      *
-     * <p>{@code ?job_id=<UUID задачи>}. Отдаёт {@code application/pdf} под тем же ключом мерчанта —
-     * публичных ссылок на файл не существует. 409 {@code document.job_not_ready}, пока задача в
-     * работе; 404 {@code document.job_expired}, когда срок хранения вышел.
+     * <p>{@code ?job_id=<job UUID>}. Returns {@code application/pdf} under the same merchant key —
+     * public links to the file do not exist. 409 {@code document.job_not_ready} while the job is in
+     * progress; 404 {@code document.job_expired} once the retention period is over.
+     *
+     * <p>Requires role: Viewer when called with a CLI key.
      *
      * <p>{@code GET /v1/documents/jobs/file} ({@code downloadDocumentJobFile}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code document.bad_job_id}, {@code document.job_expired},
-     * {@code document.job_failed}, {@code document.job_not_found}, {@code document.job_not_ready},
-     * {@code document.jobs_disabled}, {@code internal}, {@code merchant.bad_signature},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code document.bad_job_id},
+     * {@code document.job_expired}, {@code document.job_failed}, {@code document.job_not_found},
+     * {@code document.job_not_ready}, {@code document.jobs_disabled}, {@code internal},
+     * {@code merchant.bad_signature}, {@code merchant.key_expired},
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code report.crashed}, {@code report.too_large}, {@code request.body_read},

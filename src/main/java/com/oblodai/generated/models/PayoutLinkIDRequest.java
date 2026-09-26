@@ -28,7 +28,7 @@ public final class PayoutLinkIDRequest implements WireObject {
     }
 
     /**
-     * Идентификатор выплатной ссылки (link_id из ответа создания).
+     * The payout link id (link_id from the creation response).
      *
      * @return the {@code link_id} field
      */
@@ -126,7 +126,7 @@ public final class PayoutLinkIDRequest implements WireObject {
         /**
          * Sets {@code link_id}.
          *
-         * <p>Идентификатор выплатной ссылки (link_id из ответа создания).
+         * <p>The payout link id (link_id from the creation response).
          *
          * @param linkId the value
          * @return this builder

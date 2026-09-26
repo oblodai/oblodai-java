@@ -32,7 +32,8 @@ public final class SummaryResult implements WireObject {
     }
 
     /**
-     * Выплат в работе прямо сейчас (статус не финальный), без возвратов; от окна не зависит.
+     * Payouts in progress right now (non-final status), excluding refunds; independent of the
+     * window.
      *
      * @return the {@code pending_payouts} field
      */
@@ -41,8 +42,8 @@ public final class SummaryResult implements WireObject {
     }
 
     /**
-     * Оборот окна: оплаченное по оплаченным счетам (paid, paid_over), созданным в окне, — по монете
-     * оплаты, по алфавиту. Пусто — оплат не было.
+     * Turnover for the window: amounts paid on paid invoices (paid, paid_over) created within the
+     * window — per payment coin, alphabetically. Empty — there were no payments.
      *
      * @return the {@code turnover} field
      */
@@ -150,7 +151,8 @@ public final class SummaryResult implements WireObject {
         /**
          * Sets {@code pending_payouts}.
          *
-         * <p>Выплат в работе прямо сейчас (статус не финальный), без возвратов; от окна не зависит.
+         * <p>Payouts in progress right now (non-final status), excluding refunds; independent of
+         * the window.
          *
          * @param pendingPayouts the value
          * @return this builder
@@ -163,8 +165,8 @@ public final class SummaryResult implements WireObject {
         /**
          * Sets {@code turnover}.
          *
-         * <p>Оборот окна: оплаченное по оплаченным счетам (paid, paid_over), созданным в окне, — по
-         * монете оплаты, по алфавиту. Пусто — оплат не было.
+         * <p>Turnover for the window: amounts paid on paid invoices (paid, paid_over) created
+         * within the window — per payment coin, alphabetically. Empty — there were no payments.
          *
          * @param turnover the value
          * @return this builder

@@ -28,7 +28,7 @@ public final class SplitRecipientOptInView implements WireObject {
     }
 
     /**
-     * true — другие мерчанты могут направлять доли на ваш баланс.
+     * true — other merchants may route shares to your balance.
      *
      * @return the {@code enabled} field
      */
@@ -126,7 +126,7 @@ public final class SplitRecipientOptInView implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>true — другие мерчанты могут направлять доли на ваш баланс.
+         * <p>true — other merchants may route shares to your balance.
          *
          * @param enabled the value
          * @return this builder

@@ -56,7 +56,7 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Сумма в currency, строкой; больше нуля
+     * The amount in currency, as a string; greater than zero
      *
      * @return the {@code amount} field
      */
@@ -65,7 +65,7 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Крипто-актив выплаты (USDT, BTC, …); фиат невозможен
+     * The payout crypto asset (USDT, BTC, …); fiat is not possible
      *
      * @return the {@code currency} field
      */
@@ -74,8 +74,8 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Если задан — получателю уходит письмо с кнопкой «Получить средства»; сбой доставки не
-     * отменяет создание ссылки
+     * If set, the recipient gets an email with a "Claim funds" button; a delivery failure does not
+     * cancel the link creation
      *
      * @return the {@code email} field, or {@code null} when absent
      */
@@ -84,8 +84,8 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Срок жизни ссылки в секундах, клампится в диапазон 3600–2592000 (час–30 суток); без поля или
-     * при 0 ссылка живёт 1 час, а не максимум — задавайте явно
+     * The link lifetime in seconds, clamped to the range 3600–2592000 (an hour to 30 days); without
+     * the field or at 0 the link lives 1 hour, not the maximum — set it explicitly
      *
      * @return the {@code expires_in_seconds} field, or {@code null} when absent
      */
@@ -94,9 +94,8 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Кто платит сетевую комиссию: "recipient" (по умолчанию — вычитается из суммы, получателю
-     * придёт меньше) или "merchant" (резервируется сумма плюс комиссия, получателю придёт ровно
-     * amount)
+     * Who pays the network fee: "recipient" (default — deducted from the amount, the recipient gets
+     * less) or "merchant" (the amount plus the fee is reserved, the recipient gets exactly amount)
      *
      * @return the {@code fee_bearer} field, or {@code null} when absent
      */
@@ -105,7 +104,7 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Сеть выплаты получателю (tron, bitcoin, …)
+     * The network of the payout to the recipient (tron, bitcoin, …)
      *
      * @return the {@code network} field
      */
@@ -114,7 +113,7 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Сообщение получателю (видно на странице получения и в письме)
+     * A message to the recipient (visible on the claim page and in the email)
      *
      * @return the {@code note} field, or {@code null} when absent
      */
@@ -123,9 +122,10 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Код получения — второй фактор к ссылке: "auto" — сгенерируем и вернём ОДИН раз в ответе, либо
-     * свой (6–64 видимых символа), пусто — без кода. Код передавайте получателю ОТДЕЛЬНЫМ от ссылки
-     * каналом (в письмо он не кладётся); после 10 неверных вводов ссылка запирается.
+     * Claim passcode — a second factor for the link: "auto" — we generate it and return it ONCE in
+     * the response, or your own (6–64 visible characters), empty — no passcode. Give the passcode
+     * to the recipient over a channel SEPARATE from the link (it is not included in the email);
+     * after 10 wrong attempts the link is locked.
      *
      * @return the {@code passcode} field, or {@code null} when absent
      */
@@ -134,11 +134,11 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Ваш ключ дедупликации ссылки, уникальный на мерчанта: повтор с тем же reference не
-     * зарезервирует деньги второй раз. В одиночном POST /v1/payout/link необязателен — без него
-     * ключом становится заголовок Idempotency-Key, а без обоих запрос отвергается
-     * (payoutlink.idempotency_required). В пачке POST /v1/payout/link/batch обязателен у каждой
-     * ссылки: Idempotency-Key пачки на элементы не переносится
+     * Your deduplication key for the link, unique per merchant: a retry with the same reference
+     * will not reserve the money a second time. Optional in a single POST /v1/payout/link — without
+     * it the Idempotency-Key header becomes the key, and without both the request is rejected
+     * (payoutlink.idempotency_required). Required on every link in a POST /v1/payout/link/batch:
+     * the batch's Idempotency-Key is not carried over to the items
      *
      * @return the {@code reference} field, or {@code null} when absent
      */
@@ -147,7 +147,7 @@ public final class PayoutLinkItem implements WireObject {
     }
 
     /**
-     * Заголовок — виден получателю на странице получения
+     * Title — visible to the recipient on the claim page
      *
      * @return the {@code title} field, or {@code null} when absent
      */
@@ -319,7 +319,7 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в currency, строкой; больше нуля
+         * <p>The amount in currency, as a string; greater than zero
          *
          * @param amount the value
          * @return this builder
@@ -332,7 +332,7 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма в currency, строкой; больше нуля
+         * <p>The amount in currency, as a string; greater than zero
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -344,7 +344,7 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Крипто-актив выплаты (USDT, BTC, …); фиат невозможен
+         * <p>The payout crypto asset (USDT, BTC, …); fiat is not possible
          *
          * @param currency the value
          * @return this builder
@@ -357,8 +357,8 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code email}.
          *
-         * <p>Если задан — получателю уходит письмо с кнопкой «Получить средства»; сбой доставки не
-         * отменяет создание ссылки
+         * <p>If set, the recipient gets an email with a "Claim funds" button; a delivery failure
+         * does not cancel the link creation
          *
          * @param email the value
          * @return this builder
@@ -371,8 +371,8 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code expires_in_seconds}.
          *
-         * <p>Срок жизни ссылки в секундах, клампится в диапазон 3600–2592000 (час–30 суток); без
-         * поля или при 0 ссылка живёт 1 час, а не максимум — задавайте явно
+         * <p>The link lifetime in seconds, clamped to the range 3600–2592000 (an hour to 30 days);
+         * without the field or at 0 the link lives 1 hour, not the maximum — set it explicitly
          *
          * @param expiresInSeconds the value
          * @return this builder
@@ -385,9 +385,9 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию: "recipient" (по умолчанию — вычитается из суммы,
-         * получателю придёт меньше) или "merchant" (резервируется сумма плюс комиссия, получателю
-         * придёт ровно amount)
+         * <p>Who pays the network fee: "recipient" (default — deducted from the amount, the
+         * recipient gets less) or "merchant" (the amount plus the fee is reserved, the recipient
+         * gets exactly amount)
          *
          * @param feeBearer the value
          * @return this builder
@@ -400,9 +400,9 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code fee_bearer}.
          *
-         * <p>Кто платит сетевую комиссию: "recipient" (по умолчанию — вычитается из суммы,
-         * получателю придёт меньше) или "merchant" (резервируется сумма плюс комиссия, получателю
-         * придёт ровно amount)
+         * <p>Who pays the network fee: "recipient" (default — deducted from the amount, the
+         * recipient gets less) or "merchant" (the amount plus the fee is reserved, the recipient
+         * gets exactly amount)
          *
          * @param feeBearer the value as the API sends it; one this SDK version does not know is
          *     accepted
@@ -415,7 +415,7 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code network}.
          *
-         * <p>Сеть выплаты получателю (tron, bitcoin, …)
+         * <p>The network of the payout to the recipient (tron, bitcoin, …)
          *
          * @param network the value
          * @return this builder
@@ -428,7 +428,7 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code note}.
          *
-         * <p>Сообщение получателю (видно на странице получения и в письме)
+         * <p>A message to the recipient (visible on the claim page and in the email)
          *
          * @param note the value
          * @return this builder
@@ -441,10 +441,10 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code passcode}.
          *
-         * <p>Код получения — второй фактор к ссылке: "auto" — сгенерируем и вернём ОДИН раз в
-         * ответе, либо свой (6–64 видимых символа), пусто — без кода. Код передавайте получателю
-         * ОТДЕЛЬНЫМ от ссылки каналом (в письмо он не кладётся); после 10 неверных вводов ссылка
-         * запирается.
+         * <p>Claim passcode — a second factor for the link: "auto" — we generate it and return it
+         * ONCE in the response, or your own (6–64 visible characters), empty — no passcode. Give
+         * the passcode to the recipient over a channel SEPARATE from the link (it is not included
+         * in the email); after 10 wrong attempts the link is locked.
          *
          * @param passcode the value
          * @return this builder
@@ -457,11 +457,11 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code reference}.
          *
-         * <p>Ваш ключ дедупликации ссылки, уникальный на мерчанта: повтор с тем же reference не
-         * зарезервирует деньги второй раз. В одиночном POST /v1/payout/link необязателен — без него
-         * ключом становится заголовок Idempotency-Key, а без обоих запрос отвергается
-         * (payoutlink.idempotency_required). В пачке POST /v1/payout/link/batch обязателен у каждой
-         * ссылки: Idempotency-Key пачки на элементы не переносится
+         * <p>Your deduplication key for the link, unique per merchant: a retry with the same
+         * reference will not reserve the money a second time. Optional in a single POST
+         * /v1/payout/link — without it the Idempotency-Key header becomes the key, and without both
+         * the request is rejected (payoutlink.idempotency_required). Required on every link in a
+         * POST /v1/payout/link/batch: the batch's Idempotency-Key is not carried over to the items
          *
          * @param reference the value
          * @return this builder
@@ -474,7 +474,7 @@ public final class PayoutLinkItem implements WireObject {
         /**
          * Sets {@code title}.
          *
-         * <p>Заголовок — виден получателю на странице получения
+         * <p>Title — visible to the recipient on the claim page
          *
          * @param title the value
          * @return this builder

@@ -28,8 +28,8 @@ public final class VRCSRequest implements WireObject {
     }
 
     /**
-     * true — включить автоконвертацию волатильных поступлений в USDT, false — выключить; без поля —
-     * только прочитать текущее состояние.
+     * true — enable auto-conversion of volatile incoming funds to USDT, false — disable it; without
+     * the field — only read the current state.
      *
      * @return the {@code enabled} field, or {@code null} when absent
      */
@@ -127,8 +127,8 @@ public final class VRCSRequest implements WireObject {
         /**
          * Sets {@code enabled}.
          *
-         * <p>true — включить автоконвертацию волатильных поступлений в USDT, false — выключить; без
-         * поля — только прочитать текущее состояние.
+         * <p>true — enable auto-conversion of volatile incoming funds to USDT, false — disable it;
+         * without the field — only read the current state.
          *
          * @param enabled the value
          * @return this builder

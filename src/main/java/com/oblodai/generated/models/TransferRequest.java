@@ -35,7 +35,7 @@ public final class TransferRequest implements WireObject {
     }
 
     /**
-     * Сумма перевода в currency.
+     * The transfer amount in currency.
      *
      * @return the {@code amount} field
      */
@@ -44,7 +44,7 @@ public final class TransferRequest implements WireObject {
     }
 
     /**
-     * Код валюты (криптовалюта).
+     * Currency code (cryptocurrency).
      *
      * @return the {@code currency} field
      */
@@ -53,8 +53,8 @@ public final class TransferRequest implements WireObject {
     }
 
     /**
-     * Ключ идемпотентности: повтор с тем же order_id — no-op. Настоятельно передавайте всегда,
-     * иначе повтор запроса при сетевом таймауте создаст второй перевод.
+     * Idempotency key: a retry with the same order_id is a no-op. Always pass it, otherwise
+     * retrying the request after a network timeout creates a second transfer.
      *
      * @return the {@code order_id} field, or {@code null} when absent
      */
@@ -168,7 +168,7 @@ public final class TransferRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода в currency.
+         * <p>The transfer amount in currency.
          *
          * @param amount the value
          * @return this builder
@@ -181,7 +181,7 @@ public final class TransferRequest implements WireObject {
         /**
          * Sets {@code amount}.
          *
-         * <p>Сумма перевода в currency.
+         * <p>The transfer amount in currency.
          *
          * @param amount the value as a decimal string, such as {@code "10.50"}
          * @return this builder
@@ -193,7 +193,7 @@ public final class TransferRequest implements WireObject {
         /**
          * Sets {@code currency}.
          *
-         * <p>Код валюты (криптовалюта).
+         * <p>Currency code (cryptocurrency).
          *
          * @param currency the value
          * @return this builder
@@ -206,8 +206,8 @@ public final class TransferRequest implements WireObject {
         /**
          * Sets {@code order_id}.
          *
-         * <p>Ключ идемпотентности: повтор с тем же order_id — no-op. Настоятельно передавайте
-         * всегда, иначе повтор запроса при сетевом таймауте создаст второй перевод.
+         * <p>Idempotency key: a retry with the same order_id is a no-op. Always pass it, otherwise
+         * retrying the request after a network timeout creates a second transfer.
          *
          * @param orderId the value
          * @return this builder
