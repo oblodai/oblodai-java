@@ -36,6 +36,12 @@ public final class WebhookEvent implements WebhookKinds {
         this.fields = Collections.unmodifiableMap(fields);
     }
 
+    /**
+     * The signed body field with the id of the object state (the contract's {@code
+     * x-oblodai-signing.webhook.event_id_field}).
+     */
+    static final String EVENT_ID_FIELD = "event_id";
+
     /** @return a kind of {@link Facts#KNOWN_WEBHOOK_KINDS}, or a newer kind this SDK does not know */
     public String type() {
         return (String) fields.get("type");
@@ -91,6 +97,30 @@ public final class WebhookEvent implements WebhookKinds {
         return fields.get("sequence") instanceof Number n ? n.longValue() : null;
     }
 
+    /**
+     * The dedupe key, from the signed body only: its {@code event_id} (the id of the object state,
+     * the same for every retry and resend of it), else — from a core that does not sign one yet —
+     * {@code type + ":" + id + ":" + sequence} (the id is {@link #objectId()}, else the body's {@code
+     * id} or {@code uuid}; a missing part is empty). The same concept as {@code event_key} in every
+     * Oblodai SDK.
+     *
+     * @return the key
+     */
+    public String eventKey() {
+        if (fields.get(EVENT_ID_FIELD) instanceof String stateId && !stateId.isEmpty()) {
+            return stateId;
+        }
+        String id = objectId();
+        if (id == null) id = fields.get("id") instanceof String s ? s : null;
+        if (id == null) id = uuid();
+        Long sequence = sequence();
+        return (type() == null ? "" : type())
+                + ":"
+                + (id == null ? "" : id)
+                + ":"
+                + (sequence == null ? "" : String.valueOf(sequence));
+    }
+
     /** @return the on-chain transaction id, or null */
     public String txid() {
         return fields.get("txid") instanceof String s ? s : null;
@@ -139,8 +169,16 @@ public final class WebhookEvent implements WebhookKinds {
     }
 
     private Object parse(String kind, Function<Object, ?> parse) {
+        // A core that predates the signed state id sends no event_id: read such a delivery with an
+        // empty one (eventKey() then falls back to type:id:sequence) rather than refuse an authentic
+        // delivery as unreadable.
+        Map<String, Object> body = fields;
+        if (!body.containsKey(EVENT_ID_FIELD)) {
+            body = new java.util.LinkedHashMap<>(fields);
+            body.put(EVENT_ID_FIELD, "");
+        }
         try {
-            return parse.apply(fields);
+            return parse.apply(body);
         } catch (IllegalArgumentException e) {
             throw new WebhookPayloadException(
                     "the " + kind + " event does not match the contract (" + e.getMessage() + ")");

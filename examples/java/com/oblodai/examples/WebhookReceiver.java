@@ -20,8 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <ol>
  *   <li>Verify over the raw request bytes; a re-serialized body no longer matches the signature.
- *   <li>Deduplicate on the event id ({@link WebhookDeliveryInfo#eventId()}): the same for every
- *       retry and every resend of one state.
+ *   <li>Always ignore a rehearsal ({@link WebhookDeliveryInfo#isTest()}, from the signed body).
+ *   <li>Deduplicate on the signed key ({@link WebhookDeliveryInfo#eventKey()}: the body's {@code
+ *       event_id}), the same for every retry and every resend of one state.
+ *       The id headers are not signed; never dedupe on them.
  *   <li>Drop stale events: keep the last {@code sequence} applied per object.
  * </ol>
  *
@@ -88,12 +90,11 @@ public final class WebhookReceiver {
         } catch (WebhookPayloadException unreadable) {
             return 400; // authentic, but not an event this receiver can read
         }
-        String key = delivery.eventId() != null ? delivery.eventId() : delivery.id();
-        if (key != null && !seen.add(key)) {
-            return 200; // already applied
-        }
         if (delivery.isTest()) {
             return 200; // a rehearsal: signed like a live delivery, but no money moved
+        }
+        if (!seen.add(delivery.eventKey())) {
+            return 200; // already applied
         }
         WebhookEvent event = delivery.event();
         // The object: its kind and the id the contract names for that kind (a conversion's is `id`,

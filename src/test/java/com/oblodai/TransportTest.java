@@ -176,7 +176,7 @@ class TransportTest {
 
     @Test
     void reSignsOnceWithTheServerClockWhenA401RevealsSkew() {
-        long serverNow = System.currentTimeMillis() / 1000 + 3600;
+        long serverNow = System.currentTimeMillis() / 1000 + 600;
         MockHttpClient http =
                 new MockHttpClient()
                         .apiError(
@@ -190,6 +190,71 @@ class TransportTest {
         assertEquals(2, http.calls().size());
         long signedAt = Long.parseLong(http.calls().get(1).header(SigningProtocol.HEADER_TIMESTAMP));
         assertTrue(Math.abs(signedAt - serverNow) < 5, "the retry signs with the gateway's clock");
+    }
+
+    /** Ruling R2: a 401 with a Date 23 h away never moves the signing clock, not even for a re-sign. */
+    @Test
+    void aFarDateOnASignatureFailureNeverMovesTheClock() {
+        long now = System.currentTimeMillis() / 1000;
+        MockHttpClient http =
+                new MockHttpClient()
+                        .apiError(
+                                401,
+                                "{\"code\":\"merchant.bad_signature\",\"retryable\":false}",
+                                "date",
+                                httpDate(now + 23 * 3600))
+                        .ok(BALANCE);
+        Oblodai oblodai = client(http).retry(RetryOptions.none()).build();
+        assertThrows(AuthenticationException.class, () -> oblodai.account().getBalance());
+        assertEquals(1, http.calls().size(), "no re-sign with an implausible Date");
+        assertEquals(0, oblodai.transport().clock().offset());
+        oblodai.account().getBalance();
+        long signedAt = Long.parseLong(http.calls().get(1).header(SigningProtocol.HEADER_TIMESTAMP));
+        assertTrue(Math.abs(signedAt - System.currentTimeMillis() / 1000) < 5);
+    }
+
+    /** Ruling R2: 401 bad_signature + Date, then a 404 on the re-signed attempt: the offset is discarded. */
+    @Test
+    void aMeasuredOffsetIsDiscardedUnlessTheReSignedAttemptSucceeds() {
+        long now = System.currentTimeMillis() / 1000;
+        MockHttpClient http =
+                new MockHttpClient()
+                        .apiError(
+                                401,
+                                "{\"code\":\"merchant.bad_signature\",\"retryable\":false}",
+                                "date",
+                                httpDate(now + 600))
+                        .apiError(404, "{\"code\":\"payment.not_found\",\"retryable\":false}")
+                        .ok(BALANCE);
+        Oblodai oblodai = client(http).retry(RetryOptions.none()).build();
+        OblodaiException error = assertThrows(OblodaiException.class, () -> oblodai.account().getBalance());
+        assertEquals("payment.not_found", error.code());
+        long resigned = Long.parseLong(http.calls().get(1).header(SigningProtocol.HEADER_TIMESTAMP));
+        assertTrue(Math.abs(resigned - (now + 600)) < 5, "the re-signed attempt uses the server time");
+        assertEquals(0, oblodai.transport().clock().offset(), "the offset was discarded");
+        oblodai.account().getBalance();
+        long later = Long.parseLong(http.calls().get(2).header(SigningProtocol.HEADER_TIMESTAMP));
+        assertTrue(Math.abs(later - System.currentTimeMillis() / 1000) < 5);
+    }
+
+    /** Ruling R2: a successful re-signed attempt makes the offset stick. */
+    @Test
+    void aMeasuredOffsetIsAdoptedAfterTheReSignedAttemptSucceeds() {
+        long now = System.currentTimeMillis() / 1000;
+        MockHttpClient http =
+                new MockHttpClient()
+                        .apiError(
+                                401,
+                                "{\"code\":\"merchant.bad_signature\",\"retryable\":false}",
+                                "date",
+                                httpDate(now + 600))
+                        .ok(BALANCE)
+                        .ok(BALANCE);
+        Oblodai oblodai = client(http).retry(RetryOptions.none()).build();
+        oblodai.account().getBalance();
+        oblodai.account().getBalance();
+        long later = Long.parseLong(http.calls().get(2).header(SigningProtocol.HEADER_TIMESTAMP));
+        assertTrue(Math.abs(later - (now + 600)) < 5);
     }
 
     @Test

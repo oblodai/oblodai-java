@@ -102,7 +102,7 @@ public final class Envelope {
 
     /** The error the transport raises when an answer redirects — the gateway never does. */
     public static ApiException redirect(int status, String location, Object raw, Integer retryAfter) {
-        String where = location == null ? "" : " to " + location;
+        String where = location == null ? "" : " to " + Redaction.redactUrl(location, null);
         return ApiErrors.from(
                 status,
                 new ErrorDetail(

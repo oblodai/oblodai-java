@@ -8,7 +8,8 @@ import java.util.Map;
  * @param total how many items match the query in total
  * @param perPage page size the gateway applied
  * @param offset offset of this page
- * @param hasPages the gateway's own "there is more" flag - iteration stops on it
+ * @param hasPages the gateway's own "there is more" flag; iteration stops on an empty page or once
+ *     the offset reaches {@code total}
  */
 public record Paginate(long total, long perPage, long offset, boolean hasPages) {
 

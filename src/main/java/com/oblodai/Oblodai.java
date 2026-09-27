@@ -272,7 +272,7 @@ public final class Oblodai implements AutoCloseable {
      *   <caption>Environment fallbacks</caption>
      *   <tr><td>{@code OBLODAI_PUBLIC_ID} / {@code OBLODAI_SECRET}</td><td>the API key pair</td></tr>
      *   <tr><td>{@code OBLODAI_BASE_URL}</td><td>API origin</td></tr>
-     *   <tr><td>{@code OBLODAI_ADMIN_TOKEN}</td><td>admin token of a self-hosted gateway</td></tr>
+     *   <tr><td>{@code OBLODAI_ADMIN_TOKEN}</td><td>ignored (deprecated; warns once)</td></tr>
      *   <tr><td>{@code OBLODAI_ALLOW_INSECURE=1}</td><td>permit a plain-http base URL</td></tr>
      *   <tr><td>{@code OBLODAI_LOG=debug|info|warn|error}</td><td>log to stderr</td></tr>
      * </table>
@@ -303,9 +303,16 @@ public final class Oblodai implements AutoCloseable {
         }
 
         /**
-         * @param adminToken admin token of a self-hosted gateway; only merchant provisioning sends it
+         * Ignored: the SDK never sends a raw admin token. Operator-only operations (store onboarding)
+         * need the operator signing channel, which the SDK does not implement; they fail with {@code
+         * sdk.operator_channel_unsupported} before any network call — use the dashboard. Setting it
+         * logs a one-time warning.
+         *
+         * @param adminToken ignored
          * @return this
+         * @deprecated ignored; the SDK never sends a raw admin token
          */
+        @Deprecated
         public Builder adminToken(String adminToken) {
             settings.adminToken = adminToken;
             return this;

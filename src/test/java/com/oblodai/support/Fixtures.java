@@ -56,7 +56,14 @@ public final class Fixtures {
      * @return an {@code {items, paginate}} result
      */
     public static String page(String items, long offset, boolean more) {
-        return "{\"items\":" + items + ",\"paginate\":{\"total\":100,\"per_page\":2,\"offset\":" + offset
+        // A consistent page: the last one's total is where it ends (the walk stops on offset >= total).
+        long total;
+        try {
+            total = more ? 100 : offset + new com.fasterxml.jackson.databind.ObjectMapper().readTree(items).size();
+        } catch (java.io.IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+        return "{\"items\":" + items + ",\"paginate\":{\"total\":" + total + ",\"per_page\":2,\"offset\":" + offset
                 + ",\"has_pages\":" + more + "}}";
     }
 

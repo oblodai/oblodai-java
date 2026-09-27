@@ -132,10 +132,11 @@ public final class AsyncPager<T> {
                 page -> {
                     boolean goOn = onPage.apply(page);
                     List<T> items = page.items();
-                    if (!goOn || items.isEmpty() || !page.hasPages()) {
+                    long next = at + items.size();
+                    // Only an empty page or reaching `total` ends the walk (ruling R11).
+                    if (!goOn || items.isEmpty() || next >= page.total()) {
                         return CompletableFuture.completedFuture(null);
                     }
-                    long next = at + items.size();
                     return walkPages(fetcher.fetch(limit, next), next, onPage);
                 });
     }

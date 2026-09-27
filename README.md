@@ -50,9 +50,10 @@ implementation("com.oblodai:oblodai-sdk:2.0.0")
 
 One API key signs every route: a public id `oblodai_<hex>` and a secret `oblodai_live_<hex>` from the
 [dashboard](https://my.oblodai.com) (sandbox: `test_oblodai_<hex>` / `oblodai_test_<hex>`). They
-fall back to `OBLODAI_PUBLIC_ID` and `OBLODAI_SECRET`. The only other credential is the admin token
-of a self-hosted gateway (`adminToken(...)`, `OBLODAI_ADMIN_TOKEN`), sent on the onboarding route
-alone.
+fall back to `OBLODAI_PUBLIC_ID` and `OBLODAI_SECRET`. The SDK never sends a raw admin token:
+store onboarding (`sandbox().onboardStore`) is operator-only and fails with
+`sdk.operator_channel_unsupported` before any request — use the dashboard. `adminToken(...)` and
+`OBLODAI_ADMIN_TOKEN` are deprecated and ignored (a one-time warning is logged).
 
 ## Quick start
 
@@ -251,8 +252,10 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 
 ## Webhooks
 
-Verify over the raw request bytes; deduplicate on `eventId()` (`X-Webhook-Event-Id`); never act on
-a test delivery. `event().asPayment()` and the other `as<Kind>()` accessors (one per webhook kind of
+Verify over the raw request bytes; always ignore a test delivery (`isTest()`, from the signed body);
+deduplicate on `eventKey()` (the signed body's `event_id`; from an older core, `type:id:sequence`). The `X-Webhook-Id`,
+`X-Webhook-Event-Id`, `X-Webhook-Event` and `X-Webhook-Test` headers are not signed and are only
+exposed as `unverified*()`. `event().asPayment()` and the other `as<Kind>()` accessors (one per webhook kind of
 the contract, generated in `WebhookKinds`) give the typed event, and `typed()` the model of any kind
 (`Facts.WEBHOOK_KINDS`); an event kind
 this SDK does not know is still delivered, with its raw `type()` and `fields()`.
@@ -304,8 +307,8 @@ println("${invoice.uuid()}: ${all.size} invoices")
 | --- | --- | --- |
 | `publicId(...)` / `secret(...)` | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET` | none |
 | `baseUrl(...)` | `OBLODAI_BASE_URL` | `https://api.oblodai.com` |
-| `adminToken(...)` | `OBLODAI_ADMIN_TOKEN` | none |
-| `allowInsecureBaseUrl(true)` | `OBLODAI_ALLOW_INSECURE=1` | https only, loopback excepted |
+| `adminToken(...)` | `OBLODAI_ADMIN_TOKEN` | deprecated, ignored |
+| `allowInsecureBaseUrl(true)` | `OBLODAI_ALLOW_INSECURE=1` | https only, loopback included; userinfo refused |
 | `logger(...)` | `OBLODAI_LOG=debug\|info\|warn\|error` | silent |
 | `timeout(Duration)` / `deadline(Duration)` | | 30 s per attempt / 90 s per call |
 | `retry(RetryOptions)` / `maxRetries(int)` | | 2 retries |

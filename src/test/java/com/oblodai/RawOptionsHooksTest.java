@@ -107,7 +107,6 @@ class RawOptionsHooksTest {
         MockHttpClient http = new MockHttpClient().apiError(503, DOWN).ok(BALANCE);
         Oblodai oblodai =
                 Clients.builder(http, new Clients.RecordingSleeper())
-                        .adminToken("adm")
                         .onRequest(requests::add)
                         .onResponse(responses::add)
                         .build();

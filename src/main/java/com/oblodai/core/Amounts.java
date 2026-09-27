@@ -70,6 +70,23 @@ public final class Amounts {
             throw floatAmount(value, path.isEmpty() ? "body" : path);
         }
         if (value instanceof BigDecimal d) {
+            // 1E+999999999 is a few bytes, its plain string a gigabyte: measure before expanding.
+            long plainLength =
+                    d.scale() <= 0
+                            ? (long) d.precision() - d.scale()
+                            : Math.max((long) d.precision(), (long) d.scale() + 1) + 1;
+            if (plainLength > com.oblodai.generated.SigningProtocol.MAX_BODY) {
+                throw new ConfigException(
+                        ConfigException.BODY_TOO_LARGE,
+                        "the amount at "
+                                + (path.isEmpty() ? "body" : path)
+                                + " has "
+                                + plainLength
+                                + " digits; the gateway accepts a body of at most "
+                                + com.oblodai.generated.SigningProtocol.MAX_BODY
+                                + " bytes",
+                        path.isEmpty() ? "body" : path);
+            }
             return d.toPlainString();
         }
         if (value instanceof Map<?, ?> map) {

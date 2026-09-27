@@ -110,7 +110,8 @@ public final class Pager<T> implements Iterable<T> {
                         next = started ? fetcher.fetch(limit, nextOffset) : firstPage();
                         started = true;
                         nextOffset += next.items().size();
-                        if (next.items().isEmpty() || !next.hasPages()) {
+                        // Only an empty page or reaching `total` ends the walk (ruling R11).
+                        if (next.items().isEmpty() || nextOffset >= next.total()) {
                             exhausted = true;
                         }
                         return true;

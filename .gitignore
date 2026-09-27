@@ -4,3 +4,6 @@ target/
 *.iml
 .vscode/
 .m2cache/
+.env
+.env.*
+!.env.example

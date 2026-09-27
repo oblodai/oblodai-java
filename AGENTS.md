@@ -13,7 +13,8 @@
 - Every method's last argument is an optional `RequestOptions`: `idempotencyKey`, `timeout`
   (`Duration`, per attempt), `maxRetries`, `extraHeaders`, `requestId` (`X-Request-ID`).
 - One API key signs every signed route (`publicId`/`secret`, or `OBLODAI_PUBLIC_ID` /
-  `OBLODAI_SECRET`); `adminToken` is sent on the onboarding route only. A route's `auth` is
+  `OBLODAI_SECRET`); the SDK never sends a raw admin token (`adminToken` is deprecated and ignored,
+  `onboard` routes fail with `sdk.operator_channel_unsupported` before the network). A route's `auth` is
   `public`, `key` or `onboard`.
 - Retries and keys come from the route table (`idempotent`, `safe`), never from the path. The SDK
   generates the idempotency key where the gateway deduplicates and reuses it on every attempt; a key
@@ -58,8 +59,9 @@ WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
         rawBody, WebhookHeaders.of(headers), WebhookVerifier.options(secret));
 ```
 
-Verify over the raw bytes; deduplicate on `delivery.eventId()` (`X-Webhook-Event-Id`); never act on
-`delivery.isTest()`; drop out-of-order events with `WebhookVerifier.isStale(event, lastSequence)`.
+Verify over the raw bytes; always ignore `delivery.isTest()` (signed body); deduplicate on
+`delivery.eventKey()` (the signed body's `event_id`, else `type:id:sequence`; the id/test headers are unsigned and
+only exposed as `unverified*()`); drop out-of-order events with `WebhookVerifier.isStale(event, lastSequence)`.
 `event.asPayment()` and the other `as<Kind>()` accessors (generated per webhook kind in
 `com.oblodai.generated.WebhookKinds` — never add one by hand) give the typed event; an unknown
 `type()` is still delivered with its `fields()`.

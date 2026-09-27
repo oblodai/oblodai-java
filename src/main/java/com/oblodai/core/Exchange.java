@@ -36,11 +36,12 @@ final class Exchange {
     /** The offset the current attempt was signed with. */
     long signedOffset;
 
-    /** The offset this call installed when it corrected the clock. */
-    long skewInstalled;
-
-    /** The offset that was in force before this call corrected the clock. */
-    long skewBefore;
+    /**
+     * An offset measured from a signature-failure {@code Date}, used for this call's re-signed
+     * attempt only: it becomes the client-wide offset once that attempt succeeds (2xx) and is
+     * discarded otherwise. {@code null} when there is none.
+     */
+    Long pendingOffset;
 
     private final AtomicReference<CompletableFuture<?>> inFlight = new AtomicReference<>();
     private volatile boolean cancelled;

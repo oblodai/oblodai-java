@@ -24,6 +24,10 @@ import java.util.Map;
  */
 final class ClientSettings {
 
+    /** The deprecated admin token is warned about once per process. */
+    private static final java.util.concurrent.atomic.AtomicBoolean ADMIN_TOKEN_WARNED =
+            new java.util.concurrent.atomic.AtomicBoolean();
+
     String publicId;
     String secret;
     String adminToken;
@@ -66,6 +70,15 @@ final class ClientSettings {
         }
 
         HttpClient client = httpClient;
+        if (client != null && client.followRedirects() != HttpClient.Redirect.NEVER) {
+            // A following client re-sends the signed headers, the idempotency key and (307/308) the
+            // body to the redirect target before the SDK can notice.
+            throw new ConfigException(
+                    ConfigException.BAD_CONFIG,
+                    "the injected HttpClient follows redirects; build it with"
+                            + " followRedirects(HttpClient.Redirect.NEVER)",
+                    "httpClient");
+        }
         if (client == null) {
             client =
                     HttpClient.newBuilder()
@@ -75,6 +88,15 @@ final class ClientSettings {
             ownsHttpClient = true;
         }
 
+        Logger resolvedLogger = logger != null ? logger : loggerFromEnvironment();
+        if (firstSet(adminToken, env("OBLODAI_ADMIN_TOKEN"), null) != null
+                && ADMIN_TOKEN_WARNED.compareAndSet(false, true)) {
+            resolvedLogger.warn(
+                    "adminToken / OBLODAI_ADMIN_TOKEN is deprecated and ignored: the SDK never sends a"
+                            + " raw admin token; operator operations need the dashboard",
+                    Map.of());
+        }
+
         return new Transport(
                 new Transport.Config(
                         resolvedBaseUrl,
@@ -82,11 +104,11 @@ final class ClientSettings {
                         client,
                         retry,
                         clock != null ? clock : new SkewCorrectingClock(),
-                        logger != null ? logger : loggerFromEnvironment(),
+                        resolvedLogger,
                         timeoutMs,
                         deadlineMs,
                         Map.copyOf(headers),
-                        firstSet(adminToken, env("OBLODAI_ADMIN_TOKEN"), null),
+                        null,
                         userAgent(),
                         Json.mapper(),
                         hooks,
@@ -185,32 +207,33 @@ final class ClientSettings {
     }
 
     private static void assertBaseUrl(String baseUrl, boolean allowInsecure) {
+        // Never echo the URL itself: it may carry credentials.
         URI parsed;
         try {
             parsed = new URI(baseUrl);
         } catch (Exception e) {
-            throw new ConfigException(
-                    ConfigException.BAD_CONFIG, "baseUrl is not a valid URL: " + baseUrl, "baseUrl");
+            throw new ConfigException(ConfigException.BAD_CONFIG, "baseUrl is not a valid URL", "baseUrl");
         }
         if (parsed.getScheme() == null || parsed.getHost() == null) {
+            throw new ConfigException(ConfigException.BAD_CONFIG, "baseUrl is not a valid URL", "baseUrl");
+        }
+        if (parsed.getRawUserInfo() != null) {
             throw new ConfigException(
-                    ConfigException.BAD_CONFIG, "baseUrl is not a valid URL: " + baseUrl, "baseUrl");
+                    ConfigException.BAD_CONFIG,
+                    "baseUrl must not carry credentials (user:pass@); the SDK signs requests itself",
+                    "baseUrl");
         }
         if (parsed.getScheme().equals("https")) return;
         String host = parsed.getHost();
-        boolean loopback =
-                host.equals("localhost")
-                        || host.equals("127.0.0.1")
-                        || host.equals("[::1]")
-                        || host.equals("::1");
-        if (parsed.getScheme().equals("http") && (allowInsecure || loopback)) return;
+        if (parsed.getScheme().equals("http") && allowInsecure) return;
         throw new ConfigException(
                 ConfigException.BAD_CONFIG,
                 "baseUrl must use https (got "
                         + parsed.getScheme()
                         + "://"
                         + host
-                        + "); set allowInsecureBaseUrl(true) for a local gateway",
+                        + "); set allowInsecureBaseUrl(true) (or OBLODAI_ALLOW_INSECURE=1) for a local"
+                        + " gateway",
                 "baseUrl");
     }
 }

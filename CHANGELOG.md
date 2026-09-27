@@ -7,6 +7,47 @@ the line generated from the gateway's OpenAPI contract.
 
 ## Unreleased
 
+### Security
+
+- **The raw admin token is never sent.** `sandbox().onboardStore` (any `onboard` route) now fails
+  with `ConfigException` `sdk.operator_channel_unsupported` ("operator channel is not supported by
+  the SDK; use the dashboard") before any network call: the gateway accepts it only over the
+  operator signing channel, which the SDK does not implement. `Builder.adminToken` is deprecated and
+  ignored, `OBLODAI_ADMIN_TOKEN` is ignored; setting either logs a one-time warning.
+  `RequestBuilder.build` lost its `adminToken` parameter.
+- **Webhooks: dedupe and rehearsal come from the signed body only.** `WebhookDeliveryInfo` gains
+  `eventKey()` (the signed body's `event_id`, else `type:id:sequence` from an older core; also
+  `WebhookEvent.eventKey()`), and
+  `isTest()` reads only the body's `test` flag. The unsigned `X-Webhook-*` headers moved to
+  `unverifiedDeliveryId()`, `unverifiedEventId()`, `unverifiedEventType()`,
+  `unverifiedEventTime()` and `unverifiedTestHeader()` (breaking: `id()`, `eventId()`,
+  `eventType()` and `eventTime()` are gone). Docs and the receiver example ignore test deliveries
+  first and dedupe on `eventKey()`.
+- **Webhooks from an older core still read.** `typed()`/`as()` read a delivery body without the (now
+  signed) `event_id` with an empty one instead of refusing it as `webhook.bad_payload`; `eventKey()`
+  then falls back to `type:id:sequence`.
+- **Clock correction is bounded and confirmed.** A signature-failure `Date` more than ±900 s away
+  is ignored, and a measured offset becomes the client-wide one only after the re-signed attempt
+  succeeds (2xx); otherwise it is discarded. `SkewCorrectingClock.MAX_PLAUSIBLE_OFFSET_SECONDS`
+  (24 h) is deprecated in favour of `MAX_CORRECTION_SECONDS` (900).
+- **Redaction.** Model `toString` hides `claimUrl` (it embeds the claim token), `deviceCode`,
+  `documentUrl` (a signed link) and API keys. Hook `RequestInfo.url()` and redirect errors hide
+  `/v1/claim/{token}`, `/v1/aml/{token}`, signed-link query parameters (`sig`, `exp`, `token`) and
+  userinfo; hook request and response headers hide every secret-bearing header (`Authorization`,
+  `X-Api-Key`, `X-Claim-Passcode`, cookies, …).
+- **Base URL.** Credentials in the base URL (`user:pass@`) are refused and never echoed, and plain
+  `http` now needs `allowInsecureBaseUrl(true)` / `OBLODAI_ALLOW_INSECURE=1` for loopback too. An
+  injected `HttpClient` that follows redirects is refused.
+- **Request size.** A body over the contract's `MAX_BODY`, or a decimal whose plain form would be
+  larger (`1E+999999999`), is refused with `sdk.body_too_large` before it is sent.
+- **Files.** `FileResult.filename()` is a bare base name (no directories or control characters,
+  never `.`/`..`). `FileResult.writeTo(path)` no longer overwrites an existing file and creates it
+  0600; `writeTo(path, true)` replaces explicitly.
+- **Pagination** stops only on an empty page or once the offset reaches `total`.
+- **CI/release**: the conformance suite runs against a vendored snapshot in `contract/`
+  (`scripts/vendor_contract.sh`, checked by `make ci`); third-party actions are pinned to commit
+  SHAs. `.env*` is git-ignored.
+
 ### Added
 
 - `client.cliLogin()` — `start`, `poll`, `logout` (blocking and async): the browser login of the

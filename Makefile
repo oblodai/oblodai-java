@@ -15,14 +15,18 @@ MVN := docker run --rm --label oblodai.sdkcheck=1 --memory 3g \
 	$(if $(HAS_BACKEND),-v $(BACKEND):/backend:ro -e OBLODAI_BACKEND=/backend,) \
 	-w /src $(MAVEN_IMAGE) mvn -B -T 1
 
-.PHONY: ci drift verify package-check test conformance
+.PHONY: ci drift contract verify package-check test conformance
 
-ci: drift verify package-check  ## every gate
+ci: drift contract verify package-check  ## every gate
 	@echo "all gates green"
 
 drift:  ## generated code == what tools/sdkgen makes of the contract, names.lock holds
 	@echo "== generated code drift"
 	@OBLODAI_BACKEND=$(BACKEND) ./scripts/check_generated.sh $(if $(OBLODAI_BACKEND),--require,)
+
+contract:  ## the vendored contract/ snapshot (what CI runs the conformance suite on) matches the backend
+	@echo "== vendored contract snapshot"
+	@OBLODAI_BACKEND=$(BACKEND) ./scripts/vendor_contract.sh --check
 
 verify:  ## compile with -Xlint -Werror, unit + conformance tests, jar + sources + javadoc (doclint)
 	@echo "== build, lint, tests, conformance, package"

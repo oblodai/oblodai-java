@@ -27,12 +27,17 @@ import java.util.function.LongSupplier;
  *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT}: the event name (the events of each kind:
  *       Facts.WEBHOOK_KINDS)
  *   <li>{@value SigningProtocol#HEADER_WEBHOOK_ID}: stable per delivery, identical across retries
- *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT_ID}: the id of the state the delivery carries —
- *       deduplicate on it
+ *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT_ID}: the id of the state the delivery carries
  *   <li>{@value SigningProtocol#HEADER_WEBHOOK_EVENT_TIME}: unix seconds when the state change
  *       committed
- *   <li>{@value #HEADER_TEST}: true on a rehearsal delivery — no money moved
+ *   <li>{@value #HEADER_TEST}: true on a rehearsal delivery
  * </ul>
+ *
+ * <p>The signature covers only the timestamp and the body: the event, id, event-id, event-time and
+ * test headers are NOT signed and are exposed only as the {@code unverified*} components of {@link
+ * WebhookDeliveryInfo}. Deduplicate on {@link WebhookDeliveryInfo#eventKey()} (the signed body's
+ * {@code event_id}) and always ignore a delivery whose signed body says
+ * {@code test: true} ({@link WebhookDeliveryInfo#isTest()}).
  *
  * <p>Always verify over the <b>raw request bytes</b>. A re-serialized parse will not match: JSON
  * round-trips are not byte-stable, and the signature covers bytes.
@@ -236,7 +241,7 @@ public final class WebhookVerifier {
      * @param rawBody the exact request bytes
      * @param headers the request headers
      * @param options the endpoint secret and freshness window
-     * @return the event, the delivery id, the event type and the times
+     * @return the event, its signed dedupe key and the (unsigned) delivery headers
      * @throws SignatureException when the signature, the timestamp or the headers do not hold up
      * @throws WebhookPayloadException when the delivery is authentic but its body is not an event
      */
@@ -299,15 +304,18 @@ public final class WebhookVerifier {
         if (eventTimeHeader != null && eventTimeHeader.trim().matches("\\d+")) {
             eventTime = Long.valueOf(eventTimeHeader.trim());
         }
-        boolean isTest = isTrue(headers.first(HEADER_TEST)) || isTestEvent(event);
+        // From the signed body only: the test header is not covered by the MAC, and trusting it would
+        // let a replayer turn a live payment into an ignored "rehearsal".
         return new WebhookDeliveryInfo(
                 event,
+                event.eventKey(),
                 headers.first(HEADER_ID),
                 headers.first(HEADER_EVENT_ID),
                 headers.first(HEADER_EVENT),
                 eventTime,
+                isTrue(headers.first(HEADER_TEST)),
                 timestamp,
-                isTest);
+                isTestEvent(event));
     }
 
     private static boolean isTrue(String header) {

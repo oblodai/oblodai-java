@@ -75,7 +75,7 @@ class KotlinExtensionsTest {
         assertEquals(listOf("a", "b", "c"), uuids)
 
         val blocking =
-            MockHttpClient().ok(page(Fixtures.payments("a", "b"), 0, false))
+            MockHttpClient().ok(Fixtures.page(Fixtures.payments("a", "b"), 0, false))
         assertEquals(
             listOf("a", "b"),
             client(blocking).payments().listHistory().asSequence().map { it.uuid() }.toList(),

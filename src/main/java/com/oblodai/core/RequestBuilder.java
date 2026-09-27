@@ -22,8 +22,8 @@ public final class RequestBuilder {
      * Headers the SDK owns, plus the ones the JDK client refuses to let a caller set. A caller
      * header whose name matches one of these — case-insensitively — is dropped: the SDK's value
      * wins, and the request never goes out with two of anything the signature or the gateway reads.
-     * {@code X-Admin-Token} is on the list because it is a credential the transport attaches to
-     * onboarding routes only; a client-wide copy of it must not ride along on every call.
+     * {@code X-Admin-Token} is on the list because the SDK never sends a raw admin token, not even
+     * one a caller put in its own headers.
      */
     private static final Set<String> RESERVED_HEADERS =
             Set.of(
@@ -76,7 +76,6 @@ public final class RequestBuilder {
      * @param ts unix seconds to sign with
      * @param userAgent the SDK's user agent
      * @param extraHeaders caller headers; ones colliding with an SDK-owned header are dropped
-     * @param adminToken admin token to attach, on the onboarding routes that take one; null otherwise
      * @param requestId the call's {@code X-Request-ID}, or null
      * @return the request to send
      */
@@ -91,7 +90,6 @@ public final class RequestBuilder {
             long ts,
             String userAgent,
             Map<String, String> extraHeaders,
-            String adminToken,
             String requestId) {
 
         String path = joinPath(baseUrl, fillPath(route.path(), pathParams));
@@ -109,7 +107,6 @@ public final class RequestBuilder {
                 headers.put(e.getKey(), e.getValue());
             }
         }
-        if (adminToken != null) headers.put(Signing.HEADER_ADMIN_TOKEN, adminToken);
         headers.put("Accept", "application/json");
         headers.put("User-Agent", userAgent);
         boolean hasBody = !route.method().equals("GET");
@@ -166,7 +163,7 @@ public final class RequestBuilder {
                             + name
                             + "\" is set by the SDK itself and cannot be overridden"
                             + (name.equalsIgnoreCase(Signing.HEADER_ADMIN_TOKEN)
-                                    ? "; use adminToken(...), which sends it on onboarding routes only"
+                                    ? "; the SDK never sends a raw admin token"
                                     : ""),
                     name);
         }

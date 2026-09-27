@@ -97,7 +97,7 @@ public final class Calls {
 
     /**
      * @param disposition a {@code Content-Disposition} header, or null
-     * @return the file name it carries, or null
+     * @return the bare file name it carries ({@link #safeFilename}), or null
      */
     public static String filename(String disposition) {
         if (disposition == null) {
@@ -105,10 +105,35 @@ public final class Calls {
         }
         Matcher utf8 = FILENAME_UTF8.matcher(disposition);
         if (utf8.find()) {
-            return URLDecoder.decode(utf8.group(1).replace("+", "%2B"), StandardCharsets.UTF_8);
+            String decoded;
+            try {
+                decoded = URLDecoder.decode(utf8.group(1).replace("+", "%2B"), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            return safeFilename(decoded);
         }
         Matcher plain = FILENAME_PLAIN.matcher(disposition);
-        return plain.find() ? plain.group(1) : null;
+        return plain.find() ? safeFilename(plain.group(1)) : null;
+    }
+
+    /**
+     * The last path component of a server-supplied name, with control characters dropped; null for
+     * an empty name, {@code .} or {@code ..}. A hostile {@code Content-Disposition} cannot steer a
+     * save outside the caller's directory.
+     *
+     * @param name a file name as the server sent it
+     * @return a safe base name, or null
+     */
+    public static String safeFilename(String name) {
+        if (name == null) return null;
+        int cut = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+        String base = name.substring(cut + 1);
+        StringBuilder clean = new StringBuilder();
+        base.codePoints().filter(c -> !Character.isISOControl(c)).forEach(clean::appendCodePoint);
+        String out = clean.toString().strip();
+        if (out.isEmpty() || out.equals(".") || out.equals("..")) return null;
+        return out;
     }
 
 }

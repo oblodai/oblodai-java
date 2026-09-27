@@ -51,8 +51,10 @@ implementation("com.oblodai:oblodai-sdk:2.0.0")
 Один API-ключ подписывает все маршруты: публичный идентификатор `oblodai_<hex>` и секрет
 `oblodai_live_<hex>` из [кабинета](https://my.oblodai.com) (песочница: `test_oblodai_<hex>` /
 `oblodai_test_<hex>`). Без явной передачи берутся из `OBLODAI_PUBLIC_ID` и `OBLODAI_SECRET`.
-Единственный другой секрет — админ-токен своего шлюза (`adminToken(...)`, `OBLODAI_ADMIN_TOKEN`),
-он уходит только на маршрут подключения магазина.
+SDK никогда не отправляет админ-токен в открытом виде: подключение магазина
+(`sandbox().onboardStore`) доступно только оператору и падает с `sdk.operator_channel_unsupported`
+до отправки запроса — пользуйтесь кабинетом. `adminToken(...)` и `OBLODAI_ADMIN_TOKEN` устарели и
+игнорируются (один раз пишется предупреждение).
 
 ## Быстрый старт
 
@@ -251,8 +253,10 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 
 ## Вебхуки
 
-Проверяйте подпись по сырым байтам запроса; дедуплицируйте по `eventId()` (`X-Webhook-Event-Id`);
-не действуйте по тестовой доставке. `event().asPayment()` и другие доступы `as<Вид>()` (по одному на
+Проверяйте подпись по сырым байтам запроса; всегда пропускайте тестовую доставку (`isTest()`, из
+подписанного тела); дедуплицируйте по `eventKey()` (`event_id` из подписанного тела; от старого ядра — `type:id:sequence`).
+Заголовки `X-Webhook-Id`, `X-Webhook-Event-Id`, `X-Webhook-Event` и `X-Webhook-Test` не подписаны и
+доступны только как `unverified*()`. `event().asPayment()` и другие доступы `as<Вид>()` (по одному на
 вид вебхука контракта, генерируются в `WebhookKinds`) — типизированное событие, `typed()` — модель
 события любого вида контракта
 (`Facts.WEBHOOK_KINDS`); событие незнакомого вида всё равно доставляется, с исходным `type()` и
@@ -305,8 +309,8 @@ println("${invoice.uuid()}: ${all.size} invoices")
 | --- | --- | --- |
 | `publicId(...)` / `secret(...)` | `OBLODAI_PUBLIC_ID` / `OBLODAI_SECRET` | нет |
 | `baseUrl(...)` | `OBLODAI_BASE_URL` | `https://api.oblodai.com` |
-| `adminToken(...)` | `OBLODAI_ADMIN_TOKEN` | нет |
-| `allowInsecureBaseUrl(true)` | `OBLODAI_ALLOW_INSECURE=1` | только https, кроме loopback |
+| `adminToken(...)` | `OBLODAI_ADMIN_TOKEN` | устарел, игнорируется |
+| `allowInsecureBaseUrl(true)` | `OBLODAI_ALLOW_INSECURE=1` | только https, и для loopback тоже; userinfo запрещён |
 | `logger(...)` | `OBLODAI_LOG=debug\|info\|warn\|error` | молчит |
 | `timeout(Duration)` / `deadline(Duration)` | | 30 с на попытку / 90 с на вызов |
 | `retry(RetryOptions)` / `maxRetries(int)` | | 2 повтора |

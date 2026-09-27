@@ -356,7 +356,13 @@ class ConformanceTest {
                         d.path("payload").asText().getBytes(java.nio.charset.StandardCharsets.UTF_8),
                         WebhookHeaders.of(sent),
                         WebhookVerifier.options(secret).clock(() -> ts));
-        assertEquals(rehearsal, delivery.isTest(), "isTest (rehearsal header " + src.testHeader() + ")");
+        // Ruling R1: the rehearsal header is not signed, so it is reported only as
+        // unverifiedTestHeader; isTest follows the signed body (which the suite's bodies never flag).
+        assertEquals(
+                rehearsal,
+                delivery.unverifiedTestHeader(),
+                "unverifiedTestHeader (rehearsal header " + src.testHeader() + ")");
+        assertEquals(delivery.event().test(), delivery.isTest(), "isTest comes from the signed body");
         String kind = d.path("kind").asText();
         assertTrue(WebhookVerifier.isKnownEvent(delivery.event()), kind);
         assertEquals(kind, delivery.event().type());
@@ -368,10 +374,10 @@ class ConformanceTest {
                             Object got =
                                     switch (e.getValue().asText()) {
                                         case "" -> want;
-                                        case "id" -> delivery.id();
-                                        case "event_id" -> delivery.eventId();
-                                        case "event_type" -> delivery.eventType();
-                                        case "event_time" -> String.valueOf(delivery.eventTime());
+                                        case "id" -> delivery.unverifiedDeliveryId();
+                                        case "event_id" -> delivery.unverifiedEventId();
+                                        case "event_type" -> delivery.unverifiedEventType();
+                                        case "event_time" -> String.valueOf(delivery.unverifiedEventTime());
                                         case "sent_at" -> String.valueOf(delivery.sentAt());
                                         default -> throw new AssertionError(
                                                 "the delivery info has no field " + e.getValue() + " for " + e.getKey());

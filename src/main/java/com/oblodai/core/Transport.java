@@ -63,7 +63,8 @@ public final class Transport {
      * @param timeoutMs default per-attempt timeout
      * @param deadlineMs default overall budget per call
      * @param headers extra headers on every request
-     * @param adminToken admin token of a self-hosted gateway; only onboarding routes send it
+     * @param adminToken ignored and always {@code null} from the client builder: the SDK never sends
+     *     a raw admin token (deprecated)
      * @param userAgent the SDK's user agent
      * @param mapper JSON mapper
      * @param hooks request and response hooks

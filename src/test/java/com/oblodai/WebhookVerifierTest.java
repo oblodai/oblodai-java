@@ -126,7 +126,7 @@ class WebhookVerifierTest {
     }
 
     @Test
-    void flagsRehearsalDeliveriesFromEitherTheHeaderOrTheBody() {
+    void flagsRehearsalDeliveriesFromTheSignedBodyOnly() {
         WebhookHeaders live = headers(Signing.signWebhook("whsec", TS, BODY), null);
         assertFalse(
                 WebhookVerifier.verifyDelivery(
@@ -147,7 +147,8 @@ class WebhookVerifierTest {
         assertTrue(WebhookVerifier.isTestEvent(fromBody.event()));
         assertTrue(fromBody.event().test());
 
-        // Only the header carries it: still a rehearsal, though the body alone cannot tell.
+        // Ruling R1: only the unsigned header carries it — a replayer adding it to a live delivery
+        // must not turn it into an ignored rehearsal.
         Map<String, String> withHeader = new LinkedHashMap<>();
         withHeader.put(SigningProtocol.HEADER_WEBHOOK_TIMESTAMP.toLowerCase(java.util.Locale.ROOT), String.valueOf(TS));
         withHeader.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE.toLowerCase(java.util.Locale.ROOT), Signing.signWebhook("whsec", TS, BODY));
@@ -157,8 +158,45 @@ class WebhookVerifierTest {
                         BODY.getBytes(StandardCharsets.UTF_8),
                         WebhookHeaders.of(withHeader),
                         WebhookVerifier.options("whsec").clock(() -> TS));
-        assertTrue(fromHeader.isTest());
+        assertFalse(fromHeader.isTest(), "the unsigned header is not trusted");
+        assertTrue(fromHeader.unverifiedTestHeader());
         assertFalse(WebhookVerifier.isTestEvent(fromHeader.event()));
+    }
+
+    /** Ruling R1: the dedupe key comes from the signed body; rewritten id headers do not change it. */
+    @Test
+    void theDedupeKeyComesFromTheSignedBodyNotTheHeaders() {
+        String signature = Signing.signWebhook("whsec", TS, BODY);
+        Map<String, String> first = new LinkedHashMap<>();
+        first.put(SigningProtocol.HEADER_WEBHOOK_TIMESTAMP, String.valueOf(TS));
+        first.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE, signature);
+        first.put(SigningProtocol.HEADER_WEBHOOK_EVENT_ID, "e-1");
+        first.put(SigningProtocol.HEADER_WEBHOOK_ID, "d-1");
+        Map<String, String> replay = new LinkedHashMap<>(first);
+        replay.put(SigningProtocol.HEADER_WEBHOOK_EVENT_ID, "e-forged");
+        replay.put(SigningProtocol.HEADER_WEBHOOK_ID, "d-forged");
+        byte[] body = BODY.getBytes(StandardCharsets.UTF_8);
+        WebhookDeliveryInfo a =
+                WebhookVerifier.verifyDelivery(
+                        body, WebhookHeaders.of(first), WebhookVerifier.options("whsec").clock(() -> TS));
+        WebhookDeliveryInfo b =
+                WebhookVerifier.verifyDelivery(
+                        body, WebhookHeaders.of(replay), WebhookVerifier.options("whsec").clock(() -> TS));
+        assertEquals(a.eventKey(), b.eventKey());
+        assertEquals("e-forged", b.unverifiedEventId());
+        assertEquals(a.event().eventKey(), a.eventKey());
+        assertTrue(a.eventKey().endsWith(":7"), a.eventKey());
+
+        // A core that signs the state id: the body's event_id is the key, whatever the headers say.
+        String signedState = BODY.replace("\"sequence\":7", "\"sequence\":7,\"event_id\":\"st-42\"");
+        Map<String, String> withState = new LinkedHashMap<>(replay);
+        withState.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE, Signing.signWebhook("whsec", TS, signedState));
+        WebhookDeliveryInfo c =
+                WebhookVerifier.verifyDelivery(
+                        signedState.getBytes(StandardCharsets.UTF_8),
+                        WebhookHeaders.of(withState),
+                        WebhookVerifier.options("whsec").clock(() -> TS));
+        assertEquals("st-42", c.eventKey());
     }
 
     @Test

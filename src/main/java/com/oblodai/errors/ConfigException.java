@@ -34,6 +34,15 @@ public class ConfigException extends OblodaiException {
     public static final String BAD_HEADER = "sdk.bad_header";
 
     /**
+     * An operator-only operation (store onboarding): the gateway accepts it only over the operator
+     * signing channel, which the SDK does not implement. Use the dashboard.
+     */
+    public static final String OPERATOR_CHANNEL_UNSUPPORTED = "sdk.operator_channel_unsupported";
+
+    /** The request body is larger than the gateway accepts. */
+    public static final String BODY_TOO_LARGE = "sdk.body_too_large";
+
+    /**
      * @param code one of the {@code sdk.*} constants on this class
      * @param message what is wrong and how to fix it
      * @param field the option or argument at fault, when there is one

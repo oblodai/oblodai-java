@@ -82,7 +82,7 @@ class TransportSafetyTest {
 
     @Test
     void concurrentCallsOnASkewedHostAllSucceedAfterOneCorrection() throws Exception {
-        long serverNow = System.currentTimeMillis() / 1000L + 3600;
+        long serverNow = System.currentTimeMillis() / 1000L + 600;
         MockHttpClient http = new MockHttpClient().withServerClock(serverNow);
         for (int i = 0; i < 64; i++) http.ok(BALANCE);
         Oblodai oblodai = client(http).retry(RetryOptions.none()).build();
@@ -111,7 +111,7 @@ class TransportSafetyTest {
 
         assertEquals(callers, succeeded.get(), "failures: " + failures);
         long offset = oblodai.transport().clock().offset();
-        assertTrue(Math.abs(offset - 3600) <= 5, "the learned offset is the server's, got " + offset);
+        assertTrue(Math.abs(offset - 600) <= 5, "the learned offset is the server's, got " + offset);
     }
 
     @Test
@@ -139,7 +139,8 @@ class TransportSafetyTest {
                 assertThrows(
                         ConfigException.class,
                         () -> client(new MockHttpClient()).header("x-admin-token", "sneaked"));
-        assertTrue(adminToken.getMessage().contains("adminToken"), adminToken.getMessage());
+        assertTrue(
+                adminToken.getMessage().contains("never sends a raw admin token"), adminToken.getMessage());
     }
 
     @Test
@@ -175,16 +176,30 @@ class TransportSafetyTest {
                 ConfigException.class, () -> RequestOptions.of().extraHeader("X-Note", "two\r\nlines"));
     }
 
+    /**
+     * Ruling R4: the SDK never sends a raw admin token, and the operator-only onboarding route is
+     * refused with a config error before any request goes out.
+     */
     @Test
-    void theAdminTokenRidesOnlyOnOnboardingRoutes() {
+    @SuppressWarnings("deprecation")
+    void theAdminTokenIsNeverSentAndOnboardingIsRefusedBeforeTheNetwork() {
         MockHttpClient http = new MockHttpClient().ok(BALANCE).ok("{\"created\":true,\"project_id\":\"p1\",\"merchant_id\":\"m1\",\"api_key\":{\"public_id\":\"pk\",\"secret\":\"sk\"}}");
         Oblodai oblodai = client(http).adminToken("adm").build();
 
         oblodai.account().getBalance();
-        oblodai.sandbox().onboardStore("m1");
+        ConfigException refused =
+                assertThrows(ConfigException.class, () -> oblodai.sandbox().onboardStore("m1"));
+        assertEquals(ConfigException.OPERATOR_CHANNEL_UNSUPPORTED, refused.code());
+        assertTrue(refused.getMessage().contains("use the dashboard"), refused.getMessage());
+        assertEquals(1, http.calls().size(), "no request went out for onboarding");
+        assertEquals(null, http.calls().get(0).header("x-admin-token"));
+        assertTrue(!oblodai.transport().config().toString().contains("adm,"));
+        assertEquals(null, oblodai.transport().config().adminToken(), "the token is not even held");
 
-        assertEquals(null, http.calls().get(0).header("x-admin-token"), "not on a merchant route");
-        assertEquals("adm", http.calls().get(1).header("x-admin-token"));
+        MockHttpClient plain = new MockHttpClient();
+        Oblodai without = client(plain).build();
+        assertThrows(ConfigException.class, () -> without.sandbox().onboardStore("m1"));
+        assertEquals(0, plain.calls().size());
     }
 
     @Test

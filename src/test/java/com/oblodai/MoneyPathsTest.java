@@ -148,10 +148,10 @@ class MoneyPathsTest {
     }
 
     @Test
-    void revertsTheClockCorrectionWhenTheReSignedAttemptIsStillRejected() {
+    void discardsTheClockCorrectionWhenTheReSignedAttemptIsStillRejected() {
         String date =
                 java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(
-                        java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).plusHours(1));
+                        java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).plusMinutes(10));
         MockHttpClient http =
                 new MockHttpClient()
                         .apiError(401, "{\"code\":\"merchant.bad_signature\",\"retryable\":false}", "date", date)

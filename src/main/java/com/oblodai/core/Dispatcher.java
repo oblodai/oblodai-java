@@ -63,6 +63,14 @@ final class Dispatcher {
 
     /** Everything one call needs to know before its first attempt. */
     Exchange newExchange(RouteSpec route, CallOptions options) {
+        if (RouteSpec.AUTH_ONBOARD.equals(route.auth())) {
+            // The core accepts only the operator HMAC channel here; a raw admin token is never sent.
+            throw new ConfigException(
+                    ConfigException.OPERATOR_CHANNEL_UNSUPPORTED,
+                    route.label()
+                            + ": operator channel is not supported by the SDK; use the dashboard",
+                    null);
+        }
         Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (config.headers() != null) {
             headers.putAll(config.headers());
@@ -83,6 +91,16 @@ final class Dispatcher {
 
         Object body = route.method().equals("GET") ? null : Amounts.prepareBody(options.body());
         byte[] bytes = RequestBuilder.serializeBody(config.mapper(), body, route.method());
+        if (bytes.length > com.oblodai.generated.SigningProtocol.MAX_BODY) {
+            // The gateway refuses it anyway (413); refusing here keeps a huge body off the wire.
+            throw new ConfigException(
+                    ConfigException.BODY_TOO_LARGE,
+                    "the request body is "
+                            + bytes.length
+                            + " bytes; the gateway accepts at most "
+                            + com.oblodai.generated.SigningProtocol.MAX_BODY,
+                    "body");
+        }
         String idempotencyKey = resolveIdempotencyKey(route, options);
         boolean safeToRepeat = route.safe() || (route.idempotent() && idempotencyKey != null);
         RetryOptions retry =
@@ -146,7 +164,12 @@ final class Dispatcher {
     }
 
     private CompletionStage<RawResponse> onResponse(Exchange exchange, RawResponse raw) {
+        // A measured offset is adopted only when the attempt signed with it went through; any
+        // other answer discards it.
+        Long pending = exchange.pendingOffset;
+        exchange.pendingOffset = null;
         if (raw.status() >= 200 && raw.status() < 300) {
+            if (pending != null) config.clock().correct(pending);
             try {
                 afterAttempt(exchange, raw.status(), raw, null);
             } catch (RuntimeException e) {
@@ -181,33 +204,29 @@ final class Dispatcher {
 
     /**
      * Clock skew: the gateway rejected the timestamp or the MAC. Learn its time from the {@code Date}
-     * header, re-sign once, and keep the offset only if that attempt got past authentication. The
-     * comparison is against the offset THIS request was signed with, not the client-wide offset,
-     * which another call may have moved in the meantime.
+     * header (at most {@link SkewCorrectingClock#MAX_CORRECTION_SECONDS} away) and re-sign once with
+     * it; the offset becomes the client-wide one only if that attempt succeeds. The comparison is
+     * against the offset THIS request was signed with, not the client-wide offset, which another
+     * call may have moved in the meantime.
      *
      * @return the retried attempt, or {@code null} when this was not skew
      */
     private CompletionStage<RawResponse> correctClockAndRetry(Exchange exchange, RawResponse raw) {
-        if (!exchange.skewTried) {
-            Long offset = config.clock().observeServerDate(raw.header("date").orElse(null));
-            if (offset == null
-                    || Math.abs(offset - exchange.signedOffset) <= SKEW_CORRECTION_THRESHOLD_SECONDS) {
-                return null;
-            }
-            Map<String, Object> skew = new LinkedHashMap<>();
-            skew.put("route", exchange.label());
-            skew.put("offsetSec", offset);
-            warn("clock skew detected; re-signing with server time", skew);
-            exchange.skewTried = true;
-            exchange.skewBefore = exchange.signedOffset;
-            exchange.skewInstalled = offset;
-            config.clock().correct(offset);
-            return attempt(exchange);
+        if (exchange.skewTried) return null;
+        Long offset = config.clock().observeServerDate(raw.header("date").orElse(null));
+        if (offset == null) return null;
+        long delta = Math.abs(offset - exchange.signedOffset);
+        if (delta <= SKEW_CORRECTION_THRESHOLD_SECONDS
+                || delta > SkewCorrectingClock.MAX_CORRECTION_SECONDS) {
+            return null;
         }
-        // The corrected timestamp did not help: it was not skew. Undo our own correction — but only
-        // if it is still ours; a concurrent call that has since measured the offset itself wins.
-        config.clock().revert(exchange.skewInstalled, exchange.skewBefore);
-        return null;
+        Map<String, Object> skew = new LinkedHashMap<>();
+        skew.put("route", exchange.label());
+        skew.put("offsetSec", offset);
+        warn("clock skew detected; re-signing with server time", skew);
+        exchange.skewTried = true;
+        exchange.pendingOffset = offset;
+        return attempt(exchange);
     }
 
     private CompletionStage<RawResponse> retryAfterPause(Exchange exchange, Throwable cause) {
@@ -253,10 +272,9 @@ final class Dispatcher {
     }
 
     private HttpRequest buildRequest(Exchange exchange) {
-        String adminToken =
-                RouteSpec.AUTH_ONBOARD.equals(exchange.route.auth()) ? config.adminToken() : null;
-
-        exchange.signedOffset = config.clock().offset();
+        // A measured-but-unconfirmed offset applies to this call's re-signed attempt only.
+        exchange.signedOffset =
+                exchange.pendingOffset != null ? exchange.pendingOffset : config.clock().offset();
         RequestBuilder.BuiltRequest built =
                 RequestBuilder.build(
                         config.baseUrl(),
@@ -269,7 +287,6 @@ final class Dispatcher {
                         config.clock().now(exchange.signedOffset),
                         config.userAgent(),
                         exchange.headers,
-                        adminToken,
                         exchange.requestId);
 
         long timeout =
@@ -344,7 +361,10 @@ final class Dispatcher {
                                 // gateway acting on this request.
                                 return CompletableFuture.<RawResponse>failedFuture(
                                         Envelope.redirect(
-                                                response.statusCode(), response.uri().toString(), null, null));
+                                                response.statusCode(),
+                                                Redaction.redactUrl(response.uri().toString(), null),
+                                                null,
+                                                null));
                             }
                             return CompletableFuture.completedFuture(
                                     new RawResponse(
@@ -391,12 +411,13 @@ final class Dispatcher {
                                 headers.put(
                                         name,
                                         SECRET_HEADERS.contains(name.toLowerCase(Locale.ROOT))
+                                                        || Redaction.isSensitive(name)
                                                 ? Redaction.REDACTED
                                                 : String.join(", ", values)));
         exchange.attemptInfo =
                 new RequestInfo(
                         request.method(),
-                        request.uri().toString(),
+                        Redaction.redactUrl(request.uri().toString(), exchange.route.path()),
                         Map.copyOf(headers),
                         exchange.attempt + 1,
                         exchange.requestId,
@@ -414,7 +435,15 @@ final class Dispatcher {
         }
         Map<String, String> headers = new LinkedHashMap<>();
         if (raw != null) {
-            raw.headers().map().forEach((name, values) -> headers.put(name, values.isEmpty() ? "" : values.get(0)));
+            raw.headers()
+                    .map()
+                    .forEach(
+                            (name, values) ->
+                                    headers.put(
+                                            name,
+                                            Redaction.isSensitive(name)
+                                                    ? Redaction.REDACTED
+                                                    : values.isEmpty() ? "" : values.get(0)));
         }
         hooks.onResponse()
                 .accept(

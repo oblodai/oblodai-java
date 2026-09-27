@@ -50,8 +50,9 @@ class ConfigTest {
         assertEquals("pk", http.onlyCall().header(SigningProtocol.HEADER_PUBLIC_ID));
     }
 
+    /** Ruling R8: plain http is refused everywhere, loopback included, unless allow-insecure is set. */
     @Test
-    void refusesPlainHttpExceptForLoopbackOrWhenAllowed() {
+    void refusesPlainHttpUnlessExplicitlyAllowed() {
         assertTrue(
                 assertThrows(
                                 ConfigException.class,
@@ -63,14 +64,35 @@ class ConfigTest {
                         .getMessage()
                         .contains("https"));
 
-        Oblodai.builder().baseUrl("http://localhost:8093").environment(Map.of()).build();
-        Oblodai.builder().baseUrl("http://127.0.0.1:8095").environment(Map.of()).build();
-        Oblodai.builder().baseUrl("http://[::1]:8093").environment(Map.of()).build();
+        for (String local : List.of("http://localhost:8093", "http://127.0.0.1:8095", "http://[::1]:8093")) {
+            assertThrows(
+                    ConfigException.class,
+                    () -> Oblodai.builder().baseUrl(local).environment(Map.of()).build(),
+                    local);
+            Oblodai.builder().baseUrl(local).allowInsecureBaseUrl(true).environment(Map.of()).build();
+        }
+        Oblodai.builder()
+                .baseUrl("http://127.0.0.1:8095")
+                .environment(Map.of("OBLODAI_ALLOW_INSECURE", "1"))
+                .build();
         Oblodai.builder()
                 .baseUrl("http://10.0.0.1")
                 .allowInsecureBaseUrl(true)
                 .environment(Map.of())
                 .build();
+    }
+
+    /** Ruling R8: credentials in the base URL are refused, and the error never echoes them. */
+    @Test
+    void refusesUserinfoInTheBaseUrl() {
+        for (String url : List.of("https://user:hunter2@api.oblodai.com", "https://user@api.oblodai.com")) {
+            ConfigException error =
+                    assertThrows(
+                            ConfigException.class,
+                            () -> Oblodai.builder().baseUrl(url).environment(Map.of()).build());
+            assertEquals(ConfigException.BAD_CONFIG, error.code());
+            assertTrue(!error.getMessage().contains("hunter2") && !error.toString().contains("hunter2"));
+        }
     }
 
     @Test
