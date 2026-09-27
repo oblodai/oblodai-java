@@ -524,8 +524,10 @@ public final class PaymentInfoResult implements WireObject {
     }
 
     /**
-     * How much of the paid amount has been refunded: none, partial or full (cancelled and failed
-     * refunds are not counted).
+     * How much of what can be refunded has been refunded: none, partial or full — full once refunds
+     * reach the refund ceiling (what was paid without the payer surcharge, and without the
+     * commission when the customer bears it, getRefundFeeConfig), so nothing more can be refunded.
+     * Cancelled and failed refunds are not counted.
      *
      * @return the {@code refund_status} field, or {@code null} when absent
      */
@@ -1631,8 +1633,10 @@ public final class PaymentInfoResult implements WireObject {
         /**
          * Sets {@code refund_status}.
          *
-         * <p>How much of the paid amount has been refunded: none, partial or full (cancelled and
-         * failed refunds are not counted).
+         * <p>How much of what can be refunded has been refunded: none, partial or full — full once
+         * refunds reach the refund ceiling (what was paid without the payer surcharge, and without
+         * the commission when the customer bears it, getRefundFeeConfig), so nothing more can be
+         * refunded. Cancelled and failed refunds are not counted.
          *
          * @param refundStatus the value
          * @return this builder
@@ -1645,8 +1649,10 @@ public final class PaymentInfoResult implements WireObject {
         /**
          * Sets {@code refund_status}.
          *
-         * <p>How much of the paid amount has been refunded: none, partial or full (cancelled and
-         * failed refunds are not counted).
+         * <p>How much of what can be refunded has been refunded: none, partial or full — full once
+         * refunds reach the refund ceiling (what was paid without the payer surcharge, and without
+         * the commission when the customer bears it, getRefundFeeConfig), so nothing more can be
+         * refunded. Cancelled and failed refunds are not counted.
          *
          * @param refundStatus the value as the API sends it; one this SDK version does not know is
          *     accepted
