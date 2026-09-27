@@ -6,6 +6,7 @@ import com.oblodai.core.Json;
 import com.oblodai.core.Transport;
 import com.oblodai.core.Signing;
 import com.oblodai.errors.WebhookPayloadException;
+import com.oblodai.generated.SigningProtocol;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -81,6 +82,13 @@ final class WebhookPayloads {
         }
         if (!body.path("type").isTextual()) {
             throw badPayload("the delivery body lacks the string type field every event carries");
+        }
+        // The dedupe key must be usable when present: an older core omits event_id (then the key
+        // falls back to type:id:sequence), but a present empty or non-string one is a malformed body.
+        String eventIdField = SigningProtocol.WEBHOOK_EVENT_ID_FIELD;
+        if (body.has(eventIdField)
+                && !(body.get(eventIdField).isTextual() && !body.get(eventIdField).asText().isEmpty())) {
+            throw badPayload("the body's " + eventIdField + " is not a non-empty string");
         }
         @SuppressWarnings("unchecked")
         Map<String, Object> fields = (Map<String, Object>) Transport.tree(body);

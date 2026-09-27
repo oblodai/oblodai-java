@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.oblodai.core.Signing;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
+import com.oblodai.errors.WebhookPayloadException;
 import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.PaymentWebhook;
 import com.oblodai.webhooks.WebhookEvent;
@@ -229,6 +230,21 @@ class WebhookVerifierTest {
         assertEquals("st-42", first.eventKey());
         assertEquals(first.eventKey(), resend.eventKey(), "a resend is the same state");
         assertEquals("st-42", first.event().as(PaymentWebhook.class).eventId());
+    }
+
+    @Test
+    void aPresentButEmptyOrNonStringEventIdIsABadPayload() {
+        for (String bad : List.of("\"\"", "null", "42", "{}")) {
+            for (String kind : List.of("payment", "brand_new_kind")) {
+                String body =
+                        FULL_PAYMENT
+                                .formatted(",\"sequence\":7,\"" + SigningProtocol.WEBHOOK_EVENT_ID_FIELD + "\":" + bad)
+                                .replace("\"payment\"", "\"" + kind + "\"");
+                WebhookPayloadException e =
+                        assertThrows(WebhookPayloadException.class, () -> deliver(body), kind + " " + bad);
+                assertEquals("webhook.bad_payload", e.code(), kind + " " + bad);
+            }
+        }
     }
 
     @Test

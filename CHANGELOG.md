@@ -28,7 +28,8 @@ the line generated from the gateway's OpenAPI contract.
 - **Webhooks from an older core still read.** `event_id` is optional in the webhook models
   (regenerated from the contract; `eventId()` is `null` when absent), so `typed()`/`as()` read a
   delivery body without it instead of refusing it as `webhook.bad_payload`; `eventKey()` then falls
-  back to `type:id:sequence`. The generated `SigningProtocol.WEBHOOK_EVENT_ID_FIELD` (from
+  back to `type:id:sequence`. A present but empty or non-string `event_id` is `webhook.bad_payload`
+  (any kind). The generated `SigningProtocol.WEBHOOK_EVENT_ID_FIELD` (from
   `x-oblodai-signing.webhook.event_id_field`) names the dedupe field.
 - **Clock correction is bounded and confirmed.** A signature-failure `Date` more than ±900 s away
   is ignored, and a measured offset becomes the client-wide one only after the re-signed attempt
