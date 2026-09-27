@@ -284,7 +284,7 @@ public final class Webhooks extends Resource {
      * rehearsal body carries {@code "test": true} (inside the signature) and the
      * {@code X-Webhook-Test: true} header, and its {@code sequence} is always 0. A live event NEVER
      * carries these markers: your handler must ignore a body with {@code test: true} even if the
-     * signature is valid.
+     * signature is valid. Only the body's {@code test} counts: the header is not signed.
      *
      * <p>Requires role: Finance when called with a CLI key.
      *
@@ -354,7 +354,8 @@ public final class Webhooks extends Resource {
      * <p>Delivers a sample webhook of type payment to {@code url_callback}. The rehearsal body
      * carries {@code "test": true} (inside the signature) and the {@code X-Webhook-Test: true}
      * header, and its {@code sequence} is always 0. A live event NEVER carries these markers: your
-     * handler must ignore a body with {@code test: true} even if the signature is valid.
+     * handler must ignore a body with {@code test: true} even if the signature is valid. Only the
+     * body's {@code test} counts: the header is not signed.
      *
      * <p>Requires role: Finance when called with a CLI key.
      *
@@ -403,7 +404,8 @@ public final class Webhooks extends Resource {
      * <p>Delivers a sample webhook of type wallet (a static wallet deposit). The rehearsal body
      * carries {@code "test": true} (inside the signature) and the {@code X-Webhook-Test: true}
      * header, and its {@code sequence} is always 0. A live event NEVER carries these markers: your
-     * handler must ignore a body with {@code test: true} even if the signature is valid.
+     * handler must ignore a body with {@code test: true} even if the signature is valid. Only the
+     * body's {@code test} counts: the header is not signed.
      *
      * <p>Requires role: Finance when called with a CLI key.
      *
@@ -452,7 +454,8 @@ public final class Webhooks extends Resource {
      * <p>Delivers a sample webhook of type payout. The rehearsal body carries {@code "test": true}
      * (inside the signature) and the {@code X-Webhook-Test: true} header, and its {@code sequence}
      * is always 0. A live event NEVER carries these markers: your handler must ignore a body with
-     * {@code test: true} even if the signature is valid.
+     * {@code test: true} even if the signature is valid. Only the body's {@code test} counts: the
+     * header is not signed.
      *
      * <p>Requires role: Finance when called with a CLI key.
      *
@@ -503,7 +506,8 @@ public final class Webhooks extends Resource {
      * refunded, default completed). The rehearsal body carries {@code "test": true} (inside the
      * signature) and the {@code X-Webhook-Test: true} header, and its {@code sequence} is always 0.
      * A live event NEVER carries these markers: your handler must ignore a body with
-     * {@code test: true} even if the signature is valid.
+     * {@code test: true} even if the signature is valid. Only the body's {@code test} counts: the
+     * header is not signed.
      *
      * <p>Requires role: Finance when called with a CLI key.
      *

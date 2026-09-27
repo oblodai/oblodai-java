@@ -25,6 +25,7 @@ public final class PaymentWebhook implements WireObject {
             "amount",
             "currency",
             "event_at",
+            "event_id",
             "is_final",
             "network",
             "order_id",
@@ -44,6 +45,7 @@ public final class PaymentWebhook implements WireObject {
     private final BigDecimal amount;
     private final String currency;
     private final String eventAt;
+    private final String eventId;
     private final Boolean isFinal;
     private final String network;
     private final String orderId;
@@ -66,6 +68,7 @@ public final class PaymentWebhook implements WireObject {
         this.amount = builder.amount;
         this.currency = builder.currency;
         this.eventAt = builder.eventAt;
+        this.eventId = builder.eventId;
         this.isFinal = builder.isFinal;
         this.network = builder.network;
         this.orderId = builder.orderId;
@@ -118,6 +121,18 @@ public final class PaymentWebhook implements WireObject {
      */
     public String eventAt() {
         return eventAt;
+    }
+
+    /**
+     * The id of the object state this body carries — signed, and the key to deduplicate on: the
+     * same for every retry and every resend (/v1/payment/resend) of the same state, different as
+     * soon as the state changes (sequence, by contrast, grows on a resend). Always equal to the
+     * X-Webhook-Event-Id header, which is not signed — prefer this field.
+     *
+     * @return the {@code event_id} field
+     */
+    public String eventId() {
+        return eventId;
     }
 
     /**
@@ -216,7 +231,8 @@ public final class PaymentWebhook implements WireObject {
     /**
      * Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and always true
      * — inside the signature. A live event never carries this field: your handler must ignore a
-     * body with test: true even if the signature is valid.
+     * body with test: true even if the signature is valid. This field, not the unsigned
+     * X-Webhook-Test header, is what marks a rehearsal.
      *
      * @return the {@code test} field, or {@code null} when absent
      */
@@ -268,6 +284,7 @@ public final class PaymentWebhook implements WireObject {
         builder.amount = this.amount;
         builder.currency = this.currency;
         builder.eventAt = this.eventAt;
+        builder.eventId = this.eventId;
         builder.isFinal = this.isFinal;
         builder.network = this.network;
         builder.orderId = this.orderId;
@@ -299,6 +316,7 @@ public final class PaymentWebhook implements WireObject {
         builder.amount = Wire.required(data, "amount", Wire::decimal, "PaymentWebhook");
         builder.currency = Wire.required(data, "currency", Wire::string, "PaymentWebhook");
         builder.eventAt = Wire.required(data, "event_at", Wire::string, "PaymentWebhook");
+        builder.eventId = Wire.required(data, "event_id", Wire::string, "PaymentWebhook");
         builder.isFinal = Wire.required(data, "is_final", Wire::bool, "PaymentWebhook");
         builder.network = Wire.required(data, "network", Wire::string, "PaymentWebhook");
         builder.orderId = Wire.required(data, "order_id", Wire::string, "PaymentWebhook");
@@ -337,6 +355,7 @@ public final class PaymentWebhook implements WireObject {
         Wire.put(out, "amount", this.amount, this.nulls);
         Wire.put(out, "currency", this.currency, this.nulls);
         Wire.put(out, "event_at", this.eventAt, this.nulls);
+        Wire.put(out, "event_id", this.eventId, this.nulls);
         Wire.put(out, "is_final", this.isFinal, this.nulls);
         Wire.put(out, "network", this.network, this.nulls);
         Wire.put(out, "order_id", this.orderId, this.nulls);
@@ -366,6 +385,7 @@ public final class PaymentWebhook implements WireObject {
                 && Objects.equals(this.amount, that.amount)
                 && Objects.equals(this.currency, that.currency)
                 && Objects.equals(this.eventAt, that.eventAt)
+                && Objects.equals(this.eventId, that.eventId)
                 && Objects.equals(this.isFinal, that.isFinal)
                 && Objects.equals(this.network, that.network)
                 && Objects.equals(this.orderId, that.orderId)
@@ -391,6 +411,7 @@ public final class PaymentWebhook implements WireObject {
                 this.amount,
                 this.currency,
                 this.eventAt,
+                this.eventId,
                 this.isFinal,
                 this.network,
                 this.orderId,
@@ -421,6 +442,8 @@ public final class PaymentWebhook implements WireObject {
                 this.currency,
                 "eventAt",
                 this.eventAt,
+                "eventId",
+                this.eventId,
                 "isFinal",
                 this.isFinal,
                 "network",
@@ -459,6 +482,7 @@ public final class PaymentWebhook implements WireObject {
         private BigDecimal amount;
         private String currency;
         private String eventAt;
+        private String eventId;
         private Boolean isFinal;
         private String network;
         private String orderId;
@@ -539,6 +563,22 @@ public final class PaymentWebhook implements WireObject {
          */
         public Builder eventAt(String eventAt) {
             this.eventAt = eventAt;
+            return this;
+        }
+
+        /**
+         * Sets {@code event_id}.
+         *
+         * <p>The id of the object state this body carries — signed, and the key to deduplicate on:
+         * the same for every retry and every resend (/v1/payment/resend) of the same state,
+         * different as soon as the state changes (sequence, by contrast, grows on a resend). Always
+         * equal to the X-Webhook-Event-Id header, which is not signed — prefer this field.
+         *
+         * @param eventId the value
+         * @return this builder
+         */
+        public Builder eventId(String eventId) {
+            this.eventId = eventId;
             return this;
         }
 
@@ -717,7 +757,8 @@ public final class PaymentWebhook implements WireObject {
          *
          * <p>Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and
          * always true — inside the signature. A live event never carries this field: your handler
-         * must ignore a body with test: true even if the signature is valid.
+         * must ignore a body with test: true even if the signature is valid. This field, not the
+         * unsigned X-Webhook-Test header, is what marks a rehearsal.
          *
          * @param test the value
          * @return this builder
@@ -787,6 +828,7 @@ public final class PaymentWebhook implements WireObject {
             Wire.require(this.amount, "PaymentWebhook", "amount");
             Wire.require(this.currency, "PaymentWebhook", "currency");
             Wire.require(this.eventAt, "PaymentWebhook", "event_at");
+            Wire.require(this.eventId, "PaymentWebhook", "event_id");
             Wire.require(this.isFinal, "PaymentWebhook", "is_final");
             Wire.require(this.network, "PaymentWebhook", "network");
             Wire.require(this.orderId, "PaymentWebhook", "order_id");

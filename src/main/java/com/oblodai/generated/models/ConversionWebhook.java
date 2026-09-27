@@ -23,6 +23,7 @@ public final class ConversionWebhook implements WireObject {
             "created_at",
             "document_url",
             "event_at",
+            "event_id",
             "fee_percent",
             "from",
             "id",
@@ -41,6 +42,7 @@ public final class ConversionWebhook implements WireObject {
     private final String createdAt;
     private final String documentUrl;
     private final String eventAt;
+    private final String eventId;
     private final BigDecimal feePercent;
     private final String from;
     private final String id;
@@ -62,6 +64,7 @@ public final class ConversionWebhook implements WireObject {
         this.createdAt = builder.createdAt;
         this.documentUrl = builder.documentUrl;
         this.eventAt = builder.eventAt;
+        this.eventId = builder.eventId;
         this.feePercent = builder.feePercent;
         this.from = builder.from;
         this.id = builder.id;
@@ -114,6 +117,18 @@ public final class ConversionWebhook implements WireObject {
      */
     public String eventAt() {
         return eventAt;
+    }
+
+    /**
+     * The id of the object state this body carries — signed, and the key to deduplicate on: the
+     * same for every retry and every resend (/v1/payment/resend) of the same state, different as
+     * soon as the state changes (sequence, by contrast, grows on a resend). Always equal to the
+     * X-Webhook-Event-Id header, which is not signed — prefer this field.
+     *
+     * @return the {@code event_id} field
+     */
+    public String eventId() {
+        return eventId;
     }
 
     /**
@@ -211,7 +226,8 @@ public final class ConversionWebhook implements WireObject {
     /**
      * Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and always true
      * — inside the signature. A live event never carries this field: your handler must ignore a
-     * body with test: true even if the signature is valid.
+     * body with test: true even if the signature is valid. This field, not the unsigned
+     * X-Webhook-Test header, is what marks a rehearsal.
      *
      * @return the {@code test} field, or {@code null} when absent
      */
@@ -254,6 +270,7 @@ public final class ConversionWebhook implements WireObject {
         builder.createdAt = this.createdAt;
         builder.documentUrl = this.documentUrl;
         builder.eventAt = this.eventAt;
+        builder.eventId = this.eventId;
         builder.feePercent = this.feePercent;
         builder.from = this.from;
         builder.id = this.id;
@@ -285,6 +302,7 @@ public final class ConversionWebhook implements WireObject {
         builder.documentUrl = Wire.required(
                 data, "document_url", Wire::string, "ConversionWebhook");
         builder.eventAt = Wire.required(data, "event_at", Wire::string, "ConversionWebhook");
+        builder.eventId = Wire.required(data, "event_id", Wire::string, "ConversionWebhook");
         builder.feePercent = Wire.required(data, "fee_percent", Wire::decimal, "ConversionWebhook");
         builder.from = Wire.required(data, "from", Wire::string, "ConversionWebhook");
         builder.id = Wire.required(data, "id", Wire::string, "ConversionWebhook");
@@ -320,6 +338,7 @@ public final class ConversionWebhook implements WireObject {
         Wire.put(out, "created_at", this.createdAt, this.nulls);
         Wire.put(out, "document_url", this.documentUrl, this.nulls);
         Wire.put(out, "event_at", this.eventAt, this.nulls);
+        Wire.put(out, "event_id", this.eventId, this.nulls);
         Wire.put(out, "fee_percent", this.feePercent, this.nulls);
         Wire.put(out, "from", this.from, this.nulls);
         Wire.put(out, "id", this.id, this.nulls);
@@ -348,6 +367,7 @@ public final class ConversionWebhook implements WireObject {
                 && Objects.equals(this.createdAt, that.createdAt)
                 && Objects.equals(this.documentUrl, that.documentUrl)
                 && Objects.equals(this.eventAt, that.eventAt)
+                && Objects.equals(this.eventId, that.eventId)
                 && Objects.equals(this.feePercent, that.feePercent)
                 && Objects.equals(this.from, that.from)
                 && Objects.equals(this.id, that.id)
@@ -372,6 +392,7 @@ public final class ConversionWebhook implements WireObject {
                 this.createdAt,
                 this.documentUrl,
                 this.eventAt,
+                this.eventId,
                 this.feePercent,
                 this.from,
                 this.id,
@@ -401,6 +422,8 @@ public final class ConversionWebhook implements WireObject {
                 this.documentUrl,
                 "eventAt",
                 this.eventAt,
+                "eventId",
+                this.eventId,
                 "feePercent",
                 this.feePercent,
                 "from",
@@ -437,6 +460,7 @@ public final class ConversionWebhook implements WireObject {
         private String createdAt;
         private String documentUrl;
         private String eventAt;
+        private String eventId;
         private BigDecimal feePercent;
         private String from;
         private String id;
@@ -505,6 +529,22 @@ public final class ConversionWebhook implements WireObject {
          */
         public Builder eventAt(String eventAt) {
             this.eventAt = eventAt;
+            return this;
+        }
+
+        /**
+         * Sets {@code event_id}.
+         *
+         * <p>The id of the object state this body carries — signed, and the key to deduplicate on:
+         * the same for every retry and every resend (/v1/payment/resend) of the same state,
+         * different as soon as the state changes (sequence, by contrast, grows on a resend). Always
+         * equal to the X-Webhook-Event-Id header, which is not signed — prefer this field.
+         *
+         * @param eventId the value
+         * @return this builder
+         */
+        public Builder eventId(String eventId) {
+            this.eventId = eventId;
             return this;
         }
 
@@ -695,7 +735,8 @@ public final class ConversionWebhook implements WireObject {
          *
          * <p>Present only on a rehearsal (/v1/test-webhook/*, /v1/payment/testing-webhook) and
          * always true — inside the signature. A live event never carries this field: your handler
-         * must ignore a body with test: true even if the signature is valid.
+         * must ignore a body with test: true even if the signature is valid. This field, not the
+         * unsigned X-Webhook-Test header, is what marks a rehearsal.
          *
          * @param test the value
          * @return this builder
@@ -752,6 +793,7 @@ public final class ConversionWebhook implements WireObject {
             Wire.require(this.createdAt, "ConversionWebhook", "created_at");
             Wire.require(this.documentUrl, "ConversionWebhook", "document_url");
             Wire.require(this.eventAt, "ConversionWebhook", "event_at");
+            Wire.require(this.eventId, "ConversionWebhook", "event_id");
             Wire.require(this.feePercent, "ConversionWebhook", "fee_percent");
             Wire.require(this.from, "ConversionWebhook", "from");
             Wire.require(this.id, "ConversionWebhook", "id");
