@@ -1,6 +1,7 @@
 package com.oblodai.conformance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,6 +21,7 @@ import com.oblodai.errors.SignatureException;
 import com.oblodai.errors.WebhookPayloadException;
 import com.oblodai.generated.Facts;
 import com.oblodai.generated.Routes;
+import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.WireObject;
 import com.oblodai.support.Clients;
 import com.oblodai.support.MockHttpClient;
@@ -325,6 +327,18 @@ class ConformanceTest {
                 DynamicTest.dynamicTest(
                         "a delivery field or the signature check for every header role",
                         () -> assertEquals(src.headers().keySet(), roles)));
+        // The dedupe key: the signed body field the spec names at dedupe_key.field_pointer, else the
+        // suite's fallback from the body. Every fields value comes from unsigned headers.
+        JsonNode spec = read(dir.resolve(suite.path("source").path("spec").asText()).normalize());
+        String dedupeField = pointer(spec, suite.path("dedupe_key").path("field_pointer").asText()).asText();
+        out.add(
+                DynamicTest.dynamicTest(
+                        "the generated event_id_field names the spec's dedupe field",
+                        () -> {
+                            assertEquals(SigningProtocol.WEBHOOK_EVENT_ID_FIELD, dedupeField);
+                            assertEquals("type:id:sequence", suite.path("dedupe_key").path("fallback").asText());
+                            assertTrue(suite.path("fields_unverified").asBoolean(false), "fields_unverified");
+                        }));
         for (JsonNode check : suite.path("checks")) {
             assertEquals("webhook_delivery", check.path("kind").asText());
             for (JsonNode d : src.vectors()) {
@@ -363,6 +377,19 @@ class ConformanceTest {
                 delivery.unverifiedTestHeader(),
                 "unverifiedTestHeader (rehearsal header " + src.testHeader() + ")");
         assertEquals(delivery.event().test(), delivery.isTest(), "isTest comes from the signed body");
+        assertFalse(delivery.isTest(), "a live body is never a rehearsal");
+        JsonNode body;
+        try {
+            body = JSON.readTree(d.path("payload").asText());
+        } catch (IOException e) {
+            throw new AssertionError("payload is not JSON", e);
+        }
+        String field = SigningProtocol.WEBHOOK_EVENT_ID_FIELD;
+        String wantKey =
+                body.path(field).isTextual() && !body.path(field).asText().isEmpty()
+                        ? body.path(field).asText()
+                        : body.path("type").asText() + ":" + body.path("id").asText() + ":" + body.path("sequence").asText();
+        assertEquals(wantKey, delivery.eventKey(), "dedupe key");
         String kind = d.path("kind").asText();
         assertTrue(WebhookVerifier.isKnownEvent(delivery.event()), kind);
         assertEquals(kind, delivery.event().type());

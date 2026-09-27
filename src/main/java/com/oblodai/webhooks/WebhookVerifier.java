@@ -35,8 +35,8 @@ import java.util.function.LongSupplier;
  *
  * <p>The signature covers only the timestamp and the body: the event, id, event-id, event-time and
  * test headers are NOT signed and are exposed only as the {@code unverified*} components of {@link
- * WebhookDeliveryInfo}. Deduplicate on {@link WebhookDeliveryInfo#eventKey()} (the signed body's
- * {@code event_id}) and always ignore a delivery whose signed body says
+ * WebhookDeliveryInfo}. Deduplicate on {@link WebhookDeliveryInfo#eventKey()} ({@code event_id},
+ * fallback {@code type:id:sequence}, from the signed body) and always ignore a delivery whose signed body says
  * {@code test: true} ({@link WebhookDeliveryInfo#isTest()}).
  *
  * <p>Always verify over the <b>raw request bytes</b>. A re-serialized parse will not match: JSON

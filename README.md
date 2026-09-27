@@ -253,7 +253,7 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 ## Webhooks
 
 Verify over the raw request bytes; always ignore a test delivery (`isTest()`, from the signed body);
-deduplicate on `eventKey()` (the signed body's `event_id`; from an older core, `type:id:sequence`). The `X-Webhook-Id`,
+deduplicate on `eventKey()` — dedupe on `event_id` (fallback `type:id:sequence`), both from the signed body (the field is named by `SigningProtocol.WEBHOOK_EVENT_ID_FIELD`; an older core sends no `event_id`). The `X-Webhook-Id`,
 `X-Webhook-Event-Id`, `X-Webhook-Event` and `X-Webhook-Test` headers are not signed and are only
 exposed as `unverified*()`. `event().asPayment()` and the other `as<Kind>()` accessors (one per webhook kind of
 the contract, generated in `WebhookKinds`) give the typed event, and `typed()` the model of any kind

@@ -254,7 +254,7 @@ System.out.println(file.filename() + " " + Path.of(".").toAbsolutePath());
 ## Вебхуки
 
 Проверяйте подпись по сырым байтам запроса; всегда пропускайте тестовую доставку (`isTest()`, из
-подписанного тела); дедуплицируйте по `eventKey()` (`event_id` из подписанного тела; от старого ядра — `type:id:sequence`).
+подписанного тела); дедуплицируйте по `eventKey()` — по `event_id` (запасной ключ — `type:id:sequence`), оба из подписанного тела (имя поля — `SigningProtocol.WEBHOOK_EVENT_ID_FIELD`; старое ядро `event_id` не шлёт).
 Заголовки `X-Webhook-Id`, `X-Webhook-Event-Id`, `X-Webhook-Event` и `X-Webhook-Test` не подписаны и
 доступны только как `unverified*()`. `event().asPayment()` и другие доступы `as<Вид>()` (по одному на
 вид вебхука контракта, генерируются в `WebhookKinds`) — типизированное событие, `typed()` — модель

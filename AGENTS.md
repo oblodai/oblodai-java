@@ -60,7 +60,7 @@ WebhookDeliveryInfo delivery = WebhookVerifier.verifyDelivery(
 ```
 
 Verify over the raw bytes; always ignore `delivery.isTest()` (signed body); deduplicate on
-`delivery.eventKey()` (the signed body's `event_id`, else `type:id:sequence`; the id/test headers are unsigned and
+`delivery.eventKey()` — dedupe on `event_id` (fallback `type:id:sequence`), from the signed body; the id/test headers are unsigned and
 only exposed as `unverified*()`); drop out-of-order events with `WebhookVerifier.isStale(event, lastSequence)`.
 `event.asPayment()` and the other `as<Kind>()` accessors (generated per webhook kind in
 `com.oblodai.generated.WebhookKinds` — never add one by hand) give the typed event; an unknown

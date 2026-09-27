@@ -127,9 +127,11 @@ public final class PaymentWebhook implements WireObject {
      * The id of the object state this body carries — signed, and the key to deduplicate on: the
      * same for every retry and every resend (/v1/payment/resend) of the same state, different as
      * soon as the state changes (sequence, by contrast, grows on a resend). Always equal to the
-     * X-Webhook-Event-Id header, which is not signed — prefer this field.
+     * X-Webhook-Event-Id header, which is not signed — prefer this field. Always sent by current
+     * cores; a delivery from an older core may lack it — then deduplicate on type:id:sequence from
+     * the body.
      *
-     * @return the {@code event_id} field
+     * @return the {@code event_id} field, or {@code null} when absent
      */
     public String eventId() {
         return eventId;
@@ -316,7 +318,7 @@ public final class PaymentWebhook implements WireObject {
         builder.amount = Wire.required(data, "amount", Wire::decimal, "PaymentWebhook");
         builder.currency = Wire.required(data, "currency", Wire::string, "PaymentWebhook");
         builder.eventAt = Wire.required(data, "event_at", Wire::string, "PaymentWebhook");
-        builder.eventId = Wire.required(data, "event_id", Wire::string, "PaymentWebhook");
+        builder.eventId = Wire.optional(data, "event_id", Wire::string, "PaymentWebhook");
         builder.isFinal = Wire.required(data, "is_final", Wire::bool, "PaymentWebhook");
         builder.network = Wire.required(data, "network", Wire::string, "PaymentWebhook");
         builder.orderId = Wire.required(data, "order_id", Wire::string, "PaymentWebhook");
@@ -572,7 +574,9 @@ public final class PaymentWebhook implements WireObject {
          * <p>The id of the object state this body carries — signed, and the key to deduplicate on:
          * the same for every retry and every resend (/v1/payment/resend) of the same state,
          * different as soon as the state changes (sequence, by contrast, grows on a resend). Always
-         * equal to the X-Webhook-Event-Id header, which is not signed — prefer this field.
+         * equal to the X-Webhook-Event-Id header, which is not signed — prefer this field. Always
+         * sent by current cores; a delivery from an older core may lack it — then deduplicate on
+         * type:id:sequence from the body.
          *
          * @param eventId the value
          * @return this builder
@@ -828,7 +832,6 @@ public final class PaymentWebhook implements WireObject {
             Wire.require(this.amount, "PaymentWebhook", "amount");
             Wire.require(this.currency, "PaymentWebhook", "currency");
             Wire.require(this.eventAt, "PaymentWebhook", "event_at");
-            Wire.require(this.eventId, "PaymentWebhook", "event_id");
             Wire.require(this.isFinal, "PaymentWebhook", "is_final");
             Wire.require(this.network, "PaymentWebhook", "network");
             Wire.require(this.orderId, "PaymentWebhook", "order_id");

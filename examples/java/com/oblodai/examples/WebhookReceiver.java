@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <ol>
  *   <li>Verify over the raw request bytes; a re-serialized body no longer matches the signature.
  *   <li>Always ignore a rehearsal ({@link WebhookDeliveryInfo#isTest()}, from the signed body).
- *   <li>Deduplicate on the signed key ({@link WebhookDeliveryInfo#eventKey()}: the body's {@code
- *       event_id}), the same for every retry and every resend of one state.
+ *   <li>Deduplicate on the signed key ({@link WebhookDeliveryInfo#eventKey()}): {@code event_id}
+ *       (fallback {@code type:id:sequence}) from the signed body, the same for every retry and every resend of one state.
  *       The id headers are not signed; never dedupe on them.
  *   <li>Drop stale events: keep the last {@code sequence} applied per object.
  * </ol>

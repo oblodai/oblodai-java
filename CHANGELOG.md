@@ -16,16 +16,20 @@ the line generated from the gateway's OpenAPI contract.
   ignored, `OBLODAI_ADMIN_TOKEN` is ignored; setting either logs a one-time warning.
   `RequestBuilder.build` lost its `adminToken` parameter.
 - **Webhooks: dedupe and rehearsal come from the signed body only.** `WebhookDeliveryInfo` gains
-  `eventKey()` (the signed body's `event_id`, else `type:id:sequence` from an older core; also
+  `eventKey()` — dedupe on `event_id` (fallback `type:id:sequence`): the signed body field named by
+  the generated `SigningProtocol.WEBHOOK_EVENT_ID_FIELD`, else `type:id:sequence` from the body of
+  an older core (also
   `WebhookEvent.eventKey()`), and
   `isTest()` reads only the body's `test` flag. The unsigned `X-Webhook-*` headers moved to
   `unverifiedDeliveryId()`, `unverifiedEventId()`, `unverifiedEventType()`,
   `unverifiedEventTime()` and `unverifiedTestHeader()` (breaking: `id()`, `eventId()`,
   `eventType()` and `eventTime()` are gone). Docs and the receiver example ignore test deliveries
   first and dedupe on `eventKey()`.
-- **Webhooks from an older core still read.** `typed()`/`as()` read a delivery body without the (now
-  signed) `event_id` with an empty one instead of refusing it as `webhook.bad_payload`; `eventKey()`
-  then falls back to `type:id:sequence`.
+- **Webhooks from an older core still read.** `event_id` is optional in the webhook models
+  (regenerated from the contract; `eventId()` is `null` when absent), so `typed()`/`as()` read a
+  delivery body without it instead of refusing it as `webhook.bad_payload`; `eventKey()` then falls
+  back to `type:id:sequence`. The generated `SigningProtocol.WEBHOOK_EVENT_ID_FIELD` (from
+  `x-oblodai-signing.webhook.event_id_field`) names the dedupe field.
 - **Clock correction is bounded and confirmed.** A signature-failure `Date` more than ±900 s away
   is ignored, and a measured offset becomes the client-wide one only after the re-signed attempt
   succeeds (2xx); otherwise it is discarded. `SkewCorrectingClock.MAX_PLAUSIBLE_OFFSET_SECONDS`

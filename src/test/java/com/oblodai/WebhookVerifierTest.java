@@ -3,6 +3,7 @@ package com.oblodai;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,6 +11,7 @@ import com.oblodai.core.Signing;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.generated.SigningProtocol;
+import com.oblodai.generated.models.PaymentWebhook;
 import com.oblodai.webhooks.WebhookEvent;
 import com.oblodai.webhooks.WebhookDeliveryInfo;
 import com.oblodai.webhooks.WebhookHeaders;
@@ -197,6 +199,43 @@ class WebhookVerifierTest {
                         WebhookHeaders.of(withState),
                         WebhookVerifier.options("whsec").clock(() -> TS));
         assertEquals("st-42", c.eventKey());
+    }
+
+    /** A full payment body as a core sends it; {@code %s} is where an event_id may go. */
+    private static final String FULL_PAYMENT =
+            "{\"type\":\"payment\",\"uuid\":\"u1\",\"order_id\":\"o\",\"status\":\"paid\","
+                    + "\"is_final\":true,\"amount\":\"25\",\"currency\":\"USDT\",\"network\":\"tron\","
+                    + "\"payer_amount\":\"25\",\"payer_currency\":\"USDT\",\"payment_amount\":\"25\","
+                    + "\"payer_address\":\"T\",\"payer_address_is_refundable\":true,\"additional_data\":\"\","
+                    + "\"txid\":\"tx\",\"event_at\":\"2026-01-01T00:00:00Z\"%s}";
+
+    private static WebhookDeliveryInfo deliver(String body) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(SigningProtocol.HEADER_WEBHOOK_TIMESTAMP, String.valueOf(TS));
+        headers.put(SigningProtocol.HEADER_WEBHOOK_SIGNATURE, Signing.signWebhook("whsec", TS, body));
+        return WebhookVerifier.verifyDelivery(
+                body.getBytes(StandardCharsets.UTF_8),
+                WebhookHeaders.of(headers),
+                WebhookVerifier.options("whsec").clock(() -> TS));
+    }
+
+    @Test
+    void aResendOfOneStateDedupesOnEventIdThoughItsSequenceGrows() {
+        String field = ",\"" + SigningProtocol.WEBHOOK_EVENT_ID_FIELD + "\":\"st-42\"";
+        WebhookDeliveryInfo first = deliver(FULL_PAYMENT.formatted(",\"sequence\":7" + field));
+        WebhookDeliveryInfo resend = deliver(FULL_PAYMENT.formatted(",\"sequence\":9" + field));
+        assertEquals(7L, first.event().sequence());
+        assertEquals(9L, resend.event().sequence());
+        assertEquals("st-42", first.eventKey());
+        assertEquals(first.eventKey(), resend.eventKey(), "a resend is the same state");
+        assertEquals("st-42", first.event().as(PaymentWebhook.class).eventId());
+    }
+
+    @Test
+    void aDeliveryFromAnOlderCoreWithoutEventIdFallsBackToTypeIdSequence() {
+        WebhookDeliveryInfo delivery = deliver(FULL_PAYMENT.formatted(",\"sequence\":7"));
+        assertEquals("payment:u1:7", delivery.eventKey());
+        assertNull(delivery.event().as(PaymentWebhook.class).eventId(), "event_id is optional");
     }
 
     @Test
