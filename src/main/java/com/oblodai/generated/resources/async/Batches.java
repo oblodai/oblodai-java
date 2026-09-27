@@ -44,7 +44,7 @@ public final class Batches extends Resource {
      * any other value is rejected with {@code batch.bad_on_error}. Each item is idempotent on its
      * own {@code order_id}; the whole batch — on the {@code Idempotency-Key} header.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/batch} ({@code createPaymentBatch}).
      *
@@ -98,8 +98,7 @@ public final class Batches extends Resource {
      * amount to the same payer would silently collapse into one. Returns {@code batch_id}; per-item
      * status via {@code /v1/batch/info}. {@code on_error}: {@code continue}/{@code stop}.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/refund/batch} ({@code createRefundBatch}).
      *
@@ -150,8 +149,7 @@ public final class Batches extends Resource {
      * payouts, processed in the background, status via {@code /v1/batch/info}. Each item is a
      * regular {@code /v1/payout} object, idempotent on {@code order_id}.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/batch} ({@code createPayoutBatch}).
      *

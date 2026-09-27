@@ -103,8 +103,8 @@ public final class RefundRequest implements WireObject {
 
     /**
      * An optional refund idempotency key: distinguishes two different refunds with the same
-     * (payment, address, amount); a retry with the same value is deduplicated. This is not
-     * order_id.
+     * (payment, address, amount); a retry with the same value returns the refund already made, also
+     * when amount is omitted. This is not order_id.
      *
      * @return the {@code reference} field, or {@code null} when absent
      */
@@ -357,8 +357,8 @@ public final class RefundRequest implements WireObject {
          * Sets {@code reference}.
          *
          * <p>An optional refund idempotency key: distinguishes two different refunds with the same
-         * (payment, address, amount); a retry with the same value is deduplicated. This is not
-         * order_id.
+         * (payment, address, amount); a retry with the same value returns the refund already made,
+         * also when amount is omitted. This is not order_id.
          *
          * @param reference the value
          * @return this builder

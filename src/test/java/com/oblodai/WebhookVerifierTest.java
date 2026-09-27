@@ -11,8 +11,10 @@ import com.oblodai.core.Signing;
 import com.oblodai.errors.ContractException;
 import com.oblodai.errors.SignatureException;
 import com.oblodai.errors.WebhookPayloadException;
+import com.oblodai.generated.Facts;
 import com.oblodai.generated.SigningProtocol;
 import com.oblodai.generated.models.PaymentWebhook;
+import com.oblodai.generated.models.WebhookEventName;
 import com.oblodai.webhooks.WebhookEvent;
 import com.oblodai.webhooks.WebhookDeliveryInfo;
 import com.oblodai.webhooks.WebhookHeaders;
@@ -252,6 +254,18 @@ class WebhookVerifierTest {
         WebhookDeliveryInfo delivery = deliver(FULL_PAYMENT.formatted(",\"sequence\":7"));
         assertEquals("payment:u1:7", delivery.eventKey());
         assertNull(delivery.event().as(PaymentWebhook.class).eventId(), "event_id is optional");
+    }
+
+    /** invoice.reversed is a payment event; reversal is optional (a core before it omits it). */
+    @Test
+    void invoiceReversedIsAPaymentEventAndReversalIsOptional() {
+        assertTrue(WebhookEventName.of("invoice.reversed").isKnown());
+        assertEquals(WebhookEventName.INVOICE_REVERSED, WebhookEventName.of("invoice.reversed"));
+        assertTrue(Facts.WEBHOOK_KINDS.get("payment").events().contains("invoice.reversed"));
+        WebhookDeliveryInfo older = deliver(FULL_PAYMENT.formatted(",\"sequence\":7"));
+        assertNull(older.event().as(PaymentWebhook.class).reversal(), "reversal is optional");
+        WebhookDeliveryInfo reversed = deliver(FULL_PAYMENT.formatted(",\"sequence\":8,\"reversal\":true"));
+        assertEquals(Boolean.TRUE, reversed.event().as(PaymentWebhook.class).reversal());
     }
 
     @Test

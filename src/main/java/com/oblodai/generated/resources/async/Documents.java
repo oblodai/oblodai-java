@@ -379,8 +379,7 @@ public final class Documents extends Resource {
      * document is money: anyone who has it can claim the funds. The response is
      * {@code application/pdf}.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/link/cheque} ({@code getPayoutLinkCheque}).
      *

@@ -416,7 +416,7 @@ public final class Payments extends Resource {
      * seen for the invoice; after that — 409 ({@code invoice.already_paid} /
      * {@code invoice.deposit_pending}): such an invoice must be settled or refunded, not cancelled.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/cancel} ({@code cancelPayment}).
      *
@@ -488,7 +488,7 @@ public final class Payments extends Resource {
      * counted across all your payments (otherwise {@code email.rate_limited}, 429). A payment
      * receipt is sent automatically to {@code payer_email} once the payment is received.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/send-email} ({@code sendPaymentEmail}).
      *
@@ -565,7 +565,7 @@ public final class Payments extends Resource {
      * string in a redirect means "do not redirect". The URL must be http(s); it is validated on
      * write, not on display.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/checkout-config/set} ({@code setCheckoutConfig}).
      *
@@ -677,7 +677,7 @@ public final class Payments extends Resource {
      * ({@code init|pending|completed|expired}). The questionnaire contents are not shown to you:
      * they are your customer's data, not yours.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/aml-links} ({@code getPaymentAmlLinks}).
      *
@@ -751,8 +751,7 @@ public final class Payments extends Resource {
      * if the payment was already partly refunded. It moves money — it is signed with your API key
      * like everything else: a merchant has one key and it has full access.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/resolve} ({@code resolvePayment}).
      *

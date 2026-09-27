@@ -151,7 +151,7 @@ public final class Facts {
                         "payment",
                         com.oblodai.generated.models.PaymentWebhook.class,
                         com.oblodai.generated.models.PaymentWebhook::fromJson,
-                        List.of("invoice.cancelled", "invoice.confirm_check", "invoice.created", "invoice.expired", "invoice.paid", "invoice.paid_over", "invoice.select", "invoice.under_review", "invoice.wrong_amount"),
+                        List.of("invoice.cancelled", "invoice.confirm_check", "invoice.created", "invoice.expired", "invoice.paid", "invoice.paid_over", "invoice.reversed", "invoice.select", "invoice.under_review", "invoice.wrong_amount"),
                         "uuid"));
         kinds.put(
                 "payout",

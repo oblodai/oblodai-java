@@ -51,7 +51,7 @@ public final class PaymentLinks extends Resource {
      * themselves still have the usual short lifetime). The response contains {@code link_id} and
      * the {@code url} for the customer.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/link} ({@code createPaymentLink}).
      *
@@ -206,7 +206,7 @@ public final class PaymentLinks extends Resource {
      *
      * <p><code>{link_id, active}</code>. A disabled link does not accept new payments.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/link/toggle} ({@code togglePaymentLink}).
      *

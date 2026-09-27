@@ -54,10 +54,13 @@ public final class Refunds extends Resource {
      * {@code payout.insufficient_funds}. POST /v1/payment/refund/calculate shows these numbers
      * without refunding.
      *
-     * <p>Idempotent on {@code (payment, address, amount)}. Refunds to any address are approved
-     * automatically. The only exception is a card payment via an on-ramp: a refund TO THE RECORDED
-     * PAYER ADDRESS of such an invoice is rejected ({@code refund.omnibus_destination}), because
-     * that address belongs to the provider, not the buyer — send the buyer's address explicitly.
+     * <p>Idempotent on {@code (payment, address, amount)}, and on {@code reference} when you pass
+     * it: a retry with the same {@code reference} returns the refund already made — also when
+     * {@code amount} is omitted, where the retry's own default would otherwise be the (now zero)
+     * remainder. Refunds to any address are approved automatically. The only exception is a card
+     * payment via an on-ramp: a refund TO THE RECORDED PAYER ADDRESS of such an invoice is rejected
+     * ({@code refund.omnibus_destination}), because that address belongs to the provider, not the
+     * buyer — send the buyer's address explicitly.
      *
      * <p>A refund is paid in THE SAME coin the buyer paid with. If it has already been converted
      * into a stablecoin by auto-conversion, pass {@code from_currency: "USDT"} — the refund is
@@ -65,8 +68,7 @@ public final class Refunds extends Resource {
      * and partner shares are reversed. You can also send the money as a regular payout, but reports
      * will show it as a payout, not a refund.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/refund} ({@code refundPayment}).
      *
@@ -178,9 +180,14 @@ public final class Refunds extends Resource {
      * ({@code refund.exceeds_refundable}, {@code refund.dust}, {@code refund.no_address},
      * {@code refund.nothing_to_refund}, …), including {@code payout.insufficient_funds} when your
      * available balance does not cover the refund — which, when you bear the commission, can be
-     * more than the payment credited. Not checked: the destination address screening, which runs
-     * when the refund is made, and deposits that are not yet final, which the refund holds back
-     * ({@code payout.funds_maturing}). Reserves and sends nothing; safe to retry.
+     * more than the payment credited — and the payout controls the refund's payout meets: the
+     * payout freeze, your freeze, daily limit and per-payout limit, and whether the destination can
+     * receive this amount ({@code payout.destination_not_activated}). Not checked: the paid
+     * screening of the destination address, which runs when the refund is made; deposits that are
+     * not yet final, which the refund holds back ({@code payout.funds_maturing}); and, for a key
+     * that may not make refunds itself (a CLI key without the right to move money out), whether the
+     * address belongs to the gateway ({@code refund.destination_internal}) — the refund always
+     * checks it. Reserves and sends nothing; safe to retry.
      *
      * <p>Requires role: Viewer when called with a CLI key.
      *
@@ -193,12 +200,13 @@ public final class Refunds extends Resource {
      * {@code merchant.rate_limited}, {@code merchant.secret_decrypt}, {@code merchant.suspended},
      * {@code merchant.unknown_key}, {@code onramp.suppresses}, {@code payment.bad_uuid},
      * {@code payment.no_lookup}, {@code payment.not_found}, {@code payout.above_limit},
-     * {@code payout.address_network_mismatch}, {@code payout.bad_address}, {@code payout.bad_memo},
-     * {@code payout.cap_unpriceable}, {@code payout.convert_bad_amount},
-     * {@code payout.convert_insufficient}, {@code payout.convert_no_rate},
-     * {@code payout.convert_same_asset}, {@code payout.convert_unsupported},
-     * {@code payout.daily_cap}, {@code payout.freeze_unknown}, {@code payout.frozen},
-     * {@code payout.insufficient_funds}, {@code payout.memo_conflict},
+     * {@code payout.address_network_mismatch}, {@code payout.amount_below_fee},
+     * {@code payout.bad_address}, {@code payout.bad_memo}, {@code payout.cap_unpriceable},
+     * {@code payout.convert_bad_amount}, {@code payout.convert_insufficient},
+     * {@code payout.convert_no_rate}, {@code payout.convert_same_asset},
+     * {@code payout.convert_unsupported}, {@code payout.daily_cap},
+     * {@code payout.destination_not_activated}, {@code payout.freeze_unknown},
+     * {@code payout.frozen}, {@code payout.insufficient_funds}, {@code payout.memo_conflict},
      * {@code payout.memo_required}, {@code payout.memo_too_long}, {@code payout.merchant_frozen},
      * {@code rates.deviation}, {@code rates.no_source}, {@code rates.non_positive},
      * {@code rates.stale_rate}, {@code refund.bad_amount}, {@code refund.chain_ambiguous},
@@ -274,8 +282,7 @@ public final class Refunds extends Resource {
      * the operator has reviewed it. Until then it is not yours yet, and the response will be
      * "nothing to refund".
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/wallet/blocked-address-refund} ({@code refundBlockedWallet}).
      *

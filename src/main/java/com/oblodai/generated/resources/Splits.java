@@ -57,8 +57,7 @@ public final class Splits extends Resource {
      * external share cannot be recovered (top up your balance); an on-platform partner's share is
      * clawed back automatically.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/split/rule} ({@code createSplitRule}).
      *
@@ -175,7 +174,7 @@ public final class Splits extends Resource {
      *
      * <p><code>{rule_id}</code>. Does not affect shares already sent.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/split/rule/delete} ({@code deleteSplitRule}).
      *
@@ -225,7 +224,7 @@ public final class Splits extends Resource {
      * refund after sending. Range 0–7776000 (up to 90 days); the field is required — send {@code 0}
      * explicitly if shares should be sent immediately.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/split/config/set} ({@code setSplitConfig}).
      *
@@ -333,7 +332,7 @@ public final class Splits extends Resource {
      * Disabling does not revoke rules already created (money keeps arriving under them), but blocks
      * new ones.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/split/recipient/optin} ({@code setSplitRecipientOptIn}).
      *

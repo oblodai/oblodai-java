@@ -10,10 +10,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Sent when a payment moves to paid, paid_over, wrong_amount, expired or under_review, and when it
- * rolls back from them (a chain reorganization). The current status — any value from the vocabulary
- * — can be requested again: POST /v1/payment/resend. Match it to the order by order_id/uuid and to
- * the blockchain by txid and network.
+ * Sent when a payment moves to paid, paid_over, wrong_amount, expired, cancelled or under_review. A
+ * chain reorganization that removes a counted deposit is sent as invoice.reversed (reversal = true,
+ * txid empty) with the status after it. The current status — any value from the vocabulary — can be
+ * requested again: POST /v1/payment/resend. Match it to the order by order_id/uuid and to the
+ * blockchain by txid and network.
  *
  * <p>Build one with {@link #builder()}; fields the SDK does not know yet are kept in
  * {@link #extra()} and sent back as they came.
@@ -34,6 +35,7 @@ public final class PaymentWebhook implements WireObject {
             "payer_amount",
             "payer_currency",
             "payment_amount",
+            "reversal",
             "sequence",
             "status",
             "test",
@@ -54,6 +56,7 @@ public final class PaymentWebhook implements WireObject {
     private final BigDecimal payerAmount;
     private final String payerCurrency;
     private final BigDecimal paymentAmount;
+    private final Boolean reversal;
     private final Long sequence;
     private final PaymentStatus status;
     private final Boolean test;
@@ -77,6 +80,7 @@ public final class PaymentWebhook implements WireObject {
         this.payerAmount = builder.payerAmount;
         this.payerCurrency = builder.payerCurrency;
         this.paymentAmount = builder.paymentAmount;
+        this.reversal = builder.reversal;
         this.sequence = builder.sequence;
         this.status = builder.status;
         this.test = builder.test;
@@ -212,6 +216,17 @@ public final class PaymentWebhook implements WireObject {
     }
 
     /**
+     * true — a chain reorganization removed a previously counted deposit (event invoice.reversed);
+     * status and payment_amount are the state after it, txid is empty. Absent = false: cores before
+     * this version do not send the field; newer cores always send it.
+     *
+     * @return the {@code reversal} field, or {@code null} when absent
+     */
+    public Boolean reversal() {
+        return reversal;
+    }
+
+    /**
      * The global event number: within one object a higher number is newer, a lower one is a late
      * delivery and must be discarded. Always 0 on a rehearsal (test: true).
      *
@@ -295,6 +310,7 @@ public final class PaymentWebhook implements WireObject {
         builder.payerAmount = this.payerAmount;
         builder.payerCurrency = this.payerCurrency;
         builder.paymentAmount = this.paymentAmount;
+        builder.reversal = this.reversal;
         builder.sequence = this.sequence;
         builder.status = this.status;
         builder.test = this.test;
@@ -330,6 +346,7 @@ public final class PaymentWebhook implements WireObject {
                 data, "payer_currency", Wire::string, "PaymentWebhook");
         builder.paymentAmount = Wire.required(
                 data, "payment_amount", Wire::decimal, "PaymentWebhook");
+        builder.reversal = Wire.optional(data, "reversal", Wire::bool, "PaymentWebhook");
         builder.sequence = Wire.required(data, "sequence", Wire::integer, "PaymentWebhook");
         builder.status = Wire.required(data, "status", PaymentStatus::fromJson, "PaymentWebhook");
         builder.test = Wire.optional(data, "test", Wire::bool, "PaymentWebhook");
@@ -366,6 +383,7 @@ public final class PaymentWebhook implements WireObject {
         Wire.put(out, "payer_amount", this.payerAmount, this.nulls);
         Wire.put(out, "payer_currency", this.payerCurrency, this.nulls);
         Wire.put(out, "payment_amount", this.paymentAmount, this.nulls);
+        Wire.put(out, "reversal", this.reversal, this.nulls);
         Wire.put(out, "sequence", this.sequence, this.nulls);
         Wire.put(out, "status", this.status, this.nulls);
         Wire.put(out, "test", this.test, this.nulls);
@@ -396,6 +414,7 @@ public final class PaymentWebhook implements WireObject {
                 && Objects.equals(this.payerAmount, that.payerAmount)
                 && Objects.equals(this.payerCurrency, that.payerCurrency)
                 && Objects.equals(this.paymentAmount, that.paymentAmount)
+                && Objects.equals(this.reversal, that.reversal)
                 && Objects.equals(this.sequence, that.sequence)
                 && Objects.equals(this.status, that.status)
                 && Objects.equals(this.test, that.test)
@@ -422,6 +441,7 @@ public final class PaymentWebhook implements WireObject {
                 this.payerAmount,
                 this.payerCurrency,
                 this.paymentAmount,
+                this.reversal,
                 this.sequence,
                 this.status,
                 this.test,
@@ -462,6 +482,8 @@ public final class PaymentWebhook implements WireObject {
                 this.payerCurrency,
                 "paymentAmount",
                 this.paymentAmount,
+                "reversal",
+                this.reversal,
                 "sequence",
                 this.sequence,
                 "status",
@@ -493,6 +515,7 @@ public final class PaymentWebhook implements WireObject {
         private BigDecimal payerAmount;
         private String payerCurrency;
         private BigDecimal paymentAmount;
+        private Boolean reversal;
         private Long sequence;
         private PaymentStatus status;
         private Boolean test;
@@ -714,6 +737,22 @@ public final class PaymentWebhook implements WireObject {
          */
         public Builder paymentAmount(String paymentAmount) {
             return paymentAmount(paymentAmount == null ? null : new BigDecimal(paymentAmount));
+        }
+
+        /**
+         * Sets {@code reversal}.
+         *
+         * <p>true — a chain reorganization removed a previously counted deposit (event
+         * invoice.reversed); status and payment_amount are the state after it, txid is empty.
+         * Absent = false: cores before this version do not send the field; newer cores always send
+         * it.
+         *
+         * @param reversal the value
+         * @return this builder
+         */
+        public Builder reversal(Boolean reversal) {
+            this.reversal = reversal;
+            return this;
         }
 
         /**

@@ -29,8 +29,8 @@ public interface WebhookKinds {
     /**
      * The {@code payment} kind: events {@code invoice.cancelled}, {@code invoice.confirm_check},
      * {@code invoice.created}, {@code invoice.expired}, {@code invoice.paid},
-     * {@code invoice.paid_over}, {@code invoice.select}, {@code invoice.under_review},
-     * {@code invoice.wrong_amount}.
+     * {@code invoice.paid_over}, {@code invoice.reversed}, {@code invoice.select},
+     * {@code invoice.under_review}, {@code invoice.wrong_amount}.
      *
      * @return the event as its typed model ({@code type=payment})
      */

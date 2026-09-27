@@ -552,7 +552,7 @@ public final class Webhooks extends Resource {
      * deliveries additionally carry {@code X-Webhook-Signature-Prev} signed with the old secret —
      * time to roll out the change without losing verification.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/webhooks/rotate-secret} ({@code rotateWebhookSecret}).
      *
@@ -599,7 +599,7 @@ public final class Webhooks extends Resource {
      * cancelled and the store owner gets an email; after fixing the receiver, enable it with this
      * endpoint.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/webhooks/active} ({@code setWebhookActive}).
      *

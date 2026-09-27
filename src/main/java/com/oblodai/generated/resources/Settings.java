@@ -139,7 +139,7 @@ public final class Settings extends Resource {
      * expired underpayment. Both are ON by default. The refund goes to the payer's address
      * (EVM/Tron/TON/Solana; on Bitcoin/UTXO — manually).
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payment/autorefund/set} ({@code setAutoRefund}).
      *
@@ -607,7 +607,7 @@ public final class Settings extends Resource {
      * <p>{@code fee_on_recipient: true} — the network fee is paid by the recipient (they receive
      * the amount minus the fee).
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/fee-config/set} ({@code setPayoutFeeConfig}).
      *
@@ -696,7 +696,7 @@ public final class Settings extends Resource {
      * credited. Without this setting your refunds follow the gateway default (the get method shows
      * it), while the automatic refunds deduct the commission.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/refund-fee-config/set} ({@code setRefundFeeConfig}).
      *
@@ -873,8 +873,7 @@ public final class Settings extends Resource {
      *
      * <p>Automatically withdraw incoming funds to a given address.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/auto-withdraw/set} ({@code setAutoWithdrawRule}).
      *
@@ -959,8 +958,7 @@ public final class Settings extends Resource {
     /**
      * Delete an auto-withdrawal rule
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/auto-withdraw/delete} ({@code deleteAutoWithdrawRule}).
      *

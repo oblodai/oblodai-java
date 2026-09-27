@@ -41,6 +41,9 @@ public final class WebhookEventName implements WireObject {
     /** {@code "invoice.under_review"}. */
     public static final WebhookEventName INVOICE_UNDER_REVIEW = new WebhookEventName("invoice.under_review");
 
+    /** {@code "invoice.reversed"}. */
+    public static final WebhookEventName INVOICE_REVERSED = new WebhookEventName("invoice.reversed");
+
     /** {@code "payout.approved"}. */
     public static final WebhookEventName PAYOUT_APPROVED = new WebhookEventName("payout.approved");
 
@@ -84,6 +87,7 @@ public final class WebhookEventName implements WireObject {
             INVOICE_EXPIRED,
             INVOICE_CANCELLED,
             INVOICE_UNDER_REVIEW,
+            INVOICE_REVERSED,
             PAYOUT_APPROVED,
             PAYOUT_AWAITING_COSIGN,
             PAYOUT_BROADCASTING,

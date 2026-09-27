@@ -63,8 +63,7 @@ public final class Payouts extends Resource {
      * <p>Also: {@code memo} (tag/memo for TON), {@code url_callback} (your own webhook URL for this
      * payout).
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout} ({@code createPayout}).
      *
@@ -140,8 +139,7 @@ public final class Payouts extends Resource {
      * stop the rest, and a result is returned for each. Idempotent on {@code order_id}, like a
      * regular payout.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/mass} ({@code createMassPayout}).
      *
@@ -402,20 +400,23 @@ public final class Payouts extends Resource {
     /**
      * Validate a payout without creating it (dry run)
      *
-     * <p>Runs all payout-creation checks — currency, amount, network, address, memo, address
-     * screening, fee, freeze/daily limit and balance sufficiency — but reserves and sends nothing.
-     * The response is {@code valid: true} with the amounts ({@code amount}, {@code commission},
+     * <p>Runs the payout-creation checks — currency, amount, network, address, memo, sanctions
+     * lists and blocklist, fee, payout freeze, destination activation, your freeze/daily
+     * limit/per-payout limit and balance sufficiency — but reserves and sends nothing, and costs
+     * nothing: the paid AML screening of the address runs only when the payout is created, so
+     * {@code compliance.blocked} is the one refusal validation cannot foresee. The response is
+     * {@code valid: true} with the amounts ({@code amount}, {@code commission},
      * {@code payer_amount}, {@code fee_bearer}), the destination {@code address}, and for a
      * {@code from_currency} payout the USDT the funding conversion would spend
      * ({@code from_amount}, at the current rate), or the same error that creation would return. The
      * body is the same as for POST /v1/payout (order_id is optional for validation).
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/validate} ({@code validatePayout}).
      *
      * <p>Error codes: {@code auth.bad_timestamp}, {@code auth.body_too_large},
-     * {@code auth.ip_not_allowed}, {@code cli.permission_denied}, {@code compliance.blocked},
+     * {@code auth.ip_not_allowed}, {@code cli.permission_denied},
      * {@code compliance.blocked_address}, {@code compliance.blocklist_unavailable},
      * {@code compliance.no_destination}, {@code compliance.no_network},
      * {@code compliance.sanctioned_address}, {@code compliance.sanctions_unavailable},
@@ -423,19 +424,22 @@ public final class Payouts extends Resource {
      * {@code merchant.key_mode_mismatch}, {@code merchant.rate_limited},
      * {@code merchant.secret_decrypt}, {@code merchant.suspended}, {@code merchant.unknown_key},
      * {@code payout.above_limit}, {@code payout.address_network_mismatch},
-     * {@code payout.amount_below_fee}, {@code payout.bad_address}, {@code payout.bad_amount},
-     * {@code payout.bad_memo}, {@code payout.bad_url_callback}, {@code payout.cap_unpriceable},
-     * {@code payout.convert_bad_amount}, {@code payout.convert_insufficient},
-     * {@code payout.convert_no_rate}, {@code payout.convert_same_asset},
-     * {@code payout.convert_unsupported}, {@code payout.daily_cap},
-     * {@code payout.destination_internal}, {@code payout.from_currency_unsupported},
-     * {@code payout.insufficient_funds}, {@code payout.memo_conflict},
+     * {@code payout.amount_below_fee}, {@code payout.asset_mismatch}, {@code payout.bad_address},
+     * {@code payout.bad_amount}, {@code payout.bad_memo}, {@code payout.bad_url_callback},
+     * {@code payout.cap_unpriceable}, {@code payout.convert_bad_amount},
+     * {@code payout.convert_insufficient}, {@code payout.convert_no_rate},
+     * {@code payout.convert_same_asset}, {@code payout.convert_unsupported},
+     * {@code payout.daily_cap}, {@code payout.destination_internal},
+     * {@code payout.destination_not_activated}, {@code payout.fee_asset_mismatch},
+     * {@code payout.freeze_unknown}, {@code payout.from_currency_unsupported},
+     * {@code payout.frozen}, {@code payout.insufficient_funds}, {@code payout.memo_conflict},
      * {@code payout.memo_required}, {@code payout.memo_too_long}, {@code payout.merchant_frozen},
-     * {@code payout.network_required}, {@code payout.reserved_reference},
-     * {@code payout.unsupported_network}, {@code rates.deviation}, {@code rates.no_source},
-     * {@code rates.non_positive}, {@code request.bad_json}, {@code request.body_read},
-     * {@code request.control_char}, {@code request.duplicate_field}, {@code request.nul_byte},
-     * {@code request.overloaded}, {@code request.rate_limited}, {@code request.reference_invalid},
+     * {@code payout.network_required}, {@code payout.no_destination},
+     * {@code payout.reserved_reference}, {@code payout.unsupported_network},
+     * {@code rates.deviation}, {@code rates.no_source}, {@code rates.non_positive},
+     * {@code request.bad_json}, {@code request.body_read}, {@code request.control_char},
+     * {@code request.duplicate_field}, {@code request.nul_byte}, {@code request.overloaded},
+     * {@code request.rate_limited}, {@code request.reference_invalid},
      * {@code request.reference_too_long}, {@code request.too_deep},
      * {@code request.unknown_currency}, {@code sandbox.convert_not_available},
      * {@code wallet.static_not_found}, {@code webhook.no_endpoint}.
@@ -473,7 +477,7 @@ public final class Payouts extends Resource {
      * is also a payout, so this same method rejects a refund that has not been sent yet. Only your
      * own payout.
      *
-     * <p>Requires role: Finance when called with a CLI key.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/payout/cancel} ({@code cancelPayout}).
      *
@@ -693,8 +697,7 @@ public final class Payouts extends Resource {
      * (no fee, instant, off-chain). The recipient is addressed by user id; a username is resolved
      * by the dashboard's public endpoint /public/users/{username}.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/transfer/to-user} ({@code transferToUser}).
      *
@@ -753,8 +756,7 @@ public final class Payouts extends Resource {
      * {"transfers":[&lt;as in /v1/transfer/to-user&gt;...], "on_error":"continue"}. Status and
      * per-row results — POST /v1/batch/info.
      *
-     * <p>With a CLI key: only the store owner's own key (role Owner); other team members use the
-     * dashboard, where each such operation is confirmed with 2FA.
+     * <p>Not available to CLI keys: call it with the integration key.
      *
      * <p>{@code POST /v1/transfer/batch} ({@code createTransferBatch}).
      *
